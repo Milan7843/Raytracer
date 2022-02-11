@@ -9,7 +9,7 @@ uniform vec2 screenSize;
 
 float i = 0.;
 float dstThreshold = 0.005;
-float fov = 70;
+float fov = 40;
 
 vec3 skyboxColorHorizon = vec3(1., 0.7, 0.);
 vec3 skyboxColorTop = vec3(0.45, 0.95, 0.85);
@@ -21,7 +21,7 @@ struct Ray
     vec3 dir;
     bool hit;
     float closestDst;
-    vec3 endColor;
+    vec3 finalColor;
     float timesReflected;
     int objectHitType;
     int closestObjIndex;
@@ -53,9 +53,15 @@ struct Tri
     vec3 v2;
     vec3 v3;
     vec3 normal;
+    float reflectiveness;
+    vec3 color;
 };
-#DEFINE NUM_TRAINGLES $numTriangles
-uniform Tri triangles[$numTriangles]
+
+#define NUM_TRIANGLES $numTriangles
+uniform Tri triangles[NUM_TRIANGLES];
+bool trisReflected[NUM_TRIANGLES];
+
+float triangleDistance(vec3 p, Tri tri);
 
 
 
@@ -69,7 +75,35 @@ Intersection triangleIntersection(Tri tri, Ray ray);
 
 
 
+vec3 triIntersect(in vec3 ro, in vec3 rd, in vec3 v0, in vec3 v1, in vec3 v2)
+{
+    vec3 v1v0 = v1 - v0;
+    vec3 v2v0 = v2 - v0;
+    vec3 rov0 = ro - v0;
 
+#if 0
+    // Cramer's rule for solcing p(t) = ro+t·rd = p(u,v) = vo + u·(v1-v0) + v·(v2-v1)
+    float d = 1.0 / determinant(mat3(v1v0, v2v0, -rd));
+    float u = d * determinant(mat3(rov0, v2v0, -rd));
+    float v = d * determinant(mat3(v1v0, rov0, -rd));
+    float t = d * determinant(mat3(v1v0, v2v0, rov0));
+#else
+    // The four determinants above have lots of terms in common. Knowing the changing
+    // the order of the columns/rows doesn't change the volume/determinant, and that
+    // the volume is dot(cross(a,b,c)), we can precompute some common terms and reduce
+    // it all to:
+    vec3  n = cross(v1v0, v2v0);
+    vec3  q = cross(rov0, rd);
+    float d = 1.0 / dot(rd, n);
+    float u = d * dot(-q, v2v0);
+    float v = d * dot(q, v1v0);
+    float t = d * dot(-n, rov0);
+#endif    
+
+    if (u < 0.0 || v < 0.0 || (u + v)>1.0) t = -1.0;
+
+    return vec3(t, u, v);
+}
 
 Ray fireRay(vec3 pos, vec3 direction);
 
@@ -125,7 +159,7 @@ void main()
 
 
 
-    FragColor = vec4(ray.endColor, 1.);
+    FragColor = vec4(ray.finalColor, 1.);
 }
 
 
@@ -138,11 +172,33 @@ Ray fireRay(vec3 pos, vec3 direction)
 
     vec3 up = vec3(0., 1., 0.);
     float t = dot(up, ray.dir) + 0.4;
-    ray.endColor += skyboxColorTop * (t)+skyboxColorHorizon * (1. - t);
+    ray.finalColor += skyboxColorTop * (t)+skyboxColorHorizon * (1. - t);
     
+    float minDepth = 1000.;
+
+    /* Checking triangle ray hits*/
+    for (int i = 0; i < NUM_TRIANGLES; i++)
+    {
+        vec3 res = triIntersect(ray.pos, ray.dir, triangles[i].v1, triangles[i].v2, triangles[i].v3);
+        float t2 = res.x;
+        if (t2 > 0.0 && t2 < minDepth)
+        {
+            ray.finalColor = triangles[i].color;
+            minDepth = t2;
+        }
+        /*
+        Intersection isec = triangleIntersection(triangles[i], ray);
+        if (isec.intersected)
+        {
+            ray.finalColor = triangles[i].color;
+            break;
+        }*/
+    }
 
     return ray;
 }
+
+
 
 Intersection triangleIntersection(Tri tri, Ray ray)
 {
@@ -161,9 +217,6 @@ Intersection triangleIntersection(Tri tri, Ray ray)
 
     if (a > -epsilon && a < epsilon)
     {
-        // Ray is parallel to this tri
-        Intersection i;
-        i.intersected = false;
         return i;
     }
     float f = 1. / a;
@@ -175,7 +228,7 @@ Intersection triangleIntersection(Tri tri, Ray ray)
     }
     vec3 q = cross(s, e1);
     float v = f * dot(ray.dir, q);
-    if (v < 0.0 || v > 1.)
+    if (v < 0.0 || u+v > 1.)
     {
         return i;
     }

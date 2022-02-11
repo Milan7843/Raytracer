@@ -28,8 +28,6 @@ const unsigned int WINDOW_SIZE_X = 1200, WINDOW_SIZE_Y = 700;
 // Making a camera
 Camera camera(glm::vec3(-3.0f, 2.0f, -2.0f));
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, -3.0f);
-glm::vec3 cameraRot = glm::vec3(0.0f, 0.0f, 0.0f);
 float cameraSpeed = 0.01f;
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
@@ -67,7 +65,7 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 
-    Model testModel("src/models/cube.obj");
+    Model testModel("src/models/icosphere.obj");
 
     Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
     Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader");
@@ -75,8 +73,8 @@ int main()
     std::string triangleCount = std::to_string(Model::triangleCount);
     Shader raymarchShader("src/Shaders/raymarchVertexShader.shader", 
         "src/Shaders/raymarchFragmentShader.shader", triangleCount);
-    /*Shader raytracingShader("src/Shaders/raymarchVertexShader.shader",
-        "src/Shaders/raytracingFragmentShader.shader", triangleCount);*/
+    Shader raytracingShader("src/Shaders/raymarchVertexShader.shader",
+        "src/Shaders/raytracingFragmentShader.shader", triangleCount);
     
     // Object 1: simple uv coords
     float s = 1.0f;
@@ -138,7 +136,7 @@ int main()
         if (inRaytraceMode)
         {
             /* RAYTRACED RENDERING */
-            Shader* usedShader = &raymarchShader;
+            Shader* usedShader = &raytracingShader;
 
             usedShader->use();
             usedShader->setVector2("screenSize", WINDOW_SIZE_X, WINDOW_SIZE_Y);
@@ -262,38 +260,6 @@ void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        cameraPos.z += cameraSpeed * cos(cameraRot.y);
-        cameraPos.x += cameraSpeed * sin(cameraRot.y);
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        cameraPos.z -= cameraSpeed * cos(cameraRot.y);
-        cameraPos.x -= cameraSpeed * sin(cameraRot.y);
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        cameraPos.z -= cameraSpeed * sin(-cameraRot.y);
-        cameraPos.x -= cameraSpeed * cos(-cameraRot.y);
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        cameraPos.z += cameraSpeed * sin(-cameraRot.y);
-        cameraPos.x += cameraSpeed * cos(-cameraRot.y);
-    }
-    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
-        cameraRot.z -= cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
-        cameraRot.z += cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-        cameraRot.y -= cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
-        cameraRot.y += cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        cameraPos.y += cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
-        cameraPos.y -= cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS)
         inRaytraceMode = !inRaytraceMode;
 }

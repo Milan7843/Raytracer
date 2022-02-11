@@ -19,14 +19,15 @@ void Mesh::writeToShader(Shader* shader)
     for (unsigned int i = 0; i < indices.size(); i += 3)
     {
         shader->setVector3(("triangles[" + std::to_string(j) + "].v1").c_str(), vertices[indices[i]].position);
-        shader->setVector3(("triangles[" + std::to_string(j) + "].v2").c_str(), vertices[indices[i+1]].position);
-        shader->setVector3(("triangles[" + std::to_string(j) + "].v3").c_str(), vertices[indices[i+2]].position);
-        glm::vec3 ab = vertices[indices[i + 2]].position - vertices[indices[i + 0]].position;
-        glm::vec3 ac = vertices[indices[i + 1]].position - vertices[indices[i + 0]].position;
+        shader->setVector3(("triangles[" + std::to_string(j) + "].v2").c_str(), vertices[indices[static_cast<unsigned __int64>(i) + 1]].position);
+        shader->setVector3(("triangles[" + std::to_string(j) + "].v3").c_str(), vertices[indices[static_cast<unsigned __int64>(i) + 2]].position);
+        glm::vec3 ab = vertices[indices[static_cast<unsigned __int64>(i) + 2]].position - vertices[indices[i + 0]].position;
+        glm::vec3 ac = vertices[indices[static_cast<unsigned __int64>(i) + 1]].position - vertices[indices[i + 0]].position;
         glm::vec3 normal = glm::normalize(glm::cross(ab, ac));
-        shader->setVector3(("triangles[" + std::to_string(j) + "].v1").c_str(), normal);
+        shader->setVector3(("triangles[" + std::to_string(j) + "].normal").c_str(), normal);
         shader->setFloat(("triangles[" + std::to_string(j) + "].reflectiveness").c_str(), 1.0f);
-        shader->setVector3(("triangles[" + std::to_string(j) + "].color").c_str(), glm::vec3(1.0f));
+        srand(i);
+        shader->setVector3(("triangles[" + std::to_string(j) + "].color").c_str(), glm::vec3((std::rand() % 100) /100.0f));
         j++;
     }
 }

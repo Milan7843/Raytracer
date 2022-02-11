@@ -312,8 +312,8 @@ RayResult fireRay(vec3 pos, vec3 direction)
                 {
                     if (triangles[j].reflectiveness > 0.)
                     {
-                        vec3 normal = getBoxNormal(triangles[j], rayPos);
-                        //vec3 normal = triangles[j].normal;
+                        //vec3 normal = getBoxNormal(triangles[j], rayPos);
+                        vec3 normal = triangles[j].normal;
                         dir += normal * -2. * dot(dir, normal);
                         setAllNonReflected();
                         trisReflected[j] = true;
