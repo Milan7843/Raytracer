@@ -15,7 +15,7 @@ public:
 	static unsigned int triangleCount;
 	Model(const std::string& path);
 	~Model();
-	void draw();
+	void draw(Shader* shader);
 
 	void writeToShader(Shader* shader);
 

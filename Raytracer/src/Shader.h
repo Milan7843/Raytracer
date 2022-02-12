@@ -20,7 +20,7 @@ public:
 	// Program ID
 	unsigned int ID;
 	Shader(const char* vertexPath, const char* fragmentPath);
-	Shader(const char* vertexPath, const char* fragmentPath, std::string triangleArrayLength);
+	Shader(const char* vertexPath, const char* fragmentPath, std::string triangleArrayLength, std::string meshArrayLength);
 	~Shader();
 
 	// Activates the shader

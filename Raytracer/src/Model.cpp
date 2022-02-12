@@ -12,12 +12,12 @@ Model::~Model()
 {
 }
 
-void Model::draw()
+void Model::draw(Shader* shader)
 {
 	// Drawing each mesh
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
-		meshes[i].draw();
+		meshes[i].draw(shader);
 	}
 }
 
@@ -98,7 +98,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		triangleCount++;
 	}
 
-	return Mesh(vertices, indices, beginTriangleCount);
+	return Mesh(vertices, indices, beginTriangleCount, Mesh::meshCount++);
 }
 
 glm::vec3 Model::aiVector3DToGLMVec3(aiVector3D v)

@@ -1,7 +1,10 @@
 #include "Mesh.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int startIndex)
-    : shaderArraybeginIndex(startIndex)
+// Static variable
+unsigned int Mesh::meshCount = 0;
+
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int startIndex, unsigned int meshIndex)
+    : shaderArraybeginIndex(startIndex), shaderMeshIndex(meshIndex)
 {
     this->vertices = vertices;
     this->indices = indices;
@@ -16,20 +19,44 @@ Mesh::~Mesh()
 void Mesh::writeToShader(Shader* shader)
 {
     int j = 0;
+
+    // Setting the models position
+    shader->setVector3(("meshes[" + std::to_string(shaderMeshIndex) + "].position").c_str(), vec3ToGLSLVec3(position));
+
     for (unsigned int i = 0; i < indices.size(); i += 3)
     {
-        shader->setVector3(("triangles[" + std::to_string(j) + "].v1").c_str(), vertices[indices[i]].position);
-        shader->setVector3(("triangles[" + std::to_string(j) + "].v2").c_str(), vertices[indices[static_cast<unsigned __int64>(i) + 1]].position);
-        shader->setVector3(("triangles[" + std::to_string(j) + "].v3").c_str(), vertices[indices[static_cast<unsigned __int64>(i) + 2]].position);
+        // Setting reference to mesh
+        shader->setInt(("triangles[" + std::to_string(j) + "].mesh").c_str(), shaderMeshIndex);
+
+        // Setting the vertex positions
+        shader->setVector3(("triangles[" + std::to_string(j) + "].v1").c_str(), vec3ToGLSLVec3(vertices[indices[i]].position));
+        shader->setVector3(("triangles[" + std::to_string(j) + "].v2").c_str(), vec3ToGLSLVec3(vertices[indices[static_cast<unsigned __int64>(i) + 1]].position));
+        shader->setVector3(("triangles[" + std::to_string(j) + "].v3").c_str(), vec3ToGLSLVec3(vertices[indices[static_cast<unsigned __int64>(i) + 2]].position));
+
+        // Calculating the normal and setting it
         glm::vec3 ab = vertices[indices[static_cast<unsigned __int64>(i) + 2]].position - vertices[indices[i + 0]].position;
         glm::vec3 ac = vertices[indices[static_cast<unsigned __int64>(i) + 1]].position - vertices[indices[i + 0]].position;
         glm::vec3 normal = glm::normalize(glm::cross(ab, ac));
-        shader->setVector3(("triangles[" + std::to_string(j) + "].normal").c_str(), normal);
-        shader->setFloat(("triangles[" + std::to_string(j) + "].reflectiveness").c_str(), 1.0f);
+        shader->setVector3(("triangles[" + std::to_string(j) + "].normal").c_str(), vec3ToGLSLVec3(normal));
+
+        // Setting reflectiveness
+        shader->setFloat(("triangles[" + std::to_string(j) + "].reflectiveness").c_str(), 0.99f);
         srand(i);
-        shader->setVector3(("triangles[" + std::to_string(j) + "].color").c_str(), glm::vec3((std::rand() % 100) /100.0f));
+
+        //shader->setVector3(("triangles[" + std::to_string(j) + "].color").c_str(), glm::vec3((std::rand() % 100) /100.0f));
+        shader->setVector3(("triangles[" + std::to_string(j) + "].color").c_str(), glm::vec3(1.0f));
         j++;
     }
+}
+
+void Mesh::writePositionToShader(Shader* shader)
+{
+    shader->setVector3(("meshes[" + std::to_string(shaderMeshIndex) + "].position").c_str(), vec3ToGLSLVec3(position));
+}
+
+glm::vec3 Mesh::vec3ToGLSLVec3(glm::vec3 v)
+{
+    return glm::vec3(v.z, v.y, v.x);
 }
 
 void Mesh::setupMesh()
@@ -54,9 +81,16 @@ void Mesh::setupMesh()
     glBindVertexArray(0);
 }
 
-void Mesh::draw()
+void Mesh::draw(Shader* shader)
 {
     glBindVertexArray(VAO);
+
+    // Model matrix
+    glm::mat4 model = glm::mat4(1.0f);
+    // Translation of model matrix
+    model = glm::translate(model, position);
+    shader->setMat4("model", model);
+
     glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }

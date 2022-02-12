@@ -20,8 +20,13 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void init_glfw();
 // Callback for when the mouse is moved
 void mouseCallback(GLFWwindow* window, double xpos, double ypos);
+// Draws the axes
+void drawAxes(unsigned int VAO, Shader* shader, Camera* camera);
+// Generates a VAO for the axes
+unsigned int generateAxesVAO();
 
 void processInput(GLFWwindow* window);
+
 
 const unsigned int WINDOW_SIZE_X = 1200, WINDOW_SIZE_Y = 700;
 
@@ -32,6 +37,7 @@ float cameraSpeed = 0.01f;
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
+float timeSinceSwitchingModes = 100.0f;
 
 bool inRaytraceMode = false;
 
@@ -58,6 +64,8 @@ int main()
         return -1;
     }
 
+    std::cout << "max uniforms: " << GL_MAX_VERTEX_UNIFORM_VECTORS << std::endl;
+
     // Setting viewport size
     glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
@@ -71,10 +79,11 @@ int main()
     Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader");
     Shader textureShader("src/Shaders/textureVertexShader.shader", "src/Shaders/textureFragmentShader.shader");
     std::string triangleCount = std::to_string(Model::triangleCount);
+    std::string meshCount = std::to_string(Mesh::meshCount);
     Shader raymarchShader("src/Shaders/raymarchVertexShader.shader", 
-        "src/Shaders/raymarchFragmentShader.shader", triangleCount);
+        "src/Shaders/raymarchFragmentShader.shader", triangleCount, meshCount);
     Shader raytracingShader("src/Shaders/raymarchVertexShader.shader",
-        "src/Shaders/raytracingFragmentShader.shader", triangleCount);
+        "src/Shaders/raytracingFragmentShader.shader", triangleCount, meshCount);
     
     // Object 1: simple uv coords
     float s = 1.0f;
@@ -116,17 +125,19 @@ int main()
 
     bool shaderModelDataNeedsUpdate = true;
 
+    unsigned int axesVAO = generateAxesVAO();
+
+
     while (!glfwWindowShouldClose(window))
     {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        timeSinceSwitchingModes += deltaTime;
 
         // Input
         processInput(window);
         camera.processInput(window, deltaTime);
-
-        //std::cout << camera.getPosition().x << "," << cameraPos.y << "," << cameraPos.z << std::endl;
 
         // Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -157,14 +168,11 @@ int main()
             solidColorShader.use();
             solidColorShader.setVector3("inputColor", glm::vec3(0.8f, 0.3f, 0.8f));
 
+            // Drawing axes
+            drawAxes(axesVAO, &solidColorShader, &camera);
+
             // Uniforms
             float time = glfwGetTime();
-
-            // Model matrix
-            glm::mat4 model = glm::mat4(1.0f);
-            // Translation of model matrix
-            model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-            solidColorShader.setMat4("model", model);
 
             // View matrix
             glm::mat4 view = glm::mat4(1.0f);
@@ -176,7 +184,7 @@ int main()
             projection = camera.getProjectionMatrix(WINDOW_SIZE_X, WINDOW_SIZE_Y);
             solidColorShader.setMat4("projection", projection);
 
-            testModel.draw();
+            testModel.draw(&solidColorShader);
         }
         
 
@@ -260,6 +268,96 @@ void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS && timeSinceSwitchingModes > 0.3f)
+    {
+        timeSinceSwitchingModes = 0.0f;
         inRaytraceMode = !inRaytraceMode;
+    }
+}
+
+
+unsigned int generateAxesVAO()
+{
+    // Creating our vertex array object
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    // Putting the vertices into the array buffer
+    float vertices[] = {
+        // Position
+        0.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f
+    };
+    unsigned int indices[] = {
+        0, 1
+    };
+
+    unsigned int VBO;
+    // Making a buffer with the ID in VBO
+    glGenBuffers(1, &VBO);
+    // Binding our new buffer to the GL_ARRAY_BUFFER target
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // Binding our custom data into the buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Binding the element buffer object
+    unsigned int EBO;
+    // Generating a buffer for the EBO
+    glGenBuffers(1, &EBO);
+    // Binding the EBO
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    // Inserting data into the buffer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+
+    // Telling OpenGL how to interpret the data
+    // Position data
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    return VAO;
+}
+
+void drawAxes(unsigned int VAO, Shader* shader, Camera* camera)
+{
+    glLineWidth(0.01f);
+    float s = 1.0f;
+
+    shader->use();
+
+    // Model matrix
+    glm::mat4 model = glm::mat4(1.0f);
+    shader->setMat4("model", model);
+
+    // View matrix
+    glm::mat4 view = glm::mat4(1.0f);
+    view = camera->getViewMatrix();
+    shader->setMat4("view", view);
+
+    // Projection matrix
+    glm::mat4 projection;
+    projection = camera->getProjectionMatrix(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+    shader->setMat4("projection", projection);
+
+    // Binding the VAO
+    glBindVertexArray(VAO);
+
+    // Drawing the x-axis (red)
+    shader->setVector3("inputColor", 194 / 255.0f, 31 / 255.0f, 19 / 255.0f);
+    glDrawElements(GL_LINES, 2, GL_UNSIGNED_INT /* index type */, 0);
+
+    // Drawing the y-axis (up) (green)
+    model = glm::mat4(1.0f);
+    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    shader->setMat4("model", model);
+    shader->setVector3("inputColor", 29 / 255.0f, 194 / 255.0f, 57 / 255.0f);
+    glDrawElements(GL_LINES, 2, GL_UNSIGNED_INT /* index type */, 0);
+
+    // Drawing the z-axis (blue)
+    model = glm::mat4(1.0f);
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    shader->setMat4("model", model);
+    shader->setVector3("inputColor", 19 / 255.0f, 37 / 255.0f, 194 / 255.0f);
+    glDrawElements(GL_LINES, 2, GL_UNSIGNED_INT /* index type */, 0);
+    glBindVertexArray(0);
 }

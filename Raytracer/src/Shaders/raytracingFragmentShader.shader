@@ -14,6 +14,7 @@ float fov = 40;
 vec3 skyboxColorHorizon = vec3(1., 0.7, 0.);
 vec3 skyboxColorTop = vec3(0.45, 0.95, 0.85);
 
+#define MAX_REFLECTIONS 50
 
 struct Ray
 {
@@ -45,6 +46,13 @@ Sphere spheres[3] = Sphere[3](
 float sphereDst(Sphere sph, vec3 pos);
 vec3 getSphereNormal(Sphere sph, vec3 pos);
 
+// Mesh
+struct Mesh
+{
+    vec3 position;
+};
+#define NUM_MESHES $numMeshes
+uniform Mesh meshes[NUM_MESHES];
 
 // Triangle
 struct Tri
@@ -55,6 +63,7 @@ struct Tri
     vec3 normal;
     float reflectiveness;
     vec3 color;
+    int mesh;
 };
 
 #define NUM_TRIANGLES $numTriangles
@@ -68,42 +77,11 @@ float triangleDistance(vec3 p, Tri tri);
 struct Intersection
 {
     bool intersected;
+    float depth;
     vec3 pos;
 };
 
 Intersection triangleIntersection(Tri tri, Ray ray);
-
-
-
-vec3 triIntersect(in vec3 ro, in vec3 rd, in vec3 v0, in vec3 v1, in vec3 v2)
-{
-    vec3 v1v0 = v1 - v0;
-    vec3 v2v0 = v2 - v0;
-    vec3 rov0 = ro - v0;
-
-#if 0
-    // Cramer's rule for solcing p(t) = ro+t·rd = p(u,v) = vo + u·(v1-v0) + v·(v2-v1)
-    float d = 1.0 / determinant(mat3(v1v0, v2v0, -rd));
-    float u = d * determinant(mat3(rov0, v2v0, -rd));
-    float v = d * determinant(mat3(v1v0, rov0, -rd));
-    float t = d * determinant(mat3(v1v0, v2v0, rov0));
-#else
-    // The four determinants above have lots of terms in common. Knowing the changing
-    // the order of the columns/rows doesn't change the volume/determinant, and that
-    // the volume is dot(cross(a,b,c)), we can precompute some common terms and reduce
-    // it all to:
-    vec3  n = cross(v1v0, v2v0);
-    vec3  q = cross(rov0, rd);
-    float d = 1.0 / dot(rd, n);
-    float u = d * dot(-q, v2v0);
-    float v = d * dot(q, v1v0);
-    float t = d * dot(-n, rov0);
-#endif    
-
-    if (u < 0.0 || v < 0.0 || (u + v)>1.0) t = -1.0;
-
-    return vec3(t, u, v);
-}
 
 Ray fireRay(vec3 pos, vec3 direction);
 
@@ -170,29 +148,54 @@ Ray fireRay(vec3 pos, vec3 direction)
     ray.dir = direction;
 
 
-    vec3 up = vec3(0., 1., 0.);
-    float t = dot(up, ray.dir) + 0.4;
-    ray.finalColor += skyboxColorTop * (t)+skyboxColorHorizon * (1. - t);
     
-    float minDepth = 1000.;
 
-    /* Checking triangle ray hits*/
-    for (int i = 0; i < NUM_TRIANGLES; i++)
+
+    // Reflections loop
+    for (int i = 0; i < MAX_REFLECTIONS; i++)
     {
-        vec3 res = triIntersect(ray.pos, ray.dir, triangles[i].v1, triangles[i].v2, triangles[i].v3);
-        float t2 = res.x;
-        if (t2 > 0.0 && t2 < minDepth)
+        Intersection closestIntersection;
+        closestIntersection.depth = 1000.;
+        closestIntersection.intersected = false;
+        int closestTriHit = -1;
+
+        /* Checking triangle ray hits*/
+        for (int j = 0; j < NUM_TRIANGLES; j++)
         {
-            ray.finalColor = triangles[i].color;
-            minDepth = t2;
+            Intersection isec = triangleIntersection(triangles[j], ray);
+            if (isec.intersected && isec.depth < closestIntersection.depth)
+            {
+                closestIntersection = isec;
+                closestTriHit = j;
+            }
         }
-        /*
-        Intersection isec = triangleIntersection(triangles[i], ray);
-        if (isec.intersected)
+
+        // Check for hit
+        if (closestTriHit == -1)
         {
-            ray.finalColor = triangles[i].color;
+            // Calculating air color
+            vec3 up = vec3(0., 1., 0.);
+            float t = dot(up, ray.dir) + 0.4;
+            ray.finalColor += skyboxColorTop * (t)+skyboxColorHorizon * (1. - t);
             break;
-        }*/
+        }
+        else
+        {
+            if (triangles[closestTriHit].reflectiveness > 0.0)
+            {
+                ray.finalColor += (1.0 - triangles[closestTriHit].reflectiveness) * triangles[closestTriHit].color;
+                //ray.dir = reflect(ray.dir, triangles[closestTriHit].normal);
+                ray.dir += triangles[closestTriHit].normal * -2. * dot(ray.dir, triangles[closestTriHit].normal);
+                ray.pos = closestIntersection.pos + 0.00001f * ray.dir;
+                continue; // reflecting
+            }
+            else
+            {
+                ray.finalColor = triangles[closestTriHit].color;
+                ray.hit = true;
+                break;
+            }
+        }
     }
 
     return ray;
@@ -220,7 +223,7 @@ Intersection triangleIntersection(Tri tri, Ray ray)
         return i;
     }
     float f = 1. / a;
-    vec3 s = ray.pos - tri.v1;
+    vec3 s = ray.pos - (tri.v1 + meshes[tri.mesh].position);
     float u = f * dot(s, h);
     if (u < 0.0 || u > 1.)
     {
@@ -239,6 +242,7 @@ Intersection triangleIntersection(Tri tri, Ray ray)
         // Ray intersection
         i.intersected = true;
         i.pos = ray.pos + ray.dir * t;
+        i.depth = t;
         return i;
     }
     return i;

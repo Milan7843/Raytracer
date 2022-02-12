@@ -69,7 +69,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	glDeleteShader(fragment);
 }
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath, std::string triangleArrayLength)
+Shader::Shader(const char* vertexPath, const char* fragmentPath, std::string triangleArrayLength, std::string meshArrayLength)
 {
 	/* Retrieving the shader data from the files */
 
@@ -105,7 +105,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, std::string tri
 		std::cout << "Error: shader file not correctly read." << std::endl;
 	}
 	std::cout << replace(fragmentCode, "$numTriangles", triangleArrayLength);
-	//std::cout << fragmentCode;
+	std::cout << replace(fragmentCode, "$numMeshes", meshArrayLength);
+
 	const char* vShaderCode = vertexCode.c_str();
 	const char* fShaderCode = fragmentCode.c_str();
 
