@@ -3,6 +3,38 @@ out vec4 FragColor;
 
 in vec2 pixelPos;
 
+
+// Triangle
+struct Tri
+{
+    vec4 v1;
+    vec4 v2;
+    vec4 v3;
+    vec4 normal;
+    vec3 color;
+    int mesh;
+};
+
+/*
+// Base alignment  // Aligned offset
+vec4 v1;              // 16              // 0
+vec4 v2;              // 16              // 16
+vec4 v3;              // 16              // 32
+vec4 normal;          // 16              // 48
+float reflectiveness; // 4               // 64
+vec4 color;           // 16              // 80 -> must be multiple of 16 so instead of 4, 16
+int mesh;             // 4               // 96
+                                         // 100 bytes total
+*/
+
+#define NUM_TRIANGLES 2//$numTriangles
+bool trisReflected[NUM_TRIANGLES];
+
+layout(std140) uniform Tris
+{
+    Tri[NUM_TRIANGLES] triangles;
+};
+
 uniform vec3 cameraPosition;
 uniform vec3 cameraRotation;
 uniform vec2 screenSize;
@@ -39,12 +71,13 @@ struct Sphere
 };
 Sphere spheres[3] = Sphere[3](
     //     Pos                  Size    Color                   Reflectiveness      Fuzziness
-    Sphere(vec3(0., 1., 0.), 1.2, vec3(0.3, 0.6, 0.6), 4.0, 0.04),
-    Sphere(vec3(0., 2., 2.), 1.0, vec3(1.0, 0.3, 1.0), 0.001, 0.0),
-    Sphere(vec3(1., 2., -2.), 0.5, vec3(0.0, 0.8, 1.0), 0.0, 0.0)
+    Sphere(vec3(0., 1., 0.),    1.2,    vec3(0.3, 0.6, 0.6),    4.0,                0.04),
+    Sphere(vec3(0., 2., 2.),    1.0,    vec3(1.0, 0.3, 1.0),    0.001,              0.0),
+    Sphere(vec3(1., 2., -2.),   0.5,    vec3(0.0, 0.8, 1.0),    0.0,                0.0)
 );
 float sphereDst(Sphere sph, vec3 pos);
 vec3 getSphereNormal(Sphere sph, vec3 pos);
+
 
 // Mesh
 struct Mesh
@@ -53,25 +86,6 @@ struct Mesh
 };
 #define NUM_MESHES $numMeshes
 uniform Mesh meshes[NUM_MESHES];
-
-// Triangle
-struct Tri
-{
-    vec3 v1;
-    vec3 v2;
-    vec3 v3;
-    vec3 normal;
-    float reflectiveness;
-    vec3 color;
-    int mesh;
-};
-
-#define NUM_TRIANGLES $numTriangles
-uniform Tri triangles[NUM_TRIANGLES];
-bool trisReflected[NUM_TRIANGLES];
-
-float triangleDistance(vec3 p, Tri tri);
-
 
 
 struct Intersection
@@ -159,7 +173,7 @@ Ray fireRay(vec3 pos, vec3 direction)
         closestIntersection.intersected = false;
         int closestTriHit = -1;
 
-        /* Checking triangle ray hits*/
+        /* Checking triangle ray hits */
         for (int j = 0; j < NUM_TRIANGLES; j++)
         {
             Intersection isec = triangleIntersection(triangles[j], ray);
@@ -169,6 +183,7 @@ Ray fireRay(vec3 pos, vec3 direction)
                 closestTriHit = j;
             }
         }
+
 
         // Check for hit
         if (closestTriHit == -1)
@@ -181,6 +196,9 @@ Ray fireRay(vec3 pos, vec3 direction)
         }
         else
         {
+            ray.finalColor += vec3(1.);
+
+            /*
             if (triangles[closestTriHit].reflectiveness > 0.0)
             {
                 ray.finalColor += (1.0 - triangles[closestTriHit].reflectiveness) * triangles[closestTriHit].color;
@@ -194,7 +212,7 @@ Ray fireRay(vec3 pos, vec3 direction)
                 ray.finalColor = triangles[closestTriHit].color;
                 ray.hit = true;
                 break;
-            }
+            }*/
         }
     }
 
@@ -212,8 +230,8 @@ Intersection triangleIntersection(Tri tri, Ray ray)
 
     // Edges 1 and 2
     vec3 e1, e2;
-    e1 = tri.v2 - tri.v1;
-    e2 = tri.v3 - tri.v1;
+    e1 = tri.v2.xyz - tri.v1.xyz;
+    e2 = tri.v3.xyz - tri.v1.xyz;
 
     vec3 h = cross(ray.dir, e2);
     float a = dot(e1, h);
@@ -223,7 +241,7 @@ Intersection triangleIntersection(Tri tri, Ray ray)
         return i;
     }
     float f = 1. / a;
-    vec3 s = ray.pos - (tri.v1 + meshes[tri.mesh].position);
+    vec3 s = ray.pos - (tri.v1.xyz + meshes[tri.mesh].position);
     float u = f * dot(s, h);
     if (u < 0.0 || u > 1.)
     {

@@ -1595,6 +1595,16 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="assimp-vc142-mtd.dll" />
+    <None Include="src\Shaders\uvColorVertexShader.shader" />
+    <None Include="src\Shaders\raymarchFragmentShader.shader" />
+    <None Include="src\Shaders\raymarchFragmentShaderBackup.shader" />
+    <None Include="src\Shaders\raymarchVertexShader.shader" />
+    <None Include="src\Shaders\raytracingFragmentShader.shader" />
+    <None Include="src\Shaders\solidColorFragmentShader.shader" />
+    <None Include="src\Shaders\solidColorVertexShader.shader" />
+    <None Include="src\Shaders\textureFragmentShader.shader" />
+    <None Include="src\Shaders\textureVertexShader.shader" />
+    <None Include="src\Shaders\uvColorFragmentShader.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />

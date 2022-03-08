@@ -14,10 +14,6 @@ public:
 	glm::vec3 getPosition();
 	void setPosition(glm::vec3 pos);
 
-	float vertices[1];
-
-	int indices[1];
-
 
 protected:
 	// Abstract class, no need to instantiate this class
