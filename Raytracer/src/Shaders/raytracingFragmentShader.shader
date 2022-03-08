@@ -13,21 +13,11 @@ struct Tri
     vec4 normal;
     vec3 color;
     int mesh;
+    vec3 FILLER;
+    float reflectiveness;
 };
 
-/*
-// Base alignment  // Aligned offset
-vec4 v1;              // 16              // 0
-vec4 v2;              // 16              // 16
-vec4 v3;              // 16              // 32
-vec4 normal;          // 16              // 48
-float reflectiveness; // 4               // 64
-vec4 color;           // 16              // 80 -> must be multiple of 16 so instead of 4, 16
-int mesh;             // 4               // 96
-                                         // 100 bytes total
-*/
-
-#define NUM_TRIANGLES 1//$numTriangles
+#define NUM_TRIANGLES $numTriangles
 bool trisReflected[NUM_TRIANGLES];
 
 layout(std140) uniform Tris
@@ -195,15 +185,12 @@ Ray fireRay(vec3 pos, vec3 direction)
             break;
         }
         else
-        {
-            ray.finalColor += vec3(1.);
-
-            /*
+        {            
             if (triangles[closestTriHit].reflectiveness > 0.0)
             {
                 ray.finalColor += (1.0 - triangles[closestTriHit].reflectiveness) * triangles[closestTriHit].color;
-                //ray.dir = reflect(ray.dir, triangles[closestTriHit].normal);
-                ray.dir += triangles[closestTriHit].normal * -2. * dot(ray.dir, triangles[closestTriHit].normal);
+                //ray.dir = reflect(ray.dir, triangles[closestTriHit].normal.xyz);
+                ray.dir += triangles[closestTriHit].normal.xyz * -2. * dot(ray.dir, triangles[closestTriHit].normal.xyz);
                 ray.pos = closestIntersection.pos + 0.00001f * ray.dir;
                 continue; // reflecting
             }
@@ -212,7 +199,7 @@ Ray fireRay(vec3 pos, vec3 direction)
                 ray.finalColor = triangles[closestTriHit].color;
                 ray.hit = true;
                 break;
-            }*/
+            }
         }
     }
 

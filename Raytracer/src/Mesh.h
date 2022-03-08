@@ -26,6 +26,8 @@ struct Triangle
 	glm::vec4 normal;
 	glm::vec3 color;
 	int mesh;
+	glm::vec3 FILLER;
+	float reflectiveness;
 };
 
 class Mesh

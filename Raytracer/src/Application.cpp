@@ -122,29 +122,6 @@ int main()
     // Uniform Buffer Object for the vertices
     unsigned int trisUniformBlockIndex = glGetUniformBlockIndex(raytracingShader.ID, "Tris");
     glUniformBlockBinding(raytracingShader.ID, trisUniformBlockIndex, 0);
-    /*
-    struct Triangle
-    {
-        glm::vec4 v1;
-        glm::vec4 v2;
-        glm::vec4 v3;
-        glm::vec4 normal;
-        glm::vec3 color;
-        int mesh;
-    };
-    Triangle triangles[2];
-    triangles[0].v1 = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
-    triangles[0].v2 = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-    triangles[0].v3 = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
-    triangles[0].normal = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
-    triangles[0].color = glm::vec3(1.0f, 1.0f, 1.0f);
-    triangles[0].mesh = 0;
-    triangles[1].v1 = glm::vec4(3.0f, 3.0f, 3.0f, 0.0f);
-    triangles[1].v2 = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
-    triangles[1].v3 = glm::vec4(1.0f, 2.0f, 1.0f, 0.0f);
-    triangles[1].normal = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
-    triangles[1].color = glm::vec3(1.0f, 1.0f, 1.0f);
-    triangles[1].mesh = 0;*/
 
     // Generating the buffer to put the vertices in
     unsigned int uboTris;
