@@ -16,13 +16,38 @@ Mesh::~Mesh()
 
 }
 
-void Mesh::writeToShader(Shader* shader)
+int Mesh::getTriangleSize()
 {
+    return sizeof(Triangle);
+}
+
+void Mesh::writeToShader(Shader* shader, unsigned int ubo)
+{
+    Triangle riangles[2];
+    riangles[0].v1 = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+    riangles[0].v2 = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    riangles[0].v3 = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+    riangles[0].normal = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+    riangles[0].color = glm::vec3(1.0f, 1.0f, 1.0f);
+    riangles[0].mesh = 0;
+    riangles[1].v1 = glm::vec4(3.0f, 3.0f, 3.0f, 0.0f);
+    riangles[1].v2 = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+    riangles[1].v3 = glm::vec4(1.0f, 2.0f, 1.0f, 0.0f);
+    riangles[1].normal = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+    riangles[1].color = glm::vec3(1.0f, 1.0f, 1.0f);
+    riangles[1].mesh = 0;
+    triangles.clear();
+    triangles.push_back(riangles[0]);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(triangles), &triangles);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    
     int j = 0;
 
     // Setting the models position
     shader->setVector3(("meshes[" + std::to_string(shaderMeshIndex) + "].position").c_str(), vec3ToGLSLVec3(position));
-
+    /*
     for (unsigned int i = 0; i < indices.size(); i += 3)
     {
         // Setting reference to mesh
@@ -46,7 +71,7 @@ void Mesh::writeToShader(Shader* shader)
         //shader->setVector3(("triangles[" + std::to_string(j) + "].color").c_str(), glm::vec3((std::rand() % 100) /100.0f));
         shader->setVector3(("triangles[" + std::to_string(j) + "].color").c_str(), glm::vec3(1.0f));
         j++;
-    }
+    }*/
 }
 
 void Mesh::writePositionToShader(Shader* shader)
@@ -57,6 +82,10 @@ void Mesh::writePositionToShader(Shader* shader)
 glm::vec3 Mesh::vec3ToGLSLVec3(glm::vec3 v)
 {
     return glm::vec3(v.z, v.y, v.x);
+}
+glm::vec4 Mesh::vec3ToGLSLVec4(glm::vec3 v)
+{
+    return glm::vec4(v.z, v.y, v.x, 0.0f);
 }
 
 void Mesh::setupMesh()
@@ -79,6 +108,22 @@ void Mesh::setupMesh()
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    // Setting up the triangles in the UBO
+    for (unsigned int i = 0; i < vertices.size(); i += 3)
+    {
+        Triangle tri{};
+        tri.v1 = vec3ToGLSLVec4(vertices[i].position);
+        tri.v2 = vec3ToGLSLVec4(vertices[i+1].position);
+        tri.v3 = vec3ToGLSLVec4(vertices[i+2].position);
+        tri.color = glm::vec3(1.0f);
+        glm::vec3 ab = vertices[indices[static_cast<unsigned __int64>(i) + 2]].position - vertices[indices[i + 0]].position;
+        glm::vec3 ac = vertices[indices[static_cast<unsigned __int64>(i) + 1]].position - vertices[indices[i + 0]].position;
+        glm::vec3 normal = glm::normalize(glm::cross(ab, ac));
+        tri.normal = glm::vec4(normal, 0.0f);
+        tri.mesh = shaderMeshIndex;
+        triangles.push_back(tri);
+    }
 }
 
 void Mesh::draw(Shader* shader)

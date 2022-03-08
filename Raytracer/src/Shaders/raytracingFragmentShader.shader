@@ -27,7 +27,7 @@ int mesh;             // 4               // 96
                                          // 100 bytes total
 */
 
-#define NUM_TRIANGLES 2//$numTriangles
+#define NUM_TRIANGLES 1//$numTriangles
 bool trisReflected[NUM_TRIANGLES];
 
 layout(std140) uniform Tris

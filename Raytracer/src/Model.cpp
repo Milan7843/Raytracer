@@ -21,11 +21,11 @@ void Model::draw(Shader* shader)
 	}
 }
 
-void Model::writeToShader(Shader* shader)
+void Model::writeToShader(Shader* shader, unsigned int ubo)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
-		meshes[i].writeToShader(shader);
+		meshes[i].writeToShader(shader, ubo);
 	}
 }
 

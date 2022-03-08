@@ -122,8 +122,8 @@ int main()
     // Uniform Buffer Object for the vertices
     unsigned int trisUniformBlockIndex = glGetUniformBlockIndex(raytracingShader.ID, "Tris");
     glUniformBlockBinding(raytracingShader.ID, trisUniformBlockIndex, 0);
-
-    struct tri
+    /*
+    struct Triangle
     {
         glm::vec4 v1;
         glm::vec4 v2;
@@ -132,8 +132,7 @@ int main()
         glm::vec3 color;
         int mesh;
     };
-
-    tri triangles[2];
+    Triangle triangles[2];
     triangles[0].v1 = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
     triangles[0].v2 = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
     triangles[0].v3 = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
@@ -145,20 +144,21 @@ int main()
     triangles[1].v3 = glm::vec4(1.0f, 2.0f, 1.0f, 0.0f);
     triangles[1].normal = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
     triangles[1].color = glm::vec3(1.0f, 1.0f, 1.0f);
-    triangles[1].mesh = 0;
+    triangles[1].mesh = 0;*/
 
+    // Generating the buffer to put the vertices in
     unsigned int uboTris;
     glGenBuffers(1, &uboTris);
     glBindBuffer(GL_UNIFORM_BUFFER, uboTris);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(triangles), NULL, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, Model::triangleCount * Mesh::getTriangleSize(), NULL, GL_STATIC_DRAW);
     glBindBufferBase(GL_UNIFORM_BUFFER, trisUniformBlockIndex, uboTris);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 
-
+    /*
     glBindBuffer(GL_UNIFORM_BUFFER, uboTris);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(triangles), &triangles);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);*/
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -199,7 +199,7 @@ int main()
             usedShader->setVector3("cameraRotation", camera.getRotation());
             if (shaderModelDataNeedsUpdate)
             {
-                //testModel.writeToShader(usedShader);
+                testModel.writeToShader(usedShader, uboTris);
                 shaderModelDataNeedsUpdate = false;
             }
 
