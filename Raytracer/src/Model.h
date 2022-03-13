@@ -17,7 +17,7 @@ public:
 	~Model();
 	void draw(Shader* shader);
 
-	void writeToShader(Shader* shader, unsigned int ubo);
+	void writeToShader(Shader* shader, unsigned int ssbo);
 
 	std::vector<Mesh> meshes;
 private:

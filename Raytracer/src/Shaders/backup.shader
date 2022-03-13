@@ -3,8 +3,6 @@ out vec4 FragColor;
 
 in vec2 pixelPos;
 
-#define NUM_TRIANGLES $numTriangles
-bool trisReflected[NUM_TRIANGLES];
 
 // Triangle
 struct Tri
@@ -12,11 +10,15 @@ struct Tri
     vec4 v1;
     vec4 v2;
     vec4 v3;
-    vec3 normal;
-    float reflectiveness;
+    vec4 normal;
     vec3 color;
     int mesh;
+    vec3 FILLER;
+    float reflectiveness;
 };
+
+#define NUM_TRIANGLES 2//$numTriangles
+bool trisReflected[NUM_TRIANGLES];
 
 layout(std140, binding = 2) buffer Tris
 {
@@ -59,10 +61,10 @@ struct Sphere
 };
 Sphere spheres[3] = Sphere[3](
     //     Pos                  Size    Color                   Reflectiveness      Fuzziness
-    Sphere(vec3(0., 1., 0.),    1.2,    vec3(0.3, 0.6, 0.6),    4.0,                0.04),
-    Sphere(vec3(0., 2., 2.),    1.0,    vec3(1.0, 0.3, 1.0),    0.001,              0.0),
-    Sphere(vec3(1., 2., -2.),   0.5,    vec3(0.0, 0.8, 1.0),    0.0,                0.0)
-);
+    Sphere(vec3(0., 1., 0.), 1.2, vec3(0.3, 0.6, 0.6), 4.0, 0.04),
+    Sphere(vec3(0., 2., 2.), 1.0, vec3(1.0, 0.3, 1.0), 0.001, 0.0),
+    Sphere(vec3(1., 2., -2.), 0.5, vec3(0.0, 0.8, 1.0), 0.0, 0.0)
+    );
 float sphereDst(Sphere sph, vec3 pos);
 vec3 getSphereNormal(Sphere sph, vec3 pos);
 
@@ -212,12 +214,6 @@ Intersection triangleIntersection(Tri tri, Ray ray)
     i.intersected = false;
 
     const float epsilon = 0.0000001;
-    /*
-    vec3 toVertex = normalize(tri.v1.xyz - ray.pos);
-    if (dot(ray.dir, toVertex) < 0.9999f)
-    {
-        return i;
-    }*/
 
     // Edges 1 and 2
     vec3 e1, e2;

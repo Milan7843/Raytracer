@@ -21,13 +21,12 @@ int Mesh::getTriangleSize()
     return sizeof(Triangle);
 }
 
-void Mesh::writeToShader(Shader* shader, unsigned int ubo)
+void Mesh::writeToShader(Shader* shader, unsigned int ssbo)
 {
-    glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, triangles.size() * sizeof(Triangle), &triangles[0]);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    
-    int j = 0;
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, triangles.size() * sizeof(Triangle), &triangles[0], GL_STATIC_COPY);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     // Setting the models position
     shader->setVector3(("meshes[" + std::to_string(shaderMeshIndex) + "].position").c_str(), vec3ToGLSLVec3(position));
@@ -69,7 +68,6 @@ void Mesh::setupMesh()
     glBindVertexArray(0);
 
     // Setting up the triangles in the UBO
-    
     for (unsigned int i = 0; i < vertices.size(); i += 3)
     {
         Triangle tri{};
@@ -80,9 +78,9 @@ void Mesh::setupMesh()
         glm::vec3 ab = vertices[indices[static_cast<unsigned __int64>(i) + 2]].position - vertices[indices[i + 0]].position;
         glm::vec3 ac = vertices[indices[static_cast<unsigned __int64>(i) + 1]].position - vertices[indices[i + 0]].position;
         glm::vec3 normal = glm::normalize(glm::cross(ab, ac));
-        tri.normal = glm::vec4(normal, 0.0f);
+        tri.normal = vec3ToGLSLVec3(normal);
         tri.mesh = shaderMeshIndex;
-        tri.reflectiveness = 0.9f;
+        tri.reflectiveness = 0.0f;
         triangles.push_back(tri);
     }
 }

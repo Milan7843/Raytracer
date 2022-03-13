@@ -549,6 +549,7 @@
     <None Include="include\glm\gtx\vector_angle.inl" />
     <None Include="include\glm\gtx\vector_query.inl" />
     <None Include="include\glm\gtx\wrap.inl" />
+    <None Include="src\Shaders\backup.shader" />
     <None Include="src\Shaders\raymarchFragmentShader.shader" />
     <None Include="src\Shaders\raymarchFragmentShaderBackup.shader" />
     <None Include="src\Shaders\raymarchVertexShader.shader" />
@@ -557,6 +558,7 @@
     <None Include="src\Shaders\solidColorVertexShader.shader" />
     <None Include="src\Shaders\textureFragmentShader.shader" />
     <None Include="src\Shaders\textureVertexShader.shader" />
+    <None Include="src\Shaders\ubobackup.shader" />
     <None Include="src\Shaders\uvColorFragmentShader.shader" />
     <None Include="src\Shaders\uvColorVertexShader.shader" />
   </ItemGroup>

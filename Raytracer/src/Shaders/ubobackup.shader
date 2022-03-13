@@ -3,7 +3,7 @@ out vec4 FragColor;
 
 in vec2 pixelPos;
 
-#define NUM_TRIANGLES $numTriangles
+#define NUM_TRIANGLES 2//$numTriangles
 bool trisReflected[NUM_TRIANGLES];
 
 // Triangle
@@ -12,16 +12,24 @@ struct Tri
     vec4 v1;
     vec4 v2;
     vec4 v3;
-    vec3 normal;
-    float reflectiveness;
+    vec4 normal;
     vec3 color;
     int mesh;
+    vec3 FILLER;
+    float reflectiveness;
 };
 
 layout(std140, binding = 2) buffer Tris
 {
-    Tri triangles[NUM_TRIANGLES];
-};
+    vec4 v1[NUM_TRIANGLES];
+    vec4 v2[NUM_TRIANGLES];
+    vec4 v3[NUM_TRIANGLES];
+    vec4 normal[NUM_TRIANGLES];
+    vec3 color[NUM_TRIANGLES];
+    int mesh[NUM_TRIANGLES];
+    vec3 FILLER[NUM_TRIANGLES];
+    float reflectiveness[NUM_TRIANGLES];
+} triangles;
 
 uniform vec3 cameraPosition;
 uniform vec3 cameraRotation;
@@ -59,10 +67,10 @@ struct Sphere
 };
 Sphere spheres[3] = Sphere[3](
     //     Pos                  Size    Color                   Reflectiveness      Fuzziness
-    Sphere(vec3(0., 1., 0.),    1.2,    vec3(0.3, 0.6, 0.6),    4.0,                0.04),
-    Sphere(vec3(0., 2., 2.),    1.0,    vec3(1.0, 0.3, 1.0),    0.001,              0.0),
-    Sphere(vec3(1., 2., -2.),   0.5,    vec3(0.0, 0.8, 1.0),    0.0,                0.0)
-);
+    Sphere(vec3(0., 1., 0.), 1.2, vec3(0.3, 0.6, 0.6), 4.0, 0.04),
+    Sphere(vec3(0., 2., 2.), 1.0, vec3(1.0, 0.3, 1.0), 0.001, 0.0),
+    Sphere(vec3(1., 2., -2.), 0.5, vec3(0.0, 0.8, 1.0), 0.0, 0.0)
+    );
 float sphereDst(Sphere sph, vec3 pos);
 vec3 getSphereNormal(Sphere sph, vec3 pos);
 
@@ -83,7 +91,7 @@ struct Intersection
     vec3 pos;
 };
 
-Intersection triangleIntersection(Tri tri, Ray ray);
+Intersection triangleIntersection(int tri, Ray ray);
 
 Ray fireRay(vec3 pos, vec3 direction);
 
@@ -161,10 +169,10 @@ Ray fireRay(vec3 pos, vec3 direction)
         closestIntersection.intersected = false;
         int closestTriHit = -1;
 
-        // Checking triangle ray hits 
+        /* Checking triangle ray hits */
         for (int j = 0; j < NUM_TRIANGLES; j++)
         {
-            Intersection isec = triangleIntersection(triangles[j], ray);
+            Intersection isec = triangleIntersection(j, ray);
             if (isec.intersected && isec.depth < closestIntersection.depth)
             {
                 closestIntersection = isec;
@@ -184,17 +192,17 @@ Ray fireRay(vec3 pos, vec3 direction)
         }
         else
         {
-            if (triangles[closestTriHit].reflectiveness > 0.0)
+            if (triangles.reflectiveness[closestTriHit] > 0.0)
             {
-                ray.finalColor += (1.0 - triangles[closestTriHit].reflectiveness) * triangles[closestTriHit].color;
+                ray.finalColor += (1.0 - triangles.reflectiveness[closestTriHit]) * triangles.color[closestTriHit];
                 //ray.dir = reflect(ray.dir, triangles[closestTriHit].normal.xyz);
-                ray.dir += triangles[closestTriHit].normal.xyz * -2. * dot(ray.dir, triangles[closestTriHit].normal.xyz);
+                ray.dir += triangles.normal[closestTriHit].xyz * -2. * dot(ray.dir, triangles.normal[closestTriHit].xyz);
                 ray.pos = closestIntersection.pos + 0.0001f * ray.dir;
                 continue; // reflecting
             }
             else
             {
-                ray.finalColor = triangles[closestTriHit].normal.xyz;
+                ray.finalColor = triangles.normal[closestTriHit].xyz;
                 ray.hit = true;
                 break;
             }
@@ -206,23 +214,17 @@ Ray fireRay(vec3 pos, vec3 direction)
 
 
 
-Intersection triangleIntersection(Tri tri, Ray ray)
+Intersection triangleIntersection(int tri, Ray ray)
 {
     Intersection i;
     i.intersected = false;
 
     const float epsilon = 0.0000001;
-    /*
-    vec3 toVertex = normalize(tri.v1.xyz - ray.pos);
-    if (dot(ray.dir, toVertex) < 0.9999f)
-    {
-        return i;
-    }*/
 
     // Edges 1 and 2
     vec3 e1, e2;
-    e1 = tri.v2.xyz - tri.v1.xyz;
-    e2 = tri.v3.xyz - tri.v1.xyz;
+    e1 = triangles.v2[tri].xyz - triangles.v1[tri].xyz;
+    e2 = triangles.v3[tri].xyz - triangles.v1[tri].xyz;
 
     vec3 h = cross(ray.dir, e2);
     float a = dot(e1, h);
@@ -232,7 +234,7 @@ Intersection triangleIntersection(Tri tri, Ray ray)
         return i;
     }
     float f = 1. / a;
-    vec3 s = ray.pos - (tri.v1.xyz + meshes[tri.mesh].position);
+    vec3 s = ray.pos - (triangles.v1[tri].xyz + meshes[triangles.mesh[tri]].position);
     float u = f * dot(s, h);
     if (u < 0.0 || u > 1.)
     {

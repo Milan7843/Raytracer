@@ -73,15 +73,17 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 
-    Model testModel("src/models/icosphere.obj");
+    Model testModel("src/models/axes.obj");
 
     Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
     Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader");
     Shader textureShader("src/Shaders/textureVertexShader.shader", "src/Shaders/textureFragmentShader.shader");
     std::string triangleCount = std::to_string(Model::triangleCount);
     std::string meshCount = std::to_string(Mesh::meshCount);
+    /*
     Shader raymarchShader("src/Shaders/raymarchVertexShader.shader", 
         "src/Shaders/raymarchFragmentShader.shader", triangleCount, meshCount);
+    */
     Shader raytracingShader("src/Shaders/raymarchVertexShader.shader",
         "src/Shaders/raytracingFragmentShader.shader", triangleCount, meshCount);
     
@@ -118,24 +120,12 @@ int main()
     glEnableVertexAttribArray(0);
 
 
-
-    // Uniform Buffer Object for the vertices
-    unsigned int trisUniformBlockIndex = glGetUniformBlockIndex(raytracingShader.ID, "Tris");
-    glUniformBlockBinding(raytracingShader.ID, trisUniformBlockIndex, 0);
-
-    // Generating the buffer to put the vertices in
-    unsigned int uboTris;
-    glGenBuffers(1, &uboTris);
-    glBindBuffer(GL_UNIFORM_BUFFER, uboTris);
-    glBufferData(GL_UNIFORM_BUFFER, Model::triangleCount * Mesh::getTriangleSize(), NULL, GL_STATIC_DRAW);
-    glBindBufferBase(GL_UNIFORM_BUFFER, trisUniformBlockIndex, uboTris);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-
-    /*
-    glBindBuffer(GL_UNIFORM_BUFFER, uboTris);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(triangles), &triangles);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);*/
+    unsigned int ssbo = 0;
+    glGenBuffers(1, &ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, Model::triangleCount * Mesh::getTriangleSize(), 0, GL_DYNAMIC_COPY);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -148,6 +138,7 @@ int main()
 
     unsigned int axesVAO = generateAxesVAO();
 
+    unsigned int frame = 0;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -155,6 +146,9 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         timeSinceSwitchingModes += deltaTime;
+
+        if (frame % 10 == 0)
+            std::cout << "FPS: " << 1.0f / deltaTime << std::endl;
 
         // Input
         processInput(window);
@@ -176,7 +170,7 @@ int main()
             usedShader->setVector3("cameraRotation", camera.getRotation());
             if (shaderModelDataNeedsUpdate)
             {
-                testModel.writeToShader(usedShader, uboTris);
+                testModel.writeToShader(usedShader, ssbo);
                 shaderModelDataNeedsUpdate = false;
             }
 
@@ -251,6 +245,8 @@ int main()
         glfwSwapBuffers(window);
         // Check for input
         glfwPollEvents();
+
+        frame++;
     }
 
     glDeleteVertexArrays(1, &vao1);

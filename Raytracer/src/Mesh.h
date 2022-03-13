@@ -23,11 +23,10 @@ struct Triangle
 	glm::vec4 v1;
 	glm::vec4 v2;
 	glm::vec4 v3;
-	glm::vec4 normal;
+	glm::vec3 normal;
+	float reflectiveness;
 	glm::vec3 color;
 	int mesh;
-	glm::vec3 FILLER;
-	float reflectiveness;
 };
 
 class Mesh
@@ -36,7 +35,7 @@ public:
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int startIndex, unsigned int meshIndex);
 	~Mesh();
 
-	void writeToShader(Shader* shader, unsigned int ubo);
+	void writeToShader(Shader* shader, unsigned int ssbo);
 	void writePositionToShader(Shader* shader);
 
 	static unsigned int meshCount;
