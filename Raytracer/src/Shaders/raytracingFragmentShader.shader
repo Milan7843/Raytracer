@@ -66,6 +66,16 @@ Sphere spheres[3] = Sphere[3](
 float sphereDst(Sphere sph, vec3 pos);
 vec3 getSphereNormal(Sphere sph, vec3 pos);
 
+// LIGHTS
+struct PointLight
+{
+    vec3 pos;
+    vec3 color;
+};
+PointLight pointLights[1] = PointLight[1](
+    //         Pos               Color
+    PointLight(vec3(0., 2., 2.), vec3(1.0, 1.0, 1.0))
+);
 
 // Mesh
 struct Mesh
@@ -85,7 +95,7 @@ struct Intersection
 
 Intersection triangleIntersection(Tri tri, Ray ray);
 
-Ray fireRay(vec3 pos, vec3 direction);
+Ray fireRay(vec3 pos, vec3 direction, bool reflect);
 
 float rand(float seed)
 {
@@ -134,24 +144,17 @@ void main()
     dir = vec3(x, y, z);
 
 
-    Ray ray = fireRay(cameraPosition, dir);
-
-
-
+    Ray ray = fireRay(cameraPosition, dir, true);
 
     FragColor = vec4(ray.finalColor, 1.);
 }
 
 
-Ray fireRay(vec3 pos, vec3 direction)
+Ray fireRay(vec3 pos, vec3 direction, bool reflect)
 {
     Ray ray;
     ray.pos = pos;
     ray.dir = direction;
-
-
-
-
 
     // Reflections loop
     for (int i = 0; i < MAX_REFLECTIONS; i++)
@@ -184,7 +187,7 @@ Ray fireRay(vec3 pos, vec3 direction)
         }
         else
         {
-            if (triangles[closestTriHit].reflectiveness > 0.0)
+            if (triangles[closestTriHit].reflectiveness > 0.0 && reflect)
             {
                 ray.finalColor += (1.0 - triangles[closestTriHit].reflectiveness) * triangles[closestTriHit].color;
                 //ray.dir = reflect(ray.dir, triangles[closestTriHit].normal.xyz);
@@ -194,7 +197,14 @@ Ray fireRay(vec3 pos, vec3 direction)
             }
             else
             {
-                ray.finalColor = triangles[closestTriHit].normal.xyz;
+                if (reflect)
+                {
+                    ray.finalColor = calculateLights(closestIntersection.pos, triangles[closestTriHit], false);
+                }
+                else
+                {
+                    ray.finalColor = triangles[closestTriHit].color;
+                }
                 ray.hit = true;
                 break;
             }
@@ -204,6 +214,13 @@ Ray fireRay(vec3 pos, vec3 direction)
     return ray;
 }
 
+vec3 calculateLights(vec3 pos, Tri tri)
+{
+    for (int i = 0; i < pointLights.length; i++)
+    {
+        Ray ray = fireRay(cameraPosition, dir, true);
+    }
+}
 
 
 Intersection triangleIntersection(Tri tri, Ray ray)

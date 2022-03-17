@@ -23,6 +23,8 @@
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\Lights\Light.cpp" />
+    <ClCompile Include="src\Lights\PointLight.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\Object.cpp" />
@@ -395,6 +397,8 @@
     <ClInclude Include="include\glm\vector_relational.hpp" />
     <ClInclude Include="include\KHR\khrplatform.h" />
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\Lights\Light.h" />
+    <ClInclude Include="src\Lights\PointLight.h" />
     <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\Object.h" />
