@@ -71,10 +71,23 @@ struct PointLight
 {
     vec3 pos;
     vec3 color;
+    float intensity;
 };
-PointLight pointLights[1] = PointLight[1](
-    //         Pos               Color
-    PointLight(vec3(0., 2., 2.), vec3(1.0, 1.0, 1.0))
+PointLight pointLights[2] = PointLight[2](
+    //         Pos                  Color                   Intensity  
+    PointLight(vec3(0., -2., 2.),   vec3(1.0, 1.0, 0.0),    3f),
+    PointLight(vec3(0., 2., -2.),   vec3(1.0, 0.0, 0.0),    1f)
+);
+
+struct DirLight
+{
+    vec3 dir;
+    vec3 color;
+    float intensity;
+};
+DirLight dirLights[1] = DirLight[1](
+    //         Pos                  Color                   Intensity
+    DirLight(vec3(1., -1., 0.),     vec3(0.0, 0.0, 1.0),    1.)
 );
 
 // Mesh
@@ -91,11 +104,16 @@ struct Intersection
     bool intersected;
     float depth;
     vec3 pos;
+    int closestTriHit;
 };
 
 Intersection triangleIntersection(Tri tri, Ray ray);
 
+Intersection getAllIntersections(Ray ray, int skipTri);
+
 Ray fireRay(vec3 pos, vec3 direction, bool reflect);
+
+vec3 calculateLights(vec3 pos, Tri tri, int triHit);
 
 float rand(float seed)
 {
@@ -199,7 +217,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
             {
                 if (reflect)
                 {
-                    ray.finalColor = calculateLights(closestIntersection.pos, triangles[closestTriHit], false);
+                    ray.finalColor = calculateLights(closestIntersection.pos, triangles[closestTriHit], closestTriHit);
                 }
                 else
                 {
@@ -214,14 +232,94 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
     return ray;
 }
 
-vec3 calculateLights(vec3 pos, Tri tri)
+vec3 calculateLights(vec3 pos, Tri tri, int triHit)
 {
+    vec3 finalLight = vec3(0.);
+
+    /* POINT LIGHTS */
     for (int i = 0; i < pointLights.length; i++)
     {
-        Ray ray = fireRay(cameraPosition, dir, true);
+        vec3 dir = pointLights[i].pos - pos;
+        dir = normalize(dir);
+
+        // Doing ray trace light
+        Ray ray;
+        ray.pos = pos;
+        ray.dir = dir;
+
+        Intersection closestIntersection = getAllIntersections(ray, triHit);
+
+        // Check for hit
+        if (closestIntersection.closestTriHit == -1)
+        {
+            float intensity = min(
+                (1. / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z)) 
+                * dot(-dir, tri.normal),
+                1.);
+
+            finalLight += intensity * pointLights[i].color * pointLights[i].intensity;
+        }
+        else
+        {
+            // In shadow for this light
+        }
     }
+
+    /* DIRECTIONAL LIGHTS */
+    for (int i = 0; i < dirLights.length; i++)
+    {
+        vec3 dir = -dirLights[i].dir;
+        dir = normalize(dir);
+
+        // Doing ray trace light
+        Ray ray;
+        ray.pos = pos;
+        ray.dir = dir;
+
+
+        Intersection closestIntersection = getAllIntersections(ray, triHit);
+
+
+        // Check for hit
+        if (closestIntersection.closestTriHit == -1)
+        {
+            float intensity = min(
+                dot(-dir, tri.normal),
+                1.);
+
+            finalLight += intensity * dirLights[i].color * dirLights[i].intensity;
+        }
+        else
+        {
+            // In shadow for this light
+        }
+    }
+
+    return tri.color * finalLight;
 }
 
+Intersection getAllIntersections(Ray ray, int skipTri)
+{
+    Intersection closestIntersection;
+    closestIntersection.depth = 1000.;
+    closestIntersection.intersected = false;
+    closestIntersection.closestTriHit = -1;
+
+    // Checking triangle ray hits 
+    for (int j = 0; j < NUM_TRIANGLES; j++)
+    {
+        // Skip already hit tri
+        if (j == skipTri) continue;
+
+        Intersection isec = triangleIntersection(triangles[j], ray);
+        if (isec.intersected && isec.depth < closestIntersection.depth)
+        {
+            closestIntersection = isec;
+            closestIntersection.closestTriHit = j;
+        }
+    }
+    return closestIntersection;
+}
 
 Intersection triangleIntersection(Tri tri, Ray ray)
 {

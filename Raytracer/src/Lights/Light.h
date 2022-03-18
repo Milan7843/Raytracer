@@ -7,16 +7,16 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "../Shader.h"
-
 #include <vector>
 #include <iostream>
+
+#include "../Shader.h"
 
 class Light
 {
 public:
 
-	void writeToShader(Shader* shader, unsigned int ssbo);
+	void writeToShader(Shader* shader);
 	void writePositionToShader(Shader* shader);
 
 	glm::vec3 position = glm::vec3(0.0f);
