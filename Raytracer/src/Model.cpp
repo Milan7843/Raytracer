@@ -1,11 +1,8 @@
 #include "Model.h"
 
-// Static variable
-unsigned int Model::triangleCount = 0;
-
-Model::Model(const std::string& path)
+Model::Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount)
 {
-	loadModel(path);
+	loadModel(path, meshCount, triangleCount);
 }
 
 Model::~Model()
@@ -29,7 +26,7 @@ void Model::writeToShader(Shader* shader, unsigned int ssbo)
 	}
 }
 
-void Model::loadModel(std::string path)
+void Model::loadModel(std::string path, unsigned int* meshCount, unsigned int* triangleCount)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);
@@ -42,27 +39,29 @@ void Model::loadModel(std::string path)
 	}
 	directory = path.substr(0, path.find_last_of('/'));
 
-	processNode(scene->mRootNode, scene);
+	processNode(scene->mRootNode, scene, meshCount, triangleCount);
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene)
+void Model::processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* triangleCount)
 {
 	// Reading mesh data for each mesh
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene));
+		meshes.push_back(processMesh(mesh, scene, *meshCount, triangleCount));
+
+		(*meshCount)++;
 	}
 	// Reading all the data from all children
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
-		processNode(node->mChildren[i], scene);
+		processNode(node->mChildren[i], scene, meshCount, triangleCount);
 	}
 }
 
-Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
+Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCount, unsigned int* triangleCount)
 {
-	int beginTriangleCount = triangleCount;
+	int beginTriangleCount = *triangleCount;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 
@@ -94,11 +93,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			indices.push_back(face.mIndices[j]);
 		}
 		// Another triangle has been added
+
 		// This variable is used to generate start indices for mesh's triangles
-		triangleCount++;
+		(*triangleCount)++;
 	}
 
-	return Mesh(vertices, indices, beginTriangleCount, Mesh::meshCount++);
+	return Mesh(vertices, indices, beginTriangleCount, meshCount);
 }
 
 glm::vec3 Model::aiVector3DToGLMVec3(aiVector3D v)

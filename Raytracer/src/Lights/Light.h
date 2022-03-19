@@ -15,15 +15,16 @@
 class Light
 {
 public:
-
 	void writeToShader(Shader* shader);
 	void writePositionToShader(Shader* shader);
 
-	glm::vec3 position = glm::vec3(0.0f);
+	void setIndex(unsigned int index);
 
-	unsigned int VAO, VBO, EBO;
-
-private:
-	Light(glm::vec3 position);
+protected:
+	Light(glm::vec3 position, glm::vec3 color, float intensity);
 	~Light();
+	unsigned int index = 0;
+	glm::vec3 position = glm::vec3(0.0f);
+	glm::vec3 color = glm::vec3(0.0f);
+	float intensity = 1.0f;
 };

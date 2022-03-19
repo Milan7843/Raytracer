@@ -29,6 +29,7 @@
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\Object.cpp" />
     <ClCompile Include="src\RayTracedShader.cpp" />
+    <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
@@ -403,6 +404,7 @@
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\Object.h" />
     <ClInclude Include="src\RayTracedShader.h" />
+    <ClInclude Include="src\Scene.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Sphere.h" />
     <ClInclude Include="src\stb_image.h" />

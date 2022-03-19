@@ -66,6 +66,7 @@ Sphere spheres[3] = Sphere[3](
 float sphereDst(Sphere sph, vec3 pos);
 vec3 getSphereNormal(Sphere sph, vec3 pos);
 
+
 // LIGHTS
 struct PointLight
 {
@@ -73,11 +74,9 @@ struct PointLight
     vec3 color;
     float intensity;
 };
-PointLight pointLights[2] = PointLight[2](
-    //         Pos                  Color                   Intensity  
-    PointLight(vec3(0., -2., 2.),   vec3(1.0, 1.0, 0.0),    3f),
-    PointLight(vec3(0., 2., -2.),   vec3(1.0, 0.0, 0.0),    1f)
-);
+
+#define NUM_POINT_LIGHTS $numPointLights
+uniform PointLight pointLights[NUM_POINT_LIGHTS];
 
 struct DirLight
 {
@@ -237,7 +236,7 @@ vec3 calculateLights(vec3 pos, Tri tri, int triHit)
     vec3 finalLight = vec3(0.);
 
     /* POINT LIGHTS */
-    for (int i = 0; i < pointLights.length; i++)
+    for (int i = 0; i < NUM_POINT_LIGHTS; i++)
     {
         vec3 dir = pointLights[i].pos - pos;
         dir = normalize(dir);

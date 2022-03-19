@@ -1,8 +1,5 @@
 #include "Mesh.h"
 
-// Static variable
-unsigned int Mesh::meshCount = 0;
-
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int startIndex, unsigned int meshIndex)
     : shaderArraybeginIndex(startIndex), shaderMeshIndex(meshIndex)
 {

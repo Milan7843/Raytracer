@@ -14,17 +14,26 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// Forward declaration of scene
+class Scene;
+
+
 class Shader
 {
 public:
 	// Program ID
 	unsigned int ID;
 	Shader(const char* vertexPath, const char* fragmentPath);
-	Shader(const char* vertexPath, const char* fragmentPath, std::string triangleArrayLength, std::string meshArrayLength);
+	Shader(const char* vertexPath, const char* fragmentPath, Scene* scene);
 	~Shader();
 
-	// Activates the shader
+	// Activate the shader
 	void use();
+
+	// Compile the shader
+	void compile();
+	void compile(Scene* scene);
+
 
 	// Uniform setting functions
 	void setBool(const std::string &name, bool value) const;
@@ -38,7 +47,9 @@ public:
 
 private:
 	unsigned int compileShader(GLenum type, const char* code);
-	bool replace(std::string& str, const std::string& from, const std::string& to);
+
+	const char* vertexPath;
+	const char* fragmentPath;
 };
 
 #endif

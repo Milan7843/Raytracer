@@ -1,14 +1,111 @@
-
+#pragma once
 #include "Shader.h"
+#include "Scene.h"
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
+	: vertexPath(vertexPath), fragmentPath(fragmentPath)
+{
+	compile();
+
+}
+
+Shader::Shader(const char* vertexPath, const char* fragmentPath, Scene* scene)
+	: vertexPath(vertexPath), fragmentPath(fragmentPath)
+{
+	compile(scene);
+
+}
+
+Shader::~Shader()
+{
+	std::cout << "Shader object destroyed.";
+}
+
+void Shader::use()
+{
+	glUseProgram(ID);
+}
+
+void Shader::compile(Scene* scene)
 {
 	/* Retrieving the shader data from the files */
-
 	std::string vertexCode;
 	std::string fragmentCode;
 	std::ifstream vShaderFile;
 	std::ifstream fShaderFile;
+
+	// Ensuring ifstream objects can throw exceptions:
+	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+	try
+	{
+		// Opening files
+		vShaderFile.open(vertexPath);
+		fShaderFile.open(fragmentPath);
+
+		// Reading file into streams
+		std::stringstream vShaderStream, fShaderStream;
+		vShaderStream << vShaderFile.rdbuf();
+		fShaderStream << fShaderFile.rdbuf();
+
+		// Closing file handlers
+		vShaderFile.close();
+		fShaderFile.close();
+
+		// Converting the streams into strings
+		vertexCode = vShaderStream.str();
+		fragmentCode = fShaderStream.str();
+	}
+	catch (std::ifstream::failure e)
+	{
+		std::cout << "Error: shader file not correctly read." << std::endl;
+		std::cout << e.what() << std::endl;
+	}
+
+	fragmentCode = scene->setShaderVariables(fragmentCode);
+
+	const char* vShaderCode = vertexCode.c_str();
+	const char* fShaderCode = fragmentCode.c_str();
+
+
+	/* Compiling the shaders */
+
+	unsigned int vertex, fragment;
+	vertex = compileShader(GL_VERTEX_SHADER, vShaderCode);
+	fragment = compileShader(GL_FRAGMENT_SHADER, fShaderCode);
+
+
+	/* Creating the shader program */
+	int success;
+	char infoLog[512];
+
+	ID = glCreateProgram();
+	glAttachShader(ID, vertex);
+	glAttachShader(ID, fragment);
+	glLinkProgram(ID);
+	// Print linking errors if any
+	glGetProgramiv(ID, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		glGetProgramInfoLog(ID, 512, NULL, infoLog);
+		std::cout << "Error: shader program linking failed.\n" << infoLog << std::endl;
+	}
+
+	// delete the shaders as they're linked into our program now and no longer necessary
+	glDeleteShader(vertex);
+	glDeleteShader(fragment);
+}
+
+
+void Shader::compile()
+{
+	/* Retrieving the shader data from the files */
+	std::string vertexCode;
+	std::string fragmentCode;
+	std::ifstream vShaderFile;
+	std::ifstream fShaderFile;
+
 	// Ensuring ifstream objects can throw exceptions:
 	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -67,95 +164,6 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	// delete the shaders as they're linked into our program now and no longer necessary
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
-}
-
-Shader::Shader(const char* vertexPath, const char* fragmentPath, std::string triangleArrayLength, std::string meshArrayLength)
-{
-	/* Retrieving the shader data from the files */
-
-	std::string vertexCode;
-	std::string fragmentCode;
-	std::ifstream vShaderFile;
-	std::ifstream fShaderFile;
-	// Ensuring ifstream objects can throw exceptions:
-	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
-	try
-	{
-		// Opening files
-		vShaderFile.open(vertexPath);
-		fShaderFile.open(fragmentPath);
-
-		// Reading file into streams
-		std::stringstream vShaderStream, fShaderStream;
-		vShaderStream << vShaderFile.rdbuf();
-		fShaderStream << fShaderFile.rdbuf();
-
-		// Closing file handlers
-		vShaderFile.close();
-		fShaderFile.close();
-
-		// Converting the streams into strings
-		vertexCode = vShaderStream.str();
-		fragmentCode = fShaderStream.str();
-	}
-	catch (std::ifstream::failure e)
-	{
-		std::cout << "Error: shader file not correctly read." << std::endl;
-	}
-	std::cout << replace(fragmentCode, "$numTriangles", triangleArrayLength);
-	std::cout << replace(fragmentCode, "$numMeshes", meshArrayLength);
-
-	const char* vShaderCode = vertexCode.c_str();
-	const char* fShaderCode = fragmentCode.c_str();
-
-
-	/* Compiling the shaders */
-
-	unsigned int vertex, fragment;
-	vertex = compileShader(GL_VERTEX_SHADER, vShaderCode);
-	fragment = compileShader(GL_FRAGMENT_SHADER, fShaderCode);
-
-
-	/* Creating the shader program */
-
-	int success;
-	char infoLog[512];
-
-	ID = glCreateProgram();
-	glAttachShader(ID, vertex);
-	glAttachShader(ID, fragment);
-	glLinkProgram(ID);
-	// Print linking errors if any
-	glGetProgramiv(ID, GL_LINK_STATUS, &success);
-	if (!success)
-	{
-		glGetProgramInfoLog(ID, 512, NULL, infoLog);
-		std::cout << "Error: shader program linking failed.\n" << infoLog << std::endl;
-	}
-
-	// delete the shaders as they're linked into our program now and no longer necessary
-	glDeleteShader(vertex);
-	glDeleteShader(fragment);
-}
-Shader::~Shader()
-{
-	std::cout << "Shader object destroyed.";
-}
-
-bool Shader::replace(std::string& str, const std::string& from, const std::string& to)
-{
-	size_t start_pos = str.find(from);
-	if (start_pos == std::string::npos)
-		return false;
-	str.replace(start_pos, from.length(), to);
-	return true;
-}
-
-void Shader::use()
-{
-	glUseProgram(ID);
 }
 
 void Shader::setBool(const std::string& name, bool value) const

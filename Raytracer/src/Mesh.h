@@ -38,8 +38,6 @@ public:
 	void writeToShader(Shader* shader, unsigned int ssbo);
 	void writePositionToShader(Shader* shader);
 
-	static unsigned int meshCount;
-
 	static int getTriangleSize();
 
 	std::vector<Vertex> vertices;

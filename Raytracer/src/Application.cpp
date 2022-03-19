@@ -11,6 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Shader.h"
+#include "Scene.h"
 #include "Camera.h"
 #include "Model.h"
 
@@ -72,20 +73,26 @@ int main()
     // Change the viewport size if the window is resized
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    // Making a scene
+    Scene scene = Scene();
 
-    Model testModel("src/models/highresicosphere.obj");
+    // Adding our test model
+    scene.addModel("src/models/icosphere.obj");
+    PointLight pointLight1(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
+    PointLight pointLight2(glm::vec3(0.0f, 2.0f,-2.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f);
+
+    scene.addPointLight(pointLight1);
+    scene.addPointLight(pointLight2);
 
     Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
     Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader");
     Shader textureShader("src/Shaders/textureVertexShader.shader", "src/Shaders/textureFragmentShader.shader");
-    std::string triangleCount = std::to_string(Model::triangleCount);
-    std::string meshCount = std::to_string(Mesh::meshCount);
     /*
     Shader raymarchShader("src/Shaders/raymarchVertexShader.shader", 
         "src/Shaders/raymarchFragmentShader.shader", triangleCount, meshCount);
     */
-    Shader raytracingShader("src/Shaders/raymarchVertexShader.shader",
-        "src/Shaders/raytracingFragmentShader.shader", triangleCount, meshCount);
+    Shader raytracingShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracingFragmentShader.shader", &scene);
+    scene.writeLightsToShader(&raytracingShader);
     
     // Object 1: simple uv coords
     float s = 1.0f;
@@ -123,7 +130,7 @@ int main()
     unsigned int ssbo = 0;
     glGenBuffers(1, &ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, Model::triangleCount * Mesh::getTriangleSize(), 0, GL_DYNAMIC_COPY);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, scene.triangleCount * Mesh::getTriangleSize(), 0, GL_DYNAMIC_COPY);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -170,7 +177,7 @@ int main()
             usedShader->setVector3("cameraRotation", camera.getRotation());
             if (shaderModelDataNeedsUpdate)
             {
-                testModel.writeToShader(usedShader, ssbo);
+                scene.checkMeshUpdates(usedShader, ssbo);
                 shaderModelDataNeedsUpdate = false;
             }
 
@@ -199,7 +206,7 @@ int main()
             projection = camera.getProjectionMatrix(WINDOW_SIZE_X, WINDOW_SIZE_Y);
             solidColorShader.setMat4("projection", projection);
 
-            testModel.draw(&solidColorShader);
+            scene.draw(&solidColorShader);
         }
         
 
