@@ -55,13 +55,11 @@ struct Sphere
     float radius;
     vec3 color;
     float reflectiveness;
-    float fuzziness;
 };
-Sphere spheres[3] = Sphere[3](
-    //     Pos                  Size    Color                   Reflectiveness      Fuzziness
-    Sphere(vec3(0., 1., 0.),    1.2,    vec3(0.3, 0.6, 0.6),    4.0,                0.04),
-    Sphere(vec3(0., 2., 2.),    1.0,    vec3(1.0, 0.3, 1.0),    0.001,              0.0),
-    Sphere(vec3(1., 2., -2.),   0.5,    vec3(0.0, 0.8, 1.0),    0.0,                0.0)
+#define NUM_SPHERES 1//$numSpheres
+Sphere spheres[NUM_SPHERES] = Sphere[NUM_SPHERES](
+    //     Pos                  Radius  Color                   Reflectiveness
+    Sphere(vec3(0., 3., 0.),    1.2,    vec3(0.3, 0.6, 0.6),    0.0)
 );
 float sphereDst(Sphere sph, vec3 pos);
 vec3 getSphereNormal(Sphere sph, vec3 pos);
@@ -104,15 +102,19 @@ struct Intersection
     float depth;
     vec3 pos;
     int closestTriHit;
+    int closestSphereHit;
+    vec3 normal;
+    vec3 color;
+    float reflectiveness;
 };
 
 Intersection triangleIntersection(Tri tri, Ray ray);
 
-Intersection getAllIntersections(Ray ray, int skipTri);
+Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere);
 
 Ray fireRay(vec3 pos, vec3 direction, bool reflect);
 
-vec3 calculateLights(vec3 pos, Tri tri, int triHit);
+vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit);
 
 float rand(float seed)
 {
@@ -176,25 +178,11 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
     // Reflections loop
     for (int i = 0; i < MAX_REFLECTIONS; i++)
     {
-        Intersection closestIntersection;
-        closestIntersection.depth = 1000.;
-        closestIntersection.intersected = false;
-        int closestTriHit = -1;
-
-        // Checking triangle ray hits 
-        for (int j = 0; j < NUM_TRIANGLES; j++)
-        {
-            Intersection isec = triangleIntersection(triangles[j], ray);
-            if (isec.intersected && isec.depth < closestIntersection.depth)
-            {
-                closestIntersection = isec;
-                closestTriHit = j;
-            }
-        }
+        Intersection closestIntersection = getAllIntersections(ray, -1, -1);
 
 
         // Check for hit
-        if (closestTriHit == -1)
+        if (!closestIntersection.intersected)
         {
             // Calculating air color
             vec3 up = vec3(0., 1., 0.);
@@ -204,11 +192,11 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
         }
         else
         {
-            if (triangles[closestTriHit].reflectiveness > 0.0 && reflect)
+            if (closestIntersection.reflectiveness > 0.0 && reflect)
             {
-                ray.finalColor += (1.0 - triangles[closestTriHit].reflectiveness) * triangles[closestTriHit].color;
-                //ray.dir = reflect(ray.dir, triangles[closestTriHit].normal.xyz);
-                ray.dir += triangles[closestTriHit].normal.xyz * -2. * dot(ray.dir, triangles[closestTriHit].normal.xyz);
+                ray.finalColor += (1.0 - closestIntersection.reflectiveness) * closestIntersection.color;
+                //ray.dir = reflect(ray.dir, triangles[closestIntersection.closestTriHit].normal.xyz);
+                ray.dir += closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal);
                 ray.pos = closestIntersection.pos + 0.0001f * ray.dir;
                 continue; // reflecting
             }
@@ -216,11 +204,12 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
             {
                 if (reflect)
                 {
-                    ray.finalColor = calculateLights(closestIntersection.pos, triangles[closestTriHit], closestTriHit);
+                    ray.finalColor = closestIntersection.color * calculateLights(closestIntersection.pos, closestIntersection.normal, 
+                        closestIntersection.closestTriHit, closestIntersection.closestSphereHit);
                 }
                 else
                 {
-                    ray.finalColor = triangles[closestTriHit].color;
+                    ray.finalColor = closestIntersection.color;
                 }
                 ray.hit = true;
                 break;
@@ -231,7 +220,13 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
     return ray;
 }
 
-vec3 calculateLights(vec3 pos, Tri tri, int triHit)
+
+
+
+
+
+
+vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit)
 {
     vec3 finalLight = vec3(0.);
 
@@ -246,14 +241,14 @@ vec3 calculateLights(vec3 pos, Tri tri, int triHit)
         ray.pos = pos;
         ray.dir = dir;
 
-        Intersection closestIntersection = getAllIntersections(ray, triHit);
+        Intersection closestIntersection = getAllIntersections(ray, triHit, sphereHit);
 
-        // Check for hit
-        if (closestIntersection.closestTriHit == -1)
+        // Check for shadow ray hits
+        if (!closestIntersection.intersected)
         {
             float intensity = min(
                 (1. / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z)) 
-                * dot(-dir, tri.normal),
+                * dot(-dir, normal),
                 1.);
 
             finalLight += intensity * pointLights[i].color * pointLights[i].intensity;
@@ -276,14 +271,13 @@ vec3 calculateLights(vec3 pos, Tri tri, int triHit)
         ray.dir = dir;
 
 
-        Intersection closestIntersection = getAllIntersections(ray, triHit);
-
+        Intersection closestIntersection = getAllIntersections(ray, triHit, sphereHit);
 
         // Check for hit
-        if (closestIntersection.closestTriHit == -1)
+        if (!closestIntersection.intersected)
         {
             float intensity = min(
-                dot(-dir, tri.normal),
+                dot(-dir, normal),
                 1.);
 
             finalLight += intensity * dirLights[i].color * dirLights[i].intensity;
@@ -294,10 +288,21 @@ vec3 calculateLights(vec3 pos, Tri tri, int triHit)
         }
     }
 
-    return tri.color * finalLight;
+    return finalLight;
 }
 
-Intersection getAllIntersections(Ray ray, int skipTri)
+
+
+
+
+
+
+
+
+
+
+
+Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 {
     Intersection closestIntersection;
     closestIntersection.depth = 1000.;
@@ -317,8 +322,57 @@ Intersection getAllIntersections(Ray ray, int skipTri)
             closestIntersection.closestTriHit = j;
         }
     }
+
+    // Calculating ray-sphere intersections
+    for (int j = 0; j < NUM_SPHERES; j++)
+    {
+        // Skip already hit tri
+        if (j == skipSphere) continue;
+
+        // Calculating this sphere's intersection
+
+        vec3 o_c = ray.pos - spheres[j].pos; // (o-c)
+        float half_b = dot(ray.dir, o_c);
+        float b = 2.0 * half_b;
+        float c = dot(o_c, o_c) - spheres[j].radius * spheres[j].radius;
+
+        float det = b*b - 4*c;
+
+        Intersection isec = Intersection(false, 0, vec3(.0), -1, -1, vec3(0.), vec3(0.), .0);
+
+        if (det < 0.0)
+        {
+            // No intersection
+            continue;
+        }
+        // Two intersections
+        else
+        {
+            isec.depth = (-b - sqrt(det)) / 2.;
+            isec.pos = ray.pos + ray.dir * isec.depth;
+            isec.intersected = true;
+            isec.reflectiveness = spheres[j].reflectiveness;
+            isec.color = spheres[j].color;
+            //isec.normal = normalize(isec.pos - spheres[j].pos);
+            isec.normal = normalize(spheres[j].pos - isec.pos);
+        }
+
+        if (isec.intersected && isec.depth < closestIntersection.depth)
+        {
+            closestIntersection = isec;
+            closestIntersection.closestTriHit = -1; 
+            closestIntersection.closestSphereHit = j;
+        }
+    }
     return closestIntersection;
 }
+
+
+
+
+
+
+
 
 Intersection triangleIntersection(Tri tri, Ray ray)
 {
@@ -366,10 +420,22 @@ Intersection triangleIntersection(Tri tri, Ray ray)
         i.intersected = true;
         i.pos = ray.pos + ray.dir * t;
         i.depth = t;
+        i.normal = tri.normal.xyz;
+        i.color = tri.color.rgb;
+        i.reflectiveness = tri.reflectiveness;
         return i;
     }
     return i;
 }
+
+
+
+
+
+
+
+
+
 
 float sphereIntersection(Sphere sph, Ray ray)
 {
