@@ -34,7 +34,7 @@ float fov = 40;
 vec3 skyboxColorHorizon = vec3(1., 0.7, 0.);
 vec3 skyboxColorTop = vec3(0.45, 0.95, 0.85);
 
-#define MAX_REFLECTIONS 50
+#define MAX_REFLECTIONS 2
 
 struct Ray
 {
@@ -59,7 +59,7 @@ struct Sphere
 #define NUM_SPHERES 1//$numSpheres
 Sphere spheres[NUM_SPHERES] = Sphere[NUM_SPHERES](
     //     Pos                  Radius  Color                   Reflectiveness
-    Sphere(vec3(0., 3., 0.),    1.2,    vec3(0.3, 0.6, 0.6),    0.0)
+    Sphere(vec3(0., 3., 0.),    1.2,    vec3(0.8, 0.2, 0.8),    1.0)
 );
 float sphereDst(Sphere sph, vec3 pos);
 vec3 getSphereNormal(Sphere sph, vec3 pos);
@@ -180,11 +180,10 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
     {
         Intersection closestIntersection = getAllIntersections(ray, -1, -1);
 
-
         // Check for hit
         if (!closestIntersection.intersected)
         {
-            // Calculating air color
+            // Calculating sky color
             vec3 up = vec3(0., 1., 0.);
             float t = dot(up, ray.dir) + 0.4;
             ray.finalColor += skyboxColorTop * (t)+skyboxColorHorizon * (1. - t);
@@ -192,10 +191,9 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
         }
         else
         {
-            if (closestIntersection.reflectiveness > 0.0 && reflect)
+            if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS-1)
             {
                 ray.finalColor += (1.0 - closestIntersection.reflectiveness) * closestIntersection.color;
-                //ray.dir = reflect(ray.dir, triangles[closestIntersection.closestTriHit].normal.xyz);
                 ray.dir += closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal);
                 ray.pos = closestIntersection.pos + 0.0001f * ray.dir;
                 continue; // reflecting
@@ -348,13 +346,14 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         // Two intersections
         else
         {
-            isec.depth = (-b - sqrt(det)) / 2.;
-            isec.pos = ray.pos + ray.dir * isec.depth;
             isec.intersected = true;
+
+            isec.depth = (-b + sqrt(det)) / 2.;
+            isec.pos = ray.pos + ray.dir * isec.depth;
             isec.reflectiveness = spheres[j].reflectiveness;
             isec.color = spheres[j].color;
-            //isec.normal = normalize(isec.pos - spheres[j].pos);
-            isec.normal = normalize(spheres[j].pos - isec.pos);
+            isec.normal = normalize(isec.pos - spheres[j].pos);
+            //isec.normal = normalize(spheres[j].pos - isec.pos);
         }
 
         if (isec.intersected && isec.depth < closestIntersection.depth)
