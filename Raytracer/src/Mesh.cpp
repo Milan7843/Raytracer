@@ -77,7 +77,7 @@ void Mesh::setupMesh()
         glm::vec3 normal = glm::normalize(glm::cross(ab, ac));
         tri.normal = vec3ToGLSLVec3(normal);
         tri.mesh = shaderMeshIndex;
-        tri.reflectiveness = 0.0f;
+        tri.reflectiveness = 1.0f;
         triangles.push_back(tri);
     }
 }

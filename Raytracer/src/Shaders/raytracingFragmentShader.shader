@@ -34,7 +34,7 @@ float fov = 40;
 vec3 skyboxColorHorizon = vec3(1., 0.7, 0.);
 vec3 skyboxColorTop = vec3(0.45, 0.95, 0.85);
 
-#define MAX_REFLECTIONS 2
+#define MAX_REFLECTIONS 15
 
 struct Ray
 {
@@ -338,7 +338,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 
         Intersection isec = Intersection(false, 0, vec3(.0), -1, -1, vec3(0.), vec3(0.), .0);
 
-        if (det < 0.0)
+        if (b > 0.0 || det < 0.0)
         {
             // No intersection
             continue;
@@ -348,7 +348,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         {
             isec.intersected = true;
 
-            isec.depth = (-b + sqrt(det)) / 2.;
+            isec.depth = (-b - sqrt(det)) / 2.;
             isec.pos = ray.pos + ray.dir * isec.depth;
             isec.reflectiveness = spheres[j].reflectiveness;
             isec.color = spheres[j].color;
