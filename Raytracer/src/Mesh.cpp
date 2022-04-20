@@ -18,16 +18,17 @@ int Mesh::getTriangleSize()
     return sizeof(Triangle);
 }
 
-void Mesh::writeToShader(Shader* shader, unsigned int ssbo)
+void Mesh::writeToShader(Shader* shader, unsigned int ssbo, unsigned int materialIndex)
 {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     // Copying this mesh's data into the buffer at the right position
-    glBufferSubData(GL_SHADER_STORAGE_BUFFER, shaderArraybeginIndex, triangles.size() * sizeof(Triangle), &triangles[0]);
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, shaderArraybeginIndex * sizeof(Triangle), triangles.size() * sizeof(Triangle), &triangles[0]);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     // Setting the models position
     shader->setVector3(("meshes[" + std::to_string(shaderMeshIndex) + "].position").c_str(), vec3ToGLSLVec3(position));
+    shader->setInt(("meshes[" + std::to_string(shaderMeshIndex) + "].material").c_str(), materialIndex);
 }
 
 void Mesh::writePositionToShader(Shader* shader)

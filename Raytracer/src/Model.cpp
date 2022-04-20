@@ -1,6 +1,7 @@
 #include "Model.h"
 
-Model::Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount)
+Model::Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex)
+	: materialIndex(materialIndex)
 {
 	loadModel(path, meshCount, triangleCount);
 }
@@ -22,7 +23,7 @@ void Model::writeToShader(Shader* shader, unsigned int ssbo)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
-		meshes[i].writeToShader(shader, ssbo);
+		meshes[i].writeToShader(shader, ssbo, materialIndex);
 	}
 }
 

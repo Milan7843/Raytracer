@@ -19,10 +19,17 @@ void Scene::addPointLight(PointLight& pointLight)
 	this->pointLightCount++;
 }
 
-void Scene::addModel(const std::string& path)
+void Scene::addModel(const std::string& path, unsigned int materialIndex)
 {
-	Model model(path, &meshCount, &triangleCount);
+	Model model(path, &meshCount, &triangleCount, materialIndex);
 	models.push_back(model);
+}
+
+void Scene::addMaterial(Material& material)
+{
+	// Adding a new material and incrementing the counter for this
+	materials.push_back(material);
+	this->materialCount++;
 }
 
 std::string& Scene::setShaderVariables(std::string& input)
@@ -31,6 +38,7 @@ std::string& Scene::setShaderVariables(std::string& input)
 	std::cout << "$numTriangles     "	<< replace(input, "$numTriangles", std::to_string(triangleCount)) << std::endl;
 	std::cout << "$numMeshes        "	<< replace(input, "$numMeshes", std::to_string(meshCount)) << std::endl;
 	std::cout << "$numPointLights   "	<< replace(input, "$numPointLights", std::to_string(pointLightCount)) << std::endl;
+	std::cout << "$numMaterials   "		<< replace(input, "$numMaterials", std::to_string(materialCount)) << std::endl;
 	return input;
 }
 
@@ -50,6 +58,17 @@ void Scene::writeLightsToShader(Shader* shader)
 	for (PointLight pointLight : pointLights)
 	{
 		pointLight.writeToShader(shader);
+	}
+}
+
+void Scene::writeMaterialsToShader(Shader* shader)
+{
+	shader->use();
+	// Writing materials to shader
+	unsigned int index = 0;
+	for (Material material : materials)
+	{
+		material.writeToShader(shader, index++);
 	}
 }
 

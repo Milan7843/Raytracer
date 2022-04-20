@@ -24,7 +24,5 @@ void Light::writePositionToShader(Shader* shader)
 
 void Light::setIndex(unsigned int index)
 {
-	std::cout << "set index to " << index << std::endl;
 	this->index = index;
-	std::cout << "now " << this->index << std::endl;
 }

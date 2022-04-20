@@ -14,6 +14,7 @@
 #include "Scene.h"
 #include "Camera.h"
 #include "Model.h"
+#include "Material.h"
 
 // Change the viewport size if the window is resized
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -32,7 +33,7 @@ void processInput(GLFWwindow* window);
 const unsigned int WINDOW_SIZE_X = 1200, WINDOW_SIZE_Y = 700;
 
 // Making a camera
-Camera camera(glm::vec3(-3.0f, 2.0f, -2.0f));
+Camera camera(glm::vec3(0.0f, 1.8f, 2.0f));
 
 float cameraSpeed = 0.01f;
 
@@ -76,11 +77,18 @@ int main()
     // Making a scene
     Scene scene = Scene();
 
+    Material whiteMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f);
+    Material reflectiveMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f);
+
     // Adding our test models: !! MUST BE TRIANGULATED !!
-    scene.addModel("src/models/icosphere.obj");
-    scene.addModel("src/models/box.obj");
-    PointLight pointLight1(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
-    PointLight pointLight2(glm::vec3(0.0f, 2.0f,-2.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f);
+    scene.addModel("src/models/box.obj", 0);
+    scene.addModel("src/models/icosphere.obj", 1);
+
+    scene.addMaterial(whiteMaterial);
+    scene.addMaterial(reflectiveMaterial);
+
+    PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
+    PointLight pointLight2(glm::vec3(0.0f, -1.8f, 1.8f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f);
 
     scene.addPointLight(pointLight1);
     scene.addPointLight(pointLight2);
@@ -94,6 +102,7 @@ int main()
     */
     Shader raytracingShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracingFragmentShader.shader", &scene);
     scene.writeLightsToShader(&raytracingShader);
+    scene.writeMaterialsToShader(&raytracingShader);
     
     // Object 1: simple uv coords
     float s = 1.0f;

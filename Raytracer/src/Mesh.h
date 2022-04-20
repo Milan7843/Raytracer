@@ -35,7 +35,7 @@ public:
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int startIndex, unsigned int meshIndex);
 	~Mesh();
 
-	void writeToShader(Shader* shader, unsigned int ssbo);
+	void writeToShader(Shader* shader, unsigned int ssbo, unsigned int materialIndex);
 	void writePositionToShader(Shader* shader);
 
 	static int getTriangleSize();

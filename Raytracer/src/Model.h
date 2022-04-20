@@ -12,7 +12,7 @@
 class Model : public Object
 {
 public:
-	Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount);
+	Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex);
 	~Model();
 
 	void draw(Shader* shader);
@@ -29,4 +29,6 @@ private:
 	void processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* triangleCount);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCount, unsigned int* triangleCount);
 	glm::vec3 aiVector3DToGLMVec3(aiVector3D v);
+
+	unsigned int materialIndex = 0;
 };

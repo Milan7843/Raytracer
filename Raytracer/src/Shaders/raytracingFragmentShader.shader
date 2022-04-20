@@ -53,13 +53,12 @@ struct Sphere
 {
     vec3 pos;
     float radius;
-    vec3 color;
-    float reflectiveness;
+    int material;
 };
 #define NUM_SPHERES 1//$numSpheres
 Sphere spheres[NUM_SPHERES] = Sphere[NUM_SPHERES](
-    //     Pos                  Radius  Color                   Reflectiveness
-    Sphere(vec3(0., 3., 0.),    1.2,    vec3(0.8, 0.2, 0.8),    1.0)
+    //     Pos                  Radius  Material
+    Sphere(vec3(0., 3., 0.),    1.2,    0)
 );
 float sphereDst(Sphere sph, vec3 pos);
 vec3 getSphereNormal(Sphere sph, vec3 pos);
@@ -91,9 +90,19 @@ DirLight dirLights[1] = DirLight[1](
 struct Mesh
 {
     vec3 position;
+    int material;
 };
 #define NUM_MESHES $numMeshes
 uniform Mesh meshes[NUM_MESHES];
+
+struct Material
+{
+    vec3 color;
+    float reflectiveness;
+    float transparency;
+};
+#define NUM_MATERIALS $numMaterials
+uniform Material materials[NUM_MATERIALS];
 
 
 struct Intersection
@@ -242,7 +251,8 @@ vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit)
         Intersection closestIntersection = getAllIntersections(ray, triHit, sphereHit);
 
         // Check for shadow ray hits
-        if (!closestIntersection.intersected)
+        if (!closestIntersection.intersected
+            || distance(closestIntersection.pos, pos) > distance(pointLights[i].pos, pos))
         {
             float intensity = min(
                 (1. / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z)) 
@@ -350,10 +360,9 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 
             isec.depth = (-b - sqrt(det)) / 2.;
             isec.pos = ray.pos + ray.dir * isec.depth;
-            isec.reflectiveness = spheres[j].reflectiveness;
-            isec.color = spheres[j].color;
+            isec.reflectiveness = materials[spheres[j].material].reflectiveness;
+            isec.color = materials[spheres[j].material].color;
             isec.normal = normalize(isec.pos - spheres[j].pos);
-            //isec.normal = normalize(spheres[j].pos - isec.pos);
         }
 
         if (isec.intersected && isec.depth < closestIntersection.depth)
@@ -420,8 +429,8 @@ Intersection triangleIntersection(Tri tri, Ray ray)
         i.pos = ray.pos + ray.dir * t;
         i.depth = t;
         i.normal = tri.normal.xyz;
-        i.color = tri.color.rgb;
-        i.reflectiveness = tri.reflectiveness;
+        i.color = materials[meshes[tri.mesh].material].color.rgb;
+        i.reflectiveness = materials[meshes[tri.mesh].material].reflectiveness;
         return i;
     }
     return i;
