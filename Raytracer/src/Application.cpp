@@ -76,8 +76,9 @@ int main()
     // Making a scene
     Scene scene = Scene();
 
-    // Adding our test model
+    // Adding our test models: !! MUST BE TRIANGULATED !!
     scene.addModel("src/models/icosphere.obj");
+    scene.addModel("src/models/box.obj");
     PointLight pointLight1(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
     PointLight pointLight2(glm::vec3(0.0f, 2.0f,-2.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f);
 
@@ -130,6 +131,7 @@ int main()
     unsigned int ssbo = 0;
     glGenBuffers(1, &ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    std::cout << "Making room for " << scene.triangleCount << " triangles" << std::endl;
     glBufferData(GL_SHADER_STORAGE_BUFFER, scene.triangleCount * Mesh::getTriangleSize(), 0, GL_DYNAMIC_COPY);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);

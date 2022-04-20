@@ -21,7 +21,8 @@ int Mesh::getTriangleSize()
 void Mesh::writeToShader(Shader* shader, unsigned int ssbo)
 {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, triangles.size() * sizeof(Triangle), &triangles[0], GL_STATIC_COPY);
+    // Copying this mesh's data into the buffer at the right position
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, shaderArraybeginIndex, triangles.size() * sizeof(Triangle), &triangles[0]);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
