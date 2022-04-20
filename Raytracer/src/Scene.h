@@ -6,6 +6,7 @@
 
 #include "Lights/PointLight.h"
 #include "Model.h"
+#include "Sphere.h"
 #include "Material.h"
 
 class Scene
@@ -16,6 +17,7 @@ public:
 
 	void addPointLight(PointLight& pointLight);
 	Model* addModel(const std::string& path, unsigned int materialIndex);
+	Sphere* addSphere(glm::vec3 position, float radius, unsigned int materialIndex);
 	void addMaterial(Material& material);
 
 
@@ -33,7 +35,7 @@ public:
 	void writeMaterialsToShader(Shader* shader);
 
 	// Get whether any mesh has their updated variable set to true
-	void checkMeshUpdates(Shader* shader, unsigned int ssbo);
+	void checkObjectUpdates(Shader* shader, unsigned int ssbo);
 
 	unsigned int triangleCount = 0;
 
@@ -43,7 +45,9 @@ private:
 	unsigned int pointLightCount = 0;
 
 	std::vector<Model> models;
+	std::vector<Sphere> spheres;
 
+	unsigned int sphereCount = 0;
 	unsigned int meshCount = 0;
 
 	// Keeping track of the materials

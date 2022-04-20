@@ -97,6 +97,9 @@ int main()
     icosphere->scale(0.6f);
     icosphere->applyTransformations();
 
+    
+    Sphere* sphere1 = scene.addSphere(glm::vec3(0.0f, 1.0f, 0.0f), 0.8f, 1);
+    Sphere* sphere2 = scene.addSphere(glm::vec3(1.0f, 1.0f, -2.0f), 1.4f, 1);
 
     // LIGHTS
     PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f);
@@ -116,10 +119,9 @@ int main()
     */
     Shader raytracingShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracingFragmentShader.shader", &scene);
 
+
     scene.writeLightsToShader(&raytracingShader);
     scene.writeMaterialsToShader(&raytracingShader);
-
-
     
     // Object 1: simple uv coords
     float s = 1.0f;
@@ -206,7 +208,7 @@ int main()
             usedShader->setVector3("cameraRotation", camera.getRotation());
             if (shaderModelDataNeedsUpdate)
             {
-                scene.checkMeshUpdates(usedShader, ssbo);
+                scene.checkObjectUpdates(usedShader, ssbo);
                 shaderModelDataNeedsUpdate = false;
             }
 

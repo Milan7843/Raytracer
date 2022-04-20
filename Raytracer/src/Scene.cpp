@@ -23,7 +23,15 @@ Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
 {
 	Model model(path, &meshCount, &triangleCount, materialIndex);
 	models.push_back(model);
-	return &(models[models.size()-1]);
+	return &(models[models.size() - 1]);
+}
+
+Sphere* Scene::addSphere(glm::vec3 position, float radius, unsigned int materialIndex)
+{
+	Sphere sphere(position, radius, materialIndex, sphereCount);
+	sphereCount++;
+	spheres.push_back(sphere);
+	return &(spheres[spheres.size() - 1]);
 }
 
 void Scene::addMaterial(Material& material)
@@ -35,20 +43,27 @@ void Scene::addMaterial(Material& material)
 
 std::string& Scene::setShaderVariables(std::string& input)
 {
-	std::cout << std::endl << "Variable injection:"	<< std::endl;
-	std::cout << "$numTriangles     "	<< replace(input, "$numTriangles", std::to_string(triangleCount)) << std::endl;
-	std::cout << "$numMeshes        "	<< replace(input, "$numMeshes", std::to_string(meshCount)) << std::endl;
-	std::cout << "$numPointLights   "	<< replace(input, "$numPointLights", std::to_string(pointLightCount)) << std::endl;
-	std::cout << "$numMaterials   "		<< replace(input, "$numMaterials", std::to_string(materialCount)) << std::endl;
+	std::cout << std::endl << "Variable injection:" << std::endl;
+	std::cout << "$numTriangles     " << replace(input, "$numTriangles", std::to_string(triangleCount)) << std::endl;
+	std::cout << "$numMeshes        " << replace(input, "$numMeshes", std::to_string(meshCount)) << std::endl;
+	std::cout << "$numPointLights   " << replace(input, "$numPointLights", std::to_string(pointLightCount)) << std::endl;
+	std::cout << "$numMaterials		" << replace(input, "$numMaterials", std::to_string(materialCount)) << std::endl;
+	std::cout << "$numSpheres		" << replace(input, "$numSpheres", std::to_string(sphereCount)) << std::endl;
 	return input;
 }
 
 void Scene::draw(Shader* shader)
 {
-	// Updating each model as needed
+	// Drawing each model with the given shader
 	for (Model model : models)
 	{
 		model.draw(shader);
+	}
+
+	// Drawing each sphere with the given shader
+	for (Sphere sphere : spheres)
+	{
+		sphere.draw(shader);
 	}
 }
 
@@ -73,7 +88,7 @@ void Scene::writeMaterialsToShader(Shader* shader)
 	}
 }
 
-void Scene::checkMeshUpdates(Shader* shader, unsigned int ssbo)
+void Scene::checkObjectUpdates(Shader* shader, unsigned int ssbo)
 {
 	// Updating each model as needed
 	for (Model model : models)
@@ -82,6 +97,15 @@ void Scene::checkMeshUpdates(Shader* shader, unsigned int ssbo)
 		{
 			model.writeToShader(shader, ssbo);
 			model.updated = false;
+		}
+	}
+	// Updating each sphere as needed
+	for (Sphere sphere : spheres)
+	{
+		if (sphere.updated)
+		{
+			sphere.writeToShader(shader, ssbo);
+			sphere.updated = false;
 		}
 	}
 }

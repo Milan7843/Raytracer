@@ -1,8 +1,8 @@
 #include "Model.h"
 
 Model::Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex)
-	: materialIndex(materialIndex)
 {
+	this->materialIndex = materialIndex;
 	loadModel(path, meshCount, triangleCount);
 }
 
@@ -25,26 +25,6 @@ void Model::writeToShader(Shader* shader, unsigned int ssbo)
 	{
 		meshes[i].writeToShader(shader, ssbo, materialIndex);
 	}
-}
-
-void Model::rotate(glm::vec3 rotationAxis, float degrees)
-{
-	this->transformation = glm::rotate(transformation, degrees, rotationAxis);
-}
-
-void Model::move(glm::vec3 move)
-{
-	this->transformation = glm::translate(transformation, move);
-}
-
-void Model::scale(glm::vec3 scale)
-{
-	this->transformation = glm::scale(transformation, scale);
-}
-
-void Model::scale(float scale)
-{
-	this->scale(glm::vec3(1.0f) * scale);
 }
 
 void Model::applyTransformations()

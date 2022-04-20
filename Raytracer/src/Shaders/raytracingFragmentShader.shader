@@ -56,11 +56,13 @@ struct Sphere
     float radius;
     int material;
 };
-#define NUM_SPHERES 1//$numSpheres
+#define NUM_SPHERES $numSpheres
+uniform Sphere spheres[NUM_SPHERES];
+/*
 Sphere spheres[NUM_SPHERES] = Sphere[NUM_SPHERES](
     //     Pos                  Radius  Material
     Sphere(vec3(0., 3., 0.),    1.2,    1)
-);
+);*/
 float sphereDst(Sphere sph, vec3 pos);
 vec3 getSphereNormal(Sphere sph, vec3 pos);
 
@@ -94,7 +96,7 @@ struct AmbientLight
 };
 AmbientLight ambientLights[1] = AmbientLight[1](
     //           Color                  Intensity
-    AmbientLight(vec3(0.8f, 0.8f, 1.0f), 0.3f)
+    AmbientLight(vec3(0.8, 0.8, 1.0), 0.3)
 );
 
 // Mesh

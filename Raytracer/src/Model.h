@@ -15,19 +15,16 @@ public:
 	Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex);
 	~Model();
 
-	void draw(Shader* shader);
+	// Draw this object given the shader
+	virtual void draw(Shader* shader);
 
-	void writeToShader(Shader* shader, unsigned int ssbo);
+	// Write this object's data to the given shader
+	virtual void writeToShader(Shader* shader, unsigned int ssbo);
 
-	bool updated = true;
+	// Apply all the previous transformations to the vertex data
+	virtual void applyTransformations();
 
 	std::vector<Mesh> meshes;
-
-	void rotate(glm::vec3 rotationAxis, float degrees);
-	void move(glm::vec3 move);
-	void scale(glm::vec3 scale);
-	void scale(float scale);
-	void applyTransformations();
 
 private:
 	std::string directory;
@@ -35,8 +32,4 @@ private:
 	void processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* triangleCount);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCount, unsigned int* triangleCount);
 	glm::vec4 aiVector3DToGLMVec4(aiVector3D v);
-
-	glm::mat4 transformation = glm::mat4(1.0f);
-
-	unsigned int materialIndex = 0;
 };

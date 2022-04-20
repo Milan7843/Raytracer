@@ -6,7 +6,6 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsi
     this->vertices = vertices;
     this->indices = indices;
     setupMesh();
-    std::cout << indices.size() << std::endl;
 }
 Mesh::~Mesh()
 {
@@ -20,7 +19,6 @@ int Mesh::getTriangleSize()
 
 void Mesh::applyTransformations(glm::mat4& transformation)
 {
-    std::cout << glm::to_string(transformation) << std::endl;
     for (unsigned int i = 0; i < triangles.size(); i++)
     {
         triangles[i].v1 = transformation * triangles[i].v1;
