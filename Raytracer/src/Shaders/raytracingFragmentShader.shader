@@ -31,7 +31,8 @@ float i = 0.;
 float dstThreshold = 0.005;
 float fov = 40;
 
-vec3 skyboxColorHorizon = vec3(1., 0.7, 0.);
+//vec3 skyboxColorHorizon = vec3(1., 0.7, 0.);
+vec3 skyboxColorHorizon = vec3(0.1, 0.2, 0.4);
 vec3 skyboxColorTop = vec3(0.45, 0.95, 0.85);
 
 #define MAX_REFLECTIONS 15
@@ -58,7 +59,7 @@ struct Sphere
 #define NUM_SPHERES 1//$numSpheres
 Sphere spheres[NUM_SPHERES] = Sphere[NUM_SPHERES](
     //     Pos                  Radius  Material
-    Sphere(vec3(0., 3., 0.),    1.2,    0)
+    Sphere(vec3(0., 3., 0.),    1.2,    1)
 );
 float sphereDst(Sphere sph, vec3 pos);
 vec3 getSphereNormal(Sphere sph, vec3 pos);
@@ -83,7 +84,17 @@ struct DirLight
 };
 DirLight dirLights[1] = DirLight[1](
     //         Pos                  Color                   Intensity
-    DirLight(vec3(1., -1., 0.),     vec3(0.0, 0.0, 1.0),    1.)
+    DirLight(vec3(.707, -.707, 0.),     vec3(1.0, 1.0, 0.9),    1.)
+);
+
+struct AmbientLight
+{
+    vec3 color;
+    float intensity;
+};
+AmbientLight ambientLights[1] = AmbientLight[1](
+    //           Color                  Intensity
+    AmbientLight(vec3(0.8f, 0.8f, 1.0f), 0.1f)
 );
 
 // Mesh
@@ -194,16 +205,37 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
         {
             // Calculating sky color
             vec3 up = vec3(0., 1., 0.);
-            float t = dot(up, ray.dir) + 0.4;
-            ray.finalColor += skyboxColorTop * (t)+skyboxColorHorizon * (1. - t);
+            float t = dot(up, ray.dir) + 0.6;
+            vec3 skyColor = skyboxColorTop * (t) +    skyboxColorHorizon * (1. - t);
+
+            vec3 finalColor = skyColor;
+
+
+            // Rendering each directional light as a sort of sun, by doing the final color dot the -direction, 
+            // to calculate how much the ray is going into the sun
+            for (int i = 0; i < dirLights.length; i++)
+            {
+                t = dot(ray.dir, -dirLights[i].dir);
+                float threshold = 0.98f;
+                if (t > threshold)
+                {
+                    // Normalize (threshold, 1.0] to (0.0, 1.0]
+                    t = (t-threshold) / (1.-threshold);
+
+                    finalColor = dirLights[i].color * (t) +   finalColor * (1. - t);
+                }
+            }
+
+            ray.finalColor += finalColor;
             break;
         }
         else
         {
             if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS-1)
             {
+                // Calculating the new ray direction for a reflection
                 ray.finalColor += (1.0 - closestIntersection.reflectiveness) * closestIntersection.color;
-                ray.dir += closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal);
+                ray.dir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
                 ray.pos = closestIntersection.pos + 0.0001f * ray.dir;
                 continue; // reflecting
             }
@@ -273,17 +305,17 @@ vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit)
         vec3 dir = -dirLights[i].dir;
         dir = normalize(dir);
 
-        // Doing ray trace light
+        // Doing ray trace light (actually for shadows)
         Ray ray;
         ray.pos = pos;
         ray.dir = dir;
-
 
         Intersection closestIntersection = getAllIntersections(ray, triHit, sphereHit);
 
         // Check for hit
         if (!closestIntersection.intersected)
         {
+            // Works somehow??
             float intensity = min(
                 dot(-dir, normal),
                 1.);
@@ -294,6 +326,12 @@ vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit)
         {
             // In shadow for this light
         }
+    }
+
+    /* AMBIENT LIGHTS */
+    for (int i = 0; i < ambientLights.length; i++)
+    {
+        finalLight += ambientLights[i].intensity * ambientLights[i].color;
     }
 
     return finalLight;
@@ -362,7 +400,8 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
             isec.pos = ray.pos + ray.dir * isec.depth;
             isec.reflectiveness = materials[spheres[j].material].reflectiveness;
             isec.color = materials[spheres[j].material].color;
-            isec.normal = normalize(isec.pos - spheres[j].pos);
+            //isec.normal = normalize(isec.pos - spheres[j].pos);
+            isec.normal = normalize(spheres[j].pos - isec.pos);
         }
 
         if (isec.intersected && isec.depth < closestIntersection.depth)

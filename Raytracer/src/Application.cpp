@@ -33,7 +33,7 @@ void processInput(GLFWwindow* window);
 const unsigned int WINDOW_SIZE_X = 1200, WINDOW_SIZE_Y = 700;
 
 // Making a camera
-Camera camera(glm::vec3(0.0f, 1.8f, 2.0f));
+Camera camera(glm::vec3(6.7f, 2.7f, -3.7f));
 
 float cameraSpeed = 0.01f;
 
@@ -74,24 +74,33 @@ int main()
     // Change the viewport size if the window is resized
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+
+
+
     // Making a scene
     Scene scene = Scene();
 
+    // MATERIALS
     Material whiteMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f);
     Material reflectiveMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f);
-
-    // Adding our test models: !! MUST BE TRIANGULATED !!
-    scene.addModel("src/models/box.obj", 0);
-    scene.addModel("src/models/icosphere.obj", 1);
 
     scene.addMaterial(whiteMaterial);
     scene.addMaterial(reflectiveMaterial);
 
-    PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
-    PointLight pointLight2(glm::vec3(0.0f, -1.8f, 1.8f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f);
+
+    // Adding our test models: !! MUST BE TRIANGULATED !!
+    scene.addModel("src/models/plane.obj", 0);
+    scene.addModel("src/models/icosphere.obj", 0);
+
+
+    // LIGHTS
+    PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f);
+    PointLight pointLight2(glm::vec3(0.0f, -1.8f, 1.8f), glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
 
     scene.addPointLight(pointLight1);
     scene.addPointLight(pointLight2);
+
+
 
     Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
     Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader");
@@ -101,8 +110,11 @@ int main()
         "src/Shaders/raymarchFragmentShader.shader", triangleCount, meshCount);
     */
     Shader raytracingShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracingFragmentShader.shader", &scene);
+
     scene.writeLightsToShader(&raytracingShader);
     scene.writeMaterialsToShader(&raytracingShader);
+
+
     
     // Object 1: simple uv coords
     float s = 1.0f;
@@ -171,6 +183,7 @@ int main()
         // Input
         processInput(window);
         camera.processInput(window, deltaTime);
+        std::cout << camera.getPosition().x << ", " << camera.getPosition().y << ", " << camera.getPosition().z << ", " << std::endl;
 
         // Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
