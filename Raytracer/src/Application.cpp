@@ -89,8 +89,13 @@ int main()
 
 
     // Adding our test models: !! MUST BE TRIANGULATED !!
-    scene.addModel("src/models/plane.obj", 0);
-    scene.addModel("src/models/icosphere.obj", 0);
+    Model* plane = scene.addModel("src/models/plane.obj", 0);
+    Model* icosphere = scene.addModel("src/models/icosphere.obj", 0);
+
+    // Always first move, then rotate, then scale
+    icosphere->move(glm::vec3(1.0f, 0.6f, 2.0f));
+    icosphere->scale(0.6f);
+    icosphere->applyTransformations();
 
 
     // LIGHTS
@@ -183,7 +188,7 @@ int main()
         // Input
         processInput(window);
         camera.processInput(window, deltaTime);
-        std::cout << camera.getPosition().x << ", " << camera.getPosition().y << ", " << camera.getPosition().z << ", " << std::endl;
+        //std::cout << camera.getPosition().x << ", " << camera.getPosition().y << ", " << camera.getPosition().z << ", " << std::endl;
 
         // Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);

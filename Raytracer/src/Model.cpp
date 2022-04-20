@@ -27,6 +27,34 @@ void Model::writeToShader(Shader* shader, unsigned int ssbo)
 	}
 }
 
+void Model::rotate(glm::vec3 rotationAxis, float degrees)
+{
+	this->transformation = glm::rotate(transformation, degrees, rotationAxis);
+}
+
+void Model::move(glm::vec3 move)
+{
+	this->transformation = glm::translate(transformation, move);
+}
+
+void Model::scale(glm::vec3 scale)
+{
+	this->transformation = glm::scale(transformation, scale);
+}
+
+void Model::scale(float scale)
+{
+	this->scale(glm::vec3(1.0f) * scale);
+}
+
+void Model::applyTransformations()
+{
+	for (unsigned int i = 0; i < meshes.size(); i++)
+	{
+		meshes[i].applyTransformations(transformation);
+	}
+}
+
 void Model::loadModel(std::string path, unsigned int* meshCount, unsigned int* triangleCount)
 {
 	Assimp::Importer importer;
@@ -71,12 +99,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCou
 		// New vertex
 		Vertex vertex;
 
-		vertex.position = aiVector3DToGLMVec3(mesh->mVertices[i]);
+		vertex.position = aiVector3DToGLMVec4(mesh->mVertices[i]);
 
 		// Adding normals if possible
 		if (mesh->HasNormals())
 		{
-			vertex.normal = aiVector3DToGLMVec3(mesh->mNormals[i]);
+			vertex.normal = aiVector3DToGLMVec4(mesh->mNormals[i]);
 		}
 
 		// Putting the new vertex into the vertices vector
@@ -102,7 +130,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCou
 	return Mesh(vertices, indices, beginTriangleCount, meshCount);
 }
 
-glm::vec3 Model::aiVector3DToGLMVec3(aiVector3D v)
+glm::vec4 Model::aiVector3DToGLMVec4(aiVector3D v)
 {
-	return glm::vec3(v.x, v.y, v.z);
+	return glm::vec4(v.x, v.y, v.z, 1.0f);
 }

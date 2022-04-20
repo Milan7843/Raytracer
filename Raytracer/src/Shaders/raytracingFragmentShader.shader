@@ -84,7 +84,7 @@ struct DirLight
 };
 DirLight dirLights[1] = DirLight[1](
     //         Pos                  Color                   Intensity
-    DirLight(vec3(.707, -.707, 0.),     vec3(1.0, 1.0, 0.9),    1.)
+    DirLight(vec3(.707, -.707, 0.),     vec3(1.0, 1.0, 0.9),    0.8)
 );
 
 struct AmbientLight
@@ -94,7 +94,7 @@ struct AmbientLight
 };
 AmbientLight ambientLights[1] = AmbientLight[1](
     //           Color                  Intensity
-    AmbientLight(vec3(0.8f, 0.8f, 1.0f), 0.1f)
+    AmbientLight(vec3(0.8f, 0.8f, 1.0f), 0.3f)
 );
 
 // Mesh
@@ -168,7 +168,7 @@ void main()
     float cb = cos(b);
     float cc = cos(c);
 
-
+    // Calculating ray direction
     float   x = dir.x * cos(a) * cos(b);
     x += dir.y * (ca * sb * sc - sa * cc);
     x += dir.z * (ca * sb * cc + sa * sc);

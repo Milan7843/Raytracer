@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -14,7 +16,7 @@
 
 struct Vertex
 {
-	glm::vec3 position;
+	glm::vec4 position;
 	glm::vec3 normal;
 };
 
@@ -44,6 +46,8 @@ public:
 	std::vector<unsigned int> indices;
 	std::vector<Triangle> triangles;
 
+	void applyTransformations(glm::mat4& transformation);
+
 	// First index for writing this mesh's data to a shader
 	unsigned int shaderArraybeginIndex;
 	unsigned int shaderMeshIndex;
@@ -57,6 +61,6 @@ public:
 
 private:
 	glm::vec3 vec3ToGLSLVec3(glm::vec3 v);
-	glm::vec4 vec3ToGLSLVec4(glm::vec3 v);
+	glm::vec4 vec4ToGLSLVec4(glm::vec3 v);
 	void setupMesh();
 };

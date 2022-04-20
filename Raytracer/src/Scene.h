@@ -15,7 +15,7 @@ public:
 	~Scene();
 
 	void addPointLight(PointLight& pointLight);
-	void addModel(const std::string& path, unsigned int materialIndex);
+	Model* addModel(const std::string& path, unsigned int materialIndex);
 	void addMaterial(Material& material);
 
 

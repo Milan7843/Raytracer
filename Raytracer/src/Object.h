@@ -11,9 +11,6 @@ class Object
 public:
 	void writeToShader(Shader* shader);
 
-	glm::vec3 getPosition();
-	void setPosition(glm::vec3 pos);
-
 
 protected:
 	// Abstract class, no need to instantiate this class

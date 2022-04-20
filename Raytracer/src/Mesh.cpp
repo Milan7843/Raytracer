@@ -18,6 +18,17 @@ int Mesh::getTriangleSize()
     return sizeof(Triangle);
 }
 
+void Mesh::applyTransformations(glm::mat4& transformation)
+{
+    std::cout << glm::to_string(transformation) << std::endl;
+    for (unsigned int i = 0; i < triangles.size(); i++)
+    {
+        triangles[i].v1 = transformation * triangles[i].v1;
+        triangles[i].v2 = transformation * triangles[i].v2;
+        triangles[i].v3 = transformation * triangles[i].v3;
+    }
+}
+
 void Mesh::writeToShader(Shader* shader, unsigned int ssbo, unsigned int materialIndex)
 {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
@@ -40,9 +51,9 @@ glm::vec3 Mesh::vec3ToGLSLVec3(glm::vec3 v)
 {
     return glm::vec3(v.z, v.y, v.x);
 }
-glm::vec4 Mesh::vec3ToGLSLVec4(glm::vec3 v)
+glm::vec4 Mesh::vec4ToGLSLVec4(glm::vec3 v)
 {
-    return glm::vec4(v.z, v.y, v.x, 0.0f);
+    return glm::vec4(v.z, v.y, v.x, 1.0f);
 }
 
 void Mesh::setupMesh()
@@ -70,9 +81,9 @@ void Mesh::setupMesh()
     for (unsigned int i = 0; i < vertices.size(); i += 3)
     {
         Triangle tri{};
-        tri.v1 = vec3ToGLSLVec4(vertices[i].position);
-        tri.v2 = vec3ToGLSLVec4(vertices[i+1].position);
-        tri.v3 = vec3ToGLSLVec4(vertices[i+2].position);
+        tri.v1 = vec4ToGLSLVec4(vertices[i].position);
+        tri.v2 = vec4ToGLSLVec4(vertices[i+1].position);
+        tri.v3 = vec4ToGLSLVec4(vertices[i+2].position);
         tri.color = glm::vec3(1.0f);
         glm::vec3 ab = vertices[indices[static_cast<unsigned __int64>(i) + 2]].position - vertices[indices[i + 0]].position;
         glm::vec3 ac = vertices[indices[static_cast<unsigned __int64>(i) + 1]].position - vertices[indices[i + 0]].position;

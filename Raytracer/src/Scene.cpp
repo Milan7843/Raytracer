@@ -19,10 +19,11 @@ void Scene::addPointLight(PointLight& pointLight)
 	this->pointLightCount++;
 }
 
-void Scene::addModel(const std::string& path, unsigned int materialIndex)
+Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
 {
 	Model model(path, &meshCount, &triangleCount, materialIndex);
 	models.push_back(model);
+	return &(models[models.size()-1]);
 }
 
 void Scene::addMaterial(Material& material)
