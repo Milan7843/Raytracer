@@ -102,8 +102,8 @@ int main()
     Sphere* sphere2 = scene.addSphere(glm::vec3(1.0f, 1.0f, -2.0f), 1.4f, 1);
 
     // LIGHTS
-    PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f);
-    PointLight pointLight2(glm::vec3(0.0f, -1.8f, 1.8f), glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
+    PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
+    PointLight pointLight2(glm::vec3(2.0f, 1.8f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 2.0f);
 
     scene.addPointLight(pointLight1);
     scene.addPointLight(pointLight2);

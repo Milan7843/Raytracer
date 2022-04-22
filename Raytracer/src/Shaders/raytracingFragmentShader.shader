@@ -272,8 +272,8 @@ vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit)
     /* POINT LIGHTS */
     for (int i = 0; i < NUM_POINT_LIGHTS; i++)
     {
-        vec3 dir = pointLights[i].pos - pos;
-        dir = normalize(dir);
+        vec3 dist = pointLights[i].pos - pos;
+        vec3 dir = normalize(dist);
 
         // Doing ray trace light
         Ray ray;
@@ -291,7 +291,10 @@ vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit)
                 * dot(-dir, normal),
                 1.);
 
-            finalLight += intensity * pointLights[i].color * pointLights[i].intensity;
+
+            float falloff = 1.0 / (dist.x * dist.x + dist.y * dist.y + dist.z * dist.z);
+
+            finalLight += intensity * pointLights[i].color * pointLights[i].intensity * falloff;
         }
         else
         {

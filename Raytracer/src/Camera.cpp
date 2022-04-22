@@ -85,6 +85,9 @@ void Camera::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 void Camera::processInput(GLFWwindow* window, float deltaTime)
 {
 	float realSpeed = cameraSpeed * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		realSpeed *= 3;
+
 	// FORWARD/BACKWARD
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		position += realSpeed * forward;
