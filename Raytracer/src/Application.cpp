@@ -219,7 +219,7 @@ int main()
         {
             /* REGULAR RENDERING */
             solidColorShader.use();
-            solidColorShader.setVector3("inputColor", glm::vec3(0.8f, 0.3f, 0.8f));
+            //solidColorShader.setVector3("inputColor", glm::vec3(0.8f, 0.3f, 0.8f));
 
             // Drawing axes
             drawAxes(axesVAO, &solidColorShader, &camera);

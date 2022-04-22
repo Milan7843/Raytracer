@@ -29,13 +29,13 @@ public:
 	bool updated = true;
 
 	// All transformations on this object
-	glm::mat4 transformation = glm::mat4(2.0f);
+	glm::mat4 transformation = glm::mat4(1.0f);
+
+	// The index of the material this object uses
+	unsigned int materialIndex = 0;
 
 protected:
 	// Abstract class, no need to instantiate this class
 	Object();
 	virtual ~Object() {}
-
-	// The index of the material this object uses
-	unsigned int materialIndex = 0;
 };

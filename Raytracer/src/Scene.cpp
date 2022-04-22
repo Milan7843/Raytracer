@@ -57,19 +57,21 @@ void Scene::draw(Shader* shader)
 	// Drawing each model with the given shader
 	for (Model model : models)
 	{
-		model.draw(shader);
+		model.draw(shader, &materials[model.materialIndex]);
 	}
 
 	// Drawing each sphere with the given shader
 	for (Sphere sphere : spheres)
 	{
-		sphere.draw(shader);
+		sphere.draw(shader, &materials[sphere.materialIndex]);
 	}
+	std::cout << std::endl << std::endl << std::endl;
 }
 
 void Scene::writeLightsToShader(Shader* shader)
 {
 	shader->use();
+
 	// Writing point lights to shader
 	for (PointLight pointLight : pointLights)
 	{
@@ -80,6 +82,7 @@ void Scene::writeLightsToShader(Shader* shader)
 void Scene::writeMaterialsToShader(Shader* shader)
 {
 	shader->use();
+
 	// Writing materials to shader
 	unsigned int index = 0;
 	for (Material material : materials)
@@ -99,6 +102,7 @@ void Scene::checkObjectUpdates(Shader* shader, unsigned int ssbo)
 			model.updated = false;
 		}
 	}
+
 	// Updating each sphere as needed
 	for (Sphere sphere : spheres)
 	{

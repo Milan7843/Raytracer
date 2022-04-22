@@ -97,12 +97,6 @@ void Mesh::draw(Shader* shader)
 {
     glBindVertexArray(VAO);
 
-    // Model matrix
-    glm::mat4 model = glm::mat4(1.0f);
-    // Translation of model matrix
-    model = glm::translate(model, position);
-    shader->setMat4("model", model);
-
     glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }

@@ -7,7 +7,10 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Object.h"
+#include "Material.h"
 
 class Model : public Object
 {
@@ -16,7 +19,7 @@ public:
 	~Model();
 
 	// Draw this object given the shader
-	virtual void draw(Shader* shader);
+	virtual void draw(Shader* shader, Material* material);
 
 	// Write this object's data to the given shader
 	virtual void writeToShader(Shader* shader, unsigned int ssbo);

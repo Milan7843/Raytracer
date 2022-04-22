@@ -58,11 +58,7 @@ struct Sphere
 };
 #define NUM_SPHERES $numSpheres
 uniform Sphere spheres[NUM_SPHERES];
-/*
-Sphere spheres[NUM_SPHERES] = Sphere[NUM_SPHERES](
-    //     Pos                  Radius  Material
-    Sphere(vec3(0., 3., 0.),    1.2,    1)
-);*/
+
 float sphereDst(Sphere sph, vec3 pos);
 vec3 getSphereNormal(Sphere sph, vec3 pos);
 
