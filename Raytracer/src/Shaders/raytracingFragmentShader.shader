@@ -84,7 +84,8 @@ struct DirLight
     vec3 color;
     float intensity;
 };
-DirLight dirLights[1] = DirLight[1](
+#define NUM_DIR_LIGHTS 1
+DirLight dirLights[NUM_DIR_LIGHTS] = DirLight[](
     //         Pos                  Color                   Intensity
     DirLight(vec3(.707, -.707, 0.),     vec3(1.0, 1.0, 0.9),    0.8)
 );
@@ -94,7 +95,8 @@ struct AmbientLight
     vec3 color;
     float intensity;
 };
-AmbientLight ambientLights[1] = AmbientLight[1](
+#define NUM_AMBIENT_LIGHTS 1
+AmbientLight ambientLights[1] = AmbientLight[](
     //           Color                  Intensity
     AmbientLight(vec3(0.8, 0.8, 1.0), 0.3)
 );
@@ -215,7 +217,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
 
             // Rendering each directional light as a sort of sun, by doing the final color dot the -direction, 
             // to calculate how much the ray is going into the sun
-            for (int i = 0; i < dirLights.length; i++)
+            for (int i = 0; i < NUM_DIR_LIGHTS; i++)
             {
                 t = dot(ray.dir, -dirLights[i].dir);
                 float threshold = 0.98f;
@@ -302,7 +304,7 @@ vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit)
     }
 
     /* DIRECTIONAL LIGHTS */
-    for (int i = 0; i < dirLights.length; i++)
+    for (int i = 0; i < NUM_DIR_LIGHTS; i++)
     {
         vec3 dir = -dirLights[i].dir;
         dir = normalize(dir);
@@ -331,7 +333,7 @@ vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit)
     }
 
     /* AMBIENT LIGHTS */
-    for (int i = 0; i < ambientLights.length; i++)
+    for (int i = 0; i < NUM_AMBIENT_LIGHTS; i++)
     {
         finalLight += ambientLights[i].intensity * ambientLights[i].color;
     }
