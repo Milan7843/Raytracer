@@ -65,7 +65,6 @@ void Scene::draw(Shader* shader)
 	{
 		sphere.draw(shader, &materials[sphere.materialIndex]);
 	}
-	std::cout << std::endl << std::endl << std::endl;
 }
 
 void Scene::writeLightsToShader(Shader* shader)

@@ -405,6 +405,12 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
             isec.color = materials[spheres[j].material].color;
             //isec.normal = normalize(isec.pos - spheres[j].pos);
             isec.normal = normalize(spheres[j].pos - isec.pos);
+
+            if (c < 0)
+            {
+                isec.color = vec3(0.);
+                isec.reflectiveness = 0.;
+            }
         }
 
         if (isec.intersected && isec.depth < closestIntersection.depth)
