@@ -47,8 +47,10 @@ std::string& Scene::setShaderVariables(std::string& input)
 	std::cout << "$numTriangles     " << replace(input, "$numTriangles", std::to_string(triangleCount)) << std::endl;
 	std::cout << "$numMeshes        " << replace(input, "$numMeshes", std::to_string(meshCount)) << std::endl;
 	std::cout << "$numPointLights   " << replace(input, "$numPointLights", std::to_string(pointLightCount)) << std::endl;
-	std::cout << "$numMaterials		" << replace(input, "$numMaterials", std::to_string(materialCount)) << std::endl;
-	std::cout << "$numSpheres		" << replace(input, "$numSpheres", std::to_string(sphereCount)) << std::endl;
+	std::cout << "$numMaterials     " << replace(input, "$numMaterials", std::to_string(materialCount)) << std::endl;
+	std::cout << "$numSpheres       " << replace(input, "$numSpheres", std::to_string(sphereCount)) << std::endl;
+	// TODO: get window size from somewhere
+	std::cout << "$numPixels        " << replace(input, "$numPixels", std::to_string(1200*700)) << std::endl;
 	return input;
 }
 

@@ -11,8 +11,8 @@ Camera::Camera()
 	forward = glm::normalize(direction);
 }
 Camera::Camera(glm::vec3 pos)
+	: position(pos)
 {
-	position = pos;
 	up = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::vec3 direction;
 	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -79,6 +79,22 @@ void Camera::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 	direction.y = sin(glm::radians(pitch));
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	forward = glm::normalize(direction);
+}
+
+void Camera::instantiatePixelBuffer()
+{
+	// Pixel buffer
+	ssbo = 0;
+	glGenBuffers(1, &ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, 1200 * 700 * 16, 0, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+void Camera::emptyPixelBuffer()
+{
+	instantiatePixelBuffer();
 }
 
 // Processes the input

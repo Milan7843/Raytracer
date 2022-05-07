@@ -7,6 +7,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include <iostream>
 
 
@@ -24,6 +27,11 @@ public:
 	glm::vec3 getPosition();
 	glm::vec3 getRotation();
 
+	// Instantiate this camera's pixel buffer
+	void instantiatePixelBuffer();
+	// Empty this camera's pixel buffer; allows for a new image to be rendered
+	void emptyPixelBuffer();
+
 	void processInput(GLFWwindow* window, float deltaTime);
 	// Callback for when the mouse is moved
 	void mouseCallback(GLFWwindow* window, double xpos, double ypos);
@@ -38,4 +46,5 @@ private:
 	float yaw = 35.0f, pitch = -18.0f;
 	bool firstMouse = true;
 	const float cameraSpeed = 1.0f;
+	unsigned int ssbo;
 };

@@ -1631,6 +1631,7 @@
     <None Include="src\Shaders\uvColorFragmentShader.shader" />
     <None Include="src\Shaders\backup.shader" />
     <None Include="src\Shaders\ubobackup.shader" />
+    <None Include="src\Shaders\bufferedRaytracingFragmentShader.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />

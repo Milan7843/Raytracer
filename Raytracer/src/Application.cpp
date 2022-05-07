@@ -74,8 +74,8 @@ int main()
     // Change the viewport size if the window is resized
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-
-
+    // Must instantiate the buffer to be able to render to it: otherwise continuous rendering is enabled
+    // camera.instantiatePixelBuffer();
 
     // Making a scene
     Scene scene = Scene();
@@ -117,7 +117,7 @@ int main()
     Shader raymarchShader("src/Shaders/raymarchVertexShader.shader", 
         "src/Shaders/raymarchFragmentShader.shader", triangleCount, meshCount);
     */
-    Shader raytracingShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracingFragmentShader.shader", &scene);
+    Shader raytracingShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/bufferedRaytracingFragmentShader.shader", &scene);
 
 
     scene.writeLightsToShader(&raytracingShader);
@@ -327,6 +327,10 @@ void processInput(GLFWwindow* window)
     {
         timeSinceSwitchingModes = 0.0f;
         inRaytraceMode = !inRaytraceMode;
+        if (inRaytraceMode)
+        {
+            camera.emptyPixelBuffer();
+        }
     }
 }
 
