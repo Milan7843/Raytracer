@@ -83,7 +83,7 @@ void Camera::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 
 void Camera::instantiatePixelBuffer()
 {
-	// Pixel buffer
+	// Creating the pixel array buffer
 	ssbo = 0;
 	glGenBuffers(1, &ssbo);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
@@ -94,7 +94,10 @@ void Camera::instantiatePixelBuffer()
 
 void Camera::emptyPixelBuffer()
 {
-	instantiatePixelBuffer();
+	// Clearing the pixel array buffer
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+	glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_RGBA32F, GL_RGBA, GL_FLOAT, (void*)0);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
 // Processes the input

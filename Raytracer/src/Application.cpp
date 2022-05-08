@@ -75,7 +75,7 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // Must instantiate the buffer to be able to render to it: otherwise continuous rendering is enabled
-    // camera.instantiatePixelBuffer();
+    camera.instantiatePixelBuffer();
 
     // Making a scene
     Scene scene = Scene();

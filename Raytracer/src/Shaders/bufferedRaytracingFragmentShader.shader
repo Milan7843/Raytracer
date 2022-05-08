@@ -156,8 +156,8 @@ void main()
 {
     vec2 pixelPosIndex = vec2((pixelPos.x / 2. + 0.5) * screenSize.x, (pixelPos.y / 2. + 0.5) * screenSize.y);
     int pixelIndex = int(int(pixelPosIndex.x) + int(pixelPosIndex.y) * screenSize.x);
-
-    if (pixelIndex <= 0)
+    /*
+    if (pixelIndex >= 700*1200)
     {
         FragColor = vec4(1., 0., 0., 0.);
 
@@ -168,7 +168,7 @@ void main()
         FragColor = vec4(0.);
 
         return;
-    }
+    }*/
 
     // Skip raytracing if there is already a pixel defined in the buffer for this position
     if (pixelColors[pixelIndex] != vec4(0.))
@@ -218,7 +218,6 @@ void main()
     dir = vec3(x, y, z);
 
     Ray ray = fireRay(cameraPosition, dir, true);
-
 
     pixelColors[pixelIndex] = vec4(ray.finalColor, 1.);
     FragColor = vec4(ray.finalColor, 1.);
