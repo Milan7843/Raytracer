@@ -43,7 +43,7 @@ private:
 	glm::vec3 up;
 	glm::vec3 forward;
 	float lastx = 400, lasty = 300;
-	float yaw = 35.0f, pitch = -18.0f;
+	float yaw = 150.0f, pitch = -18.0f;
 	bool firstMouse = true;
 	const float cameraSpeed = 1.0f;
 	unsigned int ssbo;

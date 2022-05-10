@@ -145,30 +145,26 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect);
 
 vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit);
 
+Ray fireRayAtPixelPositionIndex(vec2 pixelPosIndex);
+
 float rand(float seed)
 {
     return fract(sin(seed) * 10000.);
 }
 
 
+/*
+ * The idea of the lighting system:
+ * Fire a ray, then calculate the lighting at that point with simple techniques (e.g. dot product normal with point light with shadow check)
+ * Then, also fire a random ray in a hemisphere from the normal, 
+   then calculate the light at that point, mixing it with the light calculated in the previous step.
+ */
+
 
 void main()
 {
     vec2 pixelPosIndex = vec2((pixelPos.x / 2. + 0.5) * screenSize.x, (pixelPos.y / 2. + 0.5) * screenSize.y);
     int pixelIndex = int(int(pixelPosIndex.x) + int(pixelPosIndex.y) * screenSize.x);
-    /*
-    if (pixelIndex >= 700*1200)
-    {
-        FragColor = vec4(1., 0., 0., 0.);
-
-        return;
-    }
-    else
-    {
-        FragColor = vec4(0.);
-
-        return;
-    }*/
 
     // Skip raytracing if there is already a pixel defined in the buffer for this position
     if (pixelColors[pixelIndex] != vec4(0.))
@@ -179,8 +175,26 @@ void main()
     }
 
     // Taking the middle of the pixel
-    pixelPosIndex = pixelPosIndex - vec2(0.5);
+    //pixelPosIndex = pixelPosIndex - vec2(0.5);
 
+    int sampleQuality = 1;
+    float d = 1. / (float(sampleQuality + 1));
+    vec3 finalColor = vec3(0.);
+
+    for (int y = 0; y < sampleQuality; y++)
+    {
+        for (int x = 0; x < sampleQuality; x++)
+        {
+            finalColor += fireRayAtPixelPositionIndex(pixelPosIndex + vec2(x*d, -y*d)).finalColor / (sampleQuality * sampleQuality);
+        }
+    }
+
+    pixelColors[pixelIndex] = vec4(finalColor, 1.);
+    FragColor = vec4(finalColor, 1.);
+}
+
+Ray fireRayAtPixelPositionIndex(vec2 pixelPosIndex)
+{
     float d = 1 / tan(radians(fov) / 2);
     vec3 dir;
     float aspect_ratio = screenSize.x / screenSize.y;
@@ -218,9 +232,7 @@ void main()
     dir = vec3(x, y, z);
 
     Ray ray = fireRay(cameraPosition, dir, true);
-
-    pixelColors[pixelIndex] = vec4(ray.finalColor, 1.);
-    FragColor = vec4(ray.finalColor, 1.);
+    return ray;
 }
 
 

@@ -190,7 +190,7 @@ int main()
         // Input
         processInput(window);
         camera.processInput(window, deltaTime);
-        //std::cout << camera.getPosition().x << ", " << camera.getPosition().y << ", " << camera.getPosition().z << ", " << std::endl;
+        //std::cout << camera.getRotation().x << ", " << camera.getRotation().y << ", " << camera.getRotation().z << ", " << std::endl;
 
         // Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
