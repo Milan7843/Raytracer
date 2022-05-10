@@ -558,6 +558,7 @@
     <None Include="include\glm\gtx\vector_query.inl" />
     <None Include="include\glm\gtx\wrap.inl" />
     <None Include="src\Shaders\backup.shader" />
+    <None Include="src\Shaders\bufferedIndirectLightingRaytracingFragmentShader.shader" />
     <None Include="src\Shaders\bufferedRaytracingFragmentShader.shader" />
     <None Include="src\Shaders\raymarchFragmentShader.shader" />
     <None Include="src\Shaders\raymarchFragmentShaderBackup.shader" />

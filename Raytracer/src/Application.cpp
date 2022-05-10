@@ -75,7 +75,7 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // Must instantiate the buffer to be able to render to it: otherwise continuous rendering is enabled
-    camera.instantiatePixelBuffer();
+    //camera.instantiatePixelBuffer();
 
     // Making a scene
     Scene scene = Scene();
@@ -83,14 +83,16 @@ int main()
     // MATERIALS
     Material whiteMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f);
     Material reflectiveMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 0.4f, 0.0f);
+    Material transparentMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.8f);
 
     scene.addMaterial(whiteMaterial);
     scene.addMaterial(reflectiveMaterial);
+    scene.addMaterial(transparentMaterial);
 
 
     // Adding our test models: !! MUST BE TRIANGULATED !!
     Model* plane = scene.addModel("src/models/plane.obj", 0);
-    Model* icosphere = scene.addModel("src/models/icosphere.obj", 0);
+    Model* icosphere = scene.addModel("src/models/icosphere.obj", 2);
 
     // Always first move, then rotate, then scale
     icosphere->move(glm::vec3(1.0f, 0.6f, 2.0f));
@@ -98,7 +100,7 @@ int main()
     icosphere->applyTransformations();
 
     
-    Sphere* sphere1 = scene.addSphere(glm::vec3(0.0f, 1.0f, 0.0f), 0.8f, 1);
+    Sphere* sphere1 = scene.addSphere(glm::vec3(0.0f, 1.0f, 0.0f), 0.8f, 2);
     Sphere* sphere2 = scene.addSphere(glm::vec3(1.0f, 1.0f, -2.0f), 1.4f, 1);
 
     // LIGHTS
