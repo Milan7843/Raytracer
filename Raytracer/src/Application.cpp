@@ -82,8 +82,8 @@ int main()
 
     // MATERIALS
     Material whiteMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f);
-    Material reflectiveMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 0.4f, 0.0f);
-    Material transparentMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 1.0f);
+    Material reflectiveMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f);
+    Material transparentMaterial(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, 1.0f);
     Material roseMaterial(glm::vec3(0.8f, 0.2f, 0.3f), 0.0f, 0.0f);
 
     scene.addMaterial(whiteMaterial);

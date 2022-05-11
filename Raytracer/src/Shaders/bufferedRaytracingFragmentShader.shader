@@ -273,7 +273,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
                     // Normalize (threshold, 1.0] to (0.0, 1.0]
                     t = (t - threshold) / (1. - threshold);
 
-                    finalColor = dirLights[i].color * (t)+finalColor * (1. - t);
+                    //finalColor = dirLights[i].color * (t)+finalColor * (1. - t);
                 }
             }
 
@@ -284,12 +284,15 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
         {
             if (closestIntersection.transparency > 0.0 && closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
             {
+                // Calculating the new ray direction for a reflection
+                //ray.finalColor += (1.0 - closestIntersection.transparency) * closestIntersection.color;
+
                 // Calculating two rays for relfection and transparency
                 vec3 normal = sign(dot(closestIntersection.normal, ray.dir)) * closestIntersection.normal;
                 vec3 reflectedRayDir = normalize(ray.dir + normal * -2. * dot(ray.dir, normal));
                 Ray reflectedRay = 
                     fireSecondaryRay(
-                        ray.pos + 0.00001f * reflectedRayDir,
+                        ray.pos + 0.001f * reflectedRayDir,
                         reflectedRayDir,
                         true
                     );
@@ -297,14 +300,14 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
                 vec3 refractedRayDir = normalize(normal * 0.1 + 0.9 * ray.dir);
                 Ray refractedRay =
                     fireSecondaryRay(
-                        ray.pos + 0.00001f * refractedRayDir,
+                        ray.pos + 0.001f * refractedRayDir,
                         refractedRayDir,
                         true
                     );
 
                 ray.finalColor += closestIntersection.reflectiveness * reflectedRay.finalColor
                     + (1.0 - closestIntersection.reflectiveness) * refractedRay.finalColor;
-
+                ray.hit = false;
                 break;
             }
             else if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
@@ -312,11 +315,24 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
                 // Calculating the new ray direction for a reflection
                 ray.finalColor += (1.0 - closestIntersection.reflectiveness) * closestIntersection.color;
                 ray.dir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
-                ray.pos = closestIntersection.pos + 0.0001f * ray.dir;
+                ray.pos = closestIntersection.pos + 0.001f * ray.dir;
                 continue; // reflecting
             }
             else if (closestIntersection.transparency > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
             {
+                vec3 normal = sign(dot(closestIntersection.normal, ray.dir)) * closestIntersection.normal;
+                vec3 refractedRayDir = normalize(normal * 0.0 + 0.9 * ray.dir);
+                Ray refractedRay =
+                    fireSecondaryRay(
+                        ray.pos + 0.01f * refractedRayDir,
+                        refractedRayDir,
+                        true
+                    );
+
+                ray.finalColor = refractedRay.finalColor;
+                ray.hit = false;
+                break;
+                /*
                 // Calculating the new ray direction for a reflection
                 ray.finalColor += (1.0 - closestIntersection.transparency) * closestIntersection.color;
 
@@ -324,15 +340,16 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
                 vec3 normal = sign(dot(closestIntersection.normal, ray.dir)) * closestIntersection.normal;
 
                 // Refracting the light
-                ray.dir = normalize(normal *0.1 + 0.9 * ray.dir);
+                ray.dir = normalize(normal * 0.1 + 0.9 * ray.dir);
                 ray.pos = closestIntersection.pos + 0.001f * ray.dir;
                 continue; // reflecting
+                */
             }
             else
             {
                 if (reflect)
                 {
-                    ray.finalColor = closestIntersection.color * calculateLights(closestIntersection.pos, closestIntersection.normal,
+                    ray.finalColor += closestIntersection.color * calculateLights(closestIntersection.pos, closestIntersection.normal,
                         closestIntersection.closestTriHit, closestIntersection.closestSphereHit);
                 }
                 else
