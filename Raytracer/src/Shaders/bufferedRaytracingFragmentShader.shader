@@ -276,7 +276,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
                     // Normalize (threshold, 1.0] to (0.0, 1.0]
                     t = (t - threshold) / (1. - threshold);
 
-                    //finalColor = dirLights[i].color * (t)+finalColor * (1. - t);
+                    finalColor = dirLights[i].color * (t)+finalColor * (1. - t);
                 }
             }
 
@@ -291,7 +291,9 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
                 ray.finalColor += (1.0 - closestIntersection.transparency) * closestIntersection.color;
 
                 // Making sure the normal always points with the ray
-                vec3 normal = sign(dot(closestIntersection.normal, ray.dir)) * closestIntersection.normal;
+                float normalRayDirDot = dot(closestIntersection.normal, ray.dir);
+                vec3 normal = sign(normalRayDirDot) * closestIntersection.normal;
+
 
                 // Calculating two rays: one for reflection and one for transparency
                 vec3 reflectedRayDir = normalize(ray.dir + normal * -2. * dot(ray.dir, normal));
@@ -302,6 +304,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
                         true
                     );
                 
+                // Refracted ray (going into the transparent object)
                 vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness +
                     (1.0 - closestIntersection.refractiveness) * ray.dir);
                 Ray refractedRay =
@@ -311,8 +314,12 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
                         true
                     );
 
-                ray.finalColor += closestIntersection.reflectiveness * reflectedRay.finalColor
-                    + (1.0 - closestIntersection.reflectiveness) * refractedRay.finalColor;
+                // This is the reflectiveness with view angle combined: [r, 1] with r = the original reflectiveness
+                float usingReflectiveness = closestIntersection.reflectiveness + (1.0 - closestIntersection.reflectiveness) * (1.0 - abs(normalRayDirDot));
+
+                // Combining the reflection and refraction colors
+                ray.finalColor += usingReflectiveness * reflectedRay.finalColor
+                    + (1.0 - usingReflectiveness) * refractedRay.finalColor;
                 ray.hit = false;
                 break;
             }
