@@ -3,8 +3,9 @@ out vec4 FragColor;
 
 in vec2 pixelPos;
 
+#define EPSILON 0.0001f
+
 #define NUM_TRIANGLES $numTriangles
-bool trisReflected[NUM_TRIANGLES];
 
 // Triangle
 struct Tri
@@ -111,6 +112,7 @@ struct Material
     vec3 color;
     float reflectiveness;
     float transparency;
+    float refractiveness;
 };
 #define NUM_MATERIALS $numMaterials
 uniform Material materials[NUM_MATERIALS];
@@ -137,6 +139,7 @@ struct Intersection
     vec3 color;
     float reflectiveness;
     float transparency;
+    float refractiveness;
 };
 
 Intersection triangleIntersection(Tri tri, Ray ray);
@@ -285,22 +288,25 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
             if (closestIntersection.transparency > 0.0 && closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
             {
                 // Calculating the new ray direction for a reflection
-                //ray.finalColor += (1.0 - closestIntersection.transparency) * closestIntersection.color;
+                ray.finalColor += (1.0 - closestIntersection.transparency) * closestIntersection.color;
 
-                // Calculating two rays for relfection and transparency
+                // Making sure the normal always points with the ray
                 vec3 normal = sign(dot(closestIntersection.normal, ray.dir)) * closestIntersection.normal;
+
+                // Calculating two rays: one for reflection and one for transparency
                 vec3 reflectedRayDir = normalize(ray.dir + normal * -2. * dot(ray.dir, normal));
                 Ray reflectedRay = 
                     fireSecondaryRay(
-                        ray.pos + 0.001f * reflectedRayDir,
+                        ray.pos + EPSILON * reflectedRayDir,
                         reflectedRayDir,
                         true
                     );
-
-                vec3 refractedRayDir = normalize(normal * 0.1 + 0.9 * ray.dir);
+                
+                vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness +
+                    (1.0 - closestIntersection.refractiveness) * ray.dir);
                 Ray refractedRay =
                     fireSecondaryRay(
-                        ray.pos + 0.001f * refractedRayDir,
+                        ray.pos + EPSILON * refractedRayDir,
                         refractedRayDir,
                         true
                     );
@@ -315,16 +321,17 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
                 // Calculating the new ray direction for a reflection
                 ray.finalColor += (1.0 - closestIntersection.reflectiveness) * closestIntersection.color;
                 ray.dir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
-                ray.pos = closestIntersection.pos + 0.001f * ray.dir;
+                ray.pos = closestIntersection.pos + EPSILON * ray.dir;
                 continue; // reflecting
             }
             else if (closestIntersection.transparency > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
             {
                 vec3 normal = sign(dot(closestIntersection.normal, ray.dir)) * closestIntersection.normal;
-                vec3 refractedRayDir = normalize(normal * 0.0 + 0.9 * ray.dir);
+                vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness + 
+                    (1.0 - closestIntersection.refractiveness) * ray.dir);
                 Ray refractedRay =
                     fireSecondaryRay(
-                        ray.pos + 0.01f * refractedRayDir,
+                        ray.pos + EPSILON * refractedRayDir,
                         refractedRayDir,
                         true
                     );
@@ -332,18 +339,6 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
                 ray.finalColor = refractedRay.finalColor;
                 ray.hit = false;
                 break;
-                /*
-                // Calculating the new ray direction for a reflection
-                ray.finalColor += (1.0 - closestIntersection.transparency) * closestIntersection.color;
-
-                // Making the normal always face the right way
-                vec3 normal = sign(dot(closestIntersection.normal, ray.dir)) * closestIntersection.normal;
-
-                // Refracting the light
-                ray.dir = normalize(normal * 0.1 + 0.9 * ray.dir);
-                ray.pos = closestIntersection.pos + 0.001f * ray.dir;
-                continue; // reflecting
-                */
             }
             else
             {
@@ -408,15 +403,8 @@ Ray fireSecondaryRay(vec3 pos, vec3 direction, bool reflect)
         }
         else
         {
-            if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
-            {
-                // Calculating the new ray direction for a reflection
-                ray.finalColor += (1.0 - closestIntersection.reflectiveness) * closestIntersection.color;
-                ray.dir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
-                ray.pos = closestIntersection.pos + 0.0001f * ray.dir;
-                continue; // reflecting
-            }
-            else if (closestIntersection.transparency > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
+            // Do transparency first, as the ray otherwise could not escape from a transparent object (it would just reflect)
+            if (closestIntersection.transparency > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
             {
                 // Calculating the new ray direction for a reflection
                 ray.finalColor += (1.0 - closestIntersection.transparency) * closestIntersection.color;
@@ -425,8 +413,16 @@ Ray fireSecondaryRay(vec3 pos, vec3 direction, bool reflect)
                 vec3 normal = sign(dot(closestIntersection.normal, ray.dir)) * closestIntersection.normal;
 
                 // Refracting the light
-                ray.dir = normalize(normal * 0.1 + 0.9 * ray.dir);
-                ray.pos = closestIntersection.pos + 0.001f * ray.dir;
+                ray.dir = normalize(normal * closestIntersection.refractiveness + (1.0 - closestIntersection.refractiveness) * ray.dir);
+                ray.pos = closestIntersection.pos + EPSILON * ray.dir;
+                continue; // reflecting
+            }
+            else if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
+            {
+                // Calculating the new ray direction for a reflection
+                ray.finalColor += (1.0 - closestIntersection.reflectiveness) * closestIntersection.color;
+                ray.dir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
+                ray.pos = closestIntersection.pos + EPSILON * ray.dir;
                 continue; // reflecting
             }
             else
@@ -575,7 +571,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 
         float det = b * b - 4 * c;
 
-        Intersection isec = Intersection(false, 0, vec3(.0), -1, -1, vec3(0.), vec3(0.), .0, .0);
+        Intersection isec = Intersection(false, 0, vec3(.0), -1, -1, vec3(0.), vec3(0.), .0, .0, .0);
 
         if (b > 0.0 || det < 0.0
             // Allows for single-sided spheres, necessary for sphere transparency and refraction
@@ -593,6 +589,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
             isec.pos = ray.pos + ray.dir * isec.depth;
             isec.reflectiveness = materials[spheres[j].material].reflectiveness;
             isec.transparency = materials[spheres[j].material].transparency;
+            isec.refractiveness = materials[spheres[j].material].refractiveness;
             isec.color = materials[spheres[j].material].color;
             isec.normal = normalize(spheres[j].pos - isec.pos);
         }
@@ -664,6 +661,7 @@ Intersection triangleIntersection(Tri tri, Ray ray)
         i.color = materials[meshes[tri.mesh].material].color.rgb;
         i.reflectiveness = materials[meshes[tri.mesh].material].reflectiveness;
         i.transparency = materials[meshes[tri.mesh].material].transparency;
+        i.refractiveness = materials[meshes[tri.mesh].material].refractiveness;
         return i;
     }
     return i;
