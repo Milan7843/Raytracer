@@ -83,9 +83,9 @@ void Mesh::setupMesh()
         tri.v2 = vec4ToGLSLVec4(vertices[i+1].position);
         tri.v3 = vec4ToGLSLVec4(vertices[i+2].position);
         tri.color = glm::vec3(1.0f);
-        glm::vec3 ab = vertices[indices[static_cast<unsigned __int64>(i) + 2]].position - vertices[indices[i + 0]].position;
-        glm::vec3 ac = vertices[indices[static_cast<unsigned __int64>(i) + 1]].position - vertices[indices[i + 0]].position;
-        glm::vec3 normal = glm::normalize(glm::cross(ab, ac));
+        glm::vec3 ab = vertices[indices[static_cast<unsigned __int64>(i) + 1]].position - vertices[indices[i + 0]].position;
+        glm::vec3 ac = vertices[indices[static_cast<unsigned __int64>(i) + 2]].position - vertices[indices[i + 0]].position;
+        glm::vec3 normal = -glm::normalize(glm::cross(ab, ac));
         tri.normal = vec3ToGLSLVec3(normal);
         tri.mesh = shaderMeshIndex;
         tri.reflectiveness = 1.0f;
