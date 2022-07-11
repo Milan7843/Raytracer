@@ -34,7 +34,7 @@ public:
 	// Write the data in the materials vector into the shader
 	void writeMaterialsToShader(AbstractShader* shader);
 
-	// Get whether any mesh has their updated variable set to true
+	// Update any changed data on the given shader and buffer
 	void checkObjectUpdates(AbstractShader* shader, unsigned int ssbo);
 
 	unsigned int triangleCount = 0;

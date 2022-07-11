@@ -3,7 +3,6 @@
 #define SHADER_H
 
 #include "AbstractShader.h"
-//#include "Scene.h"
 
 class Scene;
 

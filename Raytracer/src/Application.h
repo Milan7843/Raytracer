@@ -18,6 +18,7 @@
 #include "Callbacks.h"
 #include "Model.h"
 #include "Material.h"
+#include "Renderer.h"
 
 class Application
 {
@@ -38,6 +39,9 @@ private:
 	float deltaTime = 0.0f;	// Time between current frame and last frame
 	float lastFrame = 0.0f; // Time of last frame
 	float timeSinceSwitchingModes = 100.0f;
+
+	// The buffer for storing mesh triangles
+	unsigned int triangleBufferSSBO = 0;
 
 	bool inRaytraceMode = false;
 

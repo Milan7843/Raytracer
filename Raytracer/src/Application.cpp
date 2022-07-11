@@ -50,7 +50,7 @@ int Application::Start()
     glfwSetFramebufferSizeCallback(window, &Callbacks::framebuffer_size_callback);
 
     // Must instantiate the buffer to be able to render to it: otherwise continuous rendering is enabled
-    //camera.instantiatePixelBuffer();
+    camera.instantiatePixelBuffer();
 
     // Making a scene
     Scene scene = Scene();
@@ -98,6 +98,9 @@ int Application::Start()
         "src/Shaders/raymarchFragmentShader.shader", triangleCount, meshCount);
     */
     Shader raytracingShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/bufferedRaytracingFragmentShader.shader", &scene);
+    Shader raytracedImageRendererShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracedImageRendererShader.glsl", &scene);
+
+    Renderer raytracingRenderer("src/shaders/raytraceComputeShader.glsl");
 
 
     scene.writeLightsToShader(&raytracingShader);
@@ -136,12 +139,12 @@ int Application::Start()
     glEnableVertexAttribArray(0);
 
 
-    unsigned int ssbo = 0;
-    glGenBuffers(1, &ssbo);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    unsigned int triangleBufferSSBO = 0;
+    glGenBuffers(1, &triangleBufferSSBO);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
     std::cout << "Making room for " << scene.triangleCount << " triangles" << std::endl;
     glBufferData(GL_SHADER_STORAGE_BUFFER, scene.triangleCount * Mesh::getTriangleSize(), 0, GL_DYNAMIC_COPY);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -184,16 +187,25 @@ int Application::Start()
 
         if (inRaytraceMode)
         {
-            /* RAYTRACED RENDERING */
-            Shader* usedShader = &raytracingShader;
+            /* Raytraced rendering */
+            //glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
+            //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
+
+            raytracingRenderer.render(&scene, &camera, triangleBufferSSBO);
+
+
+            /* Raytraced result rendering */
+            Shader* usedShader = &raytracedImageRendererShader;
 
             usedShader->use();
             usedShader->setVector2("screenSize", WINDOW_SIZE_X, WINDOW_SIZE_Y);
             usedShader->setVector3("cameraPosition", camera.getPosition());
             usedShader->setVector3("cameraRotation", camera.getRotation());
+
             if (shaderModelDataNeedsUpdate)
             {
-                scene.checkObjectUpdates(usedShader, ssbo);
+                raytracingRenderer.updateMeshData(&scene, triangleBufferSSBO);
+                //scene.checkObjectUpdates(usedShader, triangleBufferSSBO);
                 shaderModelDataNeedsUpdate = false;
             }
 
