@@ -26,16 +26,16 @@ public:
 	std::string& setShaderVariables(std::string& input);
 
 	// Draw this scene with the given shader
-	void draw(Shader* shader);
+	void draw(AbstractShader* shader);
 
 	// Write the data in the lights vector into the shader
-	void writeLightsToShader(Shader* shader);
+	void writeLightsToShader(AbstractShader* shader);
 
 	// Write the data in the materials vector into the shader
-	void writeMaterialsToShader(Shader* shader);
+	void writeMaterialsToShader(AbstractShader* shader);
 
 	// Get whether any mesh has their updated variable set to true
-	void checkObjectUpdates(Shader* shader, unsigned int ssbo);
+	void checkObjectUpdates(AbstractShader* shader, unsigned int ssbo);
 
 	unsigned int triangleCount = 0;
 

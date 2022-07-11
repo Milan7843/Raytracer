@@ -7,7 +7,7 @@
 #include <iostream>
 
 // Forward declaration of the Shader class
-class Shader;
+class AbstractShader;
 
 class Material
 {
@@ -22,7 +22,7 @@ public:
 	glm::vec3 emission;
 
 	// Write this material into the shader at the provided index
-	void writeToShader(Shader* shader, unsigned int index);
+	void writeToShader(AbstractShader* shader, unsigned int index);
 
 protected:
 

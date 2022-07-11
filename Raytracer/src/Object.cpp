@@ -1,6 +1,6 @@
 #include "Object.h"
 
-void Object::writeToShader(Shader* shader, unsigned int ssbo)
+void Object::writeToShader(AbstractShader* shader, unsigned int ssbo)
 {
 
 }
@@ -33,6 +33,6 @@ Object::Object()
 {
 }
 
-void Object::draw(Shader* shader)
+void Object::draw(AbstractShader* shader)
 {
 }

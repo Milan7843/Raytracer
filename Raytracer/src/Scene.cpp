@@ -54,7 +54,7 @@ std::string& Scene::setShaderVariables(std::string& input)
 	return input;
 }
 
-void Scene::draw(Shader* shader)
+void Scene::draw(AbstractShader* shader)
 {
 	// Drawing each model with the given shader
 	for (Model model : models)
@@ -69,7 +69,7 @@ void Scene::draw(Shader* shader)
 	}
 }
 
-void Scene::writeLightsToShader(Shader* shader)
+void Scene::writeLightsToShader(AbstractShader* shader)
 {
 	shader->use();
 
@@ -80,7 +80,7 @@ void Scene::writeLightsToShader(Shader* shader)
 	}
 }
 
-void Scene::writeMaterialsToShader(Shader* shader)
+void Scene::writeMaterialsToShader(AbstractShader* shader)
 {
 	shader->use();
 
@@ -92,7 +92,7 @@ void Scene::writeMaterialsToShader(Shader* shader)
 	}
 }
 
-void Scene::checkObjectUpdates(Shader* shader, unsigned int ssbo)
+void Scene::checkObjectUpdates(AbstractShader* shader, unsigned int ssbo)
 {
 	// Updating each model as needed
 	for (Model model : models)

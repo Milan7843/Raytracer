@@ -27,7 +27,7 @@ void Mesh::applyTransformations(glm::mat4& transformation)
     }
 }
 
-void Mesh::writeToShader(Shader* shader, unsigned int ssbo, unsigned int materialIndex)
+void Mesh::writeToShader(AbstractShader* shader, unsigned int ssbo, unsigned int materialIndex)
 {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     // Copying this mesh's data into the buffer at the right position
@@ -40,7 +40,7 @@ void Mesh::writeToShader(Shader* shader, unsigned int ssbo, unsigned int materia
     shader->setInt(("meshes[" + std::to_string(shaderMeshIndex) + "].material").c_str(), materialIndex);
 }
 
-void Mesh::writePositionToShader(Shader* shader)
+void Mesh::writePositionToShader(AbstractShader* shader)
 {
     shader->setVector3(("meshes[" + std::to_string(shaderMeshIndex) + "].position").c_str(), vec3ToGLSLVec3(position));
 }
@@ -93,7 +93,7 @@ void Mesh::setupMesh()
     }
 }
 
-void Mesh::draw(Shader* shader)
+void Mesh::draw(AbstractShader* shader)
 {
     glBindVertexArray(VAO);
 

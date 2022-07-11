@@ -10,7 +10,7 @@ Model::~Model()
 {
 }
 
-void Model::draw(Shader* shader, Material* material)
+void Model::draw(AbstractShader* shader, Material* material)
 {
 	// Matrix for swapping column x and z to make a correct translation
 	unsigned int mat[16] = {
@@ -33,7 +33,7 @@ void Model::draw(Shader* shader, Material* material)
 	}
 }
 
-void Model::writeToShader(Shader* shader, unsigned int ssbo)
+void Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
