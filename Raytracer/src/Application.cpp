@@ -1,49 +1,20 @@
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
-#include <iostream>
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include "Shader.h"
-#include "Scene.h"
-#include "Camera.h"
-#include "Model.h"
-#include "Material.h"
-
-// Change the viewport size if the window is resized
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-// Initiating GLFW
-void init_glfw();
-// Callback for when the mouse is moved
-void mouseCallback(GLFWwindow* window, double xpos, double ypos);
-// Draws the axes
-void drawAxes(unsigned int VAO, Shader* shader, Camera* camera);
-// Generates a VAO for the axes
-unsigned int generateAxesVAO();
-
-void processInput(GLFWwindow* window);
+#include "Application.h"
 
 
-const unsigned int WINDOW_SIZE_X = 1200, WINDOW_SIZE_Y = 700;
+Application::Application(unsigned int WIDTH, unsigned int HEIGHT)
+    : WINDOW_SIZE_X(WIDTH), WINDOW_SIZE_Y(HEIGHT), camera(glm::vec3(6.7f, 2.7f, -3.7f))
+{
 
-// Making a camera
-Camera camera(glm::vec3(6.7f, 2.7f, -3.7f));
+}
 
-float cameraSpeed = 0.01f;
+Application::~Application()
+{
+    std::cout << "Application instance destroyed" << std::endl;
+}
 
-float deltaTime = 0.0f;	// Time between current frame and last frame
-float lastFrame = 0.0f; // Time of last frame
-float timeSinceSwitchingModes = 100.0f;
-
-bool inRaytraceMode = false;
-
-int main()
+int Application::Start()
 {
     init_glfw();
 
@@ -71,8 +42,12 @@ int main()
     // Setting viewport size
     glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
+    // Setting the callback for window resizing
+    Callbacks& callbacks = Callbacks::getInstance();
+    callbacks.setCamera(&camera);
+
     // Change the viewport size if the window is resized
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window, &Callbacks::framebuffer_size_callback);
 
     // Must instantiate the buffer to be able to render to it: otherwise continuous rendering is enabled
     //camera.instantiatePixelBuffer();
@@ -174,7 +149,6 @@ int main()
 
     // Input
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(window, mouseCallback);
 
     bool shaderModelDataNeedsUpdate = true;
 
@@ -195,6 +169,12 @@ int main()
         // Input
         processInput(window);
         camera.processInput(window, deltaTime);
+
+        // Calling the mouse callback
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+        camera.mouseCallback(window, xpos, ypos);
+
         //std::cout << camera.getRotation().x << ", " << camera.getRotation().y << ", " << camera.getRotation().z << ", " << std::endl;
 
         // Rendering
@@ -306,7 +286,7 @@ int main()
 	return 0;
 }
 
-void init_glfw() 
+void Application::init_glfw()
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -314,17 +294,8 @@ void init_glfw()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
 
-void mouseCallback(GLFWwindow* window, double xpos, double ypos)
-{
-    camera.mouseCallback(window, xpos, ypos);
-}
-
-void processInput(GLFWwindow* window)
+void Application::processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -340,7 +311,7 @@ void processInput(GLFWwindow* window)
 }
 
 
-unsigned int generateAxesVAO()
+unsigned int Application::generateAxesVAO()
 {
     // Creating our vertex array object
     unsigned int VAO;
@@ -382,7 +353,7 @@ unsigned int generateAxesVAO()
     return VAO;
 }
 
-void drawAxes(unsigned int VAO, Shader* shader, Camera* camera)
+void Application::drawAxes(unsigned int VAO, Shader* shader, Camera* camera)
 {
     glLineWidth(0.01f);
     float s = 1.0f;
