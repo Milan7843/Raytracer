@@ -20,6 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\glm\detail\glm.cpp" />
+    <ClCompile Include="src\AbstractShader.cpp" />
+    <ClCompile Include="src\ComputeShader.cpp" />
+    <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\Callbacks.cpp" />
     <ClCompile Include="src\Camera.cpp" />
@@ -31,7 +34,6 @@
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\Object.cpp" />
-    <ClCompile Include="src\RayTracedShader.cpp" />
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Sphere.cpp" />
@@ -400,6 +402,9 @@
     <ClInclude Include="include\glm\vec4.hpp" />
     <ClInclude Include="include\glm\vector_relational.hpp" />
     <ClInclude Include="include\KHR\khrplatform.h" />
+    <ClInclude Include="src\AbstractShader.h" />
+    <ClInclude Include="src\ComputeShader.h" />
+    <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\Callbacks.h" />
     <ClInclude Include="src\Camera.h" />
@@ -409,7 +414,6 @@
     <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\Object.h" />
-    <ClInclude Include="src\RayTracedShader.h" />
     <ClInclude Include="src\Scene.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Sphere.h" />
@@ -567,6 +571,8 @@
     <None Include="src\Shaders\raymarchFragmentShader.shader" />
     <None Include="src\Shaders\raymarchFragmentShaderBackup.shader" />
     <None Include="src\Shaders\raymarchVertexShader.shader" />
+    <None Include="src\Shaders\raytraceComputeShader.glsl" />
+    <None Include="src\Shaders\raytracedImageRendererShader.glsl" />
     <None Include="src\Shaders\raytracingFragmentShader.shader" />
     <None Include="src\Shaders\solidColorFragmentShader.shader" />
     <None Include="src\Shaders\solidColorVertexShader.shader" />

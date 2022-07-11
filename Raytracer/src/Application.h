@@ -12,6 +12,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Shader.h"
+#include "ComputeShader.h"
 #include "Scene.h"
 #include "Camera.h"
 #include "Callbacks.h"
