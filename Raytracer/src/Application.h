@@ -56,5 +56,8 @@ private:
 	// Generates a VAO for the axes
 	unsigned int generateAxesVAO();
 
+	// Generate a quad that spans the screen (WIP)
+	void generateScreenQuad();
+
 	void processInput(GLFWwindow* window);
 };

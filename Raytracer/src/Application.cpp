@@ -50,7 +50,7 @@ int Application::Start()
     glfwSetFramebufferSizeCallback(window, &Callbacks::framebuffer_size_callback);
 
     // Must instantiate the buffer to be able to render to it: otherwise continuous rendering is enabled
-    camera.instantiatePixelBuffer();
+    //camera.instantiatePixelBuffer();
 
     // Making a scene
     Scene scene = Scene();
@@ -100,7 +100,8 @@ int Application::Start()
     Shader raytracingShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/bufferedRaytracingFragmentShader.shader", &scene);
     Shader raytracedImageRendererShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracedImageRendererShader.glsl", &scene);
 
-    Renderer raytracingRenderer("src/shaders/raytraceComputeShader.glsl");
+    // Raytraced renderer
+    Renderer raytracingRenderer("src/shaders/raytraceComputeShader.glsl", WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
 
     scene.writeLightsToShader(&raytracingShader);
@@ -178,7 +179,7 @@ int Application::Start()
         glfwGetCursorPos(window, &xpos, &ypos);
         camera.mouseCallback(window, xpos, ypos);
 
-        //std::cout << camera.getRotation().x << ", " << camera.getRotation().y << ", " << camera.getRotation().z << ", " << std::endl;
+        //std::cout << camera.getInformation() << std::endl;
 
         // Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -187,11 +188,11 @@ int Application::Start()
 
         if (inRaytraceMode)
         {
-            /* Raytraced rendering */
             //glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
             //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
 
-            raytracingRenderer.render(&scene, &camera, triangleBufferSSBO);
+            /* Raytraced rendering */
+            raytracingRenderer.render(&scene, &camera);
 
 
             /* Raytraced result rendering */
@@ -204,13 +205,18 @@ int Application::Start()
 
             if (shaderModelDataNeedsUpdate)
             {
-                raytracingRenderer.updateMeshData(&scene, triangleBufferSSBO);
+                raytracingRenderer.updateMeshData(&scene);
                 //scene.checkObjectUpdates(usedShader, triangleBufferSSBO);
                 shaderModelDataNeedsUpdate = false;
             }
 
+            // Making sure the pixel buffer is assigned for the raytracedImageRendererShader
+            raytracingRenderer.bindPixelBuffer();
+
             glBindVertexArray(vao1);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
         else
         {
@@ -306,6 +312,10 @@ void Application::init_glfw()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 }
 
+
+void Application::generateScreenQuad()
+{
+}
 
 void Application::processInput(GLFWwindow* window)
 {

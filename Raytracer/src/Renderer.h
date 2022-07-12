@@ -7,17 +7,29 @@
 class Renderer
 {
 public:
-	Renderer(const char* raytraceComputeShaderPath);
+	Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height);
 	~Renderer();
 
 	// Render the given scene with the given camera to the given buffer
-	void render(Scene* scene, Camera* camera, unsigned int buffer);
+	void render(Scene* scene, Camera* camera);
 
 	// Check for updates in the mesh data of the scene and update the data in the buffer if necessary
-	void updateMeshData(Scene* scene, unsigned int buffer);
+	void updateMeshData(Scene* scene);
+
+	// Set the resolution used to render
+	void setResolution(unsigned int width, unsigned int height);
+
+	// Bind the pixel buffer to the GL_SHADER_STORAGE_BUFFER
+	void bindPixelBuffer();
 
 private:
 	// The compute shader used to render to the buffer
 	ComputeShader computeShader;
+
+	// The buffer to store rendered pixel data
+	unsigned int pixelBuffer;
+
+	// The resolution used to render
+	unsigned int width, height;
 };
 

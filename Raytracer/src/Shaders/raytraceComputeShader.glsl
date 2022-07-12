@@ -6,7 +6,7 @@ layout(std430, binding = 3) buffer Pixels
 	vec4 colors[];
 };
 
-uniform int size;
+uniform int screenWidth;
 
 // Returns a random value between 0 and 1 [0, 1)
 float rand(float seed)
@@ -21,7 +21,7 @@ void main()
 	int cy = int(gl_GlobalInvocationID.y);
 
 	// Calculating the total index, used to map the 2D indices to a 1D array
-	int i = int(cx + size * cy);
+	int i = int(cx + screenWidth * cy);
 
-	colors[i] = vec4(rand(i), 0.0, 0.0, 1.0);
+	colors[i] = vec4(rand(i), rand(i), rand(i), 1.0);
 }

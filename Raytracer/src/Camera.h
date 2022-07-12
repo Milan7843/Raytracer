@@ -11,7 +11,7 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
-
+#include <string>
 
 class Camera
 {
@@ -36,6 +36,9 @@ public:
 
 	// Callback for when the mouse is moved
 	void mouseCallback(GLFWwindow* window, double xpos, double ypos);
+
+	// Get important information of this camera (position, rotation)
+	std::string getInformation();
 
 	/* Private members */
 private:
