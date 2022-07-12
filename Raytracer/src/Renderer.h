@@ -7,7 +7,7 @@
 class Renderer
 {
 public:
-	Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height);
+	Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height, Scene* scene);
 	~Renderer();
 
 	// Render the given scene with the given camera to the given buffer

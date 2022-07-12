@@ -34,8 +34,14 @@ public:
 	// Write the data in the materials vector into the shader
 	void writeMaterialsToShader(AbstractShader* shader);
 
-	// Update any changed data on the given shader and buffer
-	void checkObjectUpdates(AbstractShader* shader, unsigned int ssbo);
+	// Update any changed data on the given shader
+	void checkObjectUpdates(AbstractShader* shader);
+
+	// Generate and fill up the buffer holding all triangles
+	void generateTriangleBuffer();
+
+	// Bind the buffer holding all triangles
+	void bindTriangleBuffer();
 
 	unsigned int triangleCount = 0;
 
@@ -49,6 +55,9 @@ private:
 
 	unsigned int sphereCount = 0;
 	unsigned int meshCount = 0;
+
+	// The buffer for storing mesh triangles
+	unsigned int triangleBufferSSBO = 0;
 
 	// Keeping track of the materials
 	std::vector<Material> materials;

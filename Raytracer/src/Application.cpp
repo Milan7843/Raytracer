@@ -101,11 +101,13 @@ int Application::Start()
     Shader raytracedImageRendererShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracedImageRendererShader.glsl", &scene);
 
     // Raytraced renderer
-    Renderer raytracingRenderer("src/shaders/raytraceComputeShader.glsl", WINDOW_SIZE_X, WINDOW_SIZE_Y);
+    Renderer raytracingRenderer("src/shaders/raytraceComputeShader.glsl", WINDOW_SIZE_X, WINDOW_SIZE_Y, &scene);
 
 
     scene.writeLightsToShader(&raytracingShader);
     scene.writeMaterialsToShader(&raytracingShader);
+
+    scene.generateTriangleBuffer();
     
     // Object 1: simple uv coords
     float s = 1.0f;
@@ -138,15 +140,6 @@ int Application::Start()
     
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
-
-    unsigned int triangleBufferSSBO = 0;
-    glGenBuffers(1, &triangleBufferSSBO);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
-    std::cout << "Making room for " << scene.triangleCount << " triangles" << std::endl;
-    glBufferData(GL_SHADER_STORAGE_BUFFER, scene.triangleCount * Mesh::getTriangleSize(), 0, GL_DYNAMIC_COPY);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -205,8 +198,8 @@ int Application::Start()
 
             if (shaderModelDataNeedsUpdate)
             {
-                raytracingRenderer.updateMeshData(&scene);
-                //scene.checkObjectUpdates(usedShader, triangleBufferSSBO);
+                //raytracingRenderer.updateMeshData(&scene);
+                scene.checkObjectUpdates(usedShader);
                 shaderModelDataNeedsUpdate = false;
             }
 

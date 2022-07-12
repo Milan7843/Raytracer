@@ -40,9 +40,6 @@ private:
 	float lastFrame = 0.0f; // Time of last frame
 	float timeSinceSwitchingModes = 100.0f;
 
-	// The buffer for storing mesh triangles
-	unsigned int triangleBufferSSBO = 0;
-
 	bool inRaytraceMode = false;
 
 	unsigned int WINDOW_SIZE_X = 1200, WINDOW_SIZE_Y = 700;

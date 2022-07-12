@@ -1,7 +1,7 @@
 #include "Renderer.h"
 
-Renderer::Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height)
-	: computeShader(raytraceComputeShaderPath), width(width), height(height)
+Renderer::Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height, Scene* scene)
+	: computeShader(raytraceComputeShaderPath, scene), width(width), height(height)
 {
 	// Immediately creating the pixel buffer with the given width and height
 	setResolution(width, height);
@@ -20,10 +20,19 @@ void Renderer::render(Scene* scene, Camera* camera)
 		scene->writeLightsToShader(&computeShader);
 		scene->writeMaterialsToShader(&computeShader);
 	}*/
+
+	scene->checkObjectUpdates(&computeShader);
+
+	scene->bindTriangleBuffer();
+	scene->writeLightsToShader(&computeShader);
+	scene->writeMaterialsToShader(&computeShader);
+
 	computeShader.setVector3("cameraPosition", camera->getPosition());
 	computeShader.setVector3("cameraRotation", camera->getRotation());
 
 	computeShader.setInt("screenWidth", width);
+	computeShader.setVector2("screenSize", width, height);
+	computeShader.setInt("sampleCount", sampleCount);
 
 	bindPixelBuffer();
 
@@ -37,7 +46,7 @@ void Renderer::render(Scene* scene, Camera* camera)
 
 void Renderer::updateMeshData(Scene* scene)
 {
-	scene->checkObjectUpdates(&computeShader, pixelBuffer);
+	scene->checkObjectUpdates(&computeShader);
 }
 
 void Renderer::setResolution(unsigned int width, unsigned int height)
@@ -67,5 +76,5 @@ void Renderer::bindPixelBuffer()
 
 void Renderer::setSampleCount(unsigned int sampleCount)
 {
-	this->sampleCount = sampleCount
+	this->sampleCount = sampleCount;
 }

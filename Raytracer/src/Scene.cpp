@@ -92,14 +92,14 @@ void Scene::writeMaterialsToShader(AbstractShader* shader)
 	}
 }
 
-void Scene::checkObjectUpdates(AbstractShader* shader, unsigned int ssbo)
+void Scene::checkObjectUpdates(AbstractShader* shader)
 {
 	// Updating each model as needed
 	for (Model model : models)
 	{
 		if (model.updated)
 		{
-			model.writeToShader(shader, ssbo);
+			model.writeToShader(shader, triangleBufferSSBO);
 			model.updated = false;
 		}
 	}
@@ -109,10 +109,29 @@ void Scene::checkObjectUpdates(AbstractShader* shader, unsigned int ssbo)
 	{
 		if (sphere.updated)
 		{
-			sphere.writeToShader(shader, ssbo);
+			sphere.writeToShader(shader, triangleBufferSSBO);
 			sphere.updated = false;
 		}
 	}
+}
+
+void Scene::generateTriangleBuffer()
+{
+	// Generating a buffer for the triangles to go into
+	triangleBufferSSBO = 0;
+	glGenBuffers(1, &triangleBufferSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
+
+	std::cout << "Making room for " << triangleCount << " triangles" << std::endl;
+
+	glBufferData(GL_SHADER_STORAGE_BUFFER, triangleCount * Mesh::getTriangleSize(), 0, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+void Scene::bindTriangleBuffer()
+{
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
 }
 
 bool Scene::replace(std::string& str, const std::string& from, const std::string& to)
