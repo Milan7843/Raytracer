@@ -22,6 +22,9 @@ public:
 	// Bind the pixel buffer to the GL_SHADER_STORAGE_BUFFER
 	void bindPixelBuffer();
 
+	// Set the sample count
+	void setSampleCount(unsigned int sampleCount);
+
 private:
 	// The compute shader used to render to the buffer
 	ComputeShader computeShader;
@@ -31,5 +34,8 @@ private:
 
 	// The resolution used to render
 	unsigned int width, height;
+
+	// The sample count used to render (= number of rays per pixel)
+	unsigned int sampleCount = 1;
 };
 

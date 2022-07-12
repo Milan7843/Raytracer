@@ -64,3 +64,8 @@ void Renderer::bindPixelBuffer()
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelBuffer);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, pixelBuffer);
 }
+
+void Renderer::setSampleCount(unsigned int sampleCount)
+{
+	this->sampleCount = sampleCount
+}
