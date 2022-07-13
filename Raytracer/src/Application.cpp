@@ -147,8 +147,6 @@ int Application::Start()
     // Input
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    bool shaderModelDataNeedsUpdate = true;
-
     unsigned int axesVAO = generateAxesVAO();
 
     unsigned int frame = 0;
@@ -183,9 +181,6 @@ int Application::Start()
 
         if (inRaytraceMode)
         {
-            //glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
-            //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
-
             /* Raytraced rendering */
             if (!rendered)
             {
@@ -193,22 +188,13 @@ int Application::Start()
                 rendered = true;
             }
 
-
             /* Raytraced result rendering */
-            //Shader* usedShader = &raytracingShader;
             Shader* usedShader = &raytracedImageRendererShader;
 
             usedShader->use();
             usedShader->setVector2("screenSize", WINDOW_SIZE_X, WINDOW_SIZE_Y);
             usedShader->setVector3("cameraPosition", camera.getPosition());
             usedShader->setVector3("cameraRotation", camera.getRotation());
-
-            if (shaderModelDataNeedsUpdate)
-            {
-                //raytracingRenderer.updateMeshData(&scene);
-                //scene.checkObjectUpdates(usedShader);
-                shaderModelDataNeedsUpdate = false;
-            }
 
             // Making sure the pixel buffer is assigned for the raytracedImageRendererShader
             raytracingRenderer.bindPixelBuffer();
