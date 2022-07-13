@@ -229,15 +229,12 @@ Ray fireRayAtPixelPositionIndex(vec2 pixelPosIndex)
 
 Ray fireRay(vec3 pos, vec3 direction, bool reflect)
 {
-    Ray ray;
-    ray.pos = pos;
-    ray.dir = direction;
+    Ray ray = Ray(pos, direction, false, 10000., vec3(0.), 0., 0, -1);
 
     // Reflections loop
     for (int i = 0; i < MAX_REFLECTIONS; i++)
     {
         Intersection closestIntersection = getAllIntersections(ray, -1, -1);
-
         // Check for hit
         if (!closestIntersection.intersected)
         {
@@ -264,7 +261,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
                 }
             }
 
-            //ray.finalColor += finalColor;
+            ray.finalColor += finalColor;
             break;
         }
         else
@@ -354,9 +351,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
 
 Ray fireSecondaryRay(vec3 pos, vec3 direction, bool reflect)
 {
-    Ray ray;
-    ray.pos = pos;
-    ray.dir = direction;
+    Ray ray = Ray(pos, direction, false, 10000., vec3(0.), 0., 0, -1);
 
     // Reflections loop
     for (int i = 0; i < MAX_REFLECTIONS; i++)
