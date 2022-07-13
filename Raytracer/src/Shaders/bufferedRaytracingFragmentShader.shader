@@ -124,7 +124,7 @@ uniform Material materials[NUM_MATERIALS];
 layout(std140, binding = 3) buffer Pixels
 {
     vec4 pixelColors[NUM_PIXELS];
-    int sampleCount;
+    //int sampleCount;
 };
 
 
@@ -196,8 +196,8 @@ void main()
     }
 
     pixelColors[pixelIndex] = vec4(finalColor, 1.);
-    FragColor = vec4(finalColor, 1.);
-    sampleCount++;
+    FragColor = vec4(fireRayAtPixelPositionIndex(pixelPosIndex).finalColor, 1.);
+    //sampleCount++;
 }
 
 Ray fireRayAtPixelPositionIndex(vec2 pixelPosIndex)

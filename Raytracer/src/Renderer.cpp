@@ -13,6 +13,8 @@ Renderer::~Renderer()
 
 void Renderer::render(Scene* scene, Camera* camera)
 {
+	currentFrameSampleCount++;
+
 	computeShader.use();
 	/*
 	if (scene->hasPendingChanges())
@@ -33,6 +35,7 @@ void Renderer::render(Scene* scene, Camera* camera)
 	computeShader.setInt("screenWidth", width);
 	computeShader.setVector2("screenSize", width, height);
 	computeShader.setInt("sampleCount", sampleCount);
+	computeShader.setInt("currentFrameSampleCount", currentFrameSampleCount);
 
 	bindPixelBuffer();
 

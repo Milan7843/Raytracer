@@ -571,8 +571,6 @@
     <None Include="src\Shaders\raymarchFragmentShader.shader" />
     <None Include="src\Shaders\raymarchFragmentShaderBackup.shader" />
     <None Include="src\Shaders\raymarchVertexShader.shader" />
-    <None Include="src\Shaders\raytraceComputeShader.glsl" />
-    <None Include="src\Shaders\raytracedImageRendererShader.glsl" />
     <None Include="src\Shaders\raytracingFragmentShader.shader" />
     <None Include="src\Shaders\solidColorFragmentShader.shader" />
     <None Include="src\Shaders\solidColorVertexShader.shader" />
