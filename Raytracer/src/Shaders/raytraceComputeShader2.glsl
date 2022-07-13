@@ -237,9 +237,7 @@ Ray fireRayAtPixelPositionIndex(vec2 pixelPosIndex)
 
 Ray fireRay(vec3 pos, vec3 direction, bool reflect, float seed)
 {
-    Ray ray;
-    ray.pos = pos;
-    ray.dir = direction;
+    Ray ray = Ray(pos, direction, false, 10000., vec3(0.), 0., 0, -1);
 
     // Reflections loop
     for (int i = 0; i < MAX_REFLECTIONS; i++)
@@ -305,9 +303,7 @@ vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit, float see
         lightSampleRayDirection = sign(normalRayDirDot) * lightSampleRayDirection;
 
         // Creating the random ray
-        Ray lightSampleRay;
-        lightSampleRay.dir = lightSampleRayDirection;
-        lightSampleRay.pos = pos;
+        Ray lightSampleRay = Ray(pos, lightSampleRayDirection, false, 10000., vec3(0.), 0., 0, -1);
 
         // Accumulating the light samples
         finalLight += fireLightSampleRay(lightSampleRay, triHit, sphereHit) / 10.;
