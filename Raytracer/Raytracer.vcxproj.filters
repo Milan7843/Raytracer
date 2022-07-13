@@ -1657,8 +1657,6 @@
     <None Include="src\Shaders\ubobackup.shader" />
     <None Include="src\Shaders\bufferedRaytracingFragmentShader.shader" />
     <None Include="src\Shaders\bufferedIndirectLightingRaytracingFragmentShader.shader" />
-    <None Include="src\Shaders\raytraceComputeShader.glsl" />
-    <None Include="src\Shaders\raytracedImageRendererShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />

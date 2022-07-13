@@ -1,7 +1,7 @@
 #version 460 core
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
-layout(std430, binding = 3) buffer Pixels
+layout(std140, binding = 3) buffer Pixels
 {
 	vec4 colors[];
 };
@@ -12,6 +12,22 @@ uniform int sampleCount;
 #define EPSILON 0.0001f
 
 #define NUM_TRIANGLES $numTriangles
+#define NUM_SPHERES $numSpheres
+#define NUM_POINT_LIGHTS $numPointLights
+#define NUM_DIR_LIGHTS 1
+#define NUM_AMBIENT_LIGHTS 1
+#define NUM_MESHES $numMeshes
+#define NUM_MATERIALS $numMaterials
+
+//#define NUM_TRIANGLES 1
+//#define NUM_SPHERES 1
+//#define NUM_POINT_LIGHTS 1
+//#define NUM_DIR_LIGHTS 1
+//#define NUM_AMBIENT_LIGHTS 1
+//#define NUM_MESHES 1
+//#define NUM_MATERIALS 1
+
+#define MAX_REFLECTIONS 15
 
 // Triangle
 struct Tri
@@ -41,8 +57,6 @@ float fov = 40;
 vec3 skyboxColorHorizon = vec3(0.1, 0.2, 0.4);
 vec3 skyboxColorTop = vec3(0.45, 0.95, 0.85);
 
-#define MAX_REFLECTIONS 15
-
 
 struct Ray
 {
@@ -63,7 +77,6 @@ struct Sphere
     float radius;
     int material;
 };
-#define NUM_SPHERES $numSpheres
 uniform Sphere spheres[NUM_SPHERES];
 
 float sphereDst(Sphere sph, vec3 pos);
@@ -78,7 +91,6 @@ struct PointLight
     float intensity;
 };
 
-#define NUM_POINT_LIGHTS $numPointLights
 uniform PointLight pointLights[NUM_POINT_LIGHTS];
 
 struct DirLight
@@ -87,22 +99,20 @@ struct DirLight
     vec3 color;
     float intensity;
 };
-#define NUM_DIR_LIGHTS 1
 DirLight dirLights[NUM_DIR_LIGHTS] = DirLight[](
     //         Pos                  Color                   Intensity
     DirLight(vec3(.707, -.707, 0.), vec3(1.0, 1.0, 0.9), 0.8)
-    );
+);
 
 struct AmbientLight
 {
     vec3 color;
     float intensity;
 };
-#define NUM_AMBIENT_LIGHTS 1
 AmbientLight ambientLights[1] = AmbientLight[](
     //           Color                  Intensity
     AmbientLight(vec3(0.8, 0.8, 1.0), 0.3)
-    );
+);
 
 // Mesh
 struct Mesh
@@ -110,7 +120,6 @@ struct Mesh
     vec3 position;
     int material;
 };
-#define NUM_MESHES $numMeshes
 uniform Mesh meshes[NUM_MESHES];
 
 struct Material
@@ -120,7 +129,6 @@ struct Material
     float transparency;
     float refractiveness;
 };
-#define NUM_MATERIALS $numMaterials
 uniform Material materials[NUM_MATERIALS];
 
 
@@ -165,12 +173,13 @@ void main()
 	// Calculating the total index, used to map the 2D indices to a 1D array
 	int pixelIndex = int(cx + screenWidth * cy);
     
-    vec3 finalColor = vec3(0.);
+    vec3 finalColor1 = vec3(0.);
 
     for (int s = 0; s < sampleCount; s++)
     {
-        finalColor += fireRayAtPixelPositionIndex(vec2(cx, cy)).finalColor / float(sampleCount);
+        finalColor1 += fireRayAtPixelPositionIndex(vec2(cx, cy)).finalColor;// / float(sampleCount);
     }
+
 	colors[pixelIndex] = vec4(fireRayAtPixelPositionIndex(vec2(cx, cy)).finalColor, 1.0);
 }
 
@@ -220,15 +229,12 @@ Ray fireRayAtPixelPositionIndex(vec2 pixelPosIndex)
 
 Ray fireRay(vec3 pos, vec3 direction, bool reflect)
 {
-    Ray ray;
-    ray.pos = pos;
-    ray.dir = direction;
+    Ray ray = Ray(pos, direction, false, 10000., vec3(0.), 0., 0, -1);
 
     // Reflections loop
     for (int i = 0; i < MAX_REFLECTIONS; i++)
     {
         Intersection closestIntersection = getAllIntersections(ray, -1, -1);
-
         // Check for hit
         if (!closestIntersection.intersected)
         {
@@ -272,13 +278,13 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
 
                 // Calculating two rays: one for reflection and one for transparency
                 vec3 reflectedRayDir = normalize(ray.dir + normal * -2. * dot(ray.dir, normal));
-                Ray reflectedRay = 
+                Ray reflectedRay =
                     fireSecondaryRay(
                         ray.pos + EPSILON * reflectedRayDir,
                         reflectedRayDir,
                         true
                     );
-                
+
                 // Refracted ray (going into the transparent object)
                 vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness +
                     (1.0 - closestIntersection.refractiveness) * ray.dir);
@@ -309,7 +315,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
             else if (closestIntersection.transparency > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
             {
                 vec3 normal = sign(dot(closestIntersection.normal, ray.dir)) * closestIntersection.normal;
-                vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness + 
+                vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness +
                     (1.0 - closestIntersection.refractiveness) * ray.dir);
                 Ray refractedRay =
                     fireSecondaryRay(
@@ -345,9 +351,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect)
 
 Ray fireSecondaryRay(vec3 pos, vec3 direction, bool reflect)
 {
-    Ray ray;
-    ray.pos = pos;
-    ray.dir = direction;
+    Ray ray = Ray(pos, direction, false, 10000., vec3(0.), 0., 0, -1);
 
     // Reflections loop
     for (int i = 0; i < MAX_REFLECTIONS; i++)

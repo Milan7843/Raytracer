@@ -64,7 +64,7 @@ int Application::Start()
     scene.addMaterial(whiteMaterial);
     scene.addMaterial(reflectiveMaterial);
     scene.addMaterial(transparentMaterial);
-    scene.addMaterial(roseMaterial);
+    //scene.addMaterial(roseMaterial);
 
 
     // Adding our test models: !! MUST BE TRIANGULATED !!
@@ -79,7 +79,7 @@ int Application::Start()
     
     Sphere* sphere1 = scene.addSphere(glm::vec3(0.0f, 1.0f, 0.0f), 0.8f, 2);
     Sphere* sphere2 = scene.addSphere(glm::vec3(1.0f, 1.0f, -2.0f), 1.4f, 1);
-    Sphere* sphere3 = scene.addSphere(glm::vec3(2.0f, 1.0f, 1.0f), 0.6f, 3);
+    Sphere* sphere3 = scene.addSphere(glm::vec3(2.0f, 1.0f, 1.0f), 0.6f, 2);
 
     // LIGHTS
     PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
@@ -101,7 +101,7 @@ int Application::Start()
     Shader raytracedImageRendererShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracedImageRendererShader.glsl", &scene);
 
     // Raytraced renderer
-    Renderer raytracingRenderer("src/shaders/raytraceComputeShader.glsl", WINDOW_SIZE_X, WINDOW_SIZE_Y, &scene);
+    Renderer raytracingRenderer("src/shaders/raytraceComputeShader.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y, &scene);
 
 
     scene.writeLightsToShader(&raytracingShader);
@@ -147,11 +147,11 @@ int Application::Start()
     // Input
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    bool shaderModelDataNeedsUpdate = true;
-
     unsigned int axesVAO = generateAxesVAO();
 
     unsigned int frame = 0;
+
+    bool rendered = false;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -181,12 +181,12 @@ int Application::Start()
 
         if (inRaytraceMode)
         {
-            //glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
-            //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
-
             /* Raytraced rendering */
-            raytracingRenderer.render(&scene, &camera);
-
+            if (!rendered)
+            {
+                raytracingRenderer.render(&scene, &camera);
+                rendered = true;
+            }
 
             /* Raytraced result rendering */
             Shader* usedShader = &raytracedImageRendererShader;
@@ -195,13 +195,6 @@ int Application::Start()
             usedShader->setVector2("screenSize", WINDOW_SIZE_X, WINDOW_SIZE_Y);
             usedShader->setVector3("cameraPosition", camera.getPosition());
             usedShader->setVector3("cameraRotation", camera.getRotation());
-
-            if (shaderModelDataNeedsUpdate)
-            {
-                //raytracingRenderer.updateMeshData(&scene);
-                scene.checkObjectUpdates(usedShader);
-                shaderModelDataNeedsUpdate = false;
-            }
 
             // Making sure the pixel buffer is assigned for the raytracedImageRendererShader
             raytracingRenderer.bindPixelBuffer();
@@ -320,7 +313,7 @@ void Application::processInput(GLFWwindow* window)
         inRaytraceMode = !inRaytraceMode;
         if (inRaytraceMode)
         {
-            camera.emptyPixelBuffer();
+            //camera.emptyPixelBuffer();
         }
     }
 }

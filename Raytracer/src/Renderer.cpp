@@ -13,13 +13,9 @@ Renderer::~Renderer()
 
 void Renderer::render(Scene* scene, Camera* camera)
 {
+	currentFrameSampleCount++;
+
 	computeShader.use();
-	/*
-	if (scene->hasPendingChanges())
-	{
-		scene->writeLightsToShader(&computeShader);
-		scene->writeMaterialsToShader(&computeShader);
-	}*/
 
 	scene->checkObjectUpdates(&computeShader);
 
@@ -27,12 +23,15 @@ void Renderer::render(Scene* scene, Camera* camera)
 	scene->writeLightsToShader(&computeShader);
 	scene->writeMaterialsToShader(&computeShader);
 
+	// Writing camera data to the compute shader
 	computeShader.setVector3("cameraPosition", camera->getPosition());
 	computeShader.setVector3("cameraRotation", camera->getRotation());
 
+	// Writing rendering data to the compute shader
 	computeShader.setInt("screenWidth", width);
 	computeShader.setVector2("screenSize", width, height);
 	computeShader.setInt("sampleCount", sampleCount);
+	computeShader.setInt("currentFrameSampleCount", currentFrameSampleCount);
 
 	bindPixelBuffer();
 

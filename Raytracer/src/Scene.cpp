@@ -131,6 +131,7 @@ void Scene::generateTriangleBuffer()
 
 void Scene::bindTriangleBuffer()
 {
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
 }
 

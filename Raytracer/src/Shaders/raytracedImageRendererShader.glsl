@@ -7,7 +7,7 @@ uniform vec2 screenSize;
 
 // Pixels: holds information about the rendered pixels
 #define NUM_PIXELS 700*1200//$numPixels
-layout(std430, binding = 3) buffer Pixels
+layout(std140, binding = 3) buffer Pixels
 {
     vec4 pixelColors[NUM_PIXELS];
 };
