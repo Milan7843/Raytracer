@@ -9,6 +9,10 @@ layout(std140, binding = 3) buffer Pixels
 uniform int screenWidth;
 uniform int sampleCount;
 
+uniform bool renderUsingBlocks;
+uniform vec2 currentBlockOrigin;
+uniform int blockSize;
+
 #define EPSILON 0.0001f
 
 #define NUM_TRIANGLES $numTriangles
@@ -170,12 +174,24 @@ void main()
 	int cx = int(gl_GlobalInvocationID.x);
 	int cy = int(gl_GlobalInvocationID.y);
 
+    if (renderUsingBlocks)
+    {
+        cx += int(currentBlockOrigin.x);
+        cy += int(currentBlockOrigin.y);
+
+        // Check for indices off-screen
+        if (cx >= screenSize.x || cy >= screenSize.y)
+        {
+            return;
+        }
+    }
+
 	// Calculating the total index, used to map the 2D indices to a 1D array
 	int pixelIndex = int(cx + screenWidth * cy);
     
     vec3 finalColor1 = vec3(0.);
 
-    int sampleQuality = 1;
+    int sampleQuality = 3;
     float d = 1. / (float(sampleQuality + 1));
     vec3 finalColor = vec3(0.);
 

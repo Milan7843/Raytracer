@@ -49,6 +49,13 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 	{
 		renderer->render(scene, camera);
 	}
+	if (ImGui::Button("Render frame in blocks"))
+	{
+		renderer->startBlockRender(scene, camera);
+	}
+	ImGui::ProgressBar(renderer->getRenderProgress());
+	ImGui::SliderInt("Block size", renderer->getBlockSizePointer(), 1, 400);
+
 	// Button to switch between raytraced and rasterized views
 	if (ImGui::Button(*inRaytraceMode ? "View rasterized" : "View raytraced"))
 	{
