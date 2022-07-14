@@ -14,11 +14,11 @@ Light::~Light()
 {
 }
 
-void Light::writeToShader(Shader* shader)
+void Light::writeToShader(AbstractShader* shader)
 {
 }
 
-void Light::writePositionToShader(Shader* shader)
+void Light::writePositionToShader(AbstractShader* shader)
 {
 }
 

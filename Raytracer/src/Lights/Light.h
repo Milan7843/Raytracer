@@ -10,13 +10,13 @@
 #include <vector>
 #include <iostream>
 
-#include "../Shader.h"
+#include "../AbstractShader.h"
 
 class Light
 {
 public:
-	void writeToShader(Shader* shader);
-	void writePositionToShader(Shader* shader);
+	void writeToShader(AbstractShader* shader);
+	void writePositionToShader(AbstractShader* shader);
 
 	void setIndex(unsigned int index);
 

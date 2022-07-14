@@ -9,7 +9,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "Shader.h"
+#include "AbstractShader.h"
 
 #include <vector>
 #include <iostream>
@@ -37,8 +37,8 @@ public:
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int startIndex, unsigned int meshIndex);
 	~Mesh();
 
-	void writeToShader(Shader* shader, unsigned int ssbo, unsigned int materialIndex);
-	void writePositionToShader(Shader* shader);
+	void writeToShader(AbstractShader* shader, unsigned int ssbo, unsigned int materialIndex);
+	void writePositionToShader(AbstractShader* shader);
 
 	static int getTriangleSize();
 
@@ -53,7 +53,7 @@ public:
 	unsigned int shaderMeshIndex;
 
 	// Draws this mesh using the active shader
-	void draw(Shader* shader);
+	void draw(AbstractShader* shader);
 
 	glm::vec3 position = glm::vec3(0.0f);
 

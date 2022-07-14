@@ -1,6 +1,6 @@
 #include "Material.h"
 
-#include "Shader.h"
+#include "AbstractShader.h"
 
 Material::Material(glm::vec3 color, float reflectiveness, float transparency, float refractiveness)
 	: color(color),
@@ -25,7 +25,7 @@ Material::~Material()
 
 }
 
-void Material::writeToShader(Shader* shader, unsigned int index)
+void Material::writeToShader(AbstractShader* shader, unsigned int index)
 {
 	shader->setVector3(("materials[" + std::to_string(index) + "].color").c_str(), color);
 	shader->setFloat(("materials[" + std::to_string(index) + "].reflectiveness").c_str(), reflectiveness);

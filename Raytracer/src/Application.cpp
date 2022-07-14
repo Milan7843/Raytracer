@@ -1,49 +1,20 @@
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
-#include <iostream>
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include "Shader.h"
-#include "Scene.h"
-#include "Camera.h"
-#include "Model.h"
-#include "Material.h"
-
-// Change the viewport size if the window is resized
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-// Initiating GLFW
-void init_glfw();
-// Callback for when the mouse is moved
-void mouseCallback(GLFWwindow* window, double xpos, double ypos);
-// Draws the axes
-void drawAxes(unsigned int VAO, Shader* shader, Camera* camera);
-// Generates a VAO for the axes
-unsigned int generateAxesVAO();
-
-void processInput(GLFWwindow* window);
+#include "Application.h"
 
 
-const unsigned int WINDOW_SIZE_X = 1200, WINDOW_SIZE_Y = 700;
+Application::Application(unsigned int WIDTH, unsigned int HEIGHT)
+    : WINDOW_SIZE_X(WIDTH), WINDOW_SIZE_Y(HEIGHT), camera(glm::vec3(6.7f, 2.7f, -3.7f))
+{
 
-// Making a camera
-Camera camera(glm::vec3(6.7f, 2.7f, -3.7f));
+}
 
-float cameraSpeed = 0.01f;
+Application::~Application()
+{
+    std::cout << "Application instance destroyed" << std::endl;
+}
 
-float deltaTime = 0.0f;	// Time between current frame and last frame
-float lastFrame = 0.0f; // Time of last frame
-float timeSinceSwitchingModes = 100.0f;
-
-bool inRaytraceMode = false;
-
-int main()
+int Application::Start()
 {
     init_glfw();
 
@@ -71,8 +42,12 @@ int main()
     // Setting viewport size
     glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
+    // Setting the callback for window resizing
+    Callbacks& callbacks = Callbacks::getInstance();
+    callbacks.setCamera(&camera);
+
     // Change the viewport size if the window is resized
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window, &Callbacks::framebuffer_size_callback);
 
     // Must instantiate the buffer to be able to render to it: otherwise continuous rendering is enabled
     //camera.instantiatePixelBuffer();
@@ -89,7 +64,7 @@ int main()
     scene.addMaterial(whiteMaterial);
     scene.addMaterial(reflectiveMaterial);
     scene.addMaterial(transparentMaterial);
-    scene.addMaterial(roseMaterial);
+    //scene.addMaterial(roseMaterial);
 
 
     // Adding our test models: !! MUST BE TRIANGULATED !!
@@ -104,7 +79,7 @@ int main()
     
     Sphere* sphere1 = scene.addSphere(glm::vec3(0.0f, 1.0f, 0.0f), 0.8f, 2);
     Sphere* sphere2 = scene.addSphere(glm::vec3(1.0f, 1.0f, -2.0f), 1.4f, 1);
-    Sphere* sphere3 = scene.addSphere(glm::vec3(2.0f, 1.0f, 1.0f), 0.6f, 3);
+    Sphere* sphere3 = scene.addSphere(glm::vec3(2.0f, 1.0f, 1.0f), 0.6f, 2);
 
     // LIGHTS
     PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
@@ -123,64 +98,32 @@ int main()
         "src/Shaders/raymarchFragmentShader.shader", triangleCount, meshCount);
     */
     Shader raytracingShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/bufferedRaytracingFragmentShader.shader", &scene);
+    Shader raytracedImageRendererShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracedImageRendererShader.glsl", &scene);
+
+    // Raytraced renderer
+    Renderer raytracingRenderer("src/shaders/raytraceComputeShader.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y, &scene);
 
 
     scene.writeLightsToShader(&raytracingShader);
     scene.writeMaterialsToShader(&raytracingShader);
+
+    scene.generateTriangleBuffer();
     
-    // Object 1: simple uv coords
-    float s = 1.0f;
-    float vertices[] = {
-        // Positions
-         s,  s, 0.0f, // top right
-         s, -s, 0.0f, // bottom right
-        -s, -s, 0.0f, // bottom left
-        -s,  s, 0.0f, // top left 
-    };
-
-    unsigned int indices[] = {
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
-    };
-
-    // Vertex Buffer Object, stores the vertices with all their data on the GPU
-    unsigned int vao1, vbo1, ebo1;
-
-    glGenVertexArrays(1, &vao1);
-    glGenBuffers(1, &vbo1);
-    glGenBuffers(1, &ebo1);
-
-    glBindVertexArray(vao1);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo1); 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo1);
-
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-
-    unsigned int ssbo = 0;
-    glGenBuffers(1, &ssbo);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-    std::cout << "Making room for " << scene.triangleCount << " triangles" << std::endl;
-    glBufferData(GL_SHADER_STORAGE_BUFFER, scene.triangleCount * Mesh::getTriangleSize(), 0, GL_DYNAMIC_COPY);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    // Generating the screen quad on which the raytraced image is rendered
+    generateScreenQuad();
 
     // Input
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(window, mouseCallback);
 
-    bool shaderModelDataNeedsUpdate = true;
+    // Generating a VAO for the axes so that they can be rendered easily
+    generateAxesVAO();
 
-    unsigned int axesVAO = generateAxesVAO();
+    // Enabling depth testing for rasterized view: makes sure objects get drawn on top of each other in the correct order
+    glEnable(GL_DEPTH_TEST);
 
     unsigned int frame = 0;
+
+    bool rendered = false;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -195,7 +138,13 @@ int main()
         // Input
         processInput(window);
         camera.processInput(window, deltaTime);
-        //std::cout << camera.getRotation().x << ", " << camera.getRotation().y << ", " << camera.getRotation().z << ", " << std::endl;
+
+        // Calling the mouse callback
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+        camera.mouseCallback(window, xpos, ypos);
+
+        //std::cout << camera.getInformation() << std::endl;
 
         // Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -204,27 +153,33 @@ int main()
 
         if (inRaytraceMode)
         {
-            /* RAYTRACED RENDERING */
-            Shader* usedShader = &raytracingShader;
+            /* Raytraced rendering */
+            if (!rendered)
+            {
+                raytracingRenderer.render(&scene, &camera);
+                rendered = true;
+            }
+
+            /* Raytraced result rendering */
+            Shader* usedShader = &raytracedImageRendererShader;
 
             usedShader->use();
             usedShader->setVector2("screenSize", WINDOW_SIZE_X, WINDOW_SIZE_Y);
             usedShader->setVector3("cameraPosition", camera.getPosition());
             usedShader->setVector3("cameraRotation", camera.getRotation());
-            if (shaderModelDataNeedsUpdate)
-            {
-                scene.checkObjectUpdates(usedShader, ssbo);
-                shaderModelDataNeedsUpdate = false;
-            }
 
-            glBindVertexArray(vao1);
+            // Making sure the pixel buffer is assigned for the raytracedImageRendererShader
+            raytracingRenderer.bindPixelBuffer();
+
+            glBindVertexArray(screenQuadVAO);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
         else
         {
             /* REGULAR RENDERING */
             solidColorShader.use();
-            //solidColorShader.setVector3("inputColor", glm::vec3(0.8f, 0.3f, 0.8f));
 
             // Drawing axes
             drawAxes(axesVAO, &solidColorShader, &camera);
@@ -244,45 +199,6 @@ int main()
 
             scene.draw(&solidColorShader);
         }
-        
-
-
-        /*
-        glm::mat4 transform = glm::mat4(1.0f);
-        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 1.0f));
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-
-        glm::mat4 view = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-
-        glm::mat4 projection;
-        projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-        
-
-
-        //glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        //transform = transform * view;
-        
-        textureShader.Activate();
-        textureShader.SetMat4f("model", glm::value_ptr(model));
-        textureShader.SetMat4f("view", glm::value_ptr(view));
-        textureShader.SetMat4f("projection", glm::value_ptr(projection));
-        
-        //glActiveTexture(GL_TEXTURE0);
-        glBindVertexArray(vao2);
-        //glBindTexture(GL_TEXTURE_2D, texture);
-
-        //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        */
-
-        // Binding the VAO
-        /*
-        glBindVertexArray(VAO);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glDrawArrays(GL_TRIANGLES, 0, 6 * 6);*/
 
         // Output
         glfwSwapBuffers(window);
@@ -292,21 +208,16 @@ int main()
         frame++;
     }
 
-    glDeleteVertexArrays(1, &vao1);
-    glDeleteBuffers(1, &vbo1);
-    glDeleteBuffers(1, &ebo1);
-    //glDeleteVertexArrays(1, &vao2);
-    //glDeleteBuffers(1, &vbo2);
-    //glDeleteBuffers(1, &ebo2);
-    glDeleteProgram(solidColorShader.ID);
-    glDeleteProgram(uvShader.ID);
-    glDeleteProgram(textureShader.ID);
+    glDeleteVertexArrays(1, &screenQuadVAO);
+    glDeleteBuffers(1, &screenQuadVBO);
+    glDeleteBuffers(1, &screenQuadEBO);
 
+    glfwTerminate();
 
 	return 0;
 }
 
-void init_glfw() 
+void Application::init_glfw()
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -314,17 +225,50 @@ void init_glfw()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+
+void Application::generateScreenQuad()
 {
-    glViewport(0, 0, width, height);
+    // Object 1: simple uv coords
+    float s = 1.0f;
+    float vertices[] = {
+        // Positions
+         s,  s, 0.0f, // top right
+         s, -s, 0.0f, // bottom right
+        -s, -s, 0.0f, // bottom left
+        -s,  s, 0.0f, // top left 
+    };
+
+    unsigned int indices[] = {
+        0, 1, 3,   // first triangle
+        1, 2, 3    // second triangle
+    };
+
+    // Generating the required objects
+    glGenVertexArrays(1, &screenQuadVAO);
+    glGenBuffers(1, &screenQuadVBO);
+    glGenBuffers(1, &screenQuadEBO);
+
+    // Making sure everything gets put on this specific VAO
+    glBindVertexArray(screenQuadVAO);
+
+    // Binding the buffers
+    glBindBuffer(GL_ARRAY_BUFFER, screenQuadVBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, screenQuadEBO);
+
+    // Putting the indices and vertices into the buffers
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Letting OpenGL know how to interpret the data: just 3 floats for position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Unbinding
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
-void mouseCallback(GLFWwindow* window, double xpos, double ypos)
-{
-    camera.mouseCallback(window, xpos, ypos);
-}
-
-void processInput(GLFWwindow* window)
+void Application::processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -334,13 +278,13 @@ void processInput(GLFWwindow* window)
         inRaytraceMode = !inRaytraceMode;
         if (inRaytraceMode)
         {
-            camera.emptyPixelBuffer();
+            //camera.emptyPixelBuffer();
         }
     }
 }
 
 
-unsigned int generateAxesVAO()
+void Application::generateAxesVAO()
 {
     // Creating our vertex array object
     unsigned int VAO;
@@ -379,10 +323,11 @@ unsigned int generateAxesVAO()
     // Position data
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    return VAO;
+
+    axesVAO = VAO;
 }
 
-void drawAxes(unsigned int VAO, Shader* shader, Camera* camera)
+void Application::drawAxes(unsigned int VAO, Shader* shader, Camera* camera)
 {
     glLineWidth(0.01f);
     float s = 1.0f;

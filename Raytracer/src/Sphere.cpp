@@ -13,7 +13,7 @@ Sphere::~Sphere()
 
 }
 
-void Sphere::writeToShader(Shader* shader, unsigned int ssbo)
+void Sphere::writeToShader(AbstractShader* shader, unsigned int ssbo)
 {
 	shader->setVector3(("spheres[" + std::to_string(shaderSphereIndex) + "].pos").c_str(), 
 		transformation * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));

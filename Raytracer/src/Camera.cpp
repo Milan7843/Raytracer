@@ -81,6 +81,16 @@ void Camera::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 	forward = glm::normalize(direction);
 }
 
+std::string Camera::getInformation()
+{
+	return "Camera position: ("
+		+ std::to_string(getPosition().x) + ", "
+		+ std::to_string(getPosition().y) + ", "
+		+ std::to_string(getPosition().z) + 
+		"), pitch: " + std::to_string(pitch)
+		+ ", yaw: " + std::to_string(yaw);
+}
+
 void Camera::instantiatePixelBuffer()
 {
 	// Creating the pixel array buffer

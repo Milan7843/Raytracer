@@ -11,11 +11,11 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
-
+#include <string>
 
 class Camera
 {
-	/* Public members*/
+	/* Public members */
 public:
 	Camera();
 	Camera(glm::vec3 pos);
@@ -33,8 +33,12 @@ public:
 	void emptyPixelBuffer();
 
 	void processInput(GLFWwindow* window, float deltaTime);
+
 	// Callback for when the mouse is moved
 	void mouseCallback(GLFWwindow* window, double xpos, double ypos);
+
+	// Get important information of this camera (position, rotation)
+	std::string getInformation();
 
 	/* Private members */
 private:

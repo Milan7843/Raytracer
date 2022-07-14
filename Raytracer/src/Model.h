@@ -19,10 +19,10 @@ public:
 	~Model();
 
 	// Draw this object given the shader
-	virtual void draw(Shader* shader, Material* material);
+	virtual void draw(AbstractShader* shader, Material* material);
 
 	// Write this object's data to the given shader
-	virtual void writeToShader(Shader* shader, unsigned int ssbo);
+	virtual void writeToShader(AbstractShader* shader, unsigned int ssbo);
 
 	// Apply all the previous transformations to the vertex data
 	virtual void applyTransformations();
