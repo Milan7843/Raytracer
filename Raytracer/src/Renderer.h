@@ -72,6 +72,5 @@ private:
 	int blockSizeRendering = 100;
 	bool currentlyBlockRendering = false;
 	unsigned int blockIndexX = 0, blockIndexY = 0;
-
 };
 

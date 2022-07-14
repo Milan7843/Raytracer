@@ -54,8 +54,18 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 		renderer->startBlockRender(scene, camera);
 	}
 	ImGui::ProgressBar(renderer->getRenderProgress());
+
 	ImGui::SliderInt("Block size", renderer->getBlockSizePointer(), 1, 400);
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+	{
+		ImGui::SetTooltip("The size of a render block in pixels.");
+	}
+
 	ImGui::SliderInt("Multisamples", renderer->getMultisamplePointer(), 1, 5);
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+	{
+		ImGui::SetTooltip("The number of different sample points per pixel, works as anti-aliasing.");
+	}
 
 	// Button to switch between raytraced and rasterized views
 	if (ImGui::Button(*inRaytraceMode ? "View rasterized" : "View raytraced"))
