@@ -191,7 +191,7 @@ void main()
     
     vec3 finalColor1 = vec3(0.);
 
-    int sampleQuality = 3;
+    int sampleQuality = 4;
     float d = 1. / (float(sampleQuality + 1));
     vec3 finalColor = vec3(0.);
 

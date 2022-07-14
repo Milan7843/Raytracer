@@ -155,5 +155,11 @@ int* Renderer::getBlockSizePointer()
 
 float Renderer::getRenderProgress()
 {
-	return 0.0f;
+	float blocksInHeight = (float)height / (float)blockSizeRendering;
+	float blocksInWidth = (float)width / (float)blockSizeRendering;
+
+	int blocksDone = blockIndexX + blockIndexY * blocksInWidth;
+
+	float progress = std::floor((blocksDone / (blocksInWidth * blocksInHeight)) * 100.0f) / 100.0f;
+	return progress;
 }
