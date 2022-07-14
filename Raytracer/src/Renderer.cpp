@@ -26,6 +26,7 @@ void Renderer::render(Scene* scene, Camera* camera)
 	// Writing camera data to the compute shader
 	computeShader.setVector3("cameraPosition", camera->getPosition());
 	computeShader.setVector3("cameraRotation", camera->getRotation());
+	computeShader.setFloat("fov", camera->getFov());
 
 	// Writing rendering data to the compute shader
 	computeShader.setInt("screenWidth", width);

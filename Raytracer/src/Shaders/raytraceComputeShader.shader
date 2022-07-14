@@ -52,7 +52,7 @@ uniform vec2 screenSize;
 
 float i = 0.;
 float dstThreshold = 0.005;
-float fov = 40;
+uniform float fov;
 
 vec3 skyboxColorHorizon = vec3(0.1, 0.2, 0.4);
 vec3 skyboxColorTop = vec3(0.45, 0.95, 0.85);
@@ -175,12 +175,19 @@ void main()
     
     vec3 finalColor1 = vec3(0.);
 
-    for (int s = 0; s < sampleCount; s++)
+    int sampleQuality = 1;
+    float d = 1. / (float(sampleQuality + 1));
+    vec3 finalColor = vec3(0.);
+
+    for (int y = 0; y < sampleQuality; y++)
     {
-        finalColor1 += fireRayAtPixelPositionIndex(vec2(cx, cy)).finalColor;// / float(sampleCount);
+        for (int x = 0; x < sampleQuality; x++)
+        {
+            finalColor += fireRayAtPixelPositionIndex(vec2(cx, cy) + vec2(x * d, -y * d)).finalColor / (sampleQuality * sampleQuality);
+        }
     }
 
-	colors[pixelIndex] = vec4(fireRayAtPixelPositionIndex(vec2(cx, cy)).finalColor, 1.0);
+	colors[pixelIndex] = vec4(finalColor, 1.0);
 }
 
 

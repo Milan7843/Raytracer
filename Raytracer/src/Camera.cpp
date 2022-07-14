@@ -32,7 +32,7 @@ glm::mat4 Camera::getViewMatrix()
 }
 glm::mat4 Camera::getProjectionMatrix(int width, int height)
 {   //                           cam pos,  target,            up vector
-	glm::mat4 projection = glm::perspective(glm::radians(40.0f), (float)width / (float)height, 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 100.0f);
 	return projection;
 }
 
@@ -43,6 +43,11 @@ glm::vec3 Camera::getPosition()
 glm::vec3 Camera::getRotation()
 {
 	return glm::vec3(0.0f, glm::radians(yaw), -glm::radians(pitch));
+}
+
+float Camera::getFov()
+{
+	return fov;
 }
 
 
@@ -61,9 +66,8 @@ void Camera::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 	lastx = xpos;
 	lasty = ypos;
 
-	const float sensitivity = 0.1f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
+	xoffset *= sensitivity * 0.1f;
+	yoffset *= sensitivity * 0.1f;
 
 	// Applying rotation
 	yaw += xoffset;
@@ -91,23 +95,24 @@ std::string Camera::getInformation()
 		+ ", yaw: " + std::to_string(yaw);
 }
 
-void Camera::instantiatePixelBuffer()
+float* Camera::getCameraSpeedPointer()
 {
-	// Creating the pixel array buffer
-	ssbo = 0;
-	glGenBuffers(1, &ssbo);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, 1200 * 700 * 16, 0, GL_DYNAMIC_COPY);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	return &cameraSpeed;
 }
 
-void Camera::emptyPixelBuffer()
+float* Camera::getFovPointer()
 {
-	// Clearing the pixel array buffer
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-	glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_RGBA32F, GL_RGBA, GL_FLOAT, (void*)0);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	return &fov;
+}
+
+float* Camera::getSensitivityPointer()
+{
+	return &sensitivity;
+}
+
+void Camera::resetMouseOffset()
+{
+	firstMouse = true;
 }
 
 // Processes the input
