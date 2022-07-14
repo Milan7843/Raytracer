@@ -109,45 +109,17 @@ int Application::Start()
 
     scene.generateTriangleBuffer();
     
-    // Object 1: simple uv coords
-    float s = 1.0f;
-    float vertices[] = {
-        // Positions
-         s,  s, 0.0f, // top right
-         s, -s, 0.0f, // bottom right
-        -s, -s, 0.0f, // bottom left
-        -s,  s, 0.0f, // top left 
-    };
-
-    unsigned int indices[] = {
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
-    };
-
-    // Vertex Buffer Object, stores the vertices with all their data on the GPU
-    unsigned int vao1, vbo1, ebo1;
-
-    glGenVertexArrays(1, &vao1);
-    glGenBuffers(1, &vbo1);
-    glGenBuffers(1, &ebo1);
-
-    glBindVertexArray(vao1);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo1); 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo1);
-
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    // Generating the screen quad on which the raytraced image is rendered
+    generateScreenQuad();
 
     // Input
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    unsigned int axesVAO = generateAxesVAO();
+    // Generating a VAO for the axes so that they can be rendered easily
+    generateAxesVAO();
+
+    // Enabling depth testing for rasterized view: makes sure objects get drawn on top of each other in the correct order
+    glEnable(GL_DEPTH_TEST);
 
     unsigned int frame = 0;
 
@@ -199,7 +171,7 @@ int Application::Start()
             // Making sure the pixel buffer is assigned for the raytracedImageRendererShader
             raytracingRenderer.bindPixelBuffer();
 
-            glBindVertexArray(vao1);
+            glBindVertexArray(screenQuadVAO);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -208,7 +180,6 @@ int Application::Start()
         {
             /* REGULAR RENDERING */
             solidColorShader.use();
-            //solidColorShader.setVector3("inputColor", glm::vec3(0.8f, 0.3f, 0.8f));
 
             // Drawing axes
             drawAxes(axesVAO, &solidColorShader, &camera);
@@ -228,45 +199,6 @@ int Application::Start()
 
             scene.draw(&solidColorShader);
         }
-        
-
-
-        /*
-        glm::mat4 transform = glm::mat4(1.0f);
-        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 1.0f));
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-
-        glm::mat4 view = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-
-        glm::mat4 projection;
-        projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-        
-
-
-        //glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        //transform = transform * view;
-        
-        textureShader.Activate();
-        textureShader.SetMat4f("model", glm::value_ptr(model));
-        textureShader.SetMat4f("view", glm::value_ptr(view));
-        textureShader.SetMat4f("projection", glm::value_ptr(projection));
-        
-        //glActiveTexture(GL_TEXTURE0);
-        glBindVertexArray(vao2);
-        //glBindTexture(GL_TEXTURE_2D, texture);
-
-        //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        */
-
-        // Binding the VAO
-        /*
-        glBindVertexArray(VAO);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glDrawArrays(GL_TRIANGLES, 0, 6 * 6);*/
 
         // Output
         glfwSwapBuffers(window);
@@ -276,16 +208,11 @@ int Application::Start()
         frame++;
     }
 
-    glDeleteVertexArrays(1, &vao1);
-    glDeleteBuffers(1, &vbo1);
-    glDeleteBuffers(1, &ebo1);
-    //glDeleteVertexArrays(1, &vao2);
-    //glDeleteBuffers(1, &vbo2);
-    //glDeleteBuffers(1, &ebo2);
-    glDeleteProgram(solidColorShader.ID);
-    glDeleteProgram(uvShader.ID);
-    glDeleteProgram(textureShader.ID);
+    glDeleteVertexArrays(1, &screenQuadVAO);
+    glDeleteBuffers(1, &screenQuadVBO);
+    glDeleteBuffers(1, &screenQuadEBO);
 
+    glfwTerminate();
 
 	return 0;
 }
@@ -301,6 +228,44 @@ void Application::init_glfw()
 
 void Application::generateScreenQuad()
 {
+    // Object 1: simple uv coords
+    float s = 1.0f;
+    float vertices[] = {
+        // Positions
+         s,  s, 0.0f, // top right
+         s, -s, 0.0f, // bottom right
+        -s, -s, 0.0f, // bottom left
+        -s,  s, 0.0f, // top left 
+    };
+
+    unsigned int indices[] = {
+        0, 1, 3,   // first triangle
+        1, 2, 3    // second triangle
+    };
+
+    // Generating the required objects
+    glGenVertexArrays(1, &screenQuadVAO);
+    glGenBuffers(1, &screenQuadVBO);
+    glGenBuffers(1, &screenQuadEBO);
+
+    // Making sure everything gets put on this specific VAO
+    glBindVertexArray(screenQuadVAO);
+
+    // Binding the buffers
+    glBindBuffer(GL_ARRAY_BUFFER, screenQuadVBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, screenQuadEBO);
+
+    // Putting the indices and vertices into the buffers
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Letting OpenGL know how to interpret the data: just 3 floats for position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Unbinding
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 void Application::processInput(GLFWwindow* window)
@@ -319,7 +284,7 @@ void Application::processInput(GLFWwindow* window)
 }
 
 
-unsigned int Application::generateAxesVAO()
+void Application::generateAxesVAO()
 {
     // Creating our vertex array object
     unsigned int VAO;
@@ -358,7 +323,8 @@ unsigned int Application::generateAxesVAO()
     // Position data
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    return VAO;
+
+    axesVAO = VAO;
 }
 
 void Application::drawAxes(unsigned int VAO, Shader* shader, Camera* camera)

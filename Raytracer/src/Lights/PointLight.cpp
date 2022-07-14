@@ -13,7 +13,6 @@ PointLight::~PointLight()
 
 void PointLight::writeToShader(AbstractShader* shader)
 {
-	std::cout << "setting: " << ("pointLights[" + std::to_string(this->index) + "].pos").c_str() << std::endl;
 	shader->setVector3(("pointLights[" + std::to_string(this->index) + "].pos").c_str(), position);
 	shader->setVector3(("pointLights[" + std::to_string(this->index) + "].color").c_str(), color);
 	shader->setFloat(("pointLights[" + std::to_string(this->index) + "].intensity").c_str(), intensity);

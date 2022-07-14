@@ -44,17 +44,23 @@ private:
 
 	unsigned int WINDOW_SIZE_X = 1200, WINDOW_SIZE_Y = 700;
 
-	// Initiating GLFW
+	// Initiatialise GLFW
 	void init_glfw();
 
-	// Draws the axes
+	// Draw the axes given by the VAO using the given shader from the given camera's perspective
 	void drawAxes(unsigned int VAO, Shader* shader, Camera* camera);
 
-	// Generates a VAO for the axes
-	unsigned int generateAxesVAO();
+	// Generate a VAO for the axes
+	void generateAxesVAO();
 
 	// Generate a quad that spans the screen (WIP)
 	void generateScreenQuad();
+
+	// The objects that hold the screen quad
+	unsigned int screenQuadVAO, screenQuadVBO, screenQuadEBO;
+
+	// Holds the vertices required for rendering the axes
+	unsigned int axesVAO;
 
 	void processInput(GLFWwindow* window);
 };

@@ -16,7 +16,7 @@ class AbstractShader
 {
 public:
 	// Program ID
-	unsigned int ID;
+	unsigned int ID = 0;
 
 	// Activates the shader
 	void use();
@@ -32,6 +32,9 @@ public:
 	void setVector3(const std::string& name, glm::vec3 v) const;
 	void setMat4(const std::string& name, glm::mat4 matrix) const;
 
+	// Delete the shader in this object
+	void deleteProgram();
+
 protected:
 	unsigned int compileShader(GLenum type, const char* code);
 	bool replace(std::string& str, const std::string& from, const std::string& to);
@@ -40,5 +43,5 @@ protected:
 
 	// Cannot be instantiated
 	AbstractShader() {}
-	~AbstractShader() {}
+	~AbstractShader();
 };

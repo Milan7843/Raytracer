@@ -1,5 +1,9 @@
 #include "AbstractShader.h"
 
+AbstractShader::~AbstractShader()
+{
+	deleteProgram();
+}
 
 void AbstractShader::use()
 {
@@ -41,6 +45,11 @@ void AbstractShader::setVector3(const std::string& name, glm::vec3 v) const
 void AbstractShader::setMat4(const std::string& name, glm::mat4 matrix) const
 {
 	glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void AbstractShader::deleteProgram()
+{
+	glDeleteProgram(ID);
 }
 
 unsigned int AbstractShader::compileShader(GLenum type, const char* code)
