@@ -16,9 +16,7 @@ Application::~Application()
 
 int Application::Start()
 {
-    init_glfw();
-
-    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    initialiseGLFW();
 
     // Making a GLFW window
     GLFWwindow* window = glfwCreateWindow(WINDOW_SIZE_X, WINDOW_SIZE_Y, "OpenGL", NULL, NULL);
@@ -29,6 +27,10 @@ int Application::Start()
         return -1;
     }
     glfwMakeContextCurrent(window);
+
+    ImGuiUserInterface userInterface;
+
+    userInterface.initialiseImGui(window);
 
     // GLAD manages function pointers for OpenGL, so we cannot run without it
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -41,6 +43,9 @@ int Application::Start()
 
     // Setting viewport size
     glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
+    // Enabling depth testing for rasterized view: makes sure objects get drawn on top of each other in the correct order
+    glEnable(GL_DEPTH_TEST);
 
     // Setting the callback for window resizing
     Callbacks& callbacks = Callbacks::getInstance();
@@ -112,54 +117,46 @@ int Application::Start()
     // Generating the screen quad on which the raytraced image is rendered
     generateScreenQuad();
 
-    // Input
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
     // Generating a VAO for the axes so that they can be rendered easily
     generateAxesVAO();
 
-    // Enabling depth testing for rasterized view: makes sure objects get drawn on top of each other in the correct order
-    glEnable(GL_DEPTH_TEST);
-
     unsigned int frame = 0;
-
-    bool rendered = false;
 
     while (!glfwWindowShouldClose(window))
     {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        timeSinceSwitchingModes += deltaTime;
 
         if (frame % 10 == 0)
             std::cout << "FPS: " << 1.0f / deltaTime << std::endl;
 
         // Input
         processInput(window);
-        camera.processInput(window, deltaTime);
 
-        // Calling the mouse callback
-        double xpos, ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);
-        camera.mouseCallback(window, xpos, ypos);
+        // Check whether the UI is enabled
+        if (!userInterface.isEnabled() && !inRaytraceMode)
+        {
+            // Calling the mouse callback
+            double xpos, ypos;
+            glfwGetCursorPos(window, &xpos, &ypos);
+            camera.mouseCallback(window, xpos, ypos);
+
+            // Process camera movement input
+            camera.processInput(window, deltaTime);
+        }
 
         //std::cout << camera.getInformation() << std::endl;
+        userInterface.handleInput(window, &camera);
 
         // Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        raytracingRenderer.update();
 
         if (inRaytraceMode)
         {
-            /* Raytraced rendering */
-            if (!rendered)
-            {
-                raytracingRenderer.render(&scene, &camera);
-                rendered = true;
-            }
-
             /* Raytraced result rendering */
             Shader* usedShader = &raytracedImageRendererShader;
 
@@ -200,6 +197,8 @@ int Application::Start()
             scene.draw(&solidColorShader);
         }
 
+        userInterface.drawUserInterface(&scene, &camera, &raytracingRenderer, &inRaytraceMode);
+
         // Output
         glfwSwapBuffers(window);
         // Check for input
@@ -217,11 +216,16 @@ int Application::Start()
 	return 0;
 }
 
-void Application::init_glfw()
+void Application::initialiseGLFW()
 {
+    // Initialising GLFW
     glfwInit();
+
+    // Setting OpenGL version 4.6
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+
+    // OpenGL profile: core
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 }
 
@@ -272,15 +276,6 @@ void Application::processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS && timeSinceSwitchingModes > 0.3f)
-    {
-        timeSinceSwitchingModes = 0.0f;
-        inRaytraceMode = !inRaytraceMode;
-        if (inRaytraceMode)
-        {
-            //camera.emptyPixelBuffer();
-        }
-    }
 }
 
 

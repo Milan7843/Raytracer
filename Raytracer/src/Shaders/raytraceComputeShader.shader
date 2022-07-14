@@ -8,6 +8,11 @@ layout(std140, binding = 3) buffer Pixels
 
 uniform int screenWidth;
 uniform int sampleCount;
+uniform int multisamples;
+
+uniform bool renderUsingBlocks;
+uniform vec2 currentBlockOrigin;
+uniform int blockSize;
 
 #define EPSILON 0.0001f
 
@@ -52,7 +57,7 @@ uniform vec2 screenSize;
 
 float i = 0.;
 float dstThreshold = 0.005;
-float fov = 40;
+uniform float fov;
 
 vec3 skyboxColorHorizon = vec3(0.1, 0.2, 0.4);
 vec3 skyboxColorTop = vec3(0.45, 0.95, 0.85);
@@ -170,17 +175,35 @@ void main()
 	int cx = int(gl_GlobalInvocationID.x);
 	int cy = int(gl_GlobalInvocationID.y);
 
+    if (renderUsingBlocks)
+    {
+        cx += int(currentBlockOrigin.x);
+        cy += int(currentBlockOrigin.y);
+
+        // Check for indices off-screen
+        if (cx >= screenSize.x || cy >= screenSize.y)
+        {
+            return;
+        }
+    }
+
 	// Calculating the total index, used to map the 2D indices to a 1D array
 	int pixelIndex = int(cx + screenWidth * cy);
     
     vec3 finalColor1 = vec3(0.);
 
-    for (int s = 0; s < sampleCount; s++)
+    float d = 1. / (float(multisamples + 1));
+    vec3 finalColor = vec3(0.);
+
+    for (int y = 0; y < multisamples; y++)
     {
-        finalColor1 += fireRayAtPixelPositionIndex(vec2(cx, cy)).finalColor;// / float(sampleCount);
+        for (int x = 0; x < multisamples; x++)
+        {
+            finalColor += fireRayAtPixelPositionIndex(vec2(cx, cy) + vec2(x * d, -y * d)).finalColor / (multisamples * multisamples);
+        }
     }
 
-	colors[pixelIndex] = vec4(fireRayAtPixelPositionIndex(vec2(cx, cy)).finalColor, 1.0);
+	colors[pixelIndex] = vec4(finalColor, 1.0);
 }
 
 

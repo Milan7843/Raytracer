@@ -13,6 +13,19 @@ public:
 	// Render the given scene with the given camera to the given buffer
 	void render(Scene* scene, Camera* camera);
 
+	// Render the scene in blocks (not all at once)
+	void startBlockRender(Scene* scene, Camera* camera);
+
+	void blockRenderStep();
+
+	// Set everything up for rendering
+	void setUpForRender(Scene* scene, Camera* camera);
+
+	// Update this renderer; must be called every frame
+	void update();
+
+
+
 	// Check for updates in the mesh data of the scene and update the data in the buffer if necessary
 	void updateMeshData(Scene* scene);
 
@@ -25,7 +38,16 @@ public:
 	// Set the sample count
 	void setSampleCount(unsigned int sampleCount);
 
+	int* getBlockSizePointer();
+	int* getMultisamplePointer();
+	float getRenderProgress();
+
+
 private:
+
+	// Get the top-left coordinate of the currently rendering block
+	glm::vec2 getBlockOrigin();
+
 	// The compute shader used to render to the buffer
 	ComputeShader computeShader;
 
@@ -40,5 +62,15 @@ private:
 
 	// The number of sample frames already rendered
 	unsigned int currentFrameSampleCount = 0;
+
+	// The number of sample points per pixel
+	int multisamples = 1;
+
+	/* Block rendering */
+	// The size in pixels of each block
+	int blockSize = 100;
+	int blockSizeRendering = 100;
+	bool currentlyBlockRendering = false;
+	unsigned int blockIndexX = 0, blockIndexY = 0;
 };
 

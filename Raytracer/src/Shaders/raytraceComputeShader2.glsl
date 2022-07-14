@@ -53,7 +53,7 @@ uniform vec2 screenSize;
 
 float i = 0.;
 float dstThreshold = 0.005;
-float fov = 40;
+uniform float fov;
 
 vec3 skyboxColorHorizon = vec3(0.1, 0.2, 0.4);
 vec3 skyboxColorTop = vec3(0.45, 0.95, 0.85);

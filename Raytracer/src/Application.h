@@ -19,6 +19,8 @@
 #include "Model.h"
 #include "Material.h"
 #include "Renderer.h"
+#include "ImGuiUserInterface.h"
+
 
 class Application
 {
@@ -38,14 +40,13 @@ private:
 
 	float deltaTime = 0.0f;	// Time between current frame and last frame
 	float lastFrame = 0.0f; // Time of last frame
-	float timeSinceSwitchingModes = 100.0f;
 
 	bool inRaytraceMode = false;
 
 	unsigned int WINDOW_SIZE_X = 1200, WINDOW_SIZE_Y = 700;
 
 	// Initiatialise GLFW
-	void init_glfw();
+	void initialiseGLFW();
 
 	// Draw the axes given by the VAO using the given shader from the given camera's perspective
 	void drawAxes(unsigned int VAO, Shader* shader, Camera* camera);

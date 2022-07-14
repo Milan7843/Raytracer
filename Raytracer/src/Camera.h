@@ -26,12 +26,12 @@ public:
 
 	glm::vec3 getPosition();
 	glm::vec3 getRotation();
+	float getFov();
 
-	// Instantiate this camera's pixel buffer
-	void instantiatePixelBuffer();
-	// Empty this camera's pixel buffer; allows for a new image to be rendered
-	void emptyPixelBuffer();
+	// Don't use the current mouse offset, but start from where the cursor is
+	void resetMouseOffset();
 
+	// Process the input to the camera
 	void processInput(GLFWwindow* window, float deltaTime);
 
 	// Callback for when the mouse is moved
@@ -39,6 +39,10 @@ public:
 
 	// Get important information of this camera (position, rotation)
 	std::string getInformation();
+
+	float* getCameraSpeedPointer();
+	float* getFovPointer();
+	float* getSensitivityPointer();
 
 	/* Private members */
 private:
@@ -49,6 +53,9 @@ private:
 	float lastx = 400, lasty = 300;
 	float yaw = 150.0f, pitch = -18.0f;
 	bool firstMouse = true;
-	const float cameraSpeed = 1.0f;
 	unsigned int ssbo;
+
+	float sensitivity = 1.0f;
+	float fov = 40.0f;
+	float cameraSpeed = 1.0f;
 };
