@@ -96,7 +96,7 @@ int Application::Start()
 
 
     Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
-    Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader");
+    Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader", &scene);
     Shader textureShader("src/Shaders/textureVertexShader.shader", "src/Shaders/textureFragmentShader.shader");
     /*
     Shader raymarchShader("src/Shaders/raymarchVertexShader.shader", 
@@ -111,6 +111,8 @@ int Application::Start()
 
     scene.writeLightsToShader(&raytracingShader);
     scene.writeMaterialsToShader(&raytracingShader);
+    scene.writeLightsToShader(&solidColorShader);
+    scene.writeMaterialsToShader(&solidColorShader);
 
     scene.generateTriangleBuffer();
     
