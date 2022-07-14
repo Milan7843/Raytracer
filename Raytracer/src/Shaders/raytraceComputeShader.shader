@@ -8,6 +8,7 @@ layout(std140, binding = 3) buffer Pixels
 
 uniform int screenWidth;
 uniform int sampleCount;
+uniform int multisamples;
 
 uniform bool renderUsingBlocks;
 uniform vec2 currentBlockOrigin;
@@ -191,15 +192,14 @@ void main()
     
     vec3 finalColor1 = vec3(0.);
 
-    int sampleQuality = 4;
-    float d = 1. / (float(sampleQuality + 1));
+    float d = 1. / (float(multisamples + 1));
     vec3 finalColor = vec3(0.);
 
-    for (int y = 0; y < sampleQuality; y++)
+    for (int y = 0; y < multisamples; y++)
     {
-        for (int x = 0; x < sampleQuality; x++)
+        for (int x = 0; x < multisamples; x++)
         {
-            finalColor += fireRayAtPixelPositionIndex(vec2(cx, cy) + vec2(x * d, -y * d)).finalColor / (sampleQuality * sampleQuality);
+            finalColor += fireRayAtPixelPositionIndex(vec2(cx, cy) + vec2(x * d, -y * d)).finalColor / (multisamples * multisamples);
         }
     }
 

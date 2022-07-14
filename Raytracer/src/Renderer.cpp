@@ -79,6 +79,7 @@ void Renderer::setUpForRender(Scene* scene, Camera* camera)
 	computeShader.setInt("screenWidth", width);
 	computeShader.setVector2("screenSize", width, height);
 	computeShader.setInt("sampleCount", sampleCount);
+	computeShader.setInt("multisamples", multisamples);
 	computeShader.setInt("currentFrameSampleCount", currentFrameSampleCount);
 
 	bindPixelBuffer();
@@ -151,6 +152,11 @@ void Renderer::setSampleCount(unsigned int sampleCount)
 int* Renderer::getBlockSizePointer()
 {
 	return &blockSize;
+}
+
+int* Renderer::getMultisamplePointer()
+{
+	return &multisamples;
 }
 
 float Renderer::getRenderProgress()

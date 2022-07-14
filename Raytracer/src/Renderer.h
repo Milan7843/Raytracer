@@ -39,6 +39,7 @@ public:
 	void setSampleCount(unsigned int sampleCount);
 
 	int* getBlockSizePointer();
+	int* getMultisamplePointer();
 	float getRenderProgress();
 
 
@@ -61,6 +62,9 @@ private:
 
 	// The number of sample frames already rendered
 	unsigned int currentFrameSampleCount = 0;
+
+	// The number of sample points per pixel
+	int multisamples = 1;
 
 	/* Block rendering */
 	// The size in pixels of each block
