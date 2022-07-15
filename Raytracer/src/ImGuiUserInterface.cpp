@@ -54,6 +54,7 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 		renderer->startBlockRender(scene, camera);
 	}
 	ImGui::ProgressBar(renderer->getRenderProgress());
+	ImGui::Text(std::to_string(renderer->getTimeLeft()).c_str());
 
 	ImGui::SliderInt("Block size", renderer->getBlockSizePointer(), 1, 400);
 	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))

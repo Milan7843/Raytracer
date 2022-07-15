@@ -22,7 +22,7 @@ public:
 	void setUpForRender(Scene* scene, Camera* camera);
 
 	// Update this renderer; must be called every frame
-	void update();
+	void update(float deltaTime);
 
 
 
@@ -41,6 +41,7 @@ public:
 	int* getBlockSizePointer();
 	int* getMultisamplePointer();
 	float getRenderProgress();
+	float getTimeLeft();
 
 
 private:
@@ -72,5 +73,7 @@ private:
 	int blockSizeRendering = 100;
 	bool currentlyBlockRendering = false;
 	unsigned int blockIndexX = 0, blockIndexY = 0;
+
+	float currentRenderTime = 0.0f;
 };
 
