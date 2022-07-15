@@ -168,14 +168,20 @@ int* Renderer::getMultisamplePointer()
 	return &multisamples;
 }
 
-float Renderer::getRenderProgress()
+float Renderer::getRenderProgressPrecise()
 {
 	float blocksInHeight = (float)height / (float)blockSizeRendering;
 	float blocksInWidth = (float)width / (float)blockSizeRendering;
 
 	int blocksDone = blockIndexX + blockIndexY * blocksInWidth;
 
-	float progress = std::floor((blocksDone / (blocksInWidth * blocksInHeight)) * 100.0f) / 100.0f;
+	float progress = blocksDone / (blocksInWidth * blocksInHeight);
+	return progress;
+}
+
+float Renderer::getRenderProgress()
+{
+	float progress = std::floor(getRenderProgressPrecise() * 100.0f) / 100.0f;
 	return progress;
 }
 

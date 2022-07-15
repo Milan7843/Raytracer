@@ -56,7 +56,7 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 	ImGui::ProgressBar(renderer->getRenderProgress());
 	ImGui::Text(std::to_string(renderer->getTimeLeft()).c_str());
 
-	ImGui::SliderInt("Block size", renderer->getBlockSizePointer(), 1, 400);
+	ImGui::SliderInt("Block size", renderer->getBlockSizePointer(), 1, 100);
 	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
 	{
 		ImGui::SetTooltip("The size of a render block in pixels.");
