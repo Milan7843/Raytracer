@@ -11,6 +11,8 @@
 
 #include "AbstractShader.h"
 
+#include "CoordinateUtility.h"
+
 #include <vector>
 #include <iostream>
 
@@ -60,7 +62,5 @@ public:
 	unsigned int VAO, VBO, EBO;
 
 private:
-	glm::vec3 vec3ToGLSLVec3(glm::vec3 v);
-	glm::vec4 vec4ToGLSLVec4(glm::vec3 v);
 	void setupMesh();
 };

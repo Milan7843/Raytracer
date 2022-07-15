@@ -1268,6 +1268,9 @@
     <ClInclude Include="src\ImGuiUserInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\CoordinateUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\assimp\color4.inl">
@@ -1717,6 +1720,7 @@
     <None Include="src\Shaders\ubobackup.shader" />
     <None Include="src\Shaders\bufferedRaytracingFragmentShader.shader" />
     <None Include="src\Shaders\bufferedIndirectLightingRaytracingFragmentShader.shader" />
+    <None Include="src\Shaders\raytraceComputeShaderSampled.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />

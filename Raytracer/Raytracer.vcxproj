@@ -423,6 +423,7 @@
     <ClInclude Include="include\KHR\khrplatform.h" />
     <ClInclude Include="src\AbstractShader.h" />
     <ClInclude Include="src\ComputeShader.h" />
+    <ClInclude Include="src\CoordinateUtility.h" />
     <ClInclude Include="src\ImGuiUserInterface.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Application.h" />
@@ -591,6 +592,7 @@
     <None Include="src\Shaders\raymarchFragmentShader.shader" />
     <None Include="src\Shaders\raymarchFragmentShaderBackup.shader" />
     <None Include="src\Shaders\raymarchVertexShader.shader" />
+    <None Include="src\Shaders\raytraceComputeShaderSampled.shader" />
     <None Include="src\Shaders\raytracingFragmentShader.shader" />
     <None Include="src\Shaders\solidColorFragmentShader.shader" />
     <None Include="src\Shaders\solidColorVertexShader.shader" />

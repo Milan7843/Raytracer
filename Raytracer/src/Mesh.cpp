@@ -36,22 +36,13 @@ void Mesh::writeToShader(AbstractShader* shader, unsigned int ssbo, unsigned int
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     // Setting the models position
-    shader->setVector3(("meshes[" + std::to_string(shaderMeshIndex) + "].position").c_str(), vec3ToGLSLVec3(position));
+    shader->setVector3(("meshes[" + std::to_string(shaderMeshIndex) + "].position").c_str(), CoordinateUtility::vec3ToGLSLVec3(position));
     shader->setInt(("meshes[" + std::to_string(shaderMeshIndex) + "].material").c_str(), materialIndex);
 }
 
 void Mesh::writePositionToShader(AbstractShader* shader)
 {
-    shader->setVector3(("meshes[" + std::to_string(shaderMeshIndex) + "].position").c_str(), vec3ToGLSLVec3(position));
-}
-
-glm::vec3 Mesh::vec3ToGLSLVec3(glm::vec3 v)
-{
-    return glm::vec3(v.z, v.y, v.x);
-}
-glm::vec4 Mesh::vec4ToGLSLVec4(glm::vec3 v)
-{
-    return glm::vec4(v.z, v.y, v.x, 1.0f);
+    shader->setVector3(("meshes[" + std::to_string(shaderMeshIndex) + "].position").c_str(), CoordinateUtility::vec3ToGLSLVec3(position));
 }
 
 void Mesh::setupMesh()
@@ -79,14 +70,14 @@ void Mesh::setupMesh()
     for (unsigned int i = 0; i < vertices.size(); i += 3)
     {
         Triangle tri{};
-        tri.v1 = vec4ToGLSLVec4(vertices[i].position);
-        tri.v2 = vec4ToGLSLVec4(vertices[i+1].position);
-        tri.v3 = vec4ToGLSLVec4(vertices[i+2].position);
+        tri.v1 = CoordinateUtility::vec4ToGLSLVec4(vertices[i].position);
+        tri.v2 = CoordinateUtility::vec4ToGLSLVec4(vertices[i+1].position);
+        tri.v3 = CoordinateUtility::vec4ToGLSLVec4(vertices[i+2].position);
         tri.color = glm::vec3(1.0f);
         glm::vec3 ab = vertices[indices[static_cast<unsigned __int64>(i) + 1]].position - vertices[indices[i + 0]].position;
         glm::vec3 ac = vertices[indices[static_cast<unsigned __int64>(i) + 2]].position - vertices[indices[i + 0]].position;
         glm::vec3 normal = -glm::normalize(glm::cross(ab, ac));
-        tri.normal = vec3ToGLSLVec3(normal);
+        tri.normal = CoordinateUtility::vec3ToGLSLVec3(normal);
         tri.mesh = shaderMeshIndex;
         tri.reflectiveness = 1.0f;
         triangles.push_back(tri);
