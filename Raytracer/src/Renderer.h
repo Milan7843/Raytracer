@@ -46,6 +46,8 @@ public:
 
 private:
 
+	float getRenderProgressPrecise();
+
 	// Get the top-left coordinate of the currently rendering block
 	glm::vec2 getBlockOrigin();
 
