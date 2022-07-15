@@ -64,12 +64,12 @@ int Application::Start()
     Material whiteMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f);
     Material reflectiveMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f, 0.0f);
     Material transparentMaterial(glm::vec3(0.0f, 1.0f, 0.0f), 0.5f, 1.0f, 0.01f);
-    Material roseMaterial(glm::vec3(0.8f, 0.2f, 0.3f), 0.0f, 0.0f, 0.0f);
+    Material roseMaterial(glm::vec3(0.8f, 0.2f, 0.3f), 0.00000001f, 0.0f, 0.0f);
 
     scene.addMaterial(whiteMaterial);
     scene.addMaterial(reflectiveMaterial);
     scene.addMaterial(transparentMaterial);
-    //scene.addMaterial(roseMaterial);
+    scene.addMaterial(roseMaterial);
 
 
     // Adding our test models: !! MUST BE TRIANGULATED !!
@@ -84,14 +84,14 @@ int Application::Start()
     
     Sphere* sphere1 = scene.addSphere(glm::vec3(0.0f, 1.0f, 0.0f), 0.8f, 2);
     Sphere* sphere2 = scene.addSphere(glm::vec3(1.0f, 1.0f, -2.0f), 1.4f, 1);
-    Sphere* sphere3 = scene.addSphere(glm::vec3(2.0f, 1.0f, 1.0f), 0.6f, 2);
+    Sphere* sphere3 = scene.addSphere(glm::vec3(2.0f, 1.0f, 1.0f), 0.6f, 3);
 
     // LIGHTS
     PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
     PointLight pointLight2(glm::vec3(2.0f, 1.8f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 2.0f);
 
     scene.addPointLight(pointLight1);
-    scene.addPointLight(pointLight2);
+    //scene.addPointLight(pointLight2);
 
 
 
@@ -106,7 +106,7 @@ int Application::Start()
     Shader raytracedImageRendererShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracedImageRendererShader.glsl", &scene);
 
     // Raytraced renderer
-    Renderer raytracingRenderer("src/shaders/raytraceComputeShader.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y, &scene);
+    Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampled.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y, &scene);
 
 
     scene.writeLightsToShader(&raytracingShader);

@@ -156,18 +156,24 @@ Intersection triangleIntersection(Tri tri, Ray ray);
 Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere);
 
 Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed);
-Ray fireSecondaryRay(vec3 pos, vec3 direction, bool reflect);
+Ray fireSecondaryRay(vec3 pos, vec3 direction, bool reflect, int seed);
 
 vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit);
 
-vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex);
+vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex, int seed);
 
 
 // Returns a random value between 0 and 1 [0, 1)
 float rand(float seed)
 {
-    return fract(sin(seed) * 10000.);
+    return fract(sin(seed) * 43758.5453);
 }
+
+float rand(int seed)
+{
+    return fract(sin(float(seed)) * 43758.5453);
+}
+
 
 void main()
 {
@@ -199,7 +205,7 @@ void main()
     {
         for (int x = 0; x < multisamples; x++)
         {
-            finalColor += fireRayAtPixelPositionIndex(vec2(cx, cy) + vec2(x * d, -y * d)) / (multisamples * multisamples);
+            finalColor += fireRayAtPixelPositionIndex(vec2(cx, cy) + vec2(x * d, -y * d), pixelIndex*1319* pixelIndex + pixelIndex*x*107*x*x + pixelIndex*y*2549*y) / (multisamples * multisamples);
         }
     }
 
@@ -207,7 +213,7 @@ void main()
 }
 
 
-vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex)
+vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex, int seed)
 {
     float d = 1 / tan(radians(fov) / 2);
     vec3 dir;
@@ -249,7 +255,7 @@ vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex)
 
     for (int i = 0; i < sampleCount; i++)
     {
-        Ray ray = fireRay(cameraPosition, dir, true, i);
+        Ray ray = fireRay(cameraPosition, dir, true, i * 67 + seed * 1471 * seed);
         finalColor += ray.finalColor;
     }
     finalColor = finalColor / float(sampleCount);
@@ -265,6 +271,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
     for (int i = 0; i < MAX_REFLECTIONS; i++)
     {
         Intersection closestIntersection = getAllIntersections(ray, -1, -1);
+
         // Check for hit
         if (!closestIntersection.intersected)
         {
@@ -296,6 +303,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
         }
         else
         {
+            /*
             if (closestIntersection.transparency > 0.0 && closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
             {
                 // Calculating the new ray direction for a reflection
@@ -305,29 +313,25 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
                 float normalRayDirDot = dot(closestIntersection.normal, ray.dir);
                 vec3 normal = sign(normalRayDirDot) * closestIntersection.normal;
 
-                if (rand(float(i + seed) < closestIntersection.reflectiveness)
-                {
-                    // Calculating the new ray direction for a reflection
-                    ray.finalColor += (1.0 - closestIntersection.reflectiveness) * closestIntersection.color;
-                    ray.dir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
-                    ray.pos = closestIntersection.pos + EPSILON * ray.dir;
-                    continue; // reflecting
-                }
-                else if (rand(float(i + seed) < closestIntersection.reflectiveness)
-                {
-                    vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness +
-                        (1.0 - closestIntersection.refractiveness) * ray.dir);
-                    Ray refractedRay =
+
+                // Calculating two rays: one for reflection and one for transparency
+                vec3 reflectedRayDir = normalize(ray.dir + normal * -2. * dot(ray.dir, normal));
+                Ray reflectedRay =
+                    fireSecondaryRay(
+                        ray.pos + EPSILON * reflectedRayDir,
+                        reflectedRayDir,
+                        true
+                    );
+
+                // Refracted ray (going into the transparent object)
+                vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness +
+                    (1.0 - closestIntersection.refractiveness) * ray.dir);
+                Ray refractedRay =
                     fireSecondaryRay(
                         ray.pos + EPSILON * refractedRayDir,
                         refractedRayDir,
                         true
                     );
-
-                    ray.finalColor = refractedRay.finalColor;
-                    ray.hit = false;
-                    break;
-                }
 
                 // This is the reflectiveness with view angle combined: [r, 1] with r = the original reflectiveness
                 float usingReflectiveness = closestIntersection.reflectiveness + (1.0 - closestIntersection.reflectiveness) * (1.0 - abs(normalRayDirDot));
@@ -337,16 +341,18 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
                     + (1.0 - usingReflectiveness) * refractedRay.finalColor;
                 ray.hit = false;
                 break;
-            }
-            else if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
+            }*/
+
+            if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed*17 + i * 1559) < closestIntersection.reflectiveness)
             {
                 // Calculating the new ray direction for a reflection
                 ray.finalColor += (1.0 - closestIntersection.reflectiveness) * closestIntersection.color;
+
                 ray.dir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
                 ray.pos = closestIntersection.pos + EPSILON * ray.dir;
                 continue; // reflecting
             }
-            else if (closestIntersection.transparency > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
+            else if (closestIntersection.transparency > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed*13 + i * 47 + 5779) < closestIntersection.transparency)
             {
                 vec3 normal = sign(dot(closestIntersection.normal, ray.dir)) * closestIntersection.normal;
                 vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness +
@@ -355,7 +361,8 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
                     fireSecondaryRay(
                         ray.pos + EPSILON * refractedRayDir,
                         refractedRayDir,
-                        true
+                        true,
+                        seed*29 + i*577
                     );
 
                 ray.finalColor = refractedRay.finalColor;
@@ -383,7 +390,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
 }
 
 
-Ray fireSecondaryRay(vec3 pos, vec3 direction, bool reflect)
+Ray fireSecondaryRay(vec3 pos, vec3 direction, bool reflect, int seed)
 {
     Ray ray = Ray(pos, direction, false, 10000., vec3(0.), 0., 0, -1);
 
@@ -437,7 +444,7 @@ Ray fireSecondaryRay(vec3 pos, vec3 direction, bool reflect)
                 ray.pos = closestIntersection.pos + EPSILON * ray.dir;
                 continue; // reflecting
             }
-            else if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
+            else if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed*3 + i * 97) < closestIntersection.reflectiveness)
             {
                 // Calculating the new ray direction for a reflection
                 ray.finalColor += (1.0 - closestIntersection.reflectiveness) * closestIntersection.color;
