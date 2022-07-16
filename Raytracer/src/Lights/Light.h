@@ -12,6 +12,8 @@
 
 #include "../AbstractShader.h"
 
+#include "../CoordinateUtility.h"
+
 class Light
 {
 public:

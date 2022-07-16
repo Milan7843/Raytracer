@@ -13,6 +13,7 @@ Model::~Model()
 void Model::draw(AbstractShader* shader, Material* material)
 {
 	// Matrix for swapping column x and z to make a correct translation
+
 	unsigned int mat[16] = {
 		0, 0, 1, 0,
 		0, 1, 0, 0,
@@ -22,7 +23,7 @@ void Model::draw(AbstractShader* shader, Material* material)
 	glm::mat4 fix = glm::make_mat4(mat);
 
 	// Setting up the shader
-	shader->setMat4("model", fix*transformation);
+	shader->setMat4("model", transformation);//fix*transformation);
 
 	shader->setVector3("inputColor", material->color);
 
