@@ -187,7 +187,7 @@ float Renderer::getRenderProgress()
 
 float Renderer::getTimeLeft()
 {
-	float totalTime = currentRenderTime / std::max(getRenderProgress(), 0.01f);
+	float totalTime = currentRenderTime / std::max(getRenderProgressPrecise(), 0.01f);
 
 	return totalTime - getRenderProgress() * totalTime;
 }
