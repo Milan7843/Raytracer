@@ -4,7 +4,7 @@
 
 
 Application::Application(unsigned int WIDTH, unsigned int HEIGHT)
-    : WINDOW_SIZE_X(WIDTH), WINDOW_SIZE_Y(HEIGHT), camera(glm::vec3(1.0f, 8.0f, 0.0f))//camera(glm::vec3(6.7f, 2.7f, -3.7f))
+    : WINDOW_SIZE_X(WIDTH), WINDOW_SIZE_Y(HEIGHT), camera(glm::vec3(6.7f, 2.7f, -3.7f))
 {
 
 }
