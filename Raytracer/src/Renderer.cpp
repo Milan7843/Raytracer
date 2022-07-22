@@ -33,9 +33,10 @@ void Renderer::startBlockRender(Scene* scene, Camera* camera)
 {
 	currentlyBlockRendering = true;
 
-	// Reset block indices
+	// Resetting block indices
 	blockIndexX = 0;
 	blockIndexY = 0;
+	currentBlockRenderPassIndex = 0;
 
 	blockSizeRendering = blockSize;
 
@@ -43,6 +44,7 @@ void Renderer::startBlockRender(Scene* scene, Camera* camera)
 
 	computeShader.setBool("renderUsingBlocks", true);
 	computeShader.setInt("blockSize", blockSizeRendering);
+	computeShader.setInt("renderPassCount", renderPassCount);
 
 	blockRenderStep();
 }
@@ -51,6 +53,7 @@ void Renderer::blockRenderStep()
 {
 	computeShader.use();
 	computeShader.setVector2("currentBlockOrigin", getBlockOrigin());
+	computeShader.setInt("currentBlockRenderPassIndex", currentBlockRenderPassIndex);
 
 	// Running the compute shader once for each pixel in the block
 	glDispatchCompute(blockSizeRendering, blockSizeRendering, 1);
@@ -58,6 +61,8 @@ void Renderer::blockRenderStep()
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	currentBlockRenderPassIndex++;
 }
 
 void Renderer::setUpForRender(Scene* scene, Camera* camera)
@@ -98,17 +103,28 @@ void Renderer::update(float deltaTime)
 		// Add past time to current render time
 		currentRenderTime += deltaTime;
 
+		// Check if we need to render more passes on this specific block
+		if (currentBlockRenderPassIndex < renderPassCount)
+		{
+			// Stay on this block
+			return;
+		}
+
 		// Check if it is at the right side of the screen
 		if (getBlockOrigin().x + blockSizeRendering >= width)
 		{
 			// Move down a layer
 			blockIndexY++;
 			blockIndexX = 0;
+
+			currentBlockRenderPassIndex = 0;
 		}
 		else
 		{
 			// Just move right
 			blockIndexX++;
+
+			currentBlockRenderPassIndex = 0;
 		}
 		// Check for finished render
 		if (getBlockOrigin().y >= height)
@@ -166,6 +182,16 @@ int* Renderer::getBlockSizePointer()
 int* Renderer::getMultisamplePointer()
 {
 	return &multisamples;
+}
+
+int* Renderer::getSampleCountPointer()
+{
+	return &sampleCount;
+}
+
+int* Renderer::getRenderPassCountPointer()
+{
+	return &renderPassCount;
 }
 
 float Renderer::getRenderProgressPrecise()
