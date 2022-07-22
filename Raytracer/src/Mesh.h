@@ -39,7 +39,7 @@ public:
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int startIndex, unsigned int meshIndex);
 	~Mesh();
 
-	void writeToShader(AbstractShader* shader, unsigned int ssbo, unsigned int materialIndex);
+	void writeToShader(AbstractShader* shader, unsigned int ssbo, unsigned int materialIndex, glm::mat4& transformation);
 	void writePositionToShader(AbstractShader* shader);
 
 	static int getTriangleSize();

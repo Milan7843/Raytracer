@@ -74,7 +74,7 @@ void Renderer::setUpForRender(Scene* scene, Camera* camera)
 	scene->writeMaterialsToShader(&computeShader);
 
 	// Writing camera data to the compute shader
-	computeShader.setVector3("cameraPosition", camera->getPosition());
+	computeShader.setVector3("cameraPosition", CoordinateUtility::vec3ToGLSLVec3(camera->getPosition()));
 	computeShader.setVector3("cameraRotation", camera->getRotation());
 	computeShader.setFloat("fov", camera->getFov());
 

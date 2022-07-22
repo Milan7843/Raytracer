@@ -61,7 +61,7 @@ private:
 	unsigned int width, height;
 
 	// The sample count used to render (= number of rays per pixel)
-	unsigned int sampleCount = 50;
+	unsigned int sampleCount = 20;
 
 	// The number of sample frames already rendered
 	unsigned int currentFrameSampleCount = 0;

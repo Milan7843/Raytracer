@@ -67,6 +67,7 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 	{
 		ImGui::SetTooltip("The number of different sample points per pixel, works as anti-aliasing.");
 	}
+	ImGui::Text(camera->getInformation().c_str());
 
 	// Button to switch between raytraced and rasterized views
 	if (ImGui::Button(*inRaytraceMode ? "View rasterized" : "View raytraced"))
