@@ -13,8 +13,15 @@ public:
 	// Applying transformations on this object
 	void rotate(glm::vec3 rotationAxis, float degrees);
 	void move(glm::vec3 move);
+	void setPosition(glm::vec3 pos);
 	void scale(glm::vec3 scale);
 	virtual void scale(float scale);
+
+	// Reset the rotation of this object
+	void resetRotation();
+
+	// Get a single matrix which includes all transformations
+	glm::mat4 getTransformationMatrix();
 
 	// Draw this object given the shader
 	virtual void draw(AbstractShader* shader);
@@ -22,14 +29,8 @@ public:
 	// Write this object's data to the given shader
 	virtual void writeToShader(AbstractShader* shader, unsigned int ssbo);
 
-	// Apply all the previous transformations to the vertex data
-	virtual void applyTransformations();
-
 	// Whether this object's data has been modified
 	bool updated = true;
-
-	// All transformations on this object
-	glm::mat4 transformation = glm::mat4(1.0f);
 
 	// The index of the material this object uses
 	unsigned int materialIndex = 0;
@@ -38,4 +39,9 @@ protected:
 	// Abstract class, no need to instantiate this class
 	Object();
 	virtual ~Object() {}
+
+	// Transformations
+	glm::vec3 position = glm::vec3(0.0f);
+	glm::mat4 rotationMatrix = glm::mat4(1.0f);
+	glm::vec3 scaleVector = glm::vec3(1.0f);
 };

@@ -76,10 +76,9 @@ int Application::Start()
     Model* plane = scene.addModel("src/models/plane.obj", 0);
     Model* icosphere = scene.addModel("src/models/medresicosphere.obj", 1);
 
-    // Always first move, then rotate, then scale
-    icosphere->move(glm::vec3(1.0f, 0.6f, 2.0f));
+    // Transforming the icosphere
+    icosphere->setPosition(glm::vec3(1.0f, 0.6f, 2.0f));
     icosphere->scale(0.6f);
-    icosphere->applyTransformations();
 
     
     Sphere* sphere1 = scene.addSphere(glm::vec3(0.0f, 1.0f, 0.0f), 0.8f, 2);
@@ -87,12 +86,12 @@ int Application::Start()
     Sphere* sphere3 = scene.addSphere(glm::vec3(2.0f, 1.0f, 1.0f), 0.6f, 3);
 
     // LIGHTS
-    //PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
-    PointLight pointLight1(glm::vec3(0.0f, 1.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
+    PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
+    //PointLight pointLight1(glm::vec3(0.0f, 1.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
     PointLight pointLight2(glm::vec3(2.0f, 1.8f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 2.0f);
 
     scene.addPointLight(pointLight1);
-    //scene.addPointLight(pointLight2);
+    scene.addPointLight(pointLight2);
 
 
 

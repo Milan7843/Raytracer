@@ -24,9 +24,6 @@ public:
 	// Write this object's data to the given shader
 	virtual void writeToShader(AbstractShader* shader, unsigned int ssbo);
 
-	// Apply all the previous transformations to the vertex data
-	virtual void applyTransformations();
-
 	std::vector<Mesh> meshes;
 
 private:
