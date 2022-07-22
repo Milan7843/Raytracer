@@ -13,6 +13,8 @@ uniform int multisamples;
 uniform bool renderUsingBlocks;
 uniform vec2 currentBlockOrigin;
 uniform int blockSize;
+uniform int renderPassCount;
+uniform int currentBlockRenderPassIndex;
 
 #define EPSILON 0.0001f
 
@@ -205,11 +207,29 @@ void main()
     {
         for (int x = 0; x < multisamples; x++)
         {
-            finalColor += fireRayAtPixelPositionIndex(vec2(cx, cy) + vec2(x * d, -y * d), pixelIndex*1319* pixelIndex + pixelIndex*x*107*x*x + pixelIndex*y*2549*y) / (multisamples * multisamples);
+            finalColor += fireRayAtPixelPositionIndex(vec2(cx, cy) + vec2(x * d, -y * d), pixelIndex*1319* pixelIndex + pixelIndex*x*107*x*x + pixelIndex*y*2549*y + currentBlockRenderPassIndex*89) / (multisamples * multisamples);
         }
     }
 
-    colors[pixelIndex] = vec4(finalColor, 1.0);
+
+    // TODO make buffer empty on begin of render!
+    if (currentBlockRenderPassIndex == 0)
+    {
+        // Empty the buffer here
+        colors[pixelIndex] = vec4(0.0);
+    }
+
+    float t = 1.0 / (float(currentBlockRenderPassIndex) + 1.0);
+    // examples:
+    /* old - new
+    0: 0.0 - 1.0   t= 1.0
+    1: 0.5 - 0.5   t= 0.5
+    2: 0.66 - 0.33 t= 0.33
+    3: 0.75 - 0.25 t= 0.25
+    4: 0.8 - 0.2   t= 0.20
+    5: 0.83 - 0.17 t= 0.17
+    */
+    colors[pixelIndex] = colors[pixelIndex] * (1.0 - t) + vec4(finalColor, 1.0) * t;
 }
 
 

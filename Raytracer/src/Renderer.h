@@ -40,6 +40,8 @@ public:
 
 	int* getBlockSizePointer();
 	int* getMultisamplePointer();
+	int* getSampleCountPointer();
+	int* getRenderPassCountPointer();
 	float getRenderProgress();
 	float getTimeLeft();
 
@@ -61,7 +63,10 @@ private:
 	unsigned int width, height;
 
 	// The sample count used to render (= number of rays per pixel)
-	unsigned int sampleCount = 20;
+	int sampleCount = 20;
+
+	// The numbers of render passes per block
+	int renderPassCount = 1;
 
 	// The number of sample frames already rendered
 	unsigned int currentFrameSampleCount = 0;
@@ -77,5 +82,6 @@ private:
 	unsigned int blockIndexX = 0, blockIndexY = 0;
 
 	float currentRenderTime = 0.0f;
+	int currentBlockRenderPassIndex = 0;
 };
 

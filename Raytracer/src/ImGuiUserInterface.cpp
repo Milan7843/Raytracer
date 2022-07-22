@@ -69,6 +69,20 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 	}
 	ImGui::Text(camera->getInformation().c_str());
 
+	// Samples per render pass
+	ImGui::SliderInt("Sample count", renderer->getSampleCountPointer(), 1, 100);
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+	{
+		ImGui::SetTooltip("The number of samples per pixel per render pass.");
+	}
+	
+	// Render passes per block
+	ImGui::SliderInt("Block passes", renderer->getRenderPassCountPointer(), 1, 100);
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+	{
+		ImGui::SetTooltip("The number of passes per block. Each pass will take the full number of samples for each pixel.");
+	}
+
 	// Button to switch between raytraced and rasterized views
 	if (ImGui::Button(*inRaytraceMode ? "View rasterized" : "View raytraced"))
 	{
