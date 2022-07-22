@@ -29,7 +29,7 @@ struct DirLight
 };
 DirLight dirLights[NUM_DIR_LIGHTS] = DirLight[](
     //         Pos                  Color                   Intensity
-    DirLight(vec3(.707, -.707, 0.), vec3(1.0, 1.0, 0.9), 0.0)
+    DirLight(vec3(.707, -.707, 0.), vec3(1.0, 1.0, 0.9), 0.5)
     );
 
 struct AmbientLight
@@ -39,7 +39,7 @@ struct AmbientLight
 };
 AmbientLight ambientLights[1] = AmbientLight[](
     //           Color                  Intensity
-    AmbientLight(vec3(0.8, 0.8, 1.0), 0.0)
+    AmbientLight(vec3(0.8, 0.8, 1.0), 0.02)
     );
 
 

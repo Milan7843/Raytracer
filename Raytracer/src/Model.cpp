@@ -38,7 +38,7 @@ void Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
-		meshes[i].writeToShader(shader, ssbo, materialIndex);
+		meshes[i].writeToShader(shader, ssbo, materialIndex, transformation);
 	}
 }
 

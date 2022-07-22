@@ -124,6 +124,7 @@ struct Mesh
 {
     vec3 position;
     int material;
+    mat4 transformation;
 };
 uniform Mesh meshes[NUM_MESHES];
 
@@ -644,6 +645,11 @@ Intersection triangleIntersection(Tri tri, Ray ray)
     i.intersected = false;
 
     const float epsilon = 0.0000001;
+
+    vec3 vert1 = (meshes[tri.mesh].transformation * vec4(tri.v1.xyz, 1.0)).zyx;
+    vec3 vert2 = (meshes[tri.mesh].transformation * vec4(tri.v2.xyz, 1.0)).zyx;
+    vec3 vert3 = (meshes[tri.mesh].transformation * vec4(tri.v3.xyz, 1.0)).zyx;
+
     /*
     vec3 toVertex = normalize(tri.v1.xyz - ray.pos);
     if (dot(ray.dir, toVertex) < 0.9999f)
@@ -653,8 +659,8 @@ Intersection triangleIntersection(Tri tri, Ray ray)
 
     // Edges 1 and 2
     vec3 e1, e2;
-    e1 = tri.v2.xyz - tri.v1.xyz;
-    e2 = tri.v3.xyz - tri.v1.xyz;
+    e1 = vert2 - vert1;
+    e2 = vert3 - vert1;
 
     vec3 h = cross(ray.dir, e2);
     float a = dot(e1, h);
@@ -664,7 +670,7 @@ Intersection triangleIntersection(Tri tri, Ray ray)
         return i;
     }
     float f = 1. / a;
-    vec3 s = ray.pos - (tri.v1.xyz + meshes[tri.mesh].position);
+    vec3 s = ray.pos - (vert1 + meshes[tri.mesh].position);
     float u = f * dot(s, h);
     if (u < 0.0 || u > 1.)
     {

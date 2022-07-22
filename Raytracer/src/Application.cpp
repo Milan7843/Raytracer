@@ -4,7 +4,7 @@
 
 
 Application::Application(unsigned int WIDTH, unsigned int HEIGHT)
-    : WINDOW_SIZE_X(WIDTH), WINDOW_SIZE_Y(HEIGHT), camera(glm::vec3(6.7f, 2.7f, -3.7f))
+    : WINDOW_SIZE_X(WIDTH), WINDOW_SIZE_Y(HEIGHT), camera(glm::vec3(1.0f, 8.0f, 0.0f))//camera(glm::vec3(6.7f, 2.7f, -3.7f))
 {
 
 }
@@ -74,7 +74,7 @@ int Application::Start()
 
     // Adding our test models: !! MUST BE TRIANGULATED !!
     Model* plane = scene.addModel("src/models/plane.obj", 0);
-    Model* icosphere = scene.addModel("src/models/axes.obj", 2);
+    Model* icosphere = scene.addModel("src/models/medresicosphere.obj", 1);
 
     // Always first move, then rotate, then scale
     icosphere->move(glm::vec3(1.0f, 0.6f, 2.0f));
