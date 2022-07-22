@@ -29,7 +29,7 @@ struct DirLight
 };
 DirLight dirLights[NUM_DIR_LIGHTS] = DirLight[](
     //         Pos                  Color                   Intensity
-    DirLight(vec3(.707, -.707, 0.), vec3(1.0, 1.0, 0.9), 0.5)
+    DirLight(vec3(.707, -.707, 0.), vec3(1.0, 1.0, 0.9), 0.3)
     );
 
 struct AmbientLight
@@ -48,10 +48,7 @@ vec3 calculateLights(vec3 pos, vec3 normal);
 
 void main()
 {
-    //FragColor = vec4(Color, 1.);
     FragColor = vec4(calculateLights(FragPos, Normal), 1.);
-    //FragColor = vec4(Normal, 1.);
-    //FragColor = vec4(FragPos / 4., 1.);
 }
 
 vec3 calculateLights(vec3 pos, vec3 normal)
@@ -67,8 +64,6 @@ vec3 calculateLights(vec3 pos, vec3 normal)
         float intensity = max(
             dot(dir, normal),
             0.);
-
-        //finalLight += dir / 3.;
 
         float falloff = 1.0 / (dist.x * dist.x + dist.y * dist.y + dist.z * dist.z);
 

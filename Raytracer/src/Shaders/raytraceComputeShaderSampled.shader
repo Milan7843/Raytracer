@@ -163,7 +163,6 @@ vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit);
 
 vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex, int seed);
 
-
 // Returns a random value between 0 and 1 [0, 1)
 float rand(float seed)
 {
