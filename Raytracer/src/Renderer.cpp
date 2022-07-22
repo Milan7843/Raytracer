@@ -62,6 +62,9 @@ void Renderer::blockRenderStep()
 
 void Renderer::setUpForRender(Scene* scene, Camera* camera)
 {
+	// Reset current render time
+	currentRenderTime = 0.0f;
+
 	computeShader.use();
 
 	scene->checkObjectUpdates(&computeShader);
@@ -71,7 +74,7 @@ void Renderer::setUpForRender(Scene* scene, Camera* camera)
 	scene->writeMaterialsToShader(&computeShader);
 
 	// Writing camera data to the compute shader
-	computeShader.setVector3("cameraPosition", camera->getPosition());
+	computeShader.setVector3("cameraPosition", CoordinateUtility::vec3ToGLSLVec3(camera->getPosition()));
 	computeShader.setVector3("cameraRotation", camera->getRotation());
 	computeShader.setFloat("fov", camera->getFov());
 
@@ -85,11 +88,17 @@ void Renderer::setUpForRender(Scene* scene, Camera* camera)
 	bindPixelBuffer();
 }
 
-void Renderer::update()
+void Renderer::update(float deltaTime)
 {
 	if (currentlyBlockRendering)
 	{
+		// Render a block
 		blockRenderStep();
+
+		// Add past time to current render time
+		currentRenderTime += deltaTime;
+
+		// Check if it is at the right side of the screen
 		if (getBlockOrigin().x + blockSizeRendering >= width)
 		{
 			// Move down a layer
@@ -159,13 +168,26 @@ int* Renderer::getMultisamplePointer()
 	return &multisamples;
 }
 
-float Renderer::getRenderProgress()
+float Renderer::getRenderProgressPrecise()
 {
 	float blocksInHeight = (float)height / (float)blockSizeRendering;
 	float blocksInWidth = (float)width / (float)blockSizeRendering;
 
 	int blocksDone = blockIndexX + blockIndexY * blocksInWidth;
 
-	float progress = std::floor((blocksDone / (blocksInWidth * blocksInHeight)) * 100.0f) / 100.0f;
+	float progress = blocksDone / (blocksInWidth * blocksInHeight);
 	return progress;
+}
+
+float Renderer::getRenderProgress()
+{
+	float progress = std::floor(getRenderProgressPrecise() * 100.0f) / 100.0f;
+	return progress;
+}
+
+float Renderer::getTimeLeft()
+{
+	float totalTime = currentRenderTime / std::max(getRenderProgressPrecise(), 0.01f);
+
+	return totalTime - getRenderProgress() * totalTime;
 }

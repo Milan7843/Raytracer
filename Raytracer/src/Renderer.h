@@ -22,7 +22,7 @@ public:
 	void setUpForRender(Scene* scene, Camera* camera);
 
 	// Update this renderer; must be called every frame
-	void update();
+	void update(float deltaTime);
 
 
 
@@ -41,9 +41,12 @@ public:
 	int* getBlockSizePointer();
 	int* getMultisamplePointer();
 	float getRenderProgress();
+	float getTimeLeft();
 
 
 private:
+
+	float getRenderProgressPrecise();
 
 	// Get the top-left coordinate of the currently rendering block
 	glm::vec2 getBlockOrigin();
@@ -58,7 +61,7 @@ private:
 	unsigned int width, height;
 
 	// The sample count used to render (= number of rays per pixel)
-	unsigned int sampleCount = 1;
+	unsigned int sampleCount = 20;
 
 	// The number of sample frames already rendered
 	unsigned int currentFrameSampleCount = 0;
@@ -72,5 +75,7 @@ private:
 	int blockSizeRendering = 100;
 	bool currentlyBlockRendering = false;
 	unsigned int blockIndexX = 0, blockIndexY = 0;
+
+	float currentRenderTime = 0.0f;
 };
 

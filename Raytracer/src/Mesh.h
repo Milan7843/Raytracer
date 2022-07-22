@@ -11,6 +11,8 @@
 
 #include "AbstractShader.h"
 
+#include "CoordinateUtility.h"
+
 #include <vector>
 #include <iostream>
 
@@ -37,7 +39,7 @@ public:
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int startIndex, unsigned int meshIndex);
 	~Mesh();
 
-	void writeToShader(AbstractShader* shader, unsigned int ssbo, unsigned int materialIndex);
+	void writeToShader(AbstractShader* shader, unsigned int ssbo, unsigned int materialIndex, glm::mat4& transformation);
 	void writePositionToShader(AbstractShader* shader);
 
 	static int getTriangleSize();
@@ -60,7 +62,5 @@ public:
 	unsigned int VAO, VBO, EBO;
 
 private:
-	glm::vec3 vec3ToGLSLVec3(glm::vec3 v);
-	glm::vec4 vec4ToGLSLVec4(glm::vec3 v);
 	void setupMesh();
 };

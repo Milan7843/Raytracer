@@ -38,7 +38,7 @@ glm::mat4 Camera::getProjectionMatrix(int width, int height)
 
 glm::vec3 Camera::getPosition()
 {
-	return glm::vec3(position.z, position.y, position.x);
+	return glm::vec3(position.x, position.y, position.z);
 }
 glm::vec3 Camera::getRotation()
 {

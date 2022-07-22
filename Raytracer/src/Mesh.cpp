@@ -19,15 +19,9 @@ int Mesh::getTriangleSize()
 
 void Mesh::applyTransformations(glm::mat4& transformation)
 {
-    for (unsigned int i = 0; i < triangles.size(); i++)
-    {
-        triangles[i].v1 = transformation * triangles[i].v1;
-        triangles[i].v2 = transformation * triangles[i].v2;
-        triangles[i].v3 = transformation * triangles[i].v3;
-    }
 }
 
-void Mesh::writeToShader(AbstractShader* shader, unsigned int ssbo, unsigned int materialIndex)
+void Mesh::writeToShader(AbstractShader* shader, unsigned int ssbo, unsigned int materialIndex, glm::mat4& transformation)
 {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     // Copying this mesh's data into the buffer at the right position
@@ -36,22 +30,14 @@ void Mesh::writeToShader(AbstractShader* shader, unsigned int ssbo, unsigned int
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     // Setting the models position
-    shader->setVector3(("meshes[" + std::to_string(shaderMeshIndex) + "].position").c_str(), vec3ToGLSLVec3(position));
+    writePositionToShader(shader);
+    //shader->setVector3(("meshes[" + std::to_string(shaderMeshIndex) + "].position").c_str(), CoordinateUtility::vec3ToGLSLVec3(position));
     shader->setInt(("meshes[" + std::to_string(shaderMeshIndex) + "].material").c_str(), materialIndex);
+    shader->setMat4(("meshes[" + std::to_string(shaderMeshIndex) + "].transformation").c_str(), transformation);
 }
 
 void Mesh::writePositionToShader(AbstractShader* shader)
 {
-    shader->setVector3(("meshes[" + std::to_string(shaderMeshIndex) + "].position").c_str(), vec3ToGLSLVec3(position));
-}
-
-glm::vec3 Mesh::vec3ToGLSLVec3(glm::vec3 v)
-{
-    return glm::vec3(v.z, v.y, v.x);
-}
-glm::vec4 Mesh::vec4ToGLSLVec4(glm::vec3 v)
-{
-    return glm::vec4(v.z, v.y, v.x, 1.0f);
 }
 
 void Mesh::setupMesh()
@@ -79,14 +65,14 @@ void Mesh::setupMesh()
     for (unsigned int i = 0; i < vertices.size(); i += 3)
     {
         Triangle tri{};
-        tri.v1 = vec4ToGLSLVec4(vertices[i].position);
-        tri.v2 = vec4ToGLSLVec4(vertices[i+1].position);
-        tri.v3 = vec4ToGLSLVec4(vertices[i+2].position);
+        tri.v1 = vertices[i].position;
+        tri.v2 = vertices[i + 1].position;
+        tri.v3 = vertices[i + 2].position;
         tri.color = glm::vec3(1.0f);
         glm::vec3 ab = vertices[indices[static_cast<unsigned __int64>(i) + 1]].position - vertices[indices[i + 0]].position;
         glm::vec3 ac = vertices[indices[static_cast<unsigned __int64>(i) + 2]].position - vertices[indices[i + 0]].position;
         glm::vec3 normal = -glm::normalize(glm::cross(ab, ac));
-        tri.normal = vec3ToGLSLVec3(normal);
+        tri.normal = CoordinateUtility::vec3ToGLSLVec3(normal);
         tri.mesh = shaderMeshIndex;
         tri.reflectiveness = 1.0f;
         triangles.push_back(tri);

@@ -64,17 +64,17 @@ int Application::Start()
     Material whiteMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f);
     Material reflectiveMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f, 0.0f);
     Material transparentMaterial(glm::vec3(0.0f, 1.0f, 0.0f), 0.5f, 1.0f, 0.01f);
-    Material roseMaterial(glm::vec3(0.8f, 0.2f, 0.3f), 0.0f, 0.0f, 0.0f);
+    Material roseMaterial(glm::vec3(0.8f, 0.2f, 0.3f), 0.00000001f, 0.0f, 0.0f);
 
     scene.addMaterial(whiteMaterial);
     scene.addMaterial(reflectiveMaterial);
     scene.addMaterial(transparentMaterial);
-    //scene.addMaterial(roseMaterial);
+    scene.addMaterial(roseMaterial);
 
 
     // Adding our test models: !! MUST BE TRIANGULATED !!
     Model* plane = scene.addModel("src/models/plane.obj", 0);
-    Model* icosphere = scene.addModel("src/models/icosphere.obj", 2);
+    Model* icosphere = scene.addModel("src/models/medresicosphere.obj", 1);
 
     // Always first move, then rotate, then scale
     icosphere->move(glm::vec3(1.0f, 0.6f, 2.0f));
@@ -83,20 +83,22 @@ int Application::Start()
 
     
     Sphere* sphere1 = scene.addSphere(glm::vec3(0.0f, 1.0f, 0.0f), 0.8f, 2);
-    Sphere* sphere2 = scene.addSphere(glm::vec3(1.0f, 1.0f, -2.0f), 1.4f, 1);
-    Sphere* sphere3 = scene.addSphere(glm::vec3(2.0f, 1.0f, 1.0f), 0.6f, 2);
+    Sphere* sphere2 = scene.addSphere(glm::vec3(3.0f, 1.0f, 0.0f), 1.4f, 1);
+    Sphere* sphere3 = scene.addSphere(glm::vec3(2.0f, 1.0f, 1.0f), 0.6f, 3);
 
     // LIGHTS
-    PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
+    //PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
+    PointLight pointLight1(glm::vec3(0.0f, 1.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
     PointLight pointLight2(glm::vec3(2.0f, 1.8f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 2.0f);
 
     scene.addPointLight(pointLight1);
-    scene.addPointLight(pointLight2);
+    //scene.addPointLight(pointLight2);
 
 
 
     Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
     Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader");
+    Shader rasterizedShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/rasterizedView.shader", &scene);
     Shader textureShader("src/Shaders/textureVertexShader.shader", "src/Shaders/textureFragmentShader.shader");
     /*
     Shader raymarchShader("src/Shaders/raymarchVertexShader.shader", 
@@ -106,11 +108,13 @@ int Application::Start()
     Shader raytracedImageRendererShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracedImageRendererShader.glsl", &scene);
 
     // Raytraced renderer
-    Renderer raytracingRenderer("src/shaders/raytraceComputeShader.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y, &scene);
+    Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampled.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y, &scene);
 
 
     scene.writeLightsToShader(&raytracingShader);
     scene.writeMaterialsToShader(&raytracingShader);
+    scene.writeLightsToShader(&rasterizedShader);
+    scene.writeMaterialsToShader(&rasterizedShader);
 
     scene.generateTriangleBuffer();
     
@@ -153,7 +157,7 @@ int Application::Start()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        raytracingRenderer.update();
+        raytracingRenderer.update(deltaTime);
 
         if (inRaytraceMode)
         {
@@ -162,8 +166,7 @@ int Application::Start()
 
             usedShader->use();
             usedShader->setVector2("screenSize", WINDOW_SIZE_X, WINDOW_SIZE_Y);
-            usedShader->setVector3("cameraPosition", camera.getPosition());
-            usedShader->setVector3("cameraRotation", camera.getRotation());
+            //usedShader->setVector3("cameraRotation", CoordinateUtility::vec3ToGLSLVec3(camera.getRotation()));
 
             // Making sure the pixel buffer is assigned for the raytracedImageRendererShader
             raytracingRenderer.bindPixelBuffer();
@@ -181,20 +184,23 @@ int Application::Start()
             // Drawing axes
             drawAxes(axesVAO, &solidColorShader, &camera);
 
+            /* Rasterized scene rendering */
+            rasterizedShader.use();
+
             // Uniforms
             float time = glfwGetTime();
 
             // View matrix
             glm::mat4 view = glm::mat4(1.0f);
             view = camera.getViewMatrix();
-            solidColorShader.setMat4("view", view);
+            rasterizedShader.setMat4("view", view);
 
             // Projection matrix
             glm::mat4 projection;
             projection = camera.getProjectionMatrix(WINDOW_SIZE_X, WINDOW_SIZE_Y);
-            solidColorShader.setMat4("projection", projection);
+            rasterizedShader.setMat4("projection", projection);
 
-            scene.draw(&solidColorShader);
+            scene.draw(&rasterizedShader);
         }
 
         userInterface.drawUserInterface(&scene, &camera, &raytracingRenderer, &inRaytraceMode);
