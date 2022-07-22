@@ -43,6 +43,12 @@ public:
 	// Bind the buffer holding all triangles
 	void bindTriangleBuffer();
 
+	std::vector<Material>& getMaterials();
+	std::vector<PointLight>& getPointLights();
+	std::vector<Model>& getModels();
+	std::vector<Sphere>& getSpheres();
+
+
 	unsigned int triangleCount = 0;
 
 private:

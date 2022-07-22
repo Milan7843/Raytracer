@@ -54,39 +54,11 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 		renderer->startBlockRender(scene, camera);
 	}
 	ImGui::ProgressBar(renderer->getRenderProgress());
-	ImGui::Text(std::to_string(renderer->getTimeLeft()).c_str());
 
-	ImGui::SliderInt("Block size", renderer->getBlockSizePointer(), 1, 100);
-	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+	// Drawing all settings related to rendering
+	if (ImGui::CollapsingHeader("Render settings"))
 	{
-		ImGui::SetTooltip("The size of a render block in pixels.");
-	}
-
-	ImGui::SliderInt("Multisamples", renderer->getMultisamplePointer(), 1, 5);
-	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-	{
-		ImGui::SetTooltip("The number of different sample points per pixel, works as anti-aliasing.");
-	}
-	ImGui::Text(camera->getInformation().c_str());
-
-	// Samples per render pass
-	ImGui::SliderInt("Sample count", renderer->getSampleCountPointer(), 1, 100);
-	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-	{
-		ImGui::SetTooltip("The number of samples per pixel per render pass.");
-	}
-	
-	// Render passes per block
-	ImGui::SliderInt("Block passes", renderer->getRenderPassCountPointer(), 1, 100);
-	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-	{
-		ImGui::SetTooltip("The number of passes per block. Each pass will take the full number of samples for each pixel.");
-	}
-
-	// Button to switch between raytraced and rasterized views
-	if (ImGui::Button(*inRaytraceMode ? "View rasterized" : "View raytraced"))
-	{
-		*inRaytraceMode = !(*inRaytraceMode);
+		drawRenderSettings(camera, renderer, inRaytraceMode);
 	}
 
 	ImGui::Separator();
@@ -107,7 +79,11 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 		//ImGui::ColorEdit3("Lower graph colour", (float*)&lowerColor);
 	}
 
+	drawMaterials(scene);
+	drawLights(scene);
+
 	ImGui::End();
+
 
 	// Rendering
 	ImGui::Render();
@@ -146,5 +122,105 @@ void ImGuiUserInterface::handleInput(GLFWwindow* window, Camera* camera)
 bool ImGuiUserInterface::isEnabled()
 {
 	return imGuiEnabled;
+}
+
+void ImGuiUserInterface::drawRenderSettings(Camera* camera, Renderer* renderer, bool* inRaytraceMode)
+{
+	ImGui::Text(std::to_string(renderer->getTimeLeft()).c_str());
+
+	ImGui::SliderInt("Block size", renderer->getBlockSizePointer(), 1, 100);
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+	{
+		ImGui::SetTooltip("The size of a render block in pixels.");
+	}
+
+	ImGui::SliderInt("Multisamples", renderer->getMultisamplePointer(), 1, 5);
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+	{
+		ImGui::SetTooltip("The number of different sample points per pixel, works as anti-aliasing.");
+	}
+	ImGui::Text(camera->getInformation().c_str());
+
+	// Samples per render pass
+	ImGui::SliderInt("Sample count", renderer->getSampleCountPointer(), 1, 100);
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+	{
+		ImGui::SetTooltip("The number of samples per pixel per render pass.");
+	}
+
+	// Render passes per block
+	ImGui::SliderInt("Block passes", renderer->getRenderPassCountPointer(), 1, 100);
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+	{
+		ImGui::SetTooltip("The number of passes per block. Each pass will take the full number of samples for each pixel.");
+	}
+
+	// Button to switch between raytraced and rasterized views
+	if (ImGui::Button(*inRaytraceMode ? "View rasterized" : "View raytraced"))
+	{
+		*inRaytraceMode = !(*inRaytraceMode);
+	}
+}
+
+void ImGuiUserInterface::drawMaterials(Scene* scene)
+{
+	if (ImGui::CollapsingHeader("Materials"))
+	{
+		for (Material& material : scene->getMaterials())
+		{
+			// Drawing each material
+			drawMaterial(material);
+			material.refractiveness = 1.0f;
+		}
+	}
+}
+
+void ImGuiUserInterface::drawMaterial(Material& material)
+{
+	if (ImGui::TreeNode((*material.getNamePointer()).c_str()))
+	{
+		ImGui::InputText("Name", material.getNamePointer());
+		ImGui::ColorEdit3("Color", (float*)material.getColorPointer());
+		ImGui::ColorEdit3("Emission", (float*)material.getEmissionPointer());
+		ImGui::DragFloat("Reflectiveness", material.getReflectivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
+		ImGui::DragFloat("Transparency", material.getTransparencyPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
+		ImGui::DragFloat("Refractiveness", material.getRefractivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+}
+
+void ImGuiUserInterface::drawLights(Scene* scene)
+{
+	if (ImGui::CollapsingHeader("Lights"))
+	{
+		unsigned int index = 0;
+		for (PointLight& light : scene->getPointLights())
+		{
+			// Drawing each point light
+			drawLight(light, index);
+			index++;
+		}
+	}
+}
+
+void ImGuiUserInterface::drawLight(PointLight& light, unsigned int index)
+{
+	if (ImGui::TreeNode(("Point light " + std::to_string(index + 1)).c_str()))
+	{
+		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
+		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
+		ImGui::DragFloat3("Position", (float*)light.getPositionPointer(), 0.01f);
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+}
+
+void ImGuiUserInterface::drawObjects(Scene* scene)
+{
+}
+
+void ImGuiUserInterface::drawObject(Object& object)
+{
 }
 

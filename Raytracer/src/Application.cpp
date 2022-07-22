@@ -61,10 +61,10 @@ int Application::Start()
     Scene scene = Scene();
 
     // MATERIALS
-    Material whiteMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f);
-    Material reflectiveMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f, 0.0f);
-    Material transparentMaterial(glm::vec3(0.0f, 1.0f, 0.0f), 0.5f, 1.0f, 0.01f);
-    Material roseMaterial(glm::vec3(0.8f, 0.2f, 0.3f), 0.00000001f, 0.0f, 0.0f);
+    Material whiteMaterial("White", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f);
+    Material reflectiveMaterial("Reflective", glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f, 0.0f);
+    Material transparentMaterial("Transparent", glm::vec3(0.0f, 1.0f, 0.0f), 0.5f, 1.0f, 0.01f);
+    Material roseMaterial("Rose matte", glm::vec3(0.8f, 0.2f, 0.3f), 0.00000001f, 0.0f, 0.0f);
 
     scene.addMaterial(whiteMaterial);
     scene.addMaterial(reflectiveMaterial);
@@ -130,6 +130,12 @@ int Application::Start()
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+
+        scene.writeLightsToShader(&raytracingShader);
+        scene.writeMaterialsToShader(&raytracingShader);
+        scene.writeLightsToShader(&rasterizedShader);
+        scene.writeMaterialsToShader(&rasterizedShader);
 
         if (frame % 10 == 0)
             std::cout << "FPS: " << 1.0f / deltaTime << std::endl;

@@ -12,8 +12,8 @@ class AbstractShader;
 class Material
 {
 public:
-	Material(glm::vec3 color, float reflectiveness, float transparency, glm::vec3 emission);
-	Material(glm::vec3 color, float reflectiveness, float transparency, float refractiveness);
+	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, glm::vec3 emission);
+	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness);
 	~Material();
 	glm::vec3 color;
 	float reflectiveness;
@@ -24,9 +24,16 @@ public:
 	// Write this material into the shader at the provided index
 	void writeToShader(AbstractShader* shader, unsigned int index);
 
+	// Get a pointer to the name of this material
+	std::string* getNamePointer();
+	glm::vec3* getColorPointer();
+	float* getReflectivenessPointer();
+	float* getTransparencyPointer();
+	float* getRefractivenessPointer();
+	glm::vec3* getEmissionPointer();
 protected:
 
 
 private:
-
+	std::string name;
 };

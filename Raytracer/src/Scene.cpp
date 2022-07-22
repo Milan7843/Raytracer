@@ -135,6 +135,26 @@ void Scene::bindTriangleBuffer()
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
 }
 
+std::vector<Material>& Scene::getMaterials()
+{
+	return materials;
+}
+
+std::vector<PointLight>& Scene::getPointLights()
+{
+	return pointLights;
+}
+
+std::vector<Model>& Scene::getModels()
+{
+	return models;
+}
+
+std::vector<Sphere>& Scene::getSpheres()
+{
+	return spheres;
+}
+
 bool Scene::replace(std::string& str, const std::string& from, const std::string& to)
 {
 	size_t start_pos = str.find(from);

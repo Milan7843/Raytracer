@@ -44,4 +44,22 @@ private:
 	unsigned int guiSwitchKeyPreviousState = 0;
 
 	unsigned int interfaceToggleKey = GLFW_KEY_R;
+
+	// Draw all the render settings
+	void drawRenderSettings(Camera* camera, Renderer* renderer, bool* inRaytraceMode);
+
+	// Represent a material using ImGui
+	void drawMaterials(Scene* scene);
+	void drawMaterial(Material& material);
+
+	// Represent a point light using ImGui
+	void drawLights(Scene* scene);
+	void drawLight(PointLight& light, unsigned int index);
+
+	// Represent a directional light using ImGui
+	//void drawLight(PointLight& light);
+
+	// Represent an object using ImGui
+	void drawObjects(Scene* scene);
+	void drawObject(Object& object);
 };

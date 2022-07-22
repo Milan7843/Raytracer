@@ -22,6 +22,10 @@ public:
 
 	void setIndex(unsigned int index);
 
+	glm::vec3* getPositionPointer();
+	glm::vec3* getColorPointer();
+	float* getIntensityPointer();
+
 protected:
 	Light(glm::vec3 position, glm::vec3 color, float intensity);
 	~Light();
