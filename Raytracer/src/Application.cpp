@@ -74,7 +74,7 @@ int Application::Start()
 
     // Adding our test models: !! MUST BE TRIANGULATED !!
     Model* plane = scene.addModel("src/models/plane.obj", 0);
-    Model* icosphere = scene.addModel("src/models/medresicosphere.obj", 1);
+    Model* icosphere = scene.addModel("src/models/axes.obj", 1);
 
     // Transforming the icosphere
     icosphere->setPosition(glm::vec3(1.0f, 0.6f, 2.0f));

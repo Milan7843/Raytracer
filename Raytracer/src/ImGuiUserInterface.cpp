@@ -81,6 +81,7 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 
 	drawMaterials(scene);
 	drawLights(scene);
+	drawObjects(scene);
 
 	ImGui::End();
 
@@ -218,9 +219,44 @@ void ImGuiUserInterface::drawLight(PointLight& light, unsigned int index)
 
 void ImGuiUserInterface::drawObjects(Scene* scene)
 {
+	if (ImGui::CollapsingHeader("Objects"))
+	{
+		// Drawing the models
+		if (ImGui::TreeNode("Models"))
+		{
+			unsigned int index = 0;
+			for (Model& model : scene->getModels())
+			{
+				// Drawing each point light
+				drawObject(model, index);
+				index++;
+			}
+			ImGui::TreePop();
+		}
+		// Drawing the spheres
+		if (ImGui::TreeNode("Models"))
+		{
+			unsigned int index = 0;
+			for (Model& model : scene->getModels())
+			{
+				// Drawing each point light
+				drawObject(model, index);
+				index++;
+			}
+			ImGui::TreePop();
+		}
+	}
 }
 
-void ImGuiUserInterface::drawObject(Object& object)
+void ImGuiUserInterface::drawObject(Object& object, unsigned int index)
 {
+	if (ImGui::TreeNode(("Object " + std::to_string(index + 1)).c_str()))
+	{
+		ImGui::DragFloat3("Position", (float*)object.getPositionPointer(), 0.01f);
+		ImGui::DragFloat3("Rotation", (float*)object.getRotationPointer(), 0.01f);
+		ImGui::DragFloat3("Scale", (float*)object.getScalePointer(), 0.01f);
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
 }
 

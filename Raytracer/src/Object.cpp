@@ -5,9 +5,14 @@ void Object::writeToShader(AbstractShader* shader, unsigned int ssbo)
 
 }
 
-void Object::rotate(glm::vec3 rotationAxis, float degrees)
+void Object::rotate(glm::vec3 rotation)
 {
-	this->rotationMatrix = glm::rotate(rotationMatrix, degrees, rotationAxis);
+	this->rotation += rotation;
+}
+
+void Object::setRotation(glm::vec3 rotation)
+{
+	this->rotation = rotation;
 }
 
 void Object::move(glm::vec3 move)
@@ -32,7 +37,7 @@ void Object::scale(float scale)
 
 void Object::resetRotation()
 {
-	this->rotationMatrix = glm::mat4(1.0f);
+	this->rotation = glm::vec3(0.0f);
 }
 
 glm::mat4 Object::getTransformationMatrix()
@@ -42,13 +47,44 @@ glm::mat4 Object::getTransformationMatrix()
 
 	// Applying the transformations
 	baseMatrix = glm::translate(baseMatrix, position);
+	baseMatrix *= getRotationMatrix();
 	baseMatrix = glm::scale(baseMatrix, scaleVector);
 
-	return rotationMatrix  * baseMatrix;
+	return baseMatrix;
+}
+
+glm::vec3* Object::getPositionPointer()
+{
+	return &position;
+}
+
+glm::vec3* Object::getRotationPointer()
+{
+	return &rotation;
+}
+
+glm::vec3* Object::getScalePointer()
+{
+	return &scaleVector;
 }
 
 Object::Object()
 {
+}
+
+glm::mat4 Object::getRotationMatrix()
+{
+	// Creating an identity matrix
+	glm::mat4 rotationMatrix(1.0f);
+
+	// Applying z-rotation
+	rotationMatrix = glm::rotate(rotationMatrix, rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	// Applying y-rotation
+	rotationMatrix = glm::rotate(rotationMatrix, rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	// Applying x-rotation
+	rotationMatrix = glm::rotate(rotationMatrix, rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+
+	return rotationMatrix;
 }
 
 void Object::draw(AbstractShader* shader)

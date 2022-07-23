@@ -11,7 +11,8 @@ class Object
 public:
 
 	// Applying transformations on this object
-	void rotate(glm::vec3 rotationAxis, float degrees);
+	void rotate(glm::vec3 rotation);
+	void setRotation(glm::vec3 rotation);
 	void move(glm::vec3 move);
 	void setPosition(glm::vec3 pos);
 	void scale(glm::vec3 scale);
@@ -35,13 +36,20 @@ public:
 	// The index of the material this object uses
 	unsigned int materialIndex = 0;
 
+	glm::vec3* getPositionPointer();
+	glm::vec3* getRotationPointer();
+	glm::vec3* getScalePointer();
+
 protected:
 	// Abstract class, no need to instantiate this class
 	Object();
 	virtual ~Object() {}
 
+	// Generate and get the rotation matrix
+	glm::mat4 getRotationMatrix();
+
 	// Transformations
 	glm::vec3 position = glm::vec3(0.0f);
-	glm::mat4 rotationMatrix = glm::mat4(1.0f);
+	glm::vec3 rotation = glm::vec3(0.0f);
 	glm::vec3 scaleVector = glm::vec3(1.0f);
 };
