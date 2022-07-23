@@ -1,5 +1,9 @@
 #pragma once
 
+#include <format>
+#include <iostream>
+#include <string>
+
 // ImGui
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -44,6 +48,9 @@ private:
 	unsigned int guiSwitchKeyPreviousState = 0;
 
 	unsigned int interfaceToggleKey = GLFW_KEY_R;
+
+	// Format a number of seconds
+	std::string formatTime(float time);
 
 	// Draw a help marker
 	void drawHelpMarker(const char* desc);

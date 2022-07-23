@@ -62,10 +62,16 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 	{
 		renderer->startBlockRender(scene, camera);
 	}
+
+	// Render time left indicators
 	ImGui::ProgressBar(renderer->getRenderProgress());
+	ImGui::Text("Render time left: ");
+	ImGui::SameLine();
+	ImGui::Text(formatTime(renderer->getTimeLeft()).c_str());
 
 	// Creating the tab bar
 	ImGui::BeginTabBar("full_tab_bar");
+
 
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.22f, 0.4f, 0.48f, 0.2f));
 
@@ -171,6 +177,16 @@ bool ImGuiUserInterface::isEnabled()
 	return imGuiEnabled;
 }
 
+std::string ImGuiUserInterface::formatTime(float time)
+{
+	int secondsTotal = (int)time;
+	int seconds = secondsTotal % 60;
+	int minutes = (secondsTotal / 60) % 60;
+	int hours = secondsTotal / 3600;
+
+	return std::format("{}h {}m {}s", hours, minutes, seconds);
+}
+
 void ImGuiUserInterface::drawHelpMarker(const char* desc)
 {
 	// Draw the help marker after whatever has already been drawn on this line
@@ -192,8 +208,6 @@ void ImGuiUserInterface::drawHelpMarker(const char* desc)
 
 void ImGuiUserInterface::drawRenderSettings(Camera* camera, Renderer* renderer, bool* inRaytraceMode)
 {
-	ImGui::Text(std::to_string(renderer->getTimeLeft()).c_str());
-
 	ImGui::SliderInt("Block size", renderer->getBlockSizePointer(), 1, 100);
 	drawHelpMarker("The size of a render block in pixels.");
 
