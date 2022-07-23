@@ -39,6 +39,7 @@ public:
 	glm::vec3* getPositionPointer();
 	glm::vec3* getRotationPointer();
 	glm::vec3* getScalePointer();
+	unsigned int* getMaterialIndexPointer();
 
 protected:
 	// Abstract class, no need to instantiate this class

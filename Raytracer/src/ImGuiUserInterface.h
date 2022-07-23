@@ -61,5 +61,5 @@ private:
 
 	// Represent an object using ImGui
 	void drawObjects(Scene* scene);
-	void drawObject(Object& object, unsigned int index);
+	void drawObject(Object& object, Scene* scene, unsigned int index, const char* materialSlotsCharArray);
 };

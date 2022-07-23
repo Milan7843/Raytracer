@@ -131,13 +131,13 @@ int Application::Start()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-
+        // TODO: optimise the following lines by adding data changed checks for the lights and materials
         scene.writeLightsToShader(&raytracingShader);
         scene.writeMaterialsToShader(&raytracingShader);
         scene.writeLightsToShader(&rasterizedShader);
         scene.writeMaterialsToShader(&rasterizedShader);
 
-        if (frame % 10 == 0)
+        if (frame % 10 == 0 && false)
             std::cout << "FPS: " << 1.0f / deltaTime << std::endl;
 
         // Input

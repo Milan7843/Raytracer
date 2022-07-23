@@ -35,10 +35,16 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 		return;
 	}
 
+
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+
+	//ImGui::ShowDemoWindow();
+	//ImGui::Render();
+	//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	//return;
 
 	// Creating the GUI window
 	ImGui::Begin("Render settings");
@@ -78,10 +84,13 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 		//ImGui::ColorEdit3("Upper graph colour", (float*)&upperColor);
 		//ImGui::ColorEdit3("Lower graph colour", (float*)&lowerColor);
 	}
-
+	ImGui::BeginTabBar("full_tab_bar");
+	ImGui::BeginTabItem("Scene editing");
 	drawMaterials(scene);
 	drawLights(scene);
 	drawObjects(scene);
+	ImGui::EndTabItem();
+	ImGui::EndTabBar();
 
 	ImGui::End();
 
@@ -167,12 +176,16 @@ void ImGuiUserInterface::drawMaterials(Scene* scene)
 {
 	if (ImGui::CollapsingHeader("Materials"))
 	{
+		ImGui::PushItemWidth(-1);
+		ImGui::BeginListBox("##");
 		for (Material& material : scene->getMaterials())
 		{
 			// Drawing each material
 			drawMaterial(material);
 			material.refractiveness = 1.0f;
 		}
+		ImGui::EndListBox();
+		ImGui::PopItemWidth();
 	}
 }
 
@@ -195,6 +208,8 @@ void ImGuiUserInterface::drawLights(Scene* scene)
 {
 	if (ImGui::CollapsingHeader("Lights"))
 	{
+		ImGui::PushItemWidth(-1);
+		ImGui::BeginListBox("##");
 		unsigned int index = 0;
 		for (PointLight& light : scene->getPointLights())
 		{
@@ -202,6 +217,8 @@ void ImGuiUserInterface::drawLights(Scene* scene)
 			drawLight(light, index);
 			index++;
 		}
+		ImGui::EndListBox();
+		ImGui::PopItemWidth();
 	}
 }
 
@@ -219,42 +236,85 @@ void ImGuiUserInterface::drawLight(PointLight& light, unsigned int index)
 
 void ImGuiUserInterface::drawObjects(Scene* scene)
 {
+	// Generating the char[] used for the material slots
+	std::string materialSlots = "";
+	for (Material& material : scene->getMaterials())
+	{
+		materialSlots += *material.getNamePointer() + "\000";
+	}
+	const char* materialSlotsCharArray = materialSlots.c_str();
+
 	if (ImGui::CollapsingHeader("Objects"))
 	{
 		// Drawing the models
 		if (ImGui::TreeNode("Models"))
 		{
+			ImGui::PushItemWidth(-1);
+			ImGui::BeginListBox("##");
 			unsigned int index = 0;
 			for (Model& model : scene->getModels())
 			{
-				// Drawing each point light
-				drawObject(model, index);
+				// Drawing each model
+				drawObject(model, scene, index, materialSlotsCharArray);
 				index++;
 			}
+			ImGui::EndListBox();
+			ImGui::PopItemWidth();
 			ImGui::TreePop();
 		}
 		// Drawing the spheres
-		if (ImGui::TreeNode("Models"))
+		if (ImGui::TreeNode("Spheres"))
 		{
+			ImGui::PushItemWidth(-1);
+			ImGui::BeginListBox("##");
 			unsigned int index = 0;
-			for (Model& model : scene->getModels())
+			for (Sphere& sphere : scene->getSpheres())
 			{
-				// Drawing each point light
-				drawObject(model, index);
+				// Drawing each sphere
+				drawObject(sphere, scene, index, materialSlotsCharArray);
 				index++;
 			}
+			ImGui::EndListBox();
+			ImGui::PopItemWidth();
 			ImGui::TreePop();
 		}
 	}
 }
 
-void ImGuiUserInterface::drawObject(Object& object, unsigned int index)
+void ImGuiUserInterface::drawObject(Object& object, Scene* scene, unsigned int index, const char* materialSlotsCharArray)
 {
 	if (ImGui::TreeNode(("Object " + std::to_string(index + 1)).c_str()))
 	{
+		// Showing transformations
 		ImGui::DragFloat3("Position", (float*)object.getPositionPointer(), 0.01f);
 		ImGui::DragFloat3("Rotation", (float*)object.getRotationPointer(), 0.01f);
 		ImGui::DragFloat3("Scale", (float*)object.getScalePointer(), 0.01f);
+
+		// Preview the currently selected name
+		if (ImGui::BeginCombo("##combo", (*(scene->getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
+		{
+			unsigned int i = 0;
+			for (Material& material : scene->getMaterials())
+			{
+				bool thisMaterialSelected = (i == *object.getMaterialIndexPointer());
+				
+				if (ImGui::Selectable((*(scene->getMaterials()[i].getNamePointer())).c_str()))
+				{
+					*object.getMaterialIndexPointer() = i;
+				}
+
+				if (thisMaterialSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+
+				// Increment material counter
+				i++;
+			}
+
+			// End this combo selector
+			ImGui::EndCombo();
+		}
 		ImGui::TreePop();
 		ImGui::Separator();
 	}
