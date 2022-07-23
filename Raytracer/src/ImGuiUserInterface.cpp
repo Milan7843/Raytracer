@@ -113,27 +113,19 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 		ImGui::EndTabItem();
 	}
 
-	ImGui::PopStyleColor();
-
-	ImGui::EndTabBar();
-
 	ImGui::Separator();
 
 	// Camera settings (speed, fov etc.)
-	if (ImGui::CollapsingHeader("Camera settings"))
+	if (ImGui::BeginTabItem("Camera settings"))
 	{
 		ImGui::SliderFloat("Move speed", camera->getCameraSpeedPointer(), 0.1f, 10.0f);
 		ImGui::SliderFloat("Sensitivity", camera->getSensitivityPointer(), 0.1f, 5.0f);
 		ImGui::SliderFloat("Field of view", camera->getFovPointer(), 10.0f, 90.0f);
+		ImGui::EndTabItem();
 	}
+	ImGui::PopStyleColor();
 
-	// Customisation of the program (colors etc.)
-	if (ImGui::CollapsingHeader("Customisation"))
-	{
-		//ImGui::ColorEdit3("Background colour", (float*)&clearColor);
-		//ImGui::ColorEdit3("Upper graph colour", (float*)&upperColor);
-		//ImGui::ColorEdit3("Lower graph colour", (float*)&lowerColor);
-	}
+	ImGui::EndTabBar();
 
 	ImGui::End();
 
