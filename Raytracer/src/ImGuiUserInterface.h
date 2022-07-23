@@ -45,6 +45,9 @@ private:
 
 	unsigned int interfaceToggleKey = GLFW_KEY_R;
 
+	// Draw a help marker
+	void drawHelpMarker(const char* desc);
+
 	// Draw all the render settings
 	void drawRenderSettings(Camera* camera, Renderer* renderer, bool* inRaytraceMode);
 
