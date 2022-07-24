@@ -258,7 +258,18 @@ void ImGuiUserInterface::drawLights(Scene* scene)
 	unsigned int index = 0;
 	for (PointLight& light : scene->getPointLights())
 	{
-		// Drawing each point light
+		drawLight(light, index);
+		index++;
+	}
+	index = 0;
+	for (DirectionalLight& light : scene->getDirectionalLights())
+	{
+		drawLight(light, index);
+		index++;
+	}
+	index = 0;
+	for (AmbientLight& light : scene->getAmbientLights())
+	{
 		drawLight(light, index);
 		index++;
 	}
@@ -273,6 +284,29 @@ void ImGuiUserInterface::drawLight(PointLight& light, unsigned int index)
 		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
 		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
 		ImGui::DragFloat3("Position", (float*)light.getPositionPointer(), 0.01f);
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+}
+
+void ImGuiUserInterface::drawLight(DirectionalLight& light, unsigned int index)
+{
+	if (ImGui::TreeNode(("Directional light " + std::to_string(index + 1)).c_str()))
+	{
+		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
+		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
+		ImGui::DragFloat3("Direction", (float*)light.getDirectionPointer(), 0.01f);
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+}
+
+void ImGuiUserInterface::drawLight(AmbientLight& light, unsigned int index)
+{
+	if (ImGui::TreeNode(("Ambient light " + std::to_string(index + 1)).c_str()))
+	{
+		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
+		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
 		ImGui::TreePop();
 		ImGui::Separator();
 	}
@@ -324,7 +358,7 @@ void ImGuiUserInterface::drawObjects(Scene* scene)
 
 void ImGuiUserInterface::drawObject(Object& object, Scene* scene, unsigned int index, const char* materialSlotsCharArray)
 {
-	if (ImGui::TreeNode(("Object " + std::to_string(index + 1)).c_str()))
+	if (ImGui::TreeNode(("Model " + std::to_string(index + 1)).c_str()))
 	{
 		// Showing transformations
 		ImGui::DragFloat3("Position", (float*)object.getPositionPointer(), 0.01f);
@@ -356,8 +390,52 @@ void ImGuiUserInterface::drawObject(Object& object, Scene* scene, unsigned int i
 			// End this combo selector
 			ImGui::EndCombo();
 		}
+
 		ImGui::TreePop();
 		ImGui::Separator();
 	}
 }
 
+
+
+void ImGuiUserInterface::drawObject(Sphere& object, Scene* scene, unsigned int index, const char* materialSlotsCharArray)
+{
+	if (ImGui::TreeNode(("Sphere " + std::to_string(index + 1)).c_str()))
+	{
+		// Showing transformations
+		ImGui::DragFloat3("Position", (float*)object.getPositionPointer(), 0.01f);
+
+		// Drawing a dragfloat for the sphere's radius
+		Sphere& sphere = (Sphere&)object;
+		ImGui::DragFloat("Radius", sphere.getRadiusPointer());
+
+		// Preview the currently selected name
+		if (ImGui::BeginCombo("##combo", (*(scene->getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
+		{
+			unsigned int i = 0;
+			for (Material& material : scene->getMaterials())
+			{
+				bool thisMaterialSelected = (i == *object.getMaterialIndexPointer());
+
+				if (ImGui::Selectable((*(scene->getMaterials()[i].getNamePointer())).c_str()))
+				{
+					*object.getMaterialIndexPointer() = i;
+				}
+
+				if (thisMaterialSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+
+				// Increment material counter
+				i++;
+			}
+
+			// End this combo selector
+			ImGui::EndCombo();
+		}
+
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+}

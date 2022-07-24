@@ -26,3 +26,8 @@ void Sphere::scale(float scale)
 	Object::scale(scale);
 	this->radius *= scale;
 }
+
+float* Sphere::getRadiusPointer()
+{
+	return &radius;
+}

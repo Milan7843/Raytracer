@@ -13,7 +13,7 @@ public:
 	// Write all the data of this directional light into the given shader
 	void writeToShader(AbstractShader* shader);
 
-	// Get a pointer the the direciton vector of this light
+	// Get a pointer the the direction vector of this light
 	glm::vec3* getDirectionPointer();
 
 private:

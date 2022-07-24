@@ -64,7 +64,9 @@ private:
 
 	// Represent a point light using ImGui
 	void drawLights(Scene* scene);
-	void drawLight(PointLight& light, unsigned int index);
+	virtual void drawLight(PointLight& light, unsigned int index);
+	virtual void drawLight(DirectionalLight& light, unsigned int index);
+	virtual void drawLight(AmbientLight& light, unsigned int index);
 
 	// Represent a directional light using ImGui
 	//void drawLight(PointLight& light);
@@ -72,4 +74,5 @@ private:
 	// Represent an object using ImGui
 	void drawObjects(Scene* scene);
 	void drawObject(Object& object, Scene* scene, unsigned int index, const char* materialSlotsCharArray);
+	void drawObject(Sphere& object, Scene* scene, unsigned int index, const char* materialSlotsCharArray);
 };

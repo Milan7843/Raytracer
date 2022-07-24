@@ -5,6 +5,8 @@
 #include <vector>
 
 #include "Lights/PointLight.h"
+#include "Lights/DirectionalLight.h"
+#include "Lights/AmbientLight.h"
 #include "Model.h"
 #include "Sphere.h"
 #include "Material.h"
@@ -15,7 +17,15 @@ public:
 	Scene();
 	~Scene();
 
-	void addPointLight(PointLight& pointLight);
+	// Add a point light to the scene
+	void addLight(PointLight& pointLight);
+
+	// Add a directional light to the scene
+	void addLight(DirectionalLight& directionalLight);
+
+	// Add an ambient light to the scene
+	void addLight(AmbientLight& ambientLight);
+
 	Model* addModel(const std::string& path, unsigned int materialIndex);
 	Sphere* addSphere(glm::vec3 position, float radius, unsigned int materialIndex);
 	void addMaterial(Material& material);
@@ -45,6 +55,8 @@ public:
 
 	std::vector<Material>& getMaterials();
 	std::vector<PointLight>& getPointLights();
+	std::vector<DirectionalLight>& getDirectionalLights();
+	std::vector<AmbientLight>& getAmbientLights();
 	std::vector<Model>& getModels();
 	std::vector<Sphere>& getSpheres();
 
@@ -54,7 +66,11 @@ public:
 private:
 	// Keeping track of the lights in this scene
 	std::vector<PointLight> pointLights;
+	std::vector<DirectionalLight> directionalLights;
+	std::vector<AmbientLight> ambientLights;
 	unsigned int pointLightCount = 0;
+	unsigned int directionalLightCount = 0;
+	unsigned int ambientLightCount = 0;
 
 	std::vector<Model> models;
 	std::vector<Sphere> spheres;

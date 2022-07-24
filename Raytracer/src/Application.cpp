@@ -89,9 +89,13 @@ int Application::Start()
     PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
     //PointLight pointLight1(glm::vec3(0.0f, 1.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
     PointLight pointLight2(glm::vec3(2.0f, 1.8f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 2.0f);
+    DirectionalLight directionalLight1(glm::vec3(0.707f, -0.707f, 0.0f), glm::vec3(1.0f, 1.0f, 0.9f), 0.3f);
+    AmbientLight ambientLight1(glm::vec3(0.8f, 0.8f, 1.0f), 0.02f);
 
-    scene.addPointLight(pointLight1);
-    scene.addPointLight(pointLight2);
+    scene.addLight(pointLight1);
+    scene.addLight(pointLight2);
+    scene.addLight(directionalLight1);
+    scene.addLight(ambientLight1);
 
 
 

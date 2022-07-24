@@ -14,6 +14,9 @@ public:
 	// Scale this sphere
 	virtual void scale(float scale);
 
+	// Get a pointer to the radius of this sphere
+	float* getRadiusPointer();
+
 private:
 	float radius = 1.0f;
 	unsigned int shaderSphereIndex;

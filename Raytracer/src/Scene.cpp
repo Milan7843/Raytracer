@@ -10,13 +10,31 @@ Scene::~Scene()
 }
 
 
-void Scene::addPointLight(PointLight& pointLight)
+void Scene::addLight(PointLight& pointLight)
 {
-	// Adding a new pointlight and incrementing the counter for this
+	// Adding a new point light and incrementing the counter for this
 	pointLight.setIndex(this->pointLightCount);
 	pointLights.push_back(pointLight);
 
 	this->pointLightCount++;
+}
+
+void Scene::addLight(DirectionalLight& directionalLight)
+{
+	// Adding a new directional light and incrementing the counter for this
+	directionalLight.setIndex(this->directionalLightCount);
+	directionalLights.push_back(directionalLight);
+
+	this->directionalLightCount++;
+}
+
+void Scene::addLight(AmbientLight& ambientLight)
+{
+	// Adding a new ambient light and incrementing the counter for this
+	ambientLight.setIndex(this->ambientLightCount);
+	ambientLights.push_back(ambientLight);
+
+	this->ambientLightCount++;
 }
 
 Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
@@ -57,13 +75,13 @@ std::string& Scene::setShaderVariables(std::string& input)
 void Scene::draw(AbstractShader* shader)
 {
 	// Drawing each model with the given shader
-	for (Model model : models)
+	for (Model& model : models)
 	{
 		model.draw(shader, &materials[model.materialIndex]);
 	}
 
 	// Drawing each sphere with the given shader
-	for (Sphere sphere : spheres)
+	for (Sphere& sphere : spheres)
 	{
 		sphere.draw(shader, &materials[sphere.materialIndex]);
 	}
@@ -73,10 +91,18 @@ void Scene::writeLightsToShader(AbstractShader* shader)
 {
 	shader->use();
 
-	// Writing point lights to shader
-	for (PointLight pointLight : pointLights)
+	// Writing lights to shader
+	for (PointLight light : getPointLights())
 	{
-		pointLight.writeToShader(shader);
+		light.writeToShader(shader);
+	}
+	for (DirectionalLight light : getDirectionalLights())
+	{
+		light.writeToShader(shader);
+	}
+	for (AmbientLight light : getAmbientLights())
+	{
+		light.writeToShader(shader);
 	}
 }
 
@@ -95,7 +121,7 @@ void Scene::writeMaterialsToShader(AbstractShader* shader)
 void Scene::checkObjectUpdates(AbstractShader* shader)
 {
 	// Updating each model as needed
-	for (Model model : models)
+	for (Model& model : models)
 	{
 		if (model.updated)
 		{
@@ -105,7 +131,7 @@ void Scene::checkObjectUpdates(AbstractShader* shader)
 	}
 
 	// Updating each sphere as needed
-	for (Sphere sphere : spheres)
+	for (Sphere& sphere : spheres)
 	{
 		if (sphere.updated)
 		{
@@ -143,6 +169,16 @@ std::vector<Material>& Scene::getMaterials()
 std::vector<PointLight>& Scene::getPointLights()
 {
 	return pointLights;
+}
+
+std::vector<DirectionalLight>& Scene::getDirectionalLights()
+{
+	return directionalLights;
+}
+
+std::vector<AmbientLight>& Scene::getAmbientLights()
+{
+	return ambientLights;
 }
 
 std::vector<Model>& Scene::getModels()
