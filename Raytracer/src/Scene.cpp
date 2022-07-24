@@ -12,6 +12,10 @@ Scene::~Scene()
 
 void Scene::addLight(PointLight& pointLight)
 {
+	// Full of point lights
+	if (this->pointLightCount >= MAX_POINT_LIGHT_COUNT)
+		return;
+
 	// Adding a new point light and incrementing the counter for this
 	pointLight.setIndex(this->pointLightCount);
 	pointLights.push_back(pointLight);
@@ -21,6 +25,10 @@ void Scene::addLight(PointLight& pointLight)
 
 void Scene::addLight(DirectionalLight& directionalLight)
 {
+	// Full of directional lights
+	if (this->directionalLightCount >= MAX_DIR_LIGHT_COUNT)
+		return;
+
 	// Adding a new directional light and incrementing the counter for this
 	directionalLight.setIndex(this->directionalLightCount);
 	directionalLights.push_back(directionalLight);
@@ -30,6 +38,10 @@ void Scene::addLight(DirectionalLight& directionalLight)
 
 void Scene::addLight(AmbientLight& ambientLight)
 {
+	// Full of ambient lights
+	if (this->ambientLightCount >= MAX_AMBIENT_LIGHT_COUNT)
+		return;
+
 	// Adding a new ambient light and incrementing the counter for this
 	ambientLight.setIndex(this->ambientLightCount);
 	ambientLights.push_back(ambientLight);
@@ -90,6 +102,11 @@ void Scene::draw(AbstractShader* shader)
 void Scene::writeLightsToShader(AbstractShader* shader)
 {
 	shader->use();
+
+	// Writing current lights amounts to shader
+	shader->setInt("pointLightCount", pointLightCount);
+	shader->setInt("dirLightCount", directionalLightCount);
+	shader->setInt("ambientLightCount", ambientLightCount);
 
 	// Writing lights to shader
 	for (PointLight light : getPointLights())

@@ -30,7 +30,6 @@ public:
 	Sphere* addSphere(glm::vec3 position, float radius, unsigned int materialIndex);
 	void addMaterial(Material& material);
 
-
 	// Set the variables for number of things in the shader.
 	// e.g. NUM_POINT_LIGHTS, NUM_TRIANGLES
 	std::string& setShaderVariables(std::string& input);
@@ -71,6 +70,9 @@ private:
 	unsigned int pointLightCount = 0;
 	unsigned int directionalLightCount = 0;
 	unsigned int ambientLightCount = 0;
+	const unsigned int MAX_POINT_LIGHT_COUNT = 10;
+	const unsigned int MAX_DIR_LIGHT_COUNT = 10;
+	const unsigned int MAX_AMBIENT_LIGHT_COUNT = 10;
 
 	std::vector<Model> models;
 	std::vector<Sphere> spheres;
