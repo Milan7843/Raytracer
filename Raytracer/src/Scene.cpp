@@ -58,6 +58,10 @@ Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
 
 Sphere* Scene::addSphere(glm::vec3 position, float radius, unsigned int materialIndex)
 {
+	// Full of spheres
+	if (this->sphereCount >= MAX_SPHERE_COUNT)
+		return nullptr;
+
 	Sphere sphere(position, radius, materialIndex, sphereCount);
 	sphereCount++;
 	spheres.push_back(sphere);
@@ -66,6 +70,10 @@ Sphere* Scene::addSphere(glm::vec3 position, float radius, unsigned int material
 
 void Scene::addMaterial(Material& material)
 {
+	// Full of materials
+	if (this->materialCount >= MAX_MATERIAL_COUNT)
+		return;
+
 	// Adding a new material and incrementing the counter for this
 	materials.push_back(material);
 	this->materialCount++;
@@ -127,6 +135,9 @@ void Scene::writeMaterialsToShader(AbstractShader* shader)
 {
 	shader->use();
 
+	// Writing current material count to shader
+	shader->setInt("materialCount", materialCount);
+
 	// Writing materials to shader
 	unsigned int index = 0;
 	for (Material material : materials)
@@ -137,6 +148,9 @@ void Scene::writeMaterialsToShader(AbstractShader* shader)
 
 void Scene::checkObjectUpdates(AbstractShader* shader)
 {
+	// Writing current sphere count to shader
+	shader->setInt("sphereCount", sphereCount);
+
 	// Updating each model as needed
 	for (Model& model : models)
 	{

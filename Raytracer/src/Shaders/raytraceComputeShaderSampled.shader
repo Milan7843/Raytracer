@@ -19,12 +19,12 @@ uniform int currentBlockRenderPassIndex;
 #define EPSILON 0.0001f
 
 #define NUM_TRIANGLES $numTriangles
-#define NUM_SPHERES $numSpheres
-#define NUM_POINT_LIGHTS $numPointLights
-#define NUM_DIR_LIGHTS 1
-#define NUM_AMBIENT_LIGHTS 1
+#define NUM_SPHERES 10
+#define NUM_POINT_LIGHTS 10
+#define NUM_DIR_LIGHTS 10
+#define NUM_AMBIENT_LIGHTS 10
 #define NUM_MESHES $numMeshes
-#define NUM_MATERIALS $numMaterials
+#define NUM_MATERIALS 10
 
 //#define NUM_TRIANGLES 1
 //#define NUM_SPHERES 1
@@ -85,6 +85,7 @@ struct Sphere
     int material;
 };
 uniform Sphere spheres[NUM_SPHERES];
+uniform int sphereCount;
 
 float sphereDst(Sphere sph, vec3 pos);
 vec3 getSphereNormal(Sphere sph, vec3 pos);
@@ -134,7 +135,7 @@ struct Material
     float refractiveness;
 };
 uniform Material materials[NUM_MATERIALS];
-
+uniform int materialCount;
 
 struct Intersection
 {
@@ -601,7 +602,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
     }
 
     // Calculating ray-sphere intersections
-    for (int j = 0; j < NUM_SPHERES; j++)
+    for (int j = 0; j < sphereCount; j++)
     {
         // Skip already hit tri
         if (j == skipSphere) continue;

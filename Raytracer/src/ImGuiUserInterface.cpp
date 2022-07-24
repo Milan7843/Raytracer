@@ -232,6 +232,14 @@ void ImGuiUserInterface::drawMaterials(Scene* scene)
 		drawMaterial(material);
 		material.refractiveness = 1.0f;
 	}
+
+	// Drawing the 'Add material' button
+	if (ImGui::Button("Add material"))
+	{
+		Material material("New material", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f);
+		scene->addMaterial(material);
+	}
+
 	ImGui::EndListBox();
 	ImGui::PopItemWidth();
 }
@@ -256,6 +264,8 @@ void ImGuiUserInterface::drawLights(Scene* scene)
 	ImGui::PushItemWidth(-1);
 	ImGui::BeginListBox("##");
 	unsigned int index = 0;
+
+	// Drawing the lights themselves
 	for (PointLight& light : scene->getPointLights())
 	{
 		drawLight(light, index);
@@ -272,6 +282,33 @@ void ImGuiUserInterface::drawLights(Scene* scene)
 	{
 		drawLight(light, index);
 		index++;
+	}
+
+	// Drawing the 'Add light' button
+	if (ImGui::Button("Add light"))
+		ImGui::OpenPopup("add_light_popup");
+
+	// And drawing the light options
+	if (ImGui::BeginPopup("add_light_popup"))
+	{
+		ImGui::Text("Light type");
+		ImGui::Separator();
+		if (ImGui::Selectable("Point light"))
+		{
+			PointLight light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+			scene->addLight(light);
+		}
+		if (ImGui::Selectable("Directional light"))
+		{
+			DirectionalLight light(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+			scene->addLight(light);
+		}
+		if (ImGui::Selectable("Ambient light"))
+		{
+			AmbientLight light(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f);
+			scene->addLight(light);
+		}
+		ImGui::EndPopup();
 	}
 	ImGui::EndListBox();
 	ImGui::PopItemWidth();	
@@ -350,6 +387,11 @@ void ImGuiUserInterface::drawObjects(Scene* scene)
 			drawObject(sphere, scene, index, materialSlotsCharArray);
 			index++;
 		}
+
+		// Drawing the 'Add sphere' button
+		if (ImGui::Button("Add sphere"))
+			scene->addSphere(glm::vec3(0.0f), 1.0f, 0);
+
 		ImGui::EndListBox();
 		ImGui::PopItemWidth();
 		ImGui::TreePop();
