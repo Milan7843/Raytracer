@@ -22,7 +22,7 @@ Camera::Camera(glm::vec3 pos)
 }
 Camera::~Camera()
 {
-	std::cout << "Camera destroyed" << std::endl;
+	Logger::log("Camera destroyed");
 }
 
 glm::mat4 Camera::getViewMatrix()

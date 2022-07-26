@@ -66,7 +66,7 @@ unsigned int AbstractShader::compileShader(GLenum type, const char* code)
 	if (!success)
 	{
 		glGetShaderInfoLog(id, 512, NULL, infoLog);
-		std::cout << "Error: shader compilation failed." << type << std::endl;
+		Logger::logError("shader compilation failed." + type);
 	}
 	return id;
 }
@@ -108,7 +108,7 @@ std::string AbstractShader::readFile(const char* shaderPath)
 	}
 	catch (std::ifstream::failure e)
 	{
-		std::cout << "Error: shader file not correctly read." << std::endl;
+		Logger::logError("Error: shader file not correctly read.");
 	}
 	return shaderCode;
 }
@@ -129,7 +129,8 @@ void AbstractShader::linkProgram()
 		glGetProgramInfoLog(ID, 512, NULL, infoLog);
 
 		// Printing the error log
-		std::cout << "Error: shader program linking failed.\n" << infoLog << std::endl;
+		Logger::logError("Error: shader program linking failed.");
+		Logger::logError(infoLog);
 		return;
 	}
 }

@@ -6,6 +6,8 @@
 
 #include "AbstractShader.h"
 
+#include "Logger.h"
+
 class Object
 {
 public:

@@ -29,7 +29,7 @@ void Sphere::scale(float scale)
 
 void Sphere::scale(glm::vec3 scale)
 {
-	std::cout << "Scale with vector was called on a sphere. This is not possible and should be avoided." << std::endl;
+	Logger::logWarning("Scale with vector was called on a sphere. This is not possible and should be avoided.");
 }
 
 glm::mat4 Sphere::getTransformationMatrix()

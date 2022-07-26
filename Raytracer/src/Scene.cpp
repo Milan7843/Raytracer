@@ -81,14 +81,14 @@ void Scene::addMaterial(Material& material)
 
 std::string& Scene::setShaderVariables(std::string& input)
 {
-	std::cout << std::endl << "Variable injection:" << std::endl;
-	std::cout << "$numTriangles     " << replace(input, "$numTriangles", std::to_string(triangleCount)) << std::endl;
-	std::cout << "$numMeshes        " << replace(input, "$numMeshes", std::to_string(meshCount)) << std::endl;
-	std::cout << "$numPointLights   " << replace(input, "$numPointLights", std::to_string(pointLightCount)) << std::endl;
-	std::cout << "$numMaterials     " << replace(input, "$numMaterials", std::to_string(materialCount)) << std::endl;
-	std::cout << "$numSpheres       " << replace(input, "$numSpheres", std::to_string(sphereCount)) << std::endl;
-	// TODO: get window size from somewhere
-	std::cout << "$numPixels        " << replace(input, "$numPixels", std::to_string(1200*700)) << std::endl;
+	replace(input, "$numTriangles", std::to_string(triangleCount));
+	replace(input, "$numMeshes", std::to_string(meshCount));
+	replace(input, "$numPointLights", std::to_string(pointLightCount));
+	replace(input, "$numMaterials", std::to_string(materialCount));
+	replace(input, "$numSpheres", std::to_string(sphereCount));
+
+	Logger::logWarning("TODO: get pixels into Scene::setShaderVariables");
+	replace(input, "$numPixels", std::to_string(1200 * 700));
 	return input;
 }
 
@@ -179,7 +179,7 @@ void Scene::generateTriangleBuffer()
 	glGenBuffers(1, &triangleBufferSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
 
-	std::cout << "Making room for " << triangleCount << " triangles" << std::endl;
+	Logger::log("Making room for " + std::to_string(triangleCount) + " triangles");
 
 	glBufferData(GL_SHADER_STORAGE_BUFFER, triangleCount * Mesh::getTriangleSize(), 0, GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);

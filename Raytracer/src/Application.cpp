@@ -11,7 +11,7 @@ Application::Application(unsigned int WIDTH, unsigned int HEIGHT)
 
 Application::~Application()
 {
-    std::cout << "Application instance destroyed" << std::endl;
+    Logger::log("Application instance destroyed");
 }
 
 int Application::Start()
@@ -22,7 +22,7 @@ int Application::Start()
     GLFWwindow* window = glfwCreateWindow(WINDOW_SIZE_X, WINDOW_SIZE_Y, "OpenGL", NULL, NULL);
     if (window == NULL)
     {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        Logger::logError("Failed to create GLFW window");
         glfwTerminate();
         return -1;
     }
@@ -35,11 +35,9 @@ int Application::Start()
     // GLAD manages function pointers for OpenGL, so we cannot run without it
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        Logger::logError("Failed to initialize GLAD");
         return -1;
     }
-
-    std::cout << "max uniforms: " << GL_MAX_VERTEX_UNIFORM_VECTORS << std::endl;
 
     // Setting viewport size
     glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);

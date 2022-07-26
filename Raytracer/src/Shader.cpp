@@ -59,5 +59,5 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, Scene* scene)
 
 Shader::~Shader()
 {
-	std::cout << "Shader destroyed." << std::endl;
+	Logger::log("Shader destroyed.");
 }

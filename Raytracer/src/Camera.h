@@ -13,6 +13,8 @@
 #include <iostream>
 #include <string>
 
+#include "Logger.h"
+
 class Camera
 {
 	/* Public members */
