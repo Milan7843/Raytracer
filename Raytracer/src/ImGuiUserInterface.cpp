@@ -449,7 +449,7 @@ void ImGuiUserInterface::drawObject(Sphere& object, Scene* scene, unsigned int i
 
 		// Drawing a dragfloat for the sphere's radius
 		Sphere& sphere = (Sphere&)object;
-		ImGui::DragFloat("Radius", sphere.getRadiusPointer());
+		ImGui::DragFloat("Radius", sphere.getRadiusPointer(), 0.01f, 0.01f, 100.0f, "%.02f");
 
 		// Preview the currently selected name
 		if (ImGui::BeginCombo("##combo", (*(scene->getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
@@ -459,11 +459,13 @@ void ImGuiUserInterface::drawObject(Sphere& object, Scene* scene, unsigned int i
 			{
 				bool thisMaterialSelected = (i == *object.getMaterialIndexPointer());
 
+				// Material index selector
 				if (ImGui::Selectable((*(scene->getMaterials()[i].getNamePointer())).c_str()))
 				{
 					*object.getMaterialIndexPointer() = i;
 				}
 
+				// Set this material to be 'focused' if it is the selected material
 				if (thisMaterialSelected)
 				{
 					ImGui::SetItemDefaultFocus();

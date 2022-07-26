@@ -167,7 +167,7 @@ void Scene::checkObjectUpdates(AbstractShader* shader)
 		if (sphere.updated)
 		{
 			sphere.writeToShader(shader, triangleBufferSSBO);
-			sphere.updated = false;
+			//sphere.updated = false;
 		}
 	}
 }

@@ -27,6 +27,20 @@ void Sphere::scale(float scale)
 	this->radius *= scale;
 }
 
+void Sphere::scale(glm::vec3 scale)
+{
+	std::cout << "Scale with vector was called on a sphere. This is not possible and should be avoided." << std::endl;
+}
+
+glm::mat4 Sphere::getTransformationMatrix()
+{
+	// Get the regular transformation matrix
+	glm::mat4 base = Object::getTransformationMatrix();
+
+	// Then use the radius to scale it
+	return glm::scale(base, glm::vec3(radius));
+}
+
 float* Sphere::getRadiusPointer()
 {
 	return &radius;

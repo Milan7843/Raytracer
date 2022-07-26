@@ -13,6 +13,10 @@ public:
 
 	// Scale this sphere
 	virtual void scale(float scale);
+	virtual void scale(glm::vec3 scale);
+
+	// Get a single matrix which includes all transformations
+	glm::mat4 getTransformationMatrix();
 
 	// Get a pointer to the radius of this sphere
 	float* getRadiusPointer();

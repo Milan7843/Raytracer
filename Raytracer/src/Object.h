@@ -22,7 +22,7 @@ public:
 	void resetRotation();
 
 	// Get a single matrix which includes all transformations
-	glm::mat4 getTransformationMatrix();
+	virtual glm::mat4 getTransformationMatrix();
 
 	// Draw this object given the shader
 	virtual void draw(AbstractShader* shader);

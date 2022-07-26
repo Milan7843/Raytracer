@@ -139,6 +139,8 @@ int Application::Start()
         scene.writeMaterialsToShader(&raytracingShader);
         scene.writeLightsToShader(&rasterizedShader);
         scene.writeMaterialsToShader(&rasterizedShader);
+        scene.checkObjectUpdates(&rasterizedShader);
+        scene.checkObjectUpdates(&raytracingShader);
 
         if (frame % 10 == 0 && false)
             std::cout << "FPS: " << 1.0f / deltaTime << std::endl;
