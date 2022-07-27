@@ -19,12 +19,12 @@ uniform int currentBlockRenderPassIndex;
 #define EPSILON 0.0001f
 
 #define NUM_TRIANGLES $numTriangles
-#define NUM_SPHERES $numSpheres
-#define NUM_POINT_LIGHTS $numPointLights
-#define NUM_DIR_LIGHTS 1
-#define NUM_AMBIENT_LIGHTS 1
+#define NUM_SPHERES 10
+#define NUM_POINT_LIGHTS 10
+#define NUM_DIR_LIGHTS 10
+#define NUM_AMBIENT_LIGHTS 10
 #define NUM_MESHES $numMeshes
-#define NUM_MATERIALS $numMaterials
+#define NUM_MATERIALS 10
 
 //#define NUM_TRIANGLES 1
 //#define NUM_SPHERES 1
@@ -85,6 +85,7 @@ struct Sphere
     int material;
 };
 uniform Sphere spheres[NUM_SPHERES];
+uniform int sphereCount;
 
 float sphereDst(Sphere sph, vec3 pos);
 vec3 getSphereNormal(Sphere sph, vec3 pos);
@@ -97,8 +98,8 @@ struct PointLight
     vec3 color;
     float intensity;
 };
-
 uniform PointLight pointLights[NUM_POINT_LIGHTS];
+uniform int pointLightCount;
 
 struct DirLight
 {
@@ -106,20 +107,16 @@ struct DirLight
     vec3 color;
     float intensity;
 };
-DirLight dirLights[NUM_DIR_LIGHTS] = DirLight[](
-    //         Pos                  Color                   Intensity
-    DirLight(vec3(.707, -.707, 0.), vec3(1.0, 1.0, 0.9), 0.8)
-    );
+uniform DirLight dirLights[NUM_DIR_LIGHTS];
+uniform int dirLightCount;
 
 struct AmbientLight
 {
     vec3 color;
     float intensity;
 };
-AmbientLight ambientLights[1] = AmbientLight[](
-    //           Color                  Intensity
-    AmbientLight(vec3(0.8, 0.8, 1.0), 0.3)
-    );
+uniform AmbientLight ambientLights[NUM_AMBIENT_LIGHTS];
+uniform int ambientLightCount;
 
 // Mesh
 struct Mesh
@@ -138,7 +135,7 @@ struct Material
     float refractiveness;
 };
 uniform Material materials[NUM_MATERIALS];
-
+uniform int materialCount;
 
 struct Intersection
 {
@@ -305,7 +302,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
 
             // Rendering each directional light as a sort of sun, by doing the final color dot the -direction, 
             // to calculate how much the ray is going into the sun
-            for (int i = 0; i < NUM_DIR_LIGHTS; i++)
+            for (int i = 0; i < dirLightCount; i++)
             {
                 t = dot(ray.dir, -dirLights[i].dir);
                 float threshold = 0.98f;
@@ -432,7 +429,7 @@ Ray fireSecondaryRay(vec3 pos, vec3 direction, bool reflect, int seed)
 
             // Rendering each directional light as a sort of sun, by doing the final color dot the -direction, 
             // to calculate how much the ray is going into the sun
-            for (int i = 0; i < NUM_DIR_LIGHTS; i++)
+            for (int i = 0; i < dirLightCount; i++)
             {
                 t = dot(ray.dir, -dirLights[i].dir);
                 float threshold = 0.98f;
@@ -501,7 +498,7 @@ vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit)
     vec3 finalLight = vec3(0.);
 
     /* POINT LIGHTS */
-    for (int i = 0; i < NUM_POINT_LIGHTS; i++)
+    for (int i = 0; i < pointLightCount; i++)
     {
         vec3 dist = pointLights[i].pos - pos;
         vec3 dir = normalize(dist);
@@ -534,7 +531,7 @@ vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit)
     }
 
     /* DIRECTIONAL LIGHTS */
-    for (int i = 0; i < NUM_DIR_LIGHTS; i++)
+    for (int i = 0; i < dirLightCount; i++)
     {
         vec3 dir = -dirLights[i].dir;
         dir = normalize(dir);
@@ -563,7 +560,7 @@ vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit)
     }
 
     /* AMBIENT LIGHTS */
-    for (int i = 0; i < NUM_AMBIENT_LIGHTS; i++)
+    for (int i = 0; i < ambientLightCount; i++)
     {
         finalLight += ambientLights[i].intensity * ambientLights[i].color;
     }
@@ -605,7 +602,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
     }
 
     // Calculating ray-sphere intersections
-    for (int j = 0; j < NUM_SPHERES; j++)
+    for (int j = 0; j < sphereCount; j++)
     {
         // Skip already hit tri
         if (j == skipSphere) continue;

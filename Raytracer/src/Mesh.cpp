@@ -17,11 +17,7 @@ int Mesh::getTriangleSize()
     return sizeof(Triangle);
 }
 
-void Mesh::applyTransformations(glm::mat4& transformation)
-{
-}
-
-void Mesh::writeToShader(AbstractShader* shader, unsigned int ssbo, unsigned int materialIndex, glm::mat4& transformation)
+void Mesh::writeToShader(AbstractShader* shader, unsigned int ssbo, unsigned int materialIndex, const glm::mat4& transformation)
 {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     // Copying this mesh's data into the buffer at the right position

@@ -6,9 +6,9 @@ in vec3 FragPos;
 in vec3 Color;
 in vec3 Normal;
 
-#define NUM_POINT_LIGHTS $numPointLights
-#define NUM_DIR_LIGHTS 1
-#define NUM_AMBIENT_LIGHTS 1
+#define NUM_POINT_LIGHTS 10
+#define NUM_DIR_LIGHTS 10
+#define NUM_AMBIENT_LIGHTS 10
 
 
 // LIGHTS
@@ -18,8 +18,8 @@ struct PointLight
     vec3 color;
     float intensity;
 };
-
 uniform PointLight pointLights[NUM_POINT_LIGHTS];
+uniform int pointLightCount;
 
 struct DirLight
 {
@@ -27,28 +27,23 @@ struct DirLight
     vec3 color;
     float intensity;
 };
-DirLight dirLights[NUM_DIR_LIGHTS] = DirLight[](
-    //         Pos                  Color                   Intensity
-    DirLight(vec3(.707, -.707, 0.), vec3(1.0, 1.0, 0.9), 0.3)
-    );
+uniform DirLight dirLights[NUM_DIR_LIGHTS];
+uniform int dirLightCount;
 
 struct AmbientLight
 {
     vec3 color;
     float intensity;
 };
-AmbientLight ambientLights[1] = AmbientLight[](
-    //           Color                  Intensity
-    AmbientLight(vec3(0.8, 0.8, 1.0), 0.02)
-    );
-
+uniform AmbientLight ambientLights[NUM_AMBIENT_LIGHTS];
+uniform int ambientLightCount;
 
 
 vec3 calculateLights(vec3 pos, vec3 normal);
 
 void main()
 {
-    FragColor = vec4(calculateLights(FragPos, Normal), 1.);
+    FragColor = vec4(Color * calculateLights(FragPos, Normal), 1.);
 }
 
 vec3 calculateLights(vec3 pos, vec3 normal)
@@ -56,7 +51,7 @@ vec3 calculateLights(vec3 pos, vec3 normal)
     vec3 finalLight = vec3(0.);
 
     /* POINT LIGHTS */
-    for (int i = 0; i < NUM_POINT_LIGHTS; i++)
+    for (int i = 0; i < pointLightCount; i++)
     {
         vec3 dist = pointLights[i].pos - pos;
         vec3 dir = normalize(dist);
@@ -71,7 +66,7 @@ vec3 calculateLights(vec3 pos, vec3 normal)
     }
 
     /* DIRECTIONAL LIGHTS */
-    for (int i = 0; i < NUM_DIR_LIGHTS; i++)
+    for (int i = 0; i < dirLightCount; i++)
     {
         vec3 dir = -dirLights[i].dir;
         dir = normalize(dir);
@@ -85,7 +80,7 @@ vec3 calculateLights(vec3 pos, vec3 normal)
     }
 
     /* AMBIENT LIGHTS */
-    for (int i = 0; i < NUM_AMBIENT_LIGHTS; i++)
+    for (int i = 0; i < ambientLightCount; i++)
     {
         finalLight += ambientLights[i].intensity * ambientLights[i].color;
     }

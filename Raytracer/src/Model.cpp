@@ -12,19 +12,8 @@ Model::~Model()
 
 void Model::draw(AbstractShader* shader, Material* material)
 {
-	// Matrix for swapping column x and z to make a correct translation
-
-	unsigned int mat[16] = {
-		0, 0, 1, 0,
-		0, 1, 0, 0,
-		1, 0, 0, 0,
-		0, 0, 0, 1
-	};
-	glm::mat4 fix = glm::make_mat4(mat);
-
 	// Setting up the shader
-	shader->setMat4("model", transformation);//fix*transformation);
-
+	shader->setMat4("model", getTransformationMatrix());
 	shader->setVector3("inputColor", material->color);
 
 	// Drawing each mesh
@@ -38,15 +27,7 @@ void Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
-		meshes[i].writeToShader(shader, ssbo, materialIndex, transformation);
-	}
-}
-
-void Model::applyTransformations()
-{
-	for (unsigned int i = 0; i < meshes.size(); i++)
-	{
-		meshes[i].applyTransformations(transformation);
+		meshes[i].writeToShader(shader, ssbo, materialIndex, getTransformationMatrix());
 	}
 }
 
@@ -58,7 +39,7 @@ void Model::loadModel(std::string path, unsigned int* meshCount, unsigned int* t
 	// Checking for errors
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
-		std::cout << "Assimp error: model loading failed:" << importer.GetErrorString() << std::endl;
+		Logger::logError(std::string("Assimp error: model loading failed:") + importer.GetErrorString());
 		return;
 	}
 	directory = path.substr(0, path.find_last_of('/'));
@@ -76,6 +57,7 @@ void Model::processNode(aiNode* node, const aiScene* scene, unsigned int* meshCo
 
 		(*meshCount)++;
 	}
+
 	// Reading all the data from all children
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{

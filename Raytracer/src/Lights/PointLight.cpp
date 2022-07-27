@@ -20,5 +20,5 @@ void PointLight::writeToShader(AbstractShader* shader)
 
 void PointLight::writePositionToShader(AbstractShader* shader)
 {
-	shader->setVector3(("pointLights[" + std::to_string(this->index) + "].position").c_str(), CoordinateUtility::vec3ToGLSLVec3(position));
+	shader->setVector3(("pointLights[" + std::to_string(this->index) + "].pos").c_str(), CoordinateUtility::vec3ToGLSLVec3(position));
 }

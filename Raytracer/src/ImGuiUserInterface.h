@@ -1,5 +1,9 @@
 #pragma once
 
+#include <format>
+#include <iostream>
+#include <string>
+
 // ImGui
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -44,4 +48,31 @@ private:
 	unsigned int guiSwitchKeyPreviousState = 0;
 
 	unsigned int interfaceToggleKey = GLFW_KEY_R;
+
+	// Format a number of seconds
+	std::string formatTime(float time);
+
+	// Draw a help marker
+	void drawHelpMarker(const char* desc);
+
+	// Draw all the render settings
+	void drawRenderSettings(Camera* camera, Renderer* renderer, bool* inRaytraceMode);
+
+	// Represent a material using ImGui
+	void drawMaterials(Scene* scene);
+	void drawMaterial(Material& material);
+
+	// Represent a point light using ImGui
+	void drawLights(Scene* scene);
+	virtual void drawLight(PointLight& light, unsigned int index);
+	virtual void drawLight(DirectionalLight& light, unsigned int index);
+	virtual void drawLight(AmbientLight& light, unsigned int index);
+
+	// Represent a directional light using ImGui
+	//void drawLight(PointLight& light);
+
+	// Represent an object using ImGui
+	void drawObjects(Scene* scene);
+	void drawObject(Object& object, Scene* scene, unsigned int index, const char* materialSlotsCharArray);
+	void drawObject(Sphere& object, Scene* scene, unsigned int index, const char* materialSlotsCharArray);
 };

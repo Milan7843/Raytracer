@@ -11,7 +11,7 @@ Application::Application(unsigned int WIDTH, unsigned int HEIGHT)
 
 Application::~Application()
 {
-    std::cout << "Application instance destroyed" << std::endl;
+    Logger::log("Application instance destroyed");
 }
 
 int Application::Start()
@@ -22,7 +22,7 @@ int Application::Start()
     GLFWwindow* window = glfwCreateWindow(WINDOW_SIZE_X, WINDOW_SIZE_Y, "OpenGL", NULL, NULL);
     if (window == NULL)
     {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        Logger::logError("Failed to create GLFW window");
         glfwTerminate();
         return -1;
     }
@@ -35,11 +35,9 @@ int Application::Start()
     // GLAD manages function pointers for OpenGL, so we cannot run without it
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        Logger::logError("Failed to initialize GLAD");
         return -1;
     }
-
-    std::cout << "max uniforms: " << GL_MAX_VERTEX_UNIFORM_VECTORS << std::endl;
 
     // Setting viewport size
     glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
@@ -54,45 +52,42 @@ int Application::Start()
     // Change the viewport size if the window is resized
     glfwSetFramebufferSizeCallback(window, &Callbacks::framebuffer_size_callback);
 
-    // Must instantiate the buffer to be able to render to it: otherwise continuous rendering is enabled
-    //camera.instantiatePixelBuffer();
-
     // Making a scene
     Scene scene = Scene();
 
     // MATERIALS
-    Material whiteMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f);
-    Material reflectiveMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f, 0.0f);
-    Material transparentMaterial(glm::vec3(0.0f, 1.0f, 0.0f), 0.5f, 1.0f, 0.01f);
-    Material roseMaterial(glm::vec3(0.8f, 0.2f, 0.3f), 0.00000001f, 0.0f, 0.0f);
+    Material whiteMaterial("White", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f);
+    Material reflectiveMaterial("Reflective", glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f, 0.0f);
+    Material transparentMaterial("Transparent", glm::vec3(0.0f, 1.0f, 0.0f), 0.5f, 1.0f, 0.01f);
+    Material roseMaterial("Rose matte", glm::vec3(0.8f, 0.2f, 0.3f), 0.00000001f, 0.0f, 0.0f);
 
     scene.addMaterial(whiteMaterial);
     scene.addMaterial(reflectiveMaterial);
     scene.addMaterial(transparentMaterial);
     scene.addMaterial(roseMaterial);
 
-
     // Adding our test models: !! MUST BE TRIANGULATED !!
     Model* plane = scene.addModel("src/models/plane.obj", 0);
-    Model* icosphere = scene.addModel("src/models/medresicosphere.obj", 1);
+    Model* icosphere = scene.addModel("src/models/axes.obj", 1);
 
-    // Always first move, then rotate, then scale
-    icosphere->move(glm::vec3(1.0f, 0.6f, 2.0f));
+    // Transforming the icosphere
+    icosphere->setPosition(glm::vec3(1.0f, 0.6f, 2.0f));
     icosphere->scale(0.6f);
-    icosphere->applyTransformations();
-
     
     Sphere* sphere1 = scene.addSphere(glm::vec3(0.0f, 1.0f, 0.0f), 0.8f, 2);
     Sphere* sphere2 = scene.addSphere(glm::vec3(3.0f, 1.0f, 0.0f), 1.4f, 1);
     Sphere* sphere3 = scene.addSphere(glm::vec3(2.0f, 1.0f, 1.0f), 0.6f, 3);
 
     // LIGHTS
-    //PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
-    PointLight pointLight1(glm::vec3(0.0f, 1.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
+    PointLight pointLight1(glm::vec3(0.0f, 1.8f, 1.8f), glm::vec3(1.0f, 0.0f, 0.0f), 2.0f);
     PointLight pointLight2(glm::vec3(2.0f, 1.8f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 2.0f);
+    DirectionalLight directionalLight1(glm::vec3(0.707f, -0.707f, 0.0f), glm::vec3(1.0f, 1.0f, 0.9f), 0.3f);
+    AmbientLight ambientLight1(glm::vec3(0.8f, 0.8f, 1.0f), 0.02f);
 
-    scene.addPointLight(pointLight1);
-    //scene.addPointLight(pointLight2);
+    scene.addLight(pointLight1);
+    scene.addLight(pointLight2);
+    scene.addLight(directionalLight1);
+    scene.addLight(ambientLight1);
 
 
 
@@ -132,7 +127,15 @@ int Application::Start()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        if (frame % 10 == 0)
+        // TODO: optimise the following lines by adding data changed checks for the lights and materials
+        scene.writeLightsToShader(&raytracingShader);
+        scene.writeMaterialsToShader(&raytracingShader);
+        scene.writeLightsToShader(&rasterizedShader);
+        scene.writeMaterialsToShader(&rasterizedShader);
+        scene.checkObjectUpdates(&rasterizedShader);
+        scene.checkObjectUpdates(&raytracingShader);
+
+        if (frame % 10 == 0 && false)
             std::cout << "FPS: " << 1.0f / deltaTime << std::endl;
 
         // Input

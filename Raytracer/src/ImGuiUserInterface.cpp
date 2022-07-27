@@ -35,14 +35,23 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 		return;
 	}
 
+
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
+	bool showDemoWindow = false;
+	if (showDemoWindow)
+	{
+		ImGui::ShowDemoWindow();
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		return;
+	}
+
 	// Creating the GUI window
 	ImGui::Begin("Render settings");
-
 	ImGui::Text("Press R to open or close this interface.");
 
 	if (ImGui::Button("Render frame"))
@@ -53,61 +62,73 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 	{
 		renderer->startBlockRender(scene, camera);
 	}
+
+	// Render time left indicators
 	ImGui::ProgressBar(renderer->getRenderProgress());
-	ImGui::Text(std::to_string(renderer->getTimeLeft()).c_str());
+	ImGui::Text("Render time left: ");
+	ImGui::SameLine();
+	ImGui::Text(formatTime(renderer->getTimeLeft()).c_str());
 
-	ImGui::SliderInt("Block size", renderer->getBlockSizePointer(), 1, 100);
-	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+	// Creating the tab bar
+	ImGui::BeginTabBar("full_tab_bar");
+
+
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.22f, 0.4f, 0.48f, 0.2f));
+
+	// Tap for all settings related to rendering
+	if (ImGui::BeginTabItem("Render settings"))
 	{
-		ImGui::SetTooltip("The size of a render block in pixels.");
+		ImGui::BeginGroup();
+		drawRenderSettings(camera, renderer, inRaytraceMode);
+		ImGui::EndGroup();
+		ImGui::EndTabItem();
 	}
 
-	ImGui::SliderInt("Multisamples", renderer->getMultisamplePointer(), 1, 5);
-	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+	// Tab for editing any scene objects
+	if (ImGui::BeginTabItem("Scene editing"))
 	{
-		ImGui::SetTooltip("The number of different sample points per pixel, works as anti-aliasing.");
-	}
-	ImGui::Text(camera->getInformation().c_str());
+		ImGui::BeginTabBar("scene_edit_tab_bar");
+		ImGui::BeginGroup();
 
-	// Samples per render pass
-	ImGui::SliderInt("Sample count", renderer->getSampleCountPointer(), 1, 100);
-	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-	{
-		ImGui::SetTooltip("The number of samples per pixel per render pass.");
-	}
-	
-	// Render passes per block
-	ImGui::SliderInt("Block passes", renderer->getRenderPassCountPointer(), 1, 100);
-	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-	{
-		ImGui::SetTooltip("The number of passes per block. Each pass will take the full number of samples for each pixel.");
-	}
+		if (ImGui::BeginTabItem("Objects"))
+		{
+			drawObjects(scene);
+			ImGui::EndTabItem();
+		}
 
-	// Button to switch between raytraced and rasterized views
-	if (ImGui::Button(*inRaytraceMode ? "View rasterized" : "View raytraced"))
-	{
-		*inRaytraceMode = !(*inRaytraceMode);
+		if (ImGui::BeginTabItem("Materials"))
+		{
+			drawMaterials(scene);
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem("Lights"))
+		{
+			drawLights(scene);
+			ImGui::EndTabItem();
+		}
+
+		ImGui::EndTabBar();
+		ImGui::EndGroup();
+		ImGui::EndTabItem();
 	}
 
 	ImGui::Separator();
 
 	// Camera settings (speed, fov etc.)
-	if (ImGui::CollapsingHeader("Camera settings"))
+	if (ImGui::BeginTabItem("Camera settings"))
 	{
 		ImGui::SliderFloat("Move speed", camera->getCameraSpeedPointer(), 0.1f, 10.0f);
 		ImGui::SliderFloat("Sensitivity", camera->getSensitivityPointer(), 0.1f, 5.0f);
 		ImGui::SliderFloat("Field of view", camera->getFovPointer(), 10.0f, 90.0f);
+		ImGui::EndTabItem();
 	}
+	ImGui::PopStyleColor();
 
-	// Customisation of the program (colors etc.)
-	if (ImGui::CollapsingHeader("Customisation"))
-	{
-		//ImGui::ColorEdit3("Background colour", (float*)&clearColor);
-		//ImGui::ColorEdit3("Upper graph colour", (float*)&upperColor);
-		//ImGui::ColorEdit3("Lower graph colour", (float*)&lowerColor);
-	}
+	ImGui::EndTabBar();
 
 	ImGui::End();
+
 
 	// Rendering
 	ImGui::Render();
@@ -148,3 +169,317 @@ bool ImGuiUserInterface::isEnabled()
 	return imGuiEnabled;
 }
 
+std::string ImGuiUserInterface::formatTime(float time)
+{
+	int secondsTotal = (int)time;
+	int seconds = secondsTotal % 60;
+	int minutes = (secondsTotal / 60) % 60;
+	int hours = secondsTotal / 3600;
+
+	return std::format("{}h {}m {}s", hours, minutes, seconds);
+}
+
+void ImGuiUserInterface::drawHelpMarker(const char* desc)
+{
+	// Draw the help marker after whatever has already been drawn on this line
+	ImGui::SameLine();
+
+	// Gray text [?]
+	ImGui::TextDisabled("[?]");
+
+	// Drawing the help marker on hover
+	if (ImGui::IsItemHovered())
+	{
+		ImGui::BeginTooltip();
+		ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+		ImGui::TextUnformatted(desc);
+		ImGui::PopTextWrapPos();
+		ImGui::EndTooltip();
+	}
+}
+
+void ImGuiUserInterface::drawRenderSettings(Camera* camera, Renderer* renderer, bool* inRaytraceMode)
+{
+	ImGui::SliderInt("Block size", renderer->getBlockSizePointer(), 1, 100);
+	drawHelpMarker("The size of a render block in pixels.");
+
+	ImGui::SliderInt("Multisamples", renderer->getMultisamplePointer(), 1, 5);
+	drawHelpMarker("The number of different sample points per pixel, works as anti-aliasing.");
+	ImGui::Text(camera->getInformation().c_str());
+
+	// Samples per render pass
+	ImGui::SliderInt("Sample count", renderer->getSampleCountPointer(), 1, 100);
+	drawHelpMarker("The number of samples per pixel per render pass.");
+
+	// Render passes per block
+	ImGui::SliderInt("Block passes", renderer->getRenderPassCountPointer(), 1, 100);
+	drawHelpMarker("The number of passes per block. Each pass will take the full number of samples for each pixel.");
+
+	// Button to switch between raytraced and rasterized views
+	if (ImGui::Button(*inRaytraceMode ? "View rasterized" : "View raytraced"))
+	{
+		*inRaytraceMode = !(*inRaytraceMode);
+	}
+}
+
+void ImGuiUserInterface::drawMaterials(Scene* scene)
+{
+	ImGui::PushItemWidth(-1);
+	ImGui::BeginListBox("##");
+	for (Material& material : scene->getMaterials())
+	{
+		// Drawing each material
+		drawMaterial(material);
+		material.refractiveness = 1.0f;
+	}
+
+	// Drawing the 'Add material' button
+	if (ImGui::Button("Add material"))
+	{
+		Material material("New material", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f);
+		scene->addMaterial(material);
+	}
+
+	ImGui::EndListBox();
+	ImGui::PopItemWidth();
+}
+
+void ImGuiUserInterface::drawMaterial(Material& material)
+{
+	if (ImGui::TreeNode((*material.getNamePointer()).c_str()))
+	{
+		ImGui::InputText("Name", material.getNamePointer());
+		ImGui::ColorEdit3("Color", (float*)material.getColorPointer());
+		ImGui::ColorEdit3("Emission", (float*)material.getEmissionPointer());
+		ImGui::DragFloat("Reflectiveness", material.getReflectivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
+		ImGui::DragFloat("Transparency", material.getTransparencyPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
+		ImGui::DragFloat("Refractiveness", material.getRefractivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+}
+
+void ImGuiUserInterface::drawLights(Scene* scene)
+{
+	ImGui::PushItemWidth(-1);
+	ImGui::BeginListBox("##");
+	unsigned int index = 0;
+
+	// Drawing the lights themselves
+	for (PointLight& light : scene->getPointLights())
+	{
+		drawLight(light, index);
+		index++;
+	}
+	index = 0;
+	for (DirectionalLight& light : scene->getDirectionalLights())
+	{
+		drawLight(light, index);
+		index++;
+	}
+	index = 0;
+	for (AmbientLight& light : scene->getAmbientLights())
+	{
+		drawLight(light, index);
+		index++;
+	}
+
+	// Drawing the 'Add light' button
+	if (ImGui::Button("Add light"))
+		ImGui::OpenPopup("add_light_popup");
+
+	// And drawing the light options
+	if (ImGui::BeginPopup("add_light_popup"))
+	{
+		ImGui::Text("Light type");
+		ImGui::Separator();
+		if (ImGui::Selectable("Point light"))
+		{
+			PointLight light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+			scene->addLight(light);
+		}
+		if (ImGui::Selectable("Directional light"))
+		{
+			DirectionalLight light(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+			scene->addLight(light);
+		}
+		if (ImGui::Selectable("Ambient light"))
+		{
+			AmbientLight light(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f);
+			scene->addLight(light);
+		}
+		ImGui::EndPopup();
+	}
+	ImGui::EndListBox();
+	ImGui::PopItemWidth();	
+}
+
+void ImGuiUserInterface::drawLight(PointLight& light, unsigned int index)
+{
+	if (ImGui::TreeNode(("Point light " + std::to_string(index + 1)).c_str()))
+	{
+		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
+		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
+		ImGui::DragFloat3("Position", (float*)light.getPositionPointer(), 0.01f);
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+}
+
+void ImGuiUserInterface::drawLight(DirectionalLight& light, unsigned int index)
+{
+	if (ImGui::TreeNode(("Directional light " + std::to_string(index + 1)).c_str()))
+	{
+		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
+		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
+		ImGui::DragFloat3("Direction", (float*)light.getDirectionPointer(), 0.01f);
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+}
+
+void ImGuiUserInterface::drawLight(AmbientLight& light, unsigned int index)
+{
+	if (ImGui::TreeNode(("Ambient light " + std::to_string(index + 1)).c_str()))
+	{
+		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
+		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+}
+
+void ImGuiUserInterface::drawObjects(Scene* scene)
+{
+	// Generating the char[] used for the material slots
+	std::string materialSlots = "";
+	for (Material& material : scene->getMaterials())
+	{
+		materialSlots += *material.getNamePointer() + "\000";
+	}
+	const char* materialSlotsCharArray = materialSlots.c_str();
+
+	// Drawing the models
+	if (ImGui::TreeNode("Models"))
+	{
+		ImGui::PushItemWidth(-1);
+		ImGui::BeginListBox("##");
+		unsigned int index = 0;
+		for (Model& model : scene->getModels())
+		{
+			// Drawing each model
+			drawObject(model, scene, index, materialSlotsCharArray);
+			index++;
+		}
+		ImGui::EndListBox();
+		ImGui::PopItemWidth();
+		ImGui::TreePop();
+	}
+	// Drawing the spheres
+	if (ImGui::TreeNode("Spheres"))
+	{
+		ImGui::PushItemWidth(-1);
+		ImGui::BeginListBox("##");
+		unsigned int index = 0;
+		for (Sphere& sphere : scene->getSpheres())
+		{
+			// Drawing each sphere
+			drawObject(sphere, scene, index, materialSlotsCharArray);
+			index++;
+		}
+
+		// Drawing the 'Add sphere' button
+		if (ImGui::Button("Add sphere"))
+			scene->addSphere(glm::vec3(0.0f), 1.0f, 0);
+
+		ImGui::EndListBox();
+		ImGui::PopItemWidth();
+		ImGui::TreePop();
+	}
+}
+
+void ImGuiUserInterface::drawObject(Object& object, Scene* scene, unsigned int index, const char* materialSlotsCharArray)
+{
+	if (ImGui::TreeNode(("Model " + std::to_string(index + 1)).c_str()))
+	{
+		// Showing transformations
+		ImGui::DragFloat3("Position", (float*)object.getPositionPointer(), 0.01f);
+		ImGui::DragFloat3("Rotation", (float*)object.getRotationPointer(), 0.01f);
+		ImGui::DragFloat3("Scale", (float*)object.getScalePointer(), 0.01f);
+
+		// Preview the currently selected name
+		if (ImGui::BeginCombo("##combo", (*(scene->getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
+		{
+			unsigned int i = 0;
+			for (Material& material : scene->getMaterials())
+			{
+				bool thisMaterialSelected = (i == *object.getMaterialIndexPointer());
+				
+				if (ImGui::Selectable((*(scene->getMaterials()[i].getNamePointer())).c_str()))
+				{
+					*object.getMaterialIndexPointer() = i;
+				}
+
+				if (thisMaterialSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+
+				// Increment material counter
+				i++;
+			}
+
+			// End this combo selector
+			ImGui::EndCombo();
+		}
+
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+}
+
+
+
+void ImGuiUserInterface::drawObject(Sphere& object, Scene* scene, unsigned int index, const char* materialSlotsCharArray)
+{
+	if (ImGui::TreeNode(("Sphere " + std::to_string(index + 1)).c_str()))
+	{
+		// Showing transformations
+		ImGui::DragFloat3("Position", (float*)object.getPositionPointer(), 0.01f);
+
+		// Drawing a dragfloat for the sphere's radius
+		Sphere& sphere = (Sphere&)object;
+		ImGui::DragFloat("Radius", sphere.getRadiusPointer(), 0.01f, 0.01f, 100.0f, "%.02f");
+
+		// Preview the currently selected name
+		if (ImGui::BeginCombo("##combo", (*(scene->getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
+		{
+			unsigned int i = 0;
+			for (Material& material : scene->getMaterials())
+			{
+				bool thisMaterialSelected = (i == *object.getMaterialIndexPointer());
+
+				// Material index selector
+				if (ImGui::Selectable((*(scene->getMaterials()[i].getNamePointer())).c_str()))
+				{
+					*object.getMaterialIndexPointer() = i;
+				}
+
+				// Set this material to be 'focused' if it is the selected material
+				if (thisMaterialSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+
+				// Increment material counter
+				i++;
+			}
+
+			// End this combo selector
+			ImGui::EndCombo();
+		}
+
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+}

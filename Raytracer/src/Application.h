@@ -22,6 +22,7 @@
 #include "ImGuiUserInterface.h"
 
 #include "CoordinateUtility.h"
+#include "Logger.h"
 
 
 class Application

@@ -2,8 +2,9 @@
 
 #include "AbstractShader.h"
 
-Material::Material(glm::vec3 color, float reflectiveness, float transparency, float refractiveness)
-	: color(color),
+Material::Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness)
+	: name(name),
+	color(color),
 	reflectiveness(reflectiveness),
 	transparency(transparency),
 	refractiveness(refractiveness),
@@ -11,8 +12,9 @@ Material::Material(glm::vec3 color, float reflectiveness, float transparency, fl
 {
 }
 
-Material::Material(glm::vec3 color, float reflectiveness, float transparency, glm::vec3 emission)
-	: color(color),
+Material::Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, glm::vec3 emission)
+	: name(name),
+	color(color),
 	reflectiveness(reflectiveness),
 	transparency(transparency),
 	refractiveness(0.0f),
@@ -32,4 +34,34 @@ void Material::writeToShader(AbstractShader* shader, unsigned int index)
 	shader->setFloat(("materials[" + std::to_string(index) + "].transparency").c_str(), transparency);
 	shader->setFloat(("materials[" + std::to_string(index) + "].refractiveness").c_str(), refractiveness);
 	shader->setVector3(("materials[" + std::to_string(index) + "].emission").c_str(), emission);
+}
+
+std::string* Material::getNamePointer()
+{
+	return &name;
+}
+
+glm::vec3* Material::getColorPointer()
+{
+	return &color;
+}
+
+float* Material::getReflectivenessPointer()
+{
+	return &reflectiveness;
+}
+
+float* Material::getTransparencyPointer()
+{
+	return &transparency;
+}
+
+float* Material::getRefractivenessPointer()
+{
+	return &refractiveness;
+}
+
+glm::vec3* Material::getEmissionPointer()
+{
+	return &emission;
 }
