@@ -43,7 +43,7 @@ vec3 calculateLights(vec3 pos, vec3 normal);
 
 void main()
 {
-    FragColor = vec4(calculateLights(FragPos, Normal), 1.);
+    FragColor = vec4(Color * calculateLights(FragPos, Normal), 1.);
 }
 
 vec3 calculateLights(vec3 pos, vec3 normal)

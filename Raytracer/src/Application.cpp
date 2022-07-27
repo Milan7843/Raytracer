@@ -52,9 +52,6 @@ int Application::Start()
     // Change the viewport size if the window is resized
     glfwSetFramebufferSizeCallback(window, &Callbacks::framebuffer_size_callback);
 
-    // Must instantiate the buffer to be able to render to it: otherwise continuous rendering is enabled
-    //camera.instantiatePixelBuffer();
-
     // Making a scene
     Scene scene = Scene();
 
@@ -69,7 +66,6 @@ int Application::Start()
     scene.addMaterial(transparentMaterial);
     scene.addMaterial(roseMaterial);
 
-
     // Adding our test models: !! MUST BE TRIANGULATED !!
     Model* plane = scene.addModel("src/models/plane.obj", 0);
     Model* icosphere = scene.addModel("src/models/axes.obj", 1);
@@ -77,7 +73,6 @@ int Application::Start()
     // Transforming the icosphere
     icosphere->setPosition(glm::vec3(1.0f, 0.6f, 2.0f));
     icosphere->scale(0.6f);
-
     
     Sphere* sphere1 = scene.addSphere(glm::vec3(0.0f, 1.0f, 0.0f), 0.8f, 2);
     Sphere* sphere2 = scene.addSphere(glm::vec3(3.0f, 1.0f, 0.0f), 1.4f, 1);
