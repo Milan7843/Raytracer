@@ -47,5 +47,5 @@ ComputeShader::ComputeShader(const char* shaderPath, Scene* scene)
 
 ComputeShader::~ComputeShader()
 {
-	std::cout << "Compute shader destroyed." << std::endl;
+	Logger::log("Compute shader destroyed.");
 }

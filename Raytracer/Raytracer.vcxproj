@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Lights\AmbientLight.cpp" />
     <ClCompile Include="src\Lights\DirectionalLight.cpp" />
     <ClCompile Include="include\glm\detail\glm.cpp" />
@@ -50,6 +51,7 @@
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\Lights\AmbientLight.h" />
     <ClInclude Include="src\Lights\DirectionalLight.h" />
     <ClInclude Include="include\assimp\aabb.h" />

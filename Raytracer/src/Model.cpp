@@ -39,7 +39,7 @@ void Model::loadModel(std::string path, unsigned int* meshCount, unsigned int* t
 	// Checking for errors
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
-		std::cout << "Assimp error: model loading failed:" << importer.GetErrorString() << std::endl;
+		Logger::logError(std::string("Assimp error: model loading failed:") + importer.GetErrorString());
 		return;
 	}
 	directory = path.substr(0, path.find_last_of('/'));
