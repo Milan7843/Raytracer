@@ -11,6 +11,15 @@ DirectionalLight::~DirectionalLight()
 {
 }
 
+void DirectionalLight::writeDataToStream(std::ofstream& filestream)
+{
+	// Writing basic data using the base class
+	Light::writeDataToStream(filestream);
+
+	// Then point light specific data
+	filestream << direction.x << ", " << direction.y << ", " << direction.z << "\n";
+}
+
 void DirectionalLight::writeToShader(AbstractShader* shader)
 {
 	shader->setVector3(("dirLights[" + std::to_string(this->index) + "].dir").c_str(), direction);

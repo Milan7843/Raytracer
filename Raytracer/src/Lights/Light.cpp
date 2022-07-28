@@ -22,6 +22,12 @@ void Light::writePositionToShader(AbstractShader* shader)
 {
 }
 
+void Light::writeDataToStream(std::ofstream& filestream)
+{
+	filestream << color.r << ", " << color.g << ", " << color.b << "\n";
+	filestream << intensity << "\n";
+}
+
 void Light::setIndex(unsigned int index)
 {
 	this->index = index;

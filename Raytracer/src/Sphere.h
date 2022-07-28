@@ -8,6 +8,9 @@ public:
 	Sphere(glm::vec3 position, float radius, unsigned int materialIndex, unsigned int shaderSphereIndex);
 	~Sphere();
 
+	// Write this sphere to the given filestream
+	virtual void writeDataToStream(std::ofstream& filestream);
+
 	// Write this object's data to the given shader
 	virtual void writeToShader(AbstractShader* shader, unsigned int ssbo);
 

@@ -1,6 +1,7 @@
 #include "Model.h"
 
 Model::Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex)
+	: path(path)
 {
 	this->materialIndex = materialIndex;
 	loadModel(path, meshCount, triangleCount);
@@ -8,6 +9,16 @@ Model::Model(const std::string& path, unsigned int* meshCount, unsigned int* tri
 
 Model::~Model()
 {
+}
+
+void Model::writeDataToStream(std::ofstream& filestream)
+{
+	// Writing basic object data
+	Object::writeDataToStream(filestream);
+
+	// Writing specific model data
+	filestream << path << "\n";
+	filestream << materialIndex << "\n";
 }
 
 void Model::draw(AbstractShader* shader, Material* material)

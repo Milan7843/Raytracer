@@ -23,6 +23,7 @@
 
 #include "CoordinateUtility.h"
 #include "Logger.h"
+#include "SceneFileSaver.h"
 
 
 class Application

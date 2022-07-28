@@ -18,6 +18,9 @@ public:
 	Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex);
 	~Model();
 
+	// Write this model to the given filestream
+	virtual void writeDataToStream(std::ofstream& filestream);
+
 	// Draw this object given the shader
 	virtual void draw(AbstractShader* shader, Material* material);
 
@@ -28,6 +31,8 @@ public:
 
 private:
 	std::string directory;
+	std::string path;
+
 	void loadModel(std::string path, unsigned int* meshCount, unsigned int* triangleCount);
 	void processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* triangleCount);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCount, unsigned int* triangleCount);

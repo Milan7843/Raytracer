@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\SceneManager.cpp" />
+    <ClCompile Include="src\SceneFileSaver.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Lights\AmbientLight.cpp" />
     <ClCompile Include="src\Lights\DirectionalLight.cpp" />
@@ -51,6 +53,8 @@
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\SceneManager.h" />
+    <ClInclude Include="src\SceneFileSaver.h" />
     <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\Lights\AmbientLight.h" />
     <ClInclude Include="src\Lights\DirectionalLight.h" />

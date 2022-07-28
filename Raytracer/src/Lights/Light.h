@@ -20,6 +20,9 @@ public:
 	void writeToShader(AbstractShader* shader);
 	void writePositionToShader(AbstractShader* shader);
 
+	// Write this light to the given filestream
+	virtual void writeDataToStream(std::ofstream& filestream);
+
 	void setIndex(unsigned int index);
 
 	glm::vec3* getPositionPointer();

@@ -27,6 +27,17 @@ Material::~Material()
 
 }
 
+void Material::writeDataToStream(std::ofstream& filestream)
+{
+	filestream << name << "\n";
+	filestream << color.r << ", " << color.g << ", " << color.b << "\n";
+	filestream << reflectiveness << "\n";
+	filestream << transparency << "\n";
+	filestream << refractiveness << "\n";
+	filestream << emission.r << ", " << emission.g << ", " << emission.b << "\n";
+
+}
+
 void Material::writeToShader(AbstractShader* shader, unsigned int index)
 {
 	shader->setVector3(("materials[" + std::to_string(index) + "].color").c_str(), color);

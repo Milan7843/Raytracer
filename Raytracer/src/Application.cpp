@@ -89,7 +89,7 @@ int Application::Start()
     scene.addLight(directionalLight1);
     scene.addLight(ambientLight1);
 
-
+    SceneFileSaver::writeSceneToFile(scene, std::string("Scene 1 - testing"));
 
     Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
     Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader");

@@ -15,6 +15,10 @@ public:
 	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, glm::vec3 emission);
 	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness);
 	~Material();
+
+	// Write this light to the given filestream
+	void writeDataToStream(std::ofstream& filestream);
+
 	glm::vec3 color;
 	float reflectiveness;
 	float transparency;

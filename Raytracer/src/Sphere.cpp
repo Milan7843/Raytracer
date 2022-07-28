@@ -13,6 +13,13 @@ Sphere::~Sphere()
 
 }
 
+void Sphere::writeDataToStream(std::ofstream& filestream)
+{
+	Model::writeDataToStream(filestream);
+
+	filestream << radius << "\n";
+}
+
 void Sphere::writeToShader(AbstractShader* shader, unsigned int ssbo)
 {
 	shader->setVector3(("spheres[" + std::to_string(shaderSphereIndex) + "].pos").c_str(), 

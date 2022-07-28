@@ -9,6 +9,58 @@ Scene::~Scene()
 {
 }
 
+void Scene::writeDataToStream(std::ofstream& filestream)
+{
+	// Writing the scene's data to the filestream
+	filestream << name;
+
+	// Writing all materials
+	filestream << "# Materials\n";
+	for (Material& material : materials)
+	{
+		material.writeDataToStream(filestream);
+		filestream << "\n";
+	}
+
+	// Writing all spheres
+	filestream << "# Spheres\n";
+	for (Sphere& sphere : getSpheres())
+	{
+		sphere.writeDataToStream(filestream);
+		filestream << "\n";
+	}
+
+	// Writing all models
+	filestream << "# Models\n";
+	for (Model& model : getModels())
+	{
+		model.writeDataToStream(filestream);
+		filestream << "\n";
+	}
+
+	// Writing all lights
+	filestream << "# Pointlights\n";
+	for (PointLight& light : getPointLights())
+	{
+		light.writeDataToStream(filestream);
+		filestream << "\n";
+	}
+
+	filestream << "# Directional lights\n";
+	for (DirectionalLight& light : getDirectionalLights())
+	{
+		light.writeDataToStream(filestream);
+		filestream << "\n";
+	}
+
+	filestream << "# Ambient lights\n";
+	for (AmbientLight& light : getAmbientLights())
+	{
+		light.writeDataToStream(filestream);
+		filestream << "\n";
+	}
+}
+
 
 void Scene::addLight(PointLight& pointLight)
 {
@@ -117,15 +169,15 @@ void Scene::writeLightsToShader(AbstractShader* shader)
 	shader->setInt("ambientLightCount", ambientLightCount);
 
 	// Writing lights to shader
-	for (PointLight light : getPointLights())
+	for (PointLight& light : getPointLights())
 	{
 		light.writeToShader(shader);
 	}
-	for (DirectionalLight light : getDirectionalLights())
+	for (DirectionalLight& light : getDirectionalLights())
 	{
 		light.writeToShader(shader);
 	}
-	for (AmbientLight light : getAmbientLights())
+	for (AmbientLight& light : getAmbientLights())
 	{
 		light.writeToShader(shader);
 	}
@@ -140,7 +192,7 @@ void Scene::writeMaterialsToShader(AbstractShader* shader)
 
 	// Writing materials to shader
 	unsigned int index = 0;
-	for (Material material : materials)
+	for (Material& material : materials)
 	{
 		material.writeToShader(shader, index++);
 	}
@@ -190,6 +242,11 @@ void Scene::bindTriangleBuffer()
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
+}
+
+std::string* Scene::getNamePointer()
+{
+	return &name;
 }
 
 std::vector<Material>& Scene::getMaterials()

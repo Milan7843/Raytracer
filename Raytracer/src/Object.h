@@ -12,6 +12,9 @@ class Object
 {
 public:
 
+	// Write this model to the given filestream
+	virtual void writeDataToStream(std::ofstream& filestream);
+
 	// Applying transformations on this object
 	void rotate(glm::vec3 rotation);
 	void setRotation(glm::vec3 rotation);

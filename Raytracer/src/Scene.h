@@ -17,6 +17,9 @@ public:
 	Scene();
 	~Scene();
 
+	// Write this scene to the given filestream
+	void writeDataToStream(std::ofstream& filestream);
+
 	// Add a point light to the scene
 	void addLight(PointLight& pointLight);
 
@@ -52,6 +55,9 @@ public:
 	// Bind the buffer holding all triangles
 	void bindTriangleBuffer();
 
+	// Get a pointer to the name of this scene
+	std::string* getNamePointer();
+
 	std::vector<Material>& getMaterials();
 	std::vector<PointLight>& getPointLights();
 	std::vector<DirectionalLight>& getDirectionalLights();
@@ -60,9 +66,12 @@ public:
 	std::vector<Sphere>& getSpheres();
 
 
-	unsigned int triangleCount = 0;
+	unsigned int triangleCount{ 0 };
 
 private:
+
+	std::string name{};
+
 	// Keeping track of the lights in this scene
 	std::vector<PointLight> pointLights;
 	std::vector<DirectionalLight> directionalLights;
@@ -70,11 +79,11 @@ private:
 	unsigned int pointLightCount = 0;
 	unsigned int directionalLightCount = 0;
 	unsigned int ambientLightCount = 0;
-	const unsigned int MAX_POINT_LIGHT_COUNT = 10;
-	const unsigned int MAX_DIR_LIGHT_COUNT = 10;
-	const unsigned int MAX_AMBIENT_LIGHT_COUNT = 10;
-	const unsigned int MAX_MATERIAL_COUNT = 10;
-	const unsigned int MAX_SPHERE_COUNT = 10;
+	unsigned int MAX_POINT_LIGHT_COUNT = 10;
+	unsigned int MAX_DIR_LIGHT_COUNT = 10;
+	unsigned int MAX_AMBIENT_LIGHT_COUNT = 10;
+	unsigned int MAX_MATERIAL_COUNT = 10;
+	unsigned int MAX_SPHERE_COUNT = 10;
 
 	std::vector<Model> models;
 	std::vector<Sphere> spheres;

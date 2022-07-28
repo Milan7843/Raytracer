@@ -11,6 +11,15 @@ PointLight::~PointLight()
 {
 }
 
+void PointLight::writeDataToStream(std::ofstream& filestream)
+{
+	// Writing basic data using the base class
+	Light::writeDataToStream(filestream);
+
+	// Then point light specific data
+	filestream << position.x << ", " << position.y << ", " << position.z << "\n";
+}
+
 void PointLight::writeToShader(AbstractShader* shader)
 {
 	writePositionToShader(shader);

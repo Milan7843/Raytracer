@@ -87,6 +87,46 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 	// Tab for editing any scene objects
 	if (ImGui::BeginTabItem("Scene editing"))
 	{
+		// Scene settings
+		ImGui::InputText("Scene name", scene->getNamePointer());
+
+		// Save/revert changes buttons
+		if (ImGui::Button("Save scene changes"))
+			renderer->render(scene, camera);
+
+		// Scene settings
+
+		// Holds new scene name input
+		static std::string newSceneNameInput{};
+		if (ImGui::Button("Save scene changes as new"))
+			ImGui::OpenPopup("##save_changes_new_popup");
+
+		if (ImGui::BeginPopup("##save_changes_new_popup"))
+		{
+			// Name input field
+			ImGui::InputText("Scene name", &newSceneNameInput);
+
+			if (ImGui::Button("Save"))
+			{
+				// Empty input field
+				newSceneNameInput = {};
+			}
+			ImGui::SameLine();
+
+			if (ImGui::Button("Cancel"))
+			{
+				// Empty input field
+				newSceneNameInput = {};
+				// Then close the popup
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		if (ImGui::Button("Revert scene changes"))
+			renderer->render(scene, camera);
+
+
 		ImGui::BeginTabBar("scene_edit_tab_bar");
 		ImGui::BeginGroup();
 
@@ -112,8 +152,6 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 		ImGui::EndGroup();
 		ImGui::EndTabItem();
 	}
-
-	ImGui::Separator();
 
 	// Camera settings (speed, fov etc.)
 	if (ImGui::BeginTabItem("Camera settings"))

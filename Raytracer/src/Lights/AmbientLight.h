@@ -11,6 +11,6 @@ public:
 	~AmbientLight();
 
 	// Write all the data of this directional light into the given shader
-	void writeToShader(AbstractShader* shader);
+	virtual void writeToShader(AbstractShader* shader);
 };
 
