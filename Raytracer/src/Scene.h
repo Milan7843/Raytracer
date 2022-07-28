@@ -20,6 +20,9 @@ public:
 	// Write this scene to the given filestream
 	void writeDataToStream(std::ofstream& filestream);
 
+	// Set the name of this scene
+	void setName(std::string& name);
+
 	// Add a point light to the scene
 	void addLight(PointLight& pointLight);
 

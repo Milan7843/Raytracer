@@ -1,0 +1,82 @@
+# Materials
+White
+1 1 1
+0
+0
+0
+1 1 1
+
+Reflective
+1 1 1
+1
+0
+0
+1 1 1
+
+Transparent
+0 1 0
+0.5
+1
+0.01
+1 1 1
+
+Rose matte
+0.8 0.2 0.3
+1e-08
+0
+0
+1 1 1
+# Materials end
+
+# Spheres
+0 1 0
+0 0 0
+0.8 0.8 0.8
+2
+
+3 1 0
+0 0 0
+1.4 1.4 1.4
+1
+
+2 1 1
+0 0 0
+0.6 0.6 0.6
+3
+# Spheres end
+
+# Models
+0 0 0
+0 0 0
+1 1 1
+src/models/plane.obj
+0
+
+1 0.6 2
+0 0 0
+0.6 0.6 0.6
+src/models/axes.obj
+1
+# Models end
+
+# Point lights
+1 0 0
+2
+0 1.8 1.8
+
+0 1 0
+2
+2 1.8 0
+# Point lights end
+
+# Directional lights
+1 1 0.9
+0.3
+0.707 -0.707 0
+# Directional lights end
+
+# Ambient lights
+0.8 0.8 1
+0.02
+# Ambient lights end
+

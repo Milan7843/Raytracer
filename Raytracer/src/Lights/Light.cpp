@@ -24,7 +24,7 @@ void Light::writePositionToShader(AbstractShader* shader)
 
 void Light::writeDataToStream(std::ofstream& filestream)
 {
-	filestream << color.r << ", " << color.g << ", " << color.b << "\n";
+	filestream << color.r << " " << color.g << " " << color.b << "\n";
 	filestream << intensity << "\n";
 }
 

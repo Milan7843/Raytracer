@@ -10,14 +10,15 @@ void SceneManager::changeScene(std::string& sceneName)
 	try
 	{
 		// Trying to read the file
-		//Scene newScene{ SceneFileSaver::readSceneFromFile(sceneName) };
+		Scene newScene{ SceneFileSaver::readSceneFromFile(sceneName) };
 
 		// If it could be read, set it as the new scene
 		// and set the scene name to the new one
-		//currentScene = newScene;
+		currentScene = newScene;
 	}
 	catch (const char* e)
 	{
+		Logger::logError(e);
 		// If it cannot be read: reload available scene names;
 		// maybe it was removed?
 		loadAvailableScenesNames();

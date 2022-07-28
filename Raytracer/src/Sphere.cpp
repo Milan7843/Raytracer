@@ -15,9 +15,10 @@ Sphere::~Sphere()
 
 void Sphere::writeDataToStream(std::ofstream& filestream)
 {
-	Model::writeDataToStream(filestream);
+	Object::writeDataToStream(filestream);
 
-	filestream << radius << "\n";
+	//filestream << radius << "\n";
+	filestream << materialIndex << "\n";
 }
 
 void Sphere::writeToShader(AbstractShader* shader, unsigned int ssbo)

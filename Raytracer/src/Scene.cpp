@@ -19,46 +19,69 @@ void Scene::writeDataToStream(std::ofstream& filestream)
 	for (Material& material : materials)
 	{
 		material.writeDataToStream(filestream);
-		filestream << "\n";
+		// Write newline if it is not the last item
+		if (&material != &materials.back())
+			filestream << "\n";
 	}
+	filestream << "# Materials end\n\n";
 
 	// Writing all spheres
 	filestream << "# Spheres\n";
 	for (Sphere& sphere : getSpheres())
 	{
 		sphere.writeDataToStream(filestream);
-		filestream << "\n";
+		// Write newline if it is not the last item
+		if (&sphere != &getSpheres().back())
+			filestream << "\n";
 	}
+	filestream << "# Spheres end\n\n";
 
 	// Writing all models
 	filestream << "# Models\n";
 	for (Model& model : getModels())
 	{
 		model.writeDataToStream(filestream);
-		filestream << "\n";
+		// Write newline if it is not the last item
+		if (&model != &getModels().back())
+			filestream << "\n";
 	}
+	filestream << "# Models end\n\n";
 
 	// Writing all lights
-	filestream << "# Pointlights\n";
+	filestream << "# Point lights\n";
 	for (PointLight& light : getPointLights())
 	{
 		light.writeDataToStream(filestream);
-		filestream << "\n";
+		// Write newline if it is not the last item
+		if (&light != &getPointLights().back())
+			filestream << "\n";
 	}
+	filestream << "# Point lights end\n\n";
 
 	filestream << "# Directional lights\n";
 	for (DirectionalLight& light : getDirectionalLights())
 	{
 		light.writeDataToStream(filestream);
-		filestream << "\n";
+		// Write newline if it is not the last item
+		if (&light != &getDirectionalLights().back())
+			filestream << "\n";
 	}
+	filestream << "# Directional lights end\n\n";
 
 	filestream << "# Ambient lights\n";
 	for (AmbientLight& light : getAmbientLights())
 	{
 		light.writeDataToStream(filestream);
-		filestream << "\n";
+		// Write newline if it is not the last item
+		if (&light != &getAmbientLights().back())
+			filestream << "\n";
 	}
+	filestream << "# Ambient lights end\n\n";
+}
+
+void Scene::setName(std::string& name)
+{
+	this->name = name;
 }
 
 

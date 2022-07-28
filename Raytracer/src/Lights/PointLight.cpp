@@ -17,7 +17,7 @@ void PointLight::writeDataToStream(std::ofstream& filestream)
 	Light::writeDataToStream(filestream);
 
 	// Then point light specific data
-	filestream << position.x << ", " << position.y << ", " << position.z << "\n";
+	filestream << position.x << " " << position.y << " " << position.z << "\n";
 }
 
 void PointLight::writeToShader(AbstractShader* shader)

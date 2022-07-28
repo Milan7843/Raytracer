@@ -17,7 +17,7 @@ void DirectionalLight::writeDataToStream(std::ofstream& filestream)
 	Light::writeDataToStream(filestream);
 
 	// Then point light specific data
-	filestream << direction.x << ", " << direction.y << ", " << direction.z << "\n";
+	filestream << direction.x << " " << direction.y << " " << direction.z << "\n";
 }
 
 void DirectionalLight::writeToShader(AbstractShader* shader)

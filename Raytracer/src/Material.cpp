@@ -2,6 +2,15 @@
 
 #include "AbstractShader.h"
 
+Material::Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness, glm::vec3 emission)
+	: name(name),
+	color(color),
+	reflectiveness(reflectiveness),
+	transparency(transparency),
+	refractiveness(refractiveness),
+	emission(emission)
+{
+}
 Material::Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness)
 	: name(name),
 	color(color),
@@ -30,11 +39,11 @@ Material::~Material()
 void Material::writeDataToStream(std::ofstream& filestream)
 {
 	filestream << name << "\n";
-	filestream << color.r << ", " << color.g << ", " << color.b << "\n";
+	filestream << color.r << " " << color.g << " " << color.b << "\n";
 	filestream << reflectiveness << "\n";
 	filestream << transparency << "\n";
 	filestream << refractiveness << "\n";
-	filestream << emission.r << ", " << emission.g << ", " << emission.b << "\n";
+	filestream << emission.r << " " << emission.g << " " << emission.b << "\n";
 
 }
 

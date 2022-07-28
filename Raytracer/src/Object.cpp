@@ -7,9 +7,9 @@ void Object::writeToShader(AbstractShader* shader, unsigned int ssbo)
 
 void Object::writeDataToStream(std::ofstream& filestream)
 {
-	filestream << position.x << ", " << position.y << ", " << position.z << "\n";
-	filestream << rotation.x << ", " << rotation.y << ", " << rotation.z << "\n";
-	filestream << scaleVector.x << ", " << scaleVector.y << ", " << scaleVector.z << "\n";
+	filestream << position.x << " " << position.y << " " << position.z << "\n";
+	filestream << rotation.x << " " << rotation.y << " " << rotation.z << "\n";
+	filestream << scaleVector.x << " " << scaleVector.y << " " << scaleVector.z << "\n";
 }
 
 void Object::rotate(glm::vec3 rotation)
