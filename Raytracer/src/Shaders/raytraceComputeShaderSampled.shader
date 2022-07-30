@@ -18,6 +18,7 @@ uniform int currentBlockRenderPassIndex;
 
 #define EPSILON 0.0001f
 
+// Should not be important anymore
 #define NUM_TRIANGLES $numTriangles
 #define NUM_SPHERES 10
 #define NUM_POINT_LIGHTS 10
@@ -48,6 +49,7 @@ struct Tri
     int mesh;
 };
 
+// TODO: make this variable length
 layout(std140, binding = 2) buffer Tris
 {
     Tri triangles[NUM_TRIANGLES];
@@ -208,7 +210,6 @@ void main()
         }
     }
 
-
     // TODO make buffer empty on begin of render!
     if (currentBlockRenderPassIndex == 0)
     {
@@ -272,7 +273,7 @@ vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex, int seed)
 
     for (int i = 0; i < sampleCount; i++)
     {
-        Ray ray = fireRay(cameraPosition, dir, true, i * 67 + seed * 1471 * seed);
+        Ray ray = fireRay(cameraPosition, dir, true, i * 67 * i + seed * 1471 * seed);
         finalColor += ray.finalColor;
     }
     finalColor = finalColor / float(sampleCount);

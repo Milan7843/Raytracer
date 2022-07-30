@@ -123,6 +123,8 @@ int Application::Start()
 
     unsigned int frame = 0;
 
+    Logger::logWarning("change pointer passes to references");
+
     while (!glfwWindowShouldClose(window))
     {
         float currentFrame = glfwGetTime();
@@ -134,8 +136,9 @@ int Application::Start()
         scene.writeMaterialsToShader(&raytracingShader);
         scene.writeLightsToShader(&rasterizedShader);
         scene.writeMaterialsToShader(&rasterizedShader);
-        scene.checkObjectUpdates(&rasterizedShader);
-        scene.checkObjectUpdates(&raytracingShader);
+        raytracingRenderer.updateMeshData(&scene);
+        //scene.checkObjectUpdates(&rasterizedShader);
+
 
         if (frame % 10 == 0 && false)
             std::cout << "FPS: " << 1.0f / deltaTime << std::endl;

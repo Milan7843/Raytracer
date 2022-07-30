@@ -12,6 +12,7 @@
 #include "AbstractShader.h"
 
 #include "CoordinateUtility.h"
+#include "Logger.h"
 
 #include <vector>
 #include <iostream>

@@ -63,7 +63,7 @@ glm::vec3 readVec3(std::ifstream& input)
 	input >> x;
 	input >> y;
 	input >> z;
-	
+
 	return glm::vec3(x, y, z);
 }
 
@@ -99,12 +99,8 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		filestream >> transparency;
 		emission = readVec3(filestream);
 
-
-
 		// Creating the material with the read properties
 		Material material(buffer, color, reflectiveness, transparency, refractiveness, emission);
-
-		std::cout << material << std::endl;
 
 		// And adding the material to the scene
 		scene.addMaterial(material);

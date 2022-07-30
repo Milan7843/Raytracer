@@ -15,6 +15,7 @@ ComputeShader::ComputeShader(const char* shaderPath)
 	/* Creating the shader program */
 
 	ID = glCreateProgram();
+
 	glAttachShader(ID, shader);
 	linkProgram();
 

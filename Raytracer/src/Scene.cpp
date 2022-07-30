@@ -223,6 +223,9 @@ void Scene::writeMaterialsToShader(AbstractShader* shader)
 
 void Scene::checkObjectUpdates(AbstractShader* shader)
 {
+	// Activate the shader program so that uniforms can be set
+	shader->use();
+
 	// Writing current sphere count to shader
 	shader->setInt("sphereCount", sphereCount);
 
@@ -254,8 +257,9 @@ void Scene::generateTriangleBuffer()
 	glGenBuffers(1, &triangleBufferSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
 
-	Logger::log("Making room for " + std::to_string(triangleCount) + " triangles");
+	Logger::log("Making room for " + std::to_string(triangleCount) + " triangles in SSBO " + std::to_string(triangleBufferSSBO));
 
+	// Loading zero-data into the new buffer
 	glBufferData(GL_SHADER_STORAGE_BUFFER, triangleCount * Mesh::getTriangleSize(), 0, GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
