@@ -19,7 +19,7 @@ uniform int currentBlockRenderPassIndex;
 #define EPSILON 0.0001f
 
 // Should not be important anymore
-#define NUM_TRIANGLES $numTriangles
+#define NUM_TRIANGLES 1//$numTriangles
 #define NUM_SPHERES 10
 #define NUM_POINT_LIGHTS 10
 #define NUM_DIR_LIGHTS 10
@@ -52,7 +52,7 @@ struct Tri
 // TODO: make this variable length
 layout(std140, binding = 2) buffer Tris
 {
-    Tri triangles[NUM_TRIANGLES];
+    Tri triangles[];
 };
 
 uniform vec3 cameraPosition;
@@ -588,7 +588,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
     closestIntersection.closestTriHit = -1;
 
     // Checking triangle ray hits 
-    for (int j = 0; j < NUM_TRIANGLES; j++)
+    for (int j = 0; j < triangles.length(); j++)
     {
         // Skip already hit tri
         if (j == skipTri) continue;
