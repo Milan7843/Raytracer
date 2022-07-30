@@ -52,6 +52,7 @@ int Application::Start()
     // Change the viewport size if the window is resized
     glfwSetFramebufferSizeCallback(window, &Callbacks::framebuffer_size_callback);
 
+    /*
     // Making a scene
     Scene scene = Scene();
 
@@ -88,9 +89,9 @@ int Application::Start()
     scene.addLight(pointLight2);
     scene.addLight(directionalLight1);
     scene.addLight(ambientLight1);
-
-    SceneFileSaver::writeSceneToFile(scene, std::string("Scene 1 - testing"));
-    SceneFileSaver::readSceneFromFile("Scene 1 - testing");
+    */
+    //SceneFileSaver::writeSceneToFile(scene, std::string("Scene 1 - testing"));
+    Scene scene{ SceneFileSaver::readSceneFromFile(std::string("Scene 1 - testing")) };
 
     Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
     Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader");

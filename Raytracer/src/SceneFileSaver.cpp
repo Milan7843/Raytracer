@@ -10,19 +10,17 @@ void readAmbientLights	(std::ifstream& filestream, Scene& scene);
 
 void SceneFileSaver::writeSceneToFile(Scene& scene, const std::string& fileName)
 {
-	// This function should use a to string function from every object that should be saved
-	// Then read in the same format later
-
 	// The data stream into the file
 	std::ofstream filestream { "scenes/" + fileName + ".scene"};
 
 	// Writing all scene data
 	scene.writeDataToStream(filestream);
 
+	// Done writing so flush data and close filestream
 	filestream.close();
 }
 
-Scene& SceneFileSaver::readSceneFromFile(const std::string& fileName)
+Scene SceneFileSaver::readSceneFromFile(const std::string& fileName)
 {
 	// Opening the scene file into a stream
 	std::ifstream filestream{ "scenes/" + fileName + ".scene" };
@@ -54,6 +52,8 @@ Scene& SceneFileSaver::readSceneFromFile(const std::string& fileName)
 
 	// Finally closing the file
 	filestream.close();
+
+	return scene;
 }
 
 glm::vec3 readVec3(std::ifstream& input)

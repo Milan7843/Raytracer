@@ -8,5 +8,5 @@ namespace SceneFileSaver
 	void writeSceneToFile(Scene& scene, const std::string& fileName);
 
 	// Read the scene with the given name from the file
-	Scene& readSceneFromFile(const std::string& fileName);
+	Scene readSceneFromFile(const std::string& fileName);
 }
