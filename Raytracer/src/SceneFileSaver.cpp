@@ -99,13 +99,12 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		filestream >> transparency;
 		emission = readVec3(filestream);
 
-		std::cout << "nam=" << buffer << ", clr=(" << color.x << ", " << color.y << ", " << color.z << "), refl=" << reflectiveness
-			<< ", refr=" << refractiveness << ", trns=" << transparency << ", emis=("
-			<< emission.x << ", " << emission.y << ", " << emission.z << ")" << std::endl;
 
 
 		// Creating the material with the read properties
 		Material material(buffer, color, reflectiveness, transparency, refractiveness, emission);
+
+		std::cout << material << std::endl;
 
 		// And adding the material to the scene
 		scene.addMaterial(material);
@@ -147,10 +146,6 @@ void readSpheres(std::ifstream& filestream, Scene& scene)
 		scale = readVec3(filestream);
 		filestream >> materialIndex;
 
-		std::cout << "sphere, pos=(" << position.x << ", " << position.y << ", "
-			<< position.z << "), scl=" << scale.x << ", mtidx=" << materialIndex << std::endl;
-
-
 		// Creating the sphere with the read properties
 		scene.addSphere(position, scale.x, materialIndex);
 
@@ -191,10 +186,6 @@ void readModels(std::ifstream& filestream, Scene& scene)
 		std::getline(filestream, buffer); // Skip a line
 		std::getline(filestream, buffer); // The path
 		filestream >> materialIndex;
-
-		std::cout << "model, pos=(" << position.x << ", " << position.y << ", "
-			<< position.z << "), path=" << buffer << ", scl=" << scale.x << ", mtidx=" << materialIndex << std::endl;
-
 
 		// Creating the model with the read properties
 		Model* model = scene.addModel(buffer, materialIndex);
@@ -238,11 +229,6 @@ void readPointLights(std::ifstream& filestream, Scene& scene)
 		filestream >> intensity;
 		position = readVec3(filestream);
 
-		std::cout << "pl, pos=(" << position.x << ", " << position.y << ", "
-			<< position.z << "), ints=" << intensity
-			<< ", col=(" << color.x << ", " << color.y << ", "
-			<< color.z << ")" << std::endl;
-
 		// Creating the light with the read properties
 		PointLight light(position, color, intensity);
 		scene.addLight(light);
@@ -281,11 +267,6 @@ void readDirectionalLights(std::ifstream& filestream, Scene& scene)
 		filestream >> intensity;
 		direction = readVec3(filestream);
 
-		std::cout << "dir, dir=(" << direction.x << ", " << direction.y << ", "
-			<< direction.z << "), ints=" << intensity
-			<< ", col=(" << color.x << ", " << color.y << ", "
-			<< color.z << ")" << std::endl;
-
 		// Creating the light with the read properties
 		DirectionalLight light(direction, color, intensity);
 		scene.addLight(light);
@@ -321,9 +302,6 @@ void readAmbientLights(std::ifstream& filestream, Scene& scene)
 		// Then getting said data
 		color = readVec3(filestream);
 		filestream >> intensity;
-
-		std::cout << ", col=(" << color.x << ", " << color.y << ", "
-			<< color.z << "), ints=" << intensity << std::endl;
 
 		// Creating the light with the read properties
 		AmbientLight light(color, intensity);

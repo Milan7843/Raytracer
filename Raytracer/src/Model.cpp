@@ -122,3 +122,16 @@ glm::vec4 Model::aiVector3DToGLMVec4(aiVector3D v)
 {
 	return glm::vec4(v.x, v.y, v.z, 1.0f);
 }
+
+std::ostream& operator<<(std::ostream& stream, const Model& model)
+{
+	// Writing this object to the stream
+	stream << "[Sphere]"
+		<< "\nposition: (" << model.position.x << ", " << model.position.y << ", " << model.position.z << ")"
+		<< "\nrotation: (" << model.rotation.x << ", " << model.rotation.y << ", " << model.rotation.z << ")"
+		<< "\nscale: (" << model.scaleVector.x << ", " << model.scaleVector.y << ", " << model.scaleVector.z << ")"
+		<< "\nmaterial: " << sphere.materialIndex
+		<< std::endl;
+
+	return stream;
+}

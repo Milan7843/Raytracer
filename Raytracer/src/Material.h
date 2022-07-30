@@ -36,6 +36,9 @@ public:
 	float* getTransparencyPointer();
 	float* getRefractivenessPointer();
 	glm::vec3* getEmissionPointer();
+
+	// Write this material to the stream (human readable format)
+	friend std::ostream& operator<< (std::ostream& stream, const Material& material);
 protected:
 
 

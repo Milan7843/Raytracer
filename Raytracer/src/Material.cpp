@@ -85,3 +85,18 @@ glm::vec3* Material::getEmissionPointer()
 {
 	return &emission;
 }
+
+std::ostream& operator<<(std::ostream& stream, const Material& material)
+{
+	// Writing this object to the stream
+	stream << "[Material] name: " << material.name
+		<< "\ncolor: (" << material.color.x << ", " << material.color.y << ", " << material.color.z << ")"
+		<< "\nreflectiveness: " << material.reflectiveness
+		<< "\nrefractiveness: " << material.refractiveness
+		<< "\ntransparency: " << material.transparency
+		<< "\nemission: (" << material.emission.x << ", " << material.emission.y << ", " << material.emission.z << ")"
+		<< std::endl;
+
+	return stream;
+}
+

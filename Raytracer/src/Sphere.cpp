@@ -53,3 +53,15 @@ float* Sphere::getRadiusPointer()
 {
 	return &radius;
 }
+
+std::ostream& operator<<(std::ostream& stream, const Sphere& sphere)
+{
+	// Writing this object to the stream
+	stream << "[Sphere]"
+		<< "\nposition: (" << sphere.position.x << ", " << sphere.position.y << ", " << sphere.position.z << ")"
+		<< "\nradius: " << sphere.radius
+		<< "\nmaterial: " << sphere.materialIndex
+		<< std::endl;
+
+	return stream;
+}

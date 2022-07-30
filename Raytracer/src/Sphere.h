@@ -11,6 +11,9 @@ public:
 	// Write this sphere to the given filestream
 	virtual void writeDataToStream(std::ofstream& filestream);
 
+	// Write this material to the stream (human readable format)
+	friend std::ostream& operator<< (std::ostream& stream, const Sphere& sphere);
+
 	// Write this object's data to the given shader
 	virtual void writeToShader(AbstractShader* shader, unsigned int ssbo);
 

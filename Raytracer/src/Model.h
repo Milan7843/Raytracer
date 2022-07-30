@@ -21,6 +21,9 @@ public:
 	// Write this model to the given filestream
 	virtual void writeDataToStream(std::ofstream& filestream);
 
+	// Write this material to the stream (human readable format)
+	friend std::ostream& operator<< (std::ostream& stream, const Model& model);
+
 	// Draw this object given the shader
 	virtual void draw(AbstractShader* shader, Material* material);
 
