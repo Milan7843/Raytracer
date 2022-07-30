@@ -15,7 +15,8 @@
 class Model : public Object
 {
 public:
-	Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex);
+	Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex,
+		unsigned int MAX_MESH_COUNT);
 	~Model();
 
 	// Write this model to the given filestream
@@ -36,8 +37,8 @@ private:
 	std::string directory;
 	std::string path;
 
-	void loadModel(std::string path, unsigned int* meshCount, unsigned int* triangleCount);
-	void processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* triangleCount);
+	void loadModel(std::string path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
+	void processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCount, unsigned int* triangleCount);
 	glm::vec4 aiVector3DToGLMVec4(aiVector3D v);
 };

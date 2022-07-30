@@ -1,10 +1,11 @@
 #include "Model.h"
 
-Model::Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex)
+Model::Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex,
+	unsigned int MAX_MESH_COUNT)
 	: path(path)
 {
 	this->materialIndex = materialIndex;
-	loadModel(path, meshCount, triangleCount);
+	loadModel(path, meshCount, triangleCount, MAX_MESH_COUNT);
 }
 
 Model::~Model()
@@ -42,7 +43,7 @@ void Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
 	}
 }
 
-void Model::loadModel(std::string path, unsigned int* meshCount, unsigned int* triangleCount)
+void Model::loadModel(std::string path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);
@@ -55,14 +56,22 @@ void Model::loadModel(std::string path, unsigned int* meshCount, unsigned int* t
 	}
 	directory = path.substr(0, path.find_last_of('/'));
 
-	processNode(scene->mRootNode, scene, meshCount, triangleCount);
+	processNode(scene->mRootNode, scene, meshCount, triangleCount, MAX_MESH_COUNT);
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* triangleCount)
+void Model::processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* triangleCount,
+	unsigned int MAX_MESH_COUNT)
 {
 	// Reading mesh data for each mesh
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
+		// Reached maximum number of meshes
+		if (*meshCount >= MAX_MESH_COUNT)
+		{
+			// Stop loading more meshes
+			return;
+		}
+
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		meshes.push_back(processMesh(mesh, scene, *meshCount, triangleCount));
 
@@ -72,7 +81,7 @@ void Model::processNode(aiNode* node, const aiScene* scene, unsigned int* meshCo
 	// Reading all the data from all children
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
-		processNode(node->mChildren[i], scene, meshCount, triangleCount);
+		processNode(node->mChildren[i], scene, meshCount, triangleCount, MAX_MESH_COUNT);
 	}
 }
 

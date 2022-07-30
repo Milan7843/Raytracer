@@ -1,7 +1,7 @@
 #include "Sphere.h"
 
 Sphere::Sphere(glm::vec3 position, float radius, unsigned int materialIndex, unsigned int shaderSphereIndex)
-	: Model("src/models/defaultSphere.obj", &meshCount, &triangleCount, materialIndex),
+	: Model("src/models/defaultSphere.obj", &meshCount, &triangleCount, materialIndex, 1),
 	shaderSphereIndex(shaderSphereIndex)
 {
 	this->move(position);

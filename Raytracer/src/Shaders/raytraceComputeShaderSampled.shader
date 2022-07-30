@@ -24,7 +24,7 @@ uniform int currentBlockRenderPassIndex;
 #define NUM_POINT_LIGHTS 10
 #define NUM_DIR_LIGHTS 10
 #define NUM_AMBIENT_LIGHTS 10
-#define NUM_MESHES $numMeshes
+#define NUM_MESHES 10
 #define NUM_MATERIALS 10
 
 //#define NUM_TRIANGLES 1

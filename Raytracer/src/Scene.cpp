@@ -126,7 +126,7 @@ void Scene::addLight(AmbientLight& ambientLight)
 
 Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
 {
-	Model model(path, &meshCount, &triangleCount, materialIndex);
+	Model model(path, &meshCount, &triangleCount, materialIndex, MAX_MESH_COUNT);
 	models.push_back(model);
 	return &(models[models.size() - 1]);
 }
