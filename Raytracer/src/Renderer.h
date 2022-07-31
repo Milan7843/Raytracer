@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Scene.h"
+#include "SceneManager.h"
 #include "Camera.h"
 #include "ComputeShader.h"
 
@@ -14,7 +15,7 @@ public:
 	void bindCamera(Camera* camera);
 
 	// Bind the scene to be rendered
-	void bindScene(Scene* scene);
+	void bindSceneManager(SceneManager* sceneManager);
 
 	// Render the given scene with the given camera to the given buffer
 	void render();
@@ -51,10 +52,10 @@ private:
 
 	// Things to bind before rendering
 	Camera* cameraBound;
-	Scene* sceneBound;
+	SceneManager* sceneManagerBound;
 
 	// Set everything up for rendering with the given scene and camera
-	void setUpForRender(Scene* scene, Camera* camera);
+	void setUpForRender(Scene& scene, Camera* camera);
 
 	float getRenderProgressPrecise();
 

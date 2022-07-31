@@ -16,9 +16,9 @@ void Renderer::bindCamera(Camera* camera)
 	this->cameraBound = camera;
 }
 
-void Renderer::bindScene(Scene* scene)
+void Renderer::bindSceneManager(SceneManager* sceneManager)
 {
-	this->sceneBound = scene;
+	this->sceneManagerBound = sceneManager;
 }
 
 void Renderer::render()
@@ -27,7 +27,7 @@ void Renderer::render()
 
 	currentFrameSampleCount++;
 
-	setUpForRender(sceneBound, cameraBound);
+	setUpForRender(sceneManagerBound->getCurrentScene(), cameraBound);
 
 	computeShader.setBool("renderUsingBlocks", false);
 
@@ -50,7 +50,7 @@ void Renderer::startBlockRender()
 
 	blockSizeRendering = blockSize;
 
-	setUpForRender(sceneBound, cameraBound);
+	setUpForRender(sceneManagerBound->getCurrentScene(), cameraBound);
 
 	computeShader.setBool("renderUsingBlocks", true);
 	computeShader.setInt("blockSize", blockSizeRendering);
@@ -75,18 +75,18 @@ void Renderer::blockRenderStep()
 	currentBlockRenderPassIndex++;
 }
 
-void Renderer::setUpForRender(Scene* scene, Camera* camera)
+void Renderer::setUpForRender(Scene& scene, Camera* camera)
 {
 	// Reset current render time
 	currentRenderTime = 0.0f;
 
 	computeShader.use();
 
-	scene->checkObjectUpdates(&computeShader);
+	scene.checkObjectUpdates(&computeShader);
 
-	scene->bindTriangleBuffer();
-	scene->writeLightsToShader(&computeShader);
-	scene->writeMaterialsToShader(&computeShader);
+	scene.bindTriangleBuffer();
+	scene.writeLightsToShader(&computeShader);
+	scene.writeMaterialsToShader(&computeShader);
 
 	// Writing camera data to the compute shader
 	computeShader.setVector3("cameraPosition", CoordinateUtility::vec3ToGLSLVec3(camera->getPosition()));

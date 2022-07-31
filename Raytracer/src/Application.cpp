@@ -93,7 +93,7 @@ int Application::Start()
     //SceneFileSaver::writeSceneToFile(scene, std::string("Scene 1 - testing"));
     SceneManager sceneManager{};
     sceneManager.changeScene(std::string("Scene 1 - testing"));
-    Scene scene{ SceneFileSaver::readSceneFromFile(std::string("Scene 1 - testing")) };
+    //Scene scene{ SceneFileSaver::readSceneFromFile(std::string("Scene 1 - testing")) };
 
     // Unused shaders... (should remove)
     //Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
@@ -116,12 +116,9 @@ int Application::Start()
     Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampled.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
     raytracingRenderer.bindCamera(&camera);
-    raytracingRenderer.bindScene(&scene);
+    raytracingRenderer.bindSceneManager(&sceneManager);
 
-    scene.writeLightsToShader(&rasterizedShader);
-    scene.writeMaterialsToShader(&rasterizedShader);
-
-    scene.generateTriangleBuffer();
+    sceneManager.getCurrentScene().generateTriangleBuffer();
     
     // Generating the screen quad on which the raytraced image is rendered
     generateScreenQuad();
@@ -140,8 +137,8 @@ int Application::Start()
         lastFrame = currentFrame;
 
         // TODO: optimise the following lines by adding data changed checks for the lights and materials
-        scene.writeLightsToShader(&rasterizedShader);
-        scene.writeMaterialsToShader(&rasterizedShader);
+        sceneManager.getCurrentScene().writeLightsToShader(&rasterizedShader);
+        sceneManager.getCurrentScene().writeMaterialsToShader(&rasterizedShader);
         //raytracingRenderer.updateMeshData(&scene);
         //scene.checkObjectUpdates(&rasterizedShader);
 
@@ -165,7 +162,7 @@ int Application::Start()
         }
 
         //std::cout << camera.getInformation() << std::endl;
-        userInterface.handleInput(window, &camera);
+        userInterface.handleInput(window, camera);
 
         // Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -214,10 +211,10 @@ int Application::Start()
             projection = camera.getProjectionMatrix(WINDOW_SIZE_X, WINDOW_SIZE_Y);
             rasterizedShader.setMat4("projection", projection);
 
-            scene.draw(&rasterizedShader);
+            sceneManager.getCurrentScene().draw(&rasterizedShader);
         }
 
-        userInterface.drawUserInterface(&scene, &camera, &raytracingRenderer, &inRaytraceMode);
+        userInterface.drawUserInterface(sceneManager, camera, raytracingRenderer, &inRaytraceMode);
 
         // Output
         glfwSwapBuffers(window);

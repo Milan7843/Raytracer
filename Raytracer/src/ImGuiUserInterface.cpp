@@ -27,7 +27,7 @@ void ImGuiUserInterface::initialiseImGui(GLFWwindow* window)
     ImGui_ImplOpenGL3_Init("#version 130");
 }
 
-void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Renderer* renderer, bool* inRaytraceMode)
+void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode)
 {
 	if (!imGuiEnabled)
 	{
@@ -56,18 +56,18 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 
 	if (ImGui::Button("Render frame"))
 	{
-		renderer->render();
+		renderer.render();
 	}
 	if (ImGui::Button("Render frame in blocks"))
 	{
-		renderer->startBlockRender();
+		renderer.startBlockRender();
 	}
 
 	// Render time left indicators
-	ImGui::ProgressBar(renderer->getRenderProgress());
+	ImGui::ProgressBar(renderer.getRenderProgress());
 	ImGui::Text("Render time left: ");
 	ImGui::SameLine();
-	ImGui::Text(formatTime(renderer->getTimeLeft()).c_str());
+	ImGui::Text(formatTime(renderer.getTimeLeft()).c_str());
 
 	// Creating the tab bar
 	ImGui::BeginTabBar("full_tab_bar");
@@ -88,7 +88,7 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 	if (ImGui::BeginTabItem("Scene editing"))
 	{
 		// Scene settings
-		ImGui::InputText("Scene name", scene->getNamePointer());
+		ImGui::InputText("Scene name", sceneManager.getCurrentScene().getNamePointer());
 
 		// Save/revert changes buttons
 		//if (ImGui::Button("Save scene changes"))
@@ -132,19 +132,19 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 
 		if (ImGui::BeginTabItem("Objects"))
 		{
-			drawObjects(scene);
+			drawObjects(sceneManager.getCurrentScene());
 			ImGui::EndTabItem();
 		}
 
 		if (ImGui::BeginTabItem("Materials"))
 		{
-			drawMaterials(scene);
+			drawMaterials(sceneManager.getCurrentScene());
 			ImGui::EndTabItem();
 		}
 
 		if (ImGui::BeginTabItem("Lights"))
 		{
-			drawLights(scene);
+			drawLights(sceneManager.getCurrentScene());
 			ImGui::EndTabItem();
 		}
 
@@ -156,9 +156,9 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 	// Camera settings (speed, fov etc.)
 	if (ImGui::BeginTabItem("Camera settings"))
 	{
-		ImGui::SliderFloat("Move speed", camera->getCameraSpeedPointer(), 0.1f, 10.0f);
-		ImGui::SliderFloat("Sensitivity", camera->getSensitivityPointer(), 0.1f, 5.0f);
-		ImGui::SliderFloat("Field of view", camera->getFovPointer(), 10.0f, 90.0f);
+		ImGui::SliderFloat("Move speed", camera.getCameraSpeedPointer(), 0.1f, 10.0f);
+		ImGui::SliderFloat("Sensitivity", camera.getSensitivityPointer(), 0.1f, 5.0f);
+		ImGui::SliderFloat("Field of view", camera.getFovPointer(), 10.0f, 90.0f);
 		ImGui::EndTabItem();
 	}
 	ImGui::PopStyleColor();
@@ -176,7 +176,7 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void ImGuiUserInterface::handleInput(GLFWwindow* window, Camera* camera)
+void ImGuiUserInterface::handleInput(GLFWwindow* window, Camera& camera)
 {
 	// Enable/disable the ImGui GUI on key switch
 	if (glfwGetKey(window, interfaceToggleKey) == GLFW_PRESS && guiSwitchKeyPreviousState == GLFW_RELEASE)
@@ -195,7 +195,7 @@ void ImGuiUserInterface::handleInput(GLFWwindow* window, Camera* camera)
 			// Lock the mouse
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			// Reset offset (the mouse may have moved which should not be registered as camera movement)
-			camera->resetMouseOffset();
+			camera.resetMouseOffset();
 		}
 	}
 
@@ -236,21 +236,21 @@ void ImGuiUserInterface::drawHelpMarker(const char* desc)
 	}
 }
 
-void ImGuiUserInterface::drawRenderSettings(Camera* camera, Renderer* renderer, bool* inRaytraceMode)
+void ImGuiUserInterface::drawRenderSettings(Camera& camera, Renderer& renderer, bool* inRaytraceMode)
 {
-	ImGui::SliderInt("Block size", renderer->getBlockSizePointer(), 1, 100);
+	ImGui::SliderInt("Block size", renderer.getBlockSizePointer(), 1, 100);
 	drawHelpMarker("The size of a render block in pixels.");
 
-	ImGui::SliderInt("Multisamples", renderer->getMultisamplePointer(), 1, 5);
+	ImGui::SliderInt("Multisamples", renderer.getMultisamplePointer(), 1, 5);
 	drawHelpMarker("The number of different sample points per pixel, works as anti-aliasing.");
-	ImGui::Text(camera->getInformation().c_str());
+	ImGui::Text(camera.getInformation().c_str());
 
 	// Samples per render pass
-	ImGui::SliderInt("Sample count", renderer->getSampleCountPointer(), 1, 100);
+	ImGui::SliderInt("Sample count", renderer.getSampleCountPointer(), 1, 100);
 	drawHelpMarker("The number of samples per pixel per render pass.");
 
 	// Render passes per block
-	ImGui::SliderInt("Block passes", renderer->getRenderPassCountPointer(), 1, 100);
+	ImGui::SliderInt("Block passes", renderer.getRenderPassCountPointer(), 1, 100);
 	drawHelpMarker("The number of passes per block. Each pass will take the full number of samples for each pixel.");
 
 	// Button to switch between raytraced and rasterized views
@@ -260,11 +260,11 @@ void ImGuiUserInterface::drawRenderSettings(Camera* camera, Renderer* renderer, 
 	}
 }
 
-void ImGuiUserInterface::drawMaterials(Scene* scene)
+void ImGuiUserInterface::drawMaterials(Scene& scene)
 {
 	ImGui::PushItemWidth(-1);
 	ImGui::BeginListBox("##");
-	for (Material& material : scene->getMaterials())
+	for (Material& material : scene.getMaterials())
 	{
 		// Drawing each material
 		drawMaterial(material);
@@ -275,7 +275,7 @@ void ImGuiUserInterface::drawMaterials(Scene* scene)
 	if (ImGui::Button("Add material"))
 	{
 		Material material("New material", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f);
-		scene->addMaterial(material);
+		scene.addMaterial(material);
 	}
 
 	ImGui::EndListBox();
@@ -297,26 +297,26 @@ void ImGuiUserInterface::drawMaterial(Material& material)
 	}
 }
 
-void ImGuiUserInterface::drawLights(Scene* scene)
+void ImGuiUserInterface::drawLights(Scene& scene)
 {
 	ImGui::PushItemWidth(-1);
 	ImGui::BeginListBox("##");
 	unsigned int index = 0;
 
 	// Drawing the lights themselves
-	for (PointLight& light : scene->getPointLights())
+	for (PointLight& light : scene.getPointLights())
 	{
 		drawLight(light, index);
 		index++;
 	}
 	index = 0;
-	for (DirectionalLight& light : scene->getDirectionalLights())
+	for (DirectionalLight& light : scene.getDirectionalLights())
 	{
 		drawLight(light, index);
 		index++;
 	}
 	index = 0;
-	for (AmbientLight& light : scene->getAmbientLights())
+	for (AmbientLight& light : scene.getAmbientLights())
 	{
 		drawLight(light, index);
 		index++;
@@ -334,17 +334,17 @@ void ImGuiUserInterface::drawLights(Scene* scene)
 		if (ImGui::Selectable("Point light"))
 		{
 			PointLight light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
-			scene->addLight(light);
+			scene.addLight(light);
 		}
 		if (ImGui::Selectable("Directional light"))
 		{
 			DirectionalLight light(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
-			scene->addLight(light);
+			scene.addLight(light);
 		}
 		if (ImGui::Selectable("Ambient light"))
 		{
 			AmbientLight light(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f);
-			scene->addLight(light);
+			scene.addLight(light);
 		}
 		ImGui::EndPopup();
 	}
@@ -387,11 +387,11 @@ void ImGuiUserInterface::drawLight(AmbientLight& light, unsigned int index)
 	}
 }
 
-void ImGuiUserInterface::drawObjects(Scene* scene)
+void ImGuiUserInterface::drawObjects(Scene& scene)
 {
 	// Generating the char[] used for the material slots
 	std::string materialSlots = "";
-	for (Material& material : scene->getMaterials())
+	for (Material& material : scene.getMaterials())
 	{
 		materialSlots += *material.getNamePointer() + "\000";
 	}
@@ -403,7 +403,7 @@ void ImGuiUserInterface::drawObjects(Scene* scene)
 		ImGui::PushItemWidth(-1);
 		ImGui::BeginListBox("##");
 		unsigned int index = 0;
-		for (Model& model : scene->getModels())
+		for (Model& model : scene.getModels())
 		{
 			// Drawing each model
 			drawObject(model, scene, index, materialSlotsCharArray);
@@ -419,7 +419,7 @@ void ImGuiUserInterface::drawObjects(Scene* scene)
 		ImGui::PushItemWidth(-1);
 		ImGui::BeginListBox("##");
 		unsigned int index = 0;
-		for (Sphere& sphere : scene->getSpheres())
+		for (Sphere& sphere : scene.getSpheres())
 		{
 			// Drawing each sphere
 			drawObject(sphere, scene, index, materialSlotsCharArray);
@@ -428,7 +428,7 @@ void ImGuiUserInterface::drawObjects(Scene* scene)
 
 		// Drawing the 'Add sphere' button
 		if (ImGui::Button("Add sphere"))
-			scene->addSphere(glm::vec3(0.0f), 1.0f, 0);
+			scene.addSphere(glm::vec3(0.0f), 1.0f, 0);
 
 		ImGui::EndListBox();
 		ImGui::PopItemWidth();
@@ -436,7 +436,7 @@ void ImGuiUserInterface::drawObjects(Scene* scene)
 	}
 }
 
-void ImGuiUserInterface::drawObject(Object& object, Scene* scene, unsigned int index, const char* materialSlotsCharArray)
+void ImGuiUserInterface::drawObject(Object& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray)
 {
 	if (ImGui::TreeNode(("Model " + std::to_string(index + 1)).c_str()))
 	{
@@ -446,14 +446,14 @@ void ImGuiUserInterface::drawObject(Object& object, Scene* scene, unsigned int i
 		ImGui::DragFloat3("Scale", (float*)object.getScalePointer(), 0.01f);
 
 		// Preview the currently selected name
-		if (ImGui::BeginCombo("##combo", (*(scene->getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
+		if (ImGui::BeginCombo("##combo", (*(scene.getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
 		{
 			unsigned int i = 0;
-			for (Material& material : scene->getMaterials())
+			for (Material& material : scene.getMaterials())
 			{
 				bool thisMaterialSelected = (i == *object.getMaterialIndexPointer());
 				
-				if (ImGui::Selectable((*(scene->getMaterials()[i].getNamePointer())).c_str()))
+				if (ImGui::Selectable((*(scene.getMaterials()[i].getNamePointer())).c_str()))
 				{
 					*object.getMaterialIndexPointer() = i;
 				}
@@ -478,7 +478,7 @@ void ImGuiUserInterface::drawObject(Object& object, Scene* scene, unsigned int i
 
 
 
-void ImGuiUserInterface::drawObject(Sphere& object, Scene* scene, unsigned int index, const char* materialSlotsCharArray)
+void ImGuiUserInterface::drawObject(Sphere& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray)
 {
 	if (ImGui::TreeNode(("Sphere " + std::to_string(index + 1)).c_str()))
 	{
@@ -490,15 +490,15 @@ void ImGuiUserInterface::drawObject(Sphere& object, Scene* scene, unsigned int i
 		ImGui::DragFloat("Radius", sphere.getRadiusPointer(), 0.01f, 0.01f, 100.0f, "%.02f");
 
 		// Preview the currently selected name
-		if (ImGui::BeginCombo("##combo", (*(scene->getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
+		if (ImGui::BeginCombo("##combo", (*(scene.getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
 		{
 			unsigned int i = 0;
-			for (Material& material : scene->getMaterials())
+			for (Material& material : scene.getMaterials())
 			{
 				bool thisMaterialSelected = (i == *object.getMaterialIndexPointer());
 
 				// Material index selector
-				if (ImGui::Selectable((*(scene->getMaterials()[i].getNamePointer())).c_str()))
+				if (ImGui::Selectable((*(scene.getMaterials()[i].getNamePointer())).c_str()))
 				{
 					*object.getMaterialIndexPointer() = i;
 				}
