@@ -11,6 +11,12 @@
 class SceneManager
 {
 public:
+	SceneManager();
+	~SceneManager();
+
+	// Update this scene manager (and the active scene)
+	void update();
+
 	// Save the changes to the current scene
 	void saveChanges();
 

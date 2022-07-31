@@ -1,5 +1,18 @@
 #include "SceneManager.h"
 
+SceneManager::SceneManager()
+{
+}
+
+SceneManager::~SceneManager()
+{
+}
+
+void SceneManager::update()
+{
+
+}
+
 void SceneManager::saveChanges()
 {
 	SceneFileSaver::writeSceneToFile(currentScene, *currentScene.getNamePointer());

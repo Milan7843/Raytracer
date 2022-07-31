@@ -56,11 +56,11 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 
 	if (ImGui::Button("Render frame"))
 	{
-		renderer->render(scene, camera);
+		renderer->render();
 	}
 	if (ImGui::Button("Render frame in blocks"))
 	{
-		renderer->startBlockRender(scene, camera);
+		renderer->startBlockRender();
 	}
 
 	// Render time left indicators
@@ -91,8 +91,8 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 		ImGui::InputText("Scene name", scene->getNamePointer());
 
 		// Save/revert changes buttons
-		if (ImGui::Button("Save scene changes"))
-			renderer->render(scene, camera);
+		//if (ImGui::Button("Save scene changes"))
+			//renderer->render(scene, camera);
 
 		// Scene settings
 
@@ -123,8 +123,8 @@ void ImGuiUserInterface::drawUserInterface(Scene* scene, Camera* camera, Rendere
 			ImGui::EndPopup();
 		}
 
-		if (ImGui::Button("Revert scene changes"))
-			renderer->render(scene, camera);
+		//if (ImGui::Button("Revert scene changes"))
+		//	renderer->render(scene, camera);
 
 
 		ImGui::BeginTabBar("scene_edit_tab_bar");

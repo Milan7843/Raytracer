@@ -107,6 +107,9 @@ int Application::Start()
     // Raytraced renderer
     Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampled.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y, &scene);
 
+    raytracingRenderer.bindCamera(&camera);
+    raytracingRenderer.bindScene(&scene);
+
 
     scene.writeLightsToShader(&raytracingShader);
     scene.writeMaterialsToShader(&raytracingShader);
@@ -136,7 +139,7 @@ int Application::Start()
         scene.writeMaterialsToShader(&raytracingShader);
         scene.writeLightsToShader(&rasterizedShader);
         scene.writeMaterialsToShader(&rasterizedShader);
-        raytracingRenderer.updateMeshData(&scene);
+        //raytracingRenderer.updateMeshData(&scene);
         //scene.checkObjectUpdates(&rasterizedShader);
 
 

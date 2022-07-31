@@ -11,13 +11,23 @@ Renderer::~Renderer()
 {
 }
 
-void Renderer::render(Scene* scene, Camera* camera)
+void Renderer::bindCamera(Camera* camera)
+{
+	this->cameraBound = camera;
+}
+
+void Renderer::bindScene(Scene* scene)
+{
+	this->sceneBound = scene;
+}
+
+void Renderer::render()
 {
 	currentlyBlockRendering = false;
 
 	currentFrameSampleCount++;
 
-	setUpForRender(scene, camera);
+	setUpForRender(sceneBound, cameraBound);
 
 	computeShader.setBool("renderUsingBlocks", false);
 
@@ -29,7 +39,7 @@ void Renderer::render(Scene* scene, Camera* camera)
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
-void Renderer::startBlockRender(Scene* scene, Camera* camera)
+void Renderer::startBlockRender()
 {
 	currentlyBlockRendering = true;
 
@@ -40,7 +50,7 @@ void Renderer::startBlockRender(Scene* scene, Camera* camera)
 
 	blockSizeRendering = blockSize;
 
-	setUpForRender(scene, camera);
+	setUpForRender(sceneBound, cameraBound);
 
 	computeShader.setBool("renderUsingBlocks", true);
 	computeShader.setInt("blockSize", blockSizeRendering);

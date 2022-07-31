@@ -10,21 +10,22 @@ public:
 	Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height, Scene* scene);
 	~Renderer();
 
+	// Bind the camera to be rendered with
+	void bindCamera(Camera* camera);
+
+	// Bind the scene to be rendered
+	void bindScene(Scene* scene);
+
 	// Render the given scene with the given camera to the given buffer
-	void render(Scene* scene, Camera* camera);
+	void render();
 
 	// Render the scene in blocks (not all at once)
-	void startBlockRender(Scene* scene, Camera* camera);
+	void startBlockRender();
 
 	void blockRenderStep();
 
-	// Set everything up for rendering
-	void setUpForRender(Scene* scene, Camera* camera);
-
 	// Update this renderer; must be called every frame
 	void update(float deltaTime);
-
-
 
 	// Check for updates in the mesh data of the scene and update the data in the buffer if necessary
 	void updateMeshData(Scene* scene);
@@ -47,6 +48,13 @@ public:
 
 
 private:
+
+	// Things to bind before rendering
+	Camera* cameraBound;
+	Scene* sceneBound;
+
+	// Set everything up for rendering with the given scene and camera
+	void setUpForRender(Scene* scene, Camera* camera);
 
 	float getRenderProgressPrecise();
 
