@@ -37,10 +37,9 @@ Scene SceneFileSaver::readSceneFromFile(const std::string& fileName)
 
 	// String buffer for file data
 	std::string buffer;
-
-	// Then load all the data into it
 	std::getline(filestream, buffer);
-	scene.setName(buffer);
+
+	scene.setName(fileName);
 
 	// Loading all important scene data
 	readMaterials(filestream, scene);

@@ -79,7 +79,7 @@ void Scene::writeDataToStream(std::ofstream& filestream)
 	filestream << "# Ambient lights end\n\n";
 }
 
-void Scene::setName(std::string& name)
+void Scene::setName(std::string name)
 {
 	this->name = name;
 }

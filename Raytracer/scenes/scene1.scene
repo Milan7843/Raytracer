@@ -1,4 +1,4 @@
-Scene 1 - testing# Materials
+scene1# Materials
 White
 1 1 1
 0
@@ -52,8 +52,8 @@ Rose matte
 src/models/plane.obj
 0
 
-1 0.9 2
-0 0 0
+1 1.4 2
+0 1.56 0
 0.6 0.6 0.6
 src/models/axes.obj
 1
