@@ -18,7 +18,7 @@ void SceneManager::saveChanges()
 	SceneFileSaver::writeSceneToFile(currentScene, *currentScene.getNamePointer());
 }
 
-void SceneManager::changeScene(std::string& sceneName)
+void SceneManager::changeScene(const std::string& sceneName)
 {
 	try
 	{
@@ -32,9 +32,9 @@ void SceneManager::changeScene(std::string& sceneName)
 	catch (const char* e)
 	{
 		Logger::logError(e);
-		// If it cannot be read: reload available scene names;
+		// If it cannot be read: reload available scene names; should be done automatically on opening scene choose menu ?
 		// maybe it was removed?
-		loadAvailableScenesNames();
+		//loadAvailableScenesNames();
 	}
 }
 

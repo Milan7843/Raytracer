@@ -1,7 +1,7 @@
 #include "Renderer.h"
 
-Renderer::Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height, Scene* scene)
-	: computeShader(raytraceComputeShaderPath, scene), width(width), height(height)
+Renderer::Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height)
+	: computeShader(raytraceComputeShaderPath), width(width), height(height)
 {
 	// Immediately creating the pixel buffer with the given width and height
 	setResolution(width, height);

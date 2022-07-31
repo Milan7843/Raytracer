@@ -154,19 +154,6 @@ void Scene::addMaterial(Material& material)
 	this->materialCount++;
 }
 
-std::string& Scene::setShaderVariables(std::string& input)
-{
-	replace(input, "$numTriangles", std::to_string(triangleCount));
-	replace(input, "$numMeshes", std::to_string(meshCount));
-	replace(input, "$numPointLights", std::to_string(pointLightCount));
-	replace(input, "$numMaterials", std::to_string(materialCount));
-	replace(input, "$numSpheres", std::to_string(sphereCount));
-
-	Logger::logWarning("TODO: get pixels into Scene::setShaderVariables");
-	replace(input, "$numPixels", std::to_string(1200 * 700));
-	return input;
-}
-
 void Scene::draw(AbstractShader* shader)
 {
 	// Drawing each model with the given shader

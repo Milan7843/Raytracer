@@ -14,6 +14,7 @@
 #include "Shader.h"
 #include "ComputeShader.h"
 #include "Scene.h"
+#include "SceneManager.h"
 #include "Camera.h"
 #include "Callbacks.h"
 #include "Model.h"

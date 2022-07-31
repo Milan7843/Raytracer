@@ -18,8 +18,6 @@ uniform int currentBlockRenderPassIndex;
 
 #define EPSILON 0.0001f
 
-// Should not be important anymore
-#define NUM_TRIANGLES 1//$numTriangles
 #define NUM_SPHERES 10
 #define NUM_POINT_LIGHTS 10
 #define NUM_DIR_LIGHTS 10

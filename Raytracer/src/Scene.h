@@ -36,10 +36,6 @@ public:
 	Sphere* addSphere(glm::vec3 position, float radius, unsigned int materialIndex);
 	void addMaterial(Material& material);
 
-	// Set the variables for number of things in the shader.
-	// e.g. NUM_POINT_LIGHTS, NUM_TRIANGLES
-	std::string& setShaderVariables(std::string& input);
-
 	// Draw this scene with the given shader
 	void draw(AbstractShader* shader);
 

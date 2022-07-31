@@ -91,28 +91,33 @@ int Application::Start()
     scene.addLight(ambientLight1);
     */
     //SceneFileSaver::writeSceneToFile(scene, std::string("Scene 1 - testing"));
+    SceneManager sceneManager{};
+    sceneManager.changeScene(std::string("Scene 1 - testing"));
     Scene scene{ SceneFileSaver::readSceneFromFile(std::string("Scene 1 - testing")) };
 
-    Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
-    Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader");
-    Shader rasterizedShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/rasterizedView.shader", &scene);
-    Shader textureShader("src/Shaders/textureVertexShader.shader", "src/Shaders/textureFragmentShader.shader");
-    /*
+    // Unused shaders... (should remove)
+    //Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
+    //Shader textureShader("src/Shaders/textureVertexShader.shader", "src/Shaders/textureFragmentShader.shader");
+    //Shader raytracingShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/bufferedRaytracingFragmentShader.shader");
+
+    /* Old raymarching shader (no way it works still...)
     Shader raymarchShader("src/Shaders/raymarchVertexShader.shader", 
         "src/Shaders/raymarchFragmentShader.shader", triangleCount, meshCount);
     */
-    Shader raytracingShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/bufferedRaytracingFragmentShader.shader", &scene);
-    Shader raytracedImageRendererShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracedImageRendererShader.glsl", &scene);
+
+    // Shader for drawing axes
+    Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader");
+    // Shader for viewing rasterized view
+    Shader rasterizedShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/rasterizedView.shader");
+    // Shader for rendering the quad which shows the rendered image
+    Shader raytracedImageRendererShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracedImageRendererShader.glsl");
 
     // Raytraced renderer
-    Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampled.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y, &scene);
+    Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampled.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
     raytracingRenderer.bindCamera(&camera);
     raytracingRenderer.bindScene(&scene);
 
-
-    scene.writeLightsToShader(&raytracingShader);
-    scene.writeMaterialsToShader(&raytracingShader);
     scene.writeLightsToShader(&rasterizedShader);
     scene.writeMaterialsToShader(&rasterizedShader);
 
@@ -135,8 +140,6 @@ int Application::Start()
         lastFrame = currentFrame;
 
         // TODO: optimise the following lines by adding data changed checks for the lights and materials
-        scene.writeLightsToShader(&raytracingShader);
-        scene.writeMaterialsToShader(&raytracingShader);
         scene.writeLightsToShader(&rasterizedShader);
         scene.writeMaterialsToShader(&rasterizedShader);
         //raytracingRenderer.updateMeshData(&scene);

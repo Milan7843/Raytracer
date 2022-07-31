@@ -21,7 +21,7 @@ public:
 	void saveChanges();
 
 	// Set the new scene by name
-	void changeScene(std::string& sceneName);
+	void changeScene(const std::string& sceneName);
 
 	// Revert all changes to the current scene by reading it again
 	void revertChanges();
