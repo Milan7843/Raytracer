@@ -84,6 +84,16 @@ void Scene::setName(std::string name)
 	this->name = name;
 }
 
+void Scene::setHDRI(unsigned int hdri)
+{
+	this->hdri = hdri;
+}
+
+unsigned int Scene::getHDRI()
+{
+	return hdri;
+}
+
 
 void Scene::addLight(PointLight& pointLight)
 {

@@ -115,6 +115,11 @@ int Application::Start()
     // Raytraced renderer
     Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampled.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
+    unsigned int meshCount{ 0 }, triCount{ 0 };
+    Model skybox("src/models/cube.obj", &meshCount, &triCount, 0, 1);
+
+    sceneManager.loadHDRI("hdri_default.png");
+
     raytracingRenderer.bindCamera(&camera);
     raytracingRenderer.bindSceneManager(&sceneManager);
 

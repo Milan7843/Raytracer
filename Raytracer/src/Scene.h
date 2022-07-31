@@ -23,6 +23,10 @@ public:
 	// Set the name of this scene
 	void setName(std::string name);
 
+	// Set the HDRI used in this scene
+	void setHDRI(unsigned int hdri);
+	unsigned int getHDRI();
+
 	// Add a point light to the scene
 	void addLight(PointLight& pointLight);
 
@@ -70,6 +74,9 @@ public:
 private:
 
 	std::string name{};
+
+	// The hdri currently loaded
+	unsigned int hdri = 0;
 
 	// Keeping track of the lights in this scene
 	std::vector<PointLight> pointLights;

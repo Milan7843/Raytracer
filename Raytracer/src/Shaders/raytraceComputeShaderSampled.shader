@@ -92,6 +92,9 @@ vec3 getSphereNormal(Sphere sph, vec3 pos);
 
 
 // LIGHTS
+// Skybox
+uniform sampler2D hdri;
+
 struct PointLight
 {
     vec3 pos;
@@ -171,6 +174,13 @@ float rand(float seed)
 float rand(int seed)
 {
     return fract(sin(float(seed)) * 43758.5453);
+}
+
+#define PI 3.14159265359
+float atan2(float x, float z)
+{
+    bool s = (abs(x) > abs(z));
+    return mix(PI/2.0 - atan(x, z), atan(z, x), s);
 }
 
 
@@ -295,6 +305,12 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
             vec3 up = vec3(0., 1., 0.);
             float t = dot(up, ray.dir) + 0.6;
             vec3 skyColor = skyboxColorTop * (t)+skyboxColorHorizon * (1. - t);
+
+            // Calculating HDRI position
+            float yaw = atan2(ray.dir.x, ray.dir.z);
+            float pitch = (ray.dir.y / 2 + 0.5);
+
+            skyColor = texture(hdri, vec2(yaw/(2*PI), -pitch)).rgb;
 
             vec3 finalColor = skyColor;
 

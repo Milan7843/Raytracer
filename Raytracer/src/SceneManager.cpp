@@ -1,5 +1,9 @@
 #include "SceneManager.h"
 
+// For HDRI loading
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 SceneManager::SceneManager()
 {
 }
@@ -51,6 +55,8 @@ void SceneManager::revertChanges()
 
 void SceneManager::loadAvailableScenesNames()
 {
+	// TODO: move this to separate cpp/header file (getFilesOfTypeInFolder())
+	// (as the same code is used in renderer.cpp to load hdri's
 	try
 	{
 		// Empty the array of available scene names
@@ -76,12 +82,6 @@ void SceneManager::loadAvailableScenesNames()
 	{
 		Logger::logError(std::string("Error reading scene names: ") + e.what());
 	}
-	/*
-	catch (const char* e)
-	{
-		// Printing the error
-		std::cout << e << std::endl;
-	}*/
 }
 
 std::vector<std::string>& SceneManager::getAvailableScenesNames()
@@ -135,6 +135,46 @@ std::string SceneManager::scenePathToSceneName(std::string scenePath)
 
 	std::string s{ scenePath.substr(preLength, scenePath.length() - preLength - aftLength)};
 	return s;
+}
+
+void SceneManager::loadHDRI(const std::string& imageName)
+{
+	std::string fileName = "HDRIs/" + imageName;
+
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(fileName.c_str(), &width, &height, &nrComponents, 0);
+
+	if (data)
+	{
+		GLenum format;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+	else
+	{
+		std::cout << stbi_failure_reason() << std::endl;
+		Logger::logError("Failed to load image: " + fileName);
+	}
+
+	stbi_image_free(data);
+
+	getCurrentScene().setHDRI(textureID);
 }
 
 std::vector<std::string> SceneManager::split(const std::string& input, char delim)

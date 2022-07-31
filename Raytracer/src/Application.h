@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stb_image.h"
+//#include "stb_image.h"
 
 #include <iostream>
 
@@ -68,5 +68,6 @@ private:
 	// Holds the vertices required for rendering the axes
 	unsigned int axesVAO;
 
+	// Hold the vertices required to render the skybox
 	void processInput(GLFWwindow* window);
 };

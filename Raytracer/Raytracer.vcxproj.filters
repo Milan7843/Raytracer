@@ -111,6 +111,9 @@
     <ClCompile Include="src\SceneManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\HDRI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -1299,6 +1302,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\SceneManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\HDRI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

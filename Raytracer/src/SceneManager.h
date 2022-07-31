@@ -47,6 +47,9 @@ public:
 	// Extract the scene name from the path
 	std::string scenePathToSceneName(std::string scenePath);
 
+	// Set the HDRI in the currently active scene
+	void loadHDRI(const std::string& imageName);
+
 private:
 	// Keeps the current scene loaded in memory
 	Scene currentScene;
