@@ -51,7 +51,7 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 	}
 
 	// Creating the GUI window
-	ImGui::Begin("Render settings");
+	ImGui::Begin(sceneManager.getCurrentScene().getNamePointer()->c_str());
 	ImGui::Text("Press R to open or close this interface.");
 
 	if (ImGui::Button("Render frame"))
@@ -87,19 +87,20 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 	// Tab for editing any scene objects
 	if (ImGui::BeginTabItem("Scene editing"))
 	{
-		// Scene settings
-		ImGui::InputText("Scene name", sceneManager.getCurrentScene().getNamePointer());
-
 		// Save/revert changes buttons
 		if (ImGui::Button("Save scene changes"))
 		{
-			//std::cout << std::flush;
+			sceneManager.saveChanges();
 		}
 
-		// Scene settings
+		if (ImGui::Button("Revert scene changes"))
+		{
+			sceneManager.revertChanges();
+		}
 
 		// Holds new scene name input
 		static std::string newSceneNameInput{};
+
 		if (ImGui::Button("Save scene changes as new"))
 			ImGui::OpenPopup("##save_changes_new_popup");
 
@@ -110,9 +111,27 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 
 			if (ImGui::Button("Save"))
 			{
-				// Empty input field
-				newSceneNameInput = {};
+				if (sceneManager.containsInvalidSceneNameCharacters(newSceneNameInput))
+				{
+					ImGui::Text("Scene name cannot contain \\, / or .");
+				}
+				else
+				{
+					if (sceneManager.willSaveOverwrite(newSceneNameInput))
+					{
+						ImGui::OpenPopup("##save_changes_overwrite_popup");
+					}
+					else
+					{
+						sceneManager.saveChangesAs(newSceneNameInput);
+						// Empty input field
+						newSceneNameInput = {};
+						// Then close the popup
+						ImGui::CloseCurrentPopup();
+					}
+				}
 			}
+
 			ImGui::SameLine();
 
 			if (ImGui::Button("Cancel"))
@@ -121,6 +140,30 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 				newSceneNameInput = {};
 				// Then close the popup
 				ImGui::CloseCurrentPopup();
+			}
+
+			// Popup to ask whether you want to overwrite a scene
+			if (ImGui::BeginPopup("##save_changes_overwrite_popup"))
+			{
+				ImGui::Text(("Saving the scene with the name '" + newSceneNameInput
+					+ "' will overwrite the scene with the same name.").c_str());
+				ImGui::Text("Are you sure you want to overwrite this scene?");
+
+				if (ImGui::Button("Save anyway"))
+				{
+					sceneManager.saveChangesAs(newSceneNameInput);
+					// Empty input field
+					newSceneNameInput = {};
+					// Then close the popup
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Cancel"))
+				{
+					// Then close the popup
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
 			}
 			ImGui::EndPopup();
 		}
@@ -146,26 +189,8 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 					break;
 				}
 			}
-
-			if (ImGui::Button("Save"))
-			{
-				// Empty input field
-				newSceneNameInput = {};
-			}
-			ImGui::SameLine();
-
-			if (ImGui::Button("Cancel"))
-			{
-				// Empty input field
-				newSceneNameInput = {};
-				// Then close the popup
-				ImGui::CloseCurrentPopup();
-			}
 			ImGui::EndPopup();
 		}
-
-		//if (ImGui::Button("Revert scene changes"))
-		//	renderer->render(scene, camera);
 
 
 		ImGui::BeginTabBar("scene_edit_tab_bar");

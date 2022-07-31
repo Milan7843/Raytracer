@@ -18,6 +18,11 @@ void SceneManager::saveChanges()
 	SceneFileSaver::writeSceneToFile(currentScene, *currentScene.getNamePointer());
 }
 
+void SceneManager::saveChangesAs(std::string& sceneName)
+{
+	SceneFileSaver::writeSceneToFile(currentScene, sceneName);
+}
+
 void SceneManager::changeScene(const std::string& sceneName)
 {
 	try
@@ -56,7 +61,12 @@ void SceneManager::loadAvailableScenesNames()
 		{
 			// The file must end with .scene; if it does, add it to the list
 			if (file.path().string().ends_with(".scene"))
-				availableScenesNames.push_back(file.path().string());
+			{
+				// Converting scene path to scene name before adding it
+				availableScenesNames.push_back(
+					scenePathToSceneName(file.path().string())
+				);
+			}
 
 			else // Throw an error if an unknown filetype was found in the scenes folder
 				Logger::logError("Error: unknown file found in /scenes folder: " + file.path().string());
@@ -80,7 +90,80 @@ std::vector<std::string>& SceneManager::getAvailableScenesNames()
 	return availableScenesNames;
 }
 
+bool SceneManager::willSaveOverwrite(std::string& sceneName)
+{
+	try
+	{
+		// Looping through all files in the scene folder, checking each name
+		for (const auto& file : std::filesystem::directory_iterator("scenes"))
+		{
+			// Comparing every file name in the scenes folder
+			if (scenePathToSceneName(file.path().string()) == sceneName)
+			{
+				return true;
+			}
+		}
+	}
+	catch (std::filesystem::filesystem_error e)
+	{
+		Logger::logError(std::string("Error reading scene names: ") + e.what());
+	}
+
+	return false;
+}
+
+bool SceneManager::containsInvalidSceneNameCharacters(std::string& sceneName)
+{
+	if (sceneName.find('\\') != std::string::npos)
+		return true;
+	if (sceneName.find('.') != std::string::npos)
+		return true;
+	if (sceneName.find('/') != std::string::npos)
+		return true;
+	return false;
+}
+
 Scene& SceneManager::getCurrentScene()
 {
 	return currentScene;
+}
+
+std::string SceneManager::scenePathToSceneName(std::string scenePath)
+{
+	int preLength = 7; // scenes/
+	int aftLength = 6; // .scene
+
+	std::string s{ scenePath.substr(preLength, scenePath.length() - preLength - aftLength)};
+	return s;
+}
+
+std::vector<std::string> SceneManager::split(const std::string& input, char delim)
+{
+	std::vector<std::string> splitted;
+	std::string temp;
+
+	// Iterating over every character in the string
+	for (int i = 0; i < input.size(); i++)
+	{
+		char currentChar = input[i];
+
+		// Check for delimiter
+		if (currentChar == delim)
+		{
+			// Must not add empty string on double delim
+			if (temp.length() != 0)
+			{
+				// Adding whatever temp contains to the splitted
+				splitted.push_back(temp);
+				temp = "";
+			}
+		}
+		else
+		{
+			// Moving forward
+			temp += currentChar;
+		}
+	}
+
+	return splitted;
 }
