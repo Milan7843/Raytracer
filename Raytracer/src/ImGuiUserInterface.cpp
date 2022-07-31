@@ -91,8 +91,10 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 		ImGui::InputText("Scene name", sceneManager.getCurrentScene().getNamePointer());
 
 		// Save/revert changes buttons
-		//if (ImGui::Button("Save scene changes"))
-			//renderer->render(scene, camera);
+		if (ImGui::Button("Save scene changes"))
+		{
+			//std::cout << std::flush;
+		}
 
 		// Scene settings
 
@@ -105,6 +107,45 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 		{
 			// Name input field
 			ImGui::InputText("Scene name", &newSceneNameInput);
+
+			if (ImGui::Button("Save"))
+			{
+				// Empty input field
+				newSceneNameInput = {};
+			}
+			ImGui::SameLine();
+
+			if (ImGui::Button("Cancel"))
+			{
+				// Empty input field
+				newSceneNameInput = {};
+				// Then close the popup
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		/* Popup for opening scene! */
+		if (ImGui::Button("Open scene"))
+			ImGui::OpenPopup("##open_scene_popup");
+
+		if (ImGui::BeginPopup("##open_scene_popup"))
+		{
+			// Showing all possible scene names
+			Logger::logWarning("TODO: optimise getAvailableSceneNames to not be called every frame! (ImGuiUserInterface.cpp:135)");
+			for (std::string& name : sceneManager.getAvailableScenesNames())
+			{
+				// Making a button which loads the scene on click
+				if (ImGui::Button(name.c_str()))
+				{
+					// Loading the scene
+					sceneManager.changeScene(name);
+
+					// Closing the popup
+					ImGui::CloseCurrentPopup();
+					break;
+				}
+			}
 
 			if (ImGui::Button("Save"))
 			{

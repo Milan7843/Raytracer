@@ -46,18 +46,37 @@ void SceneManager::revertChanges()
 
 void SceneManager::loadAvailableScenesNames()
 {
-	// Empty the array of available scene names
-	availableScenesNames.clear();
-
-	// Looping through all files in the scene folder, adding each name
-	for (const auto& file : std::filesystem::directory_iterator("/scenes/"))
+	try
 	{
-		availableScenesNames.push_back(file.path().string());
+		// Empty the array of available scene names
+		availableScenesNames.clear();
+
+		// Looping through all files in the scene folder, adding each name
+		for (const auto& file : std::filesystem::directory_iterator("scenes"))
+		{
+			// The file must end with .scene; if it does, add it to the list
+			if (file.path().string().ends_with(".scene"))
+				availableScenesNames.push_back(file.path().string());
+
+			else // Throw an error if an unknown filetype was found in the scenes folder
+				Logger::logError("Error: unknown file found in /scenes folder: " + file.path().string());
+		}
 	}
+	catch (std::filesystem::filesystem_error e)
+	{
+		Logger::logError(std::string("Error reading scene names: ") + e.what());
+	}
+	/*
+	catch (const char* e)
+	{
+		// Printing the error
+		std::cout << e << std::endl;
+	}*/
 }
 
 std::vector<std::string>& SceneManager::getAvailableScenesNames()
 {
+	loadAvailableScenesNames();
 	return availableScenesNames;
 }
 

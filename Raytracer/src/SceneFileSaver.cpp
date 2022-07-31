@@ -53,6 +53,9 @@ Scene SceneFileSaver::readSceneFromFile(const std::string& fileName)
 	// Finally closing the file
 	filestream.close();
 
+	// Generating a buffer big enough for all triangles to go into
+	scene.generateTriangleBuffer();
+
 	return scene;
 }
 
