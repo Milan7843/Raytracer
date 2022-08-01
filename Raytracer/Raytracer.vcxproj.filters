@@ -114,6 +114,9 @@
     <ClCompile Include="src\HDRIRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\FileUtility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -1305,6 +1308,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\HDRIRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FileUtility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

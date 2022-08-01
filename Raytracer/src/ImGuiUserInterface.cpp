@@ -172,17 +172,55 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 		if (ImGui::Button("Open scene"))
 			ImGui::OpenPopup("##open_scene_popup");
 
+		static bool updateSceneNames = true;
+
 		if (ImGui::BeginPopup("##open_scene_popup"))
 		{
+			// Stop updating while the popup is open
+			updateSceneNames = false;
+
 			// Showing all possible scene names
-			Logger::logWarning("TODO: optimise getAvailableSceneNames to not be called every frame! (ImGuiUserInterface.cpp:135)");
-			for (std::string& name : sceneManager.getAvailableScenesNames())
+			for (std::string& name : sceneManager.getAvailableScenesNames(updateSceneNames))
 			{
 				// Making a button which loads the scene on click
 				if (ImGui::Button(name.c_str()))
 				{
 					// Loading the scene
 					sceneManager.changeScene(name);
+
+					updateSceneNames = true;
+
+					// Closing the popup
+					ImGui::CloseCurrentPopup();
+					break;
+				}
+			}
+			ImGui::EndPopup();
+		}
+
+
+		/* Popup for opening scene! */
+		if (ImGui::Button("Set HDRI"))
+			ImGui::OpenPopup("##open_hdri_popup");
+
+		static bool updateHDRINames = true;
+
+		if (ImGui::BeginPopup("##open_hdri_popup"))
+		{
+			// Stop updating while the popup is open
+			updateHDRINames = false;
+
+			// Showing all possible scene names
+			for (std::string& name : sceneManager.getAvailableHDRINames(updateHDRINames))
+			{
+				// Making a button which loads the scene on click
+				if (ImGui::Button(name.c_str()))
+				{
+					// Setting the HDRI
+					sceneManager.loadHDRI(name);
+
+					// Update next time
+					updateHDRINames = true;
 
 					// Closing the popup
 					ImGui::CloseCurrentPopup();

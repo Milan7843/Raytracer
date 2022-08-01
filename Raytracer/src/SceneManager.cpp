@@ -55,39 +55,26 @@ void SceneManager::revertChanges()
 
 void SceneManager::loadAvailableScenesNames()
 {
-	// TODO: move this to separate cpp/header file (getFilesOfTypeInFolder())
-	// (as the same code is used in renderer.cpp to load hdri's
-	try
-	{
-		// Empty the array of available scene names
-		availableScenesNames.clear();
-
-		// Looping through all files in the scene folder, adding each name
-		for (const auto& file : std::filesystem::directory_iterator("scenes"))
-		{
-			// The file must end with .scene; if it does, add it to the list
-			if (file.path().string().ends_with(".scene"))
-			{
-				// Converting scene path to scene name before adding it
-				availableScenesNames.push_back(
-					scenePathToSceneName(file.path().string())
-				);
-			}
-
-			else // Throw an error if an unknown filetype was found in the scenes folder
-				Logger::logError("Error: unknown file found in /scenes folder: " + file.path().string());
-		}
-	}
-	catch (std::filesystem::filesystem_error e)
-	{
-		Logger::logError(std::string("Error reading scene names: ") + e.what());
-	}
+	availableScenesNames = FileUtility::getFilesOfTypeInFolder("scenes", ".scene");
 }
 
-std::vector<std::string>& SceneManager::getAvailableScenesNames()
+std::vector<std::string>& SceneManager::getAvailableScenesNames(bool update)
 {
-	loadAvailableScenesNames();
+	if (update)
+		loadAvailableScenesNames();
 	return availableScenesNames;
+}
+
+void SceneManager::loadAvailableHDRINames()
+{
+	availableHDRINames = FileUtility::getFilesOfTypeInFolder("HDRIs", "");
+}
+
+std::vector<std::string>& SceneManager::getAvailableHDRINames(bool update)
+{
+	if (update)
+		loadAvailableHDRINames();
+	return availableHDRINames;
 }
 
 bool SceneManager::willSaveOverwrite(std::string& sceneName)
