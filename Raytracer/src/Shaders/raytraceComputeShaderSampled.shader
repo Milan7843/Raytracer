@@ -307,7 +307,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
             vec3 skyColor = skyboxColorTop * (t)+skyboxColorHorizon * (1. - t);
 
             // Calculating HDRI position
-            float yaw = atan2(ray.dir.x, ray.dir.z);
+            float yaw = atan2(ray.dir.z, ray.dir.x);
             float pitch = (ray.dir.y / 2 + 0.5);
 
             skyColor = texture(hdri, vec2(yaw/(2*PI), -pitch)).rgb;

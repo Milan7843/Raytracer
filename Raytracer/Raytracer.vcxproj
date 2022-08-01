@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\HDRI.cpp" />
+    <ClCompile Include="src\HDRIRenderer.cpp" />
     <ClCompile Include="src\SceneManager.cpp" />
     <ClCompile Include="src\SceneFileSaver.cpp" />
     <ClCompile Include="src\Logger.cpp" />
@@ -54,7 +54,7 @@
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\HDRI.h" />
+    <ClInclude Include="src\HDRIRenderer.h" />
     <ClInclude Include="src\SceneManager.h" />
     <ClInclude Include="src\SceneFileSaver.h" />
     <ClInclude Include="src\Logger.h" />
@@ -601,6 +601,8 @@
     <None Include="src\Shaders\backup.shader" />
     <None Include="src\Shaders\bufferedIndirectLightingRaytracingFragmentShader.shader" />
     <None Include="src\Shaders\bufferedRaytracingFragmentShader.shader" />
+    <None Include="src\Shaders\hdriFragment.shader" />
+    <None Include="src\Shaders\hdriVertex.shader" />
     <None Include="src\Shaders\rasterizedView.shader" />
     <None Include="src\Shaders\raymarchFragmentShader.shader" />
     <None Include="src\Shaders\raymarchFragmentShaderBackup.shader" />

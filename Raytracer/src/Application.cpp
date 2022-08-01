@@ -115,8 +115,7 @@ int Application::Start()
     // Raytraced renderer
     Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampled.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
-    unsigned int meshCount{ 0 }, triCount{ 0 };
-    Model skybox("src/models/cube.obj", &meshCount, &triCount, 0, 1);
+    HDRIRenderer hdriRenderer("src/shaders/hdriVertex.shader", "src/shaders/hdriFragment.shader");
 
     sceneManager.loadHDRI("hdri_default.png");
 
@@ -194,6 +193,9 @@ int Application::Start()
         }
         else
         {
+            // Drawing the HDRI (skybox)
+            hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI(), camera, WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
             /* REGULAR RENDERING */
             solidColorShader.use();
 

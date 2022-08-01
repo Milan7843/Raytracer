@@ -20,6 +20,7 @@
 #include "Model.h"
 #include "Material.h"
 #include "Renderer.h"
+#include "HDRIRenderer.h"
 #include "ImGuiUserInterface.h"
 
 #include "CoordinateUtility.h"
