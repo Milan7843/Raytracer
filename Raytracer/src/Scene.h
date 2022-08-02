@@ -11,6 +11,8 @@
 #include "Sphere.h"
 #include "Material.h"
 
+#include <iostream>
+
 class Scene
 {
 public:
@@ -24,7 +26,7 @@ public:
 	void setName(std::string name);
 
 	// Set the HDRI used in this scene
-	void setHDRI(unsigned int hdri);
+	void loadHDRI(const std::string& imageName);
 	unsigned int getHDRI();
 
 	// Add a point light to the scene
@@ -77,6 +79,7 @@ private:
 
 	// The hdri currently loaded
 	unsigned int hdri = 0;
+	std::string loadedHDRIName{"default_hdri.png"};
 
 	// Keeping track of the lights in this scene
 	std::vector<PointLight> pointLights;

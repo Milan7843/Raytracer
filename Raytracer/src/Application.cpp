@@ -89,8 +89,10 @@ int Application::Start()
     scene.addLight(pointLight2);
     scene.addLight(directionalLight1);
     scene.addLight(ambientLight1);
+    
+    SceneFileSaver::writeSceneToFile(scene, std::string("Scene 1 - testing"));
     */
-    //SceneFileSaver::writeSceneToFile(scene, std::string("Scene 1 - testing"));
+
     SceneManager sceneManager{};
     sceneManager.changeScene(std::string("Scene 1 - testing"));
     //Scene scene{ SceneFileSaver::readSceneFromFile(std::string("Scene 1 - testing")) };
@@ -116,8 +118,6 @@ int Application::Start()
     Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampled.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
     HDRIRenderer hdriRenderer("src/shaders/hdriVertex.shader", "src/shaders/hdriFragment.shader");
-
-    sceneManager.loadHDRI("hdri_default.png");
 
     raytracingRenderer.bindCamera(&camera);
     raytracingRenderer.bindSceneManager(&sceneManager);

@@ -40,7 +40,7 @@ void HDRIRenderer::drawHDRI(unsigned int hdri, Camera& camera, unsigned int widt
 void HDRIRenderer::generateSkyboxVAO()
 {
     // Big cube vertices and indices
-    float s = 300.0f;
+    float s = 100.0f;
     float vertices[]{
          s,  s,  s,
          s,  s, -s,
