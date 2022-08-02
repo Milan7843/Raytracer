@@ -66,7 +66,7 @@ unsigned int AbstractShader::compileShader(GLenum type, const char* code)
 	if (!success)
 	{
 		glGetShaderInfoLog(id, 512, NULL, infoLog);
-		Logger::logError("shader compilation failed." + type);
+		Logger::logError("shader compilation failed." + std::string(infoLog));
 	}
 	return id;
 }

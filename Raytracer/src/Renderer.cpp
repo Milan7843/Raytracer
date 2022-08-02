@@ -100,6 +100,12 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	computeShader.setInt("multisamples", multisamples);
 	computeShader.setInt("currentFrameSampleCount", currentFrameSampleCount);
 
+	// Binding the hdri
+	computeShader.setInt("hdri", 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.getHDRI());
+
 	bindPixelBuffer();
 }
 

@@ -89,8 +89,10 @@ int Application::Start()
     scene.addLight(pointLight2);
     scene.addLight(directionalLight1);
     scene.addLight(ambientLight1);
+    
+    SceneFileSaver::writeSceneToFile(scene, std::string("Scene 1 - testing"));
     */
-    //SceneFileSaver::writeSceneToFile(scene, std::string("Scene 1 - testing"));
+
     SceneManager sceneManager{};
     sceneManager.changeScene(std::string("Scene 1 - testing"));
     //Scene scene{ SceneFileSaver::readSceneFromFile(std::string("Scene 1 - testing")) };
@@ -114,6 +116,8 @@ int Application::Start()
 
     // Raytraced renderer
     Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampled.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
+    HDRIRenderer hdriRenderer("src/shaders/hdriVertex.shader", "src/shaders/hdriFragment.shader");
 
     raytracingRenderer.bindCamera(&camera);
     raytracingRenderer.bindSceneManager(&sceneManager);
@@ -189,6 +193,9 @@ int Application::Start()
         }
         else
         {
+            // Drawing the HDRI (skybox)
+            hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI(), camera, WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
             /* REGULAR RENDERING */
             solidColorShader.use();
 

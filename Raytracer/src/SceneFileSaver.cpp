@@ -35,11 +35,13 @@ Scene SceneFileSaver::readSceneFromFile(const std::string& fileName)
 	// Otherwise create a scene
 	Scene scene{};
 
+	scene.setName(fileName);
+
 	// String buffer for file data
 	std::string buffer;
 	std::getline(filestream, buffer);
-
-	scene.setName(fileName);
+	scene.loadHDRI(buffer);
+	std::getline(filestream, buffer);
 
 	// Loading all important scene data
 	readMaterials(filestream, scene);
