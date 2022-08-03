@@ -34,8 +34,14 @@ public:
 	// Set the resolution used to render
 	void setResolution(unsigned int width, unsigned int height);
 
+	// Get the resolution used to render
+	unsigned int getWidth();
+	unsigned int getHeight();
+
 	// Bind the pixel buffer to the GL_SHADER_STORAGE_BUFFER
 	void bindPixelBuffer();
+
+	unsigned int getPixelBuffer();
 
 	// Set the sample count
 	void setSampleCount(unsigned int sampleCount);

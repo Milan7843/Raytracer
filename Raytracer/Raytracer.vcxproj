@@ -453,6 +453,7 @@
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Sphere.h" />
     <ClInclude Include="src\stb_image.h" />
+    <ClInclude Include="src\stb_image_write.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc142-mtd.dll" />

@@ -26,6 +26,7 @@
 #include "SceneManager.h"
 #include "Camera.h"
 #include "Renderer.h"
+#include "FileUtility.h"
 
 class ImGuiUserInterface
 {

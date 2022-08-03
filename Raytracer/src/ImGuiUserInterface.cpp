@@ -69,6 +69,11 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 	ImGui::SameLine();
 	ImGui::Text(formatTime(renderer.getTimeLeft()).c_str());
 
+	if (ImGui::Button("Save render"))
+	{
+		FileUtility::saveRender("render.png", renderer.getWidth(), renderer.getHeight(), renderer.getPixelBuffer());
+	}
+
 	// Creating the tab bar
 	ImGui::BeginTabBar("full_tab_bar");
 

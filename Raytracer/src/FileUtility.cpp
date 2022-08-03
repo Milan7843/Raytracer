@@ -1,5 +1,10 @@
 #include "FileUtility.h"
 
+// For render saving
+#define __STDC_LIB_EXT1__
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
 void removeFolderAndFiletype(std::vector<std::string>& fileNames, const char* folder, const char* filetype);
 
 std::vector<std::string> FileUtility::getFilesOfTypeInFolder(const char* folder, const char* filetype)
@@ -29,6 +34,21 @@ std::vector<std::string> FileUtility::getFilesOfTypeInFolder(const char* folder,
 	removeFolderAndFiletype(filesFound, folder, filetype);
 
 	return filesFound;
+}
+
+void FileUtility::saveRender(const std::string& imageName, unsigned int width, unsigned int height, unsigned int pixelBuffer)
+{
+	// Calculating some important values
+	unsigned int numberOfChannels = 4; // R, G, B, A
+	unsigned int stride = numberOfChannels * width;
+
+	// Getting the pixel data
+	std::vector<char> pixelsChars(stride * height);
+	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixelsChars.data());
+
+	// Writing the pixel data to a png
+	stbi_flip_vertically_on_write(true);
+	stbi_write_png(("renders/" + imageName).c_str(), width, height, numberOfChannels, pixelsChars.data(), stride);
 }
 
 void removeFolderAndFiletype(std::vector<std::string>& fileNames, const char* folder, const char* filetype)

@@ -174,10 +174,25 @@ void Renderer::setResolution(unsigned int width, unsigned int height)
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
+unsigned int Renderer::getWidth()
+{
+	return width;
+}
+
+unsigned int Renderer::getHeight()
+{
+	return height;
+}
+
 void Renderer::bindPixelBuffer()
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelBuffer);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, pixelBuffer);
+}
+
+unsigned int Renderer::getPixelBuffer()
+{
+	return pixelBuffer;
 }
 
 glm::vec2 Renderer::getBlockOrigin()
