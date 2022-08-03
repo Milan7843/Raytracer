@@ -58,7 +58,7 @@ private:
 	void drawHelpMarker(const char* desc);
 
 	// Draw all the render settings
-	void drawRenderSettings(Camera& camera, Renderer& renderer, bool* inRaytraceMode);
+	void drawRenderSettings(SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode);
 
 	// Represent a material using ImGui
 	void drawMaterials(Scene& scene);

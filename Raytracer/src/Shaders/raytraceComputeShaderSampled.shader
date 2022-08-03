@@ -11,6 +11,7 @@ uniform int sampleCount;
 uniform int multisamples;
 
 uniform bool renderUsingBlocks;
+uniform bool useHDRIAsBackground;
 uniform vec2 currentBlockOrigin;
 uniform int blockSize;
 uniform int renderPassCount;
@@ -304,14 +305,16 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
             // Calculating sky color
             vec3 up = vec3(0., 1., 0.);
             float t = dot(up, ray.dir) + 0.6;
-            vec3 skyColor = skyboxColorTop * (t)+skyboxColorHorizon * (1. - t);
+            vec3 skyColor = skyboxColorTop* (t)+skyboxColorHorizon * (1. - t);
 
-            // Calculating HDRI position
-            float yaw = atan2(ray.dir.z, ray.dir.x);
-            float pitch = (ray.dir.y / 2 + 0.5);
+            if (useHDRIAsBackground || i != 0)
+            {
+                // Calculating HDRI position
+                float yaw = atan2(ray.dir.z, ray.dir.x);
+                float pitch = (ray.dir.y / 2 + 0.5);
 
-            skyColor = texture(hdri, vec2(yaw/(2*PI), -pitch)).rgb;
-
+                skyColor = texture(hdri, vec2(yaw / (2 * PI), -pitch)).rgb;
+            }
             vec3 finalColor = skyColor;
 
 

@@ -93,6 +93,8 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	computeShader.setVector3("cameraRotation", camera->getRotation());
 	computeShader.setFloat("fov", camera->getFov());
 
+	computeShader.setBool("useHDRIAsBackground", *scene.getUseHDRIAsBackgroundPointer());
+
 	// Writing rendering data to the compute shader
 	computeShader.setInt("screenWidth", width);
 	computeShader.setVector2("screenSize", width, height);

@@ -78,16 +78,16 @@ private:
 	unsigned int width, height;
 
 	// The sample count used to render (= number of rays per pixel)
-	int sampleCount = 20;
+	int sampleCount{ 20 };
 
 	// The numbers of render passes per block
-	int renderPassCount = 1;
+	int renderPassCount{ 1 };
 
 	// The number of sample frames already rendered
-	unsigned int currentFrameSampleCount = 0;
+	unsigned int currentFrameSampleCount{ 0 };
 
 	// The number of sample points per pixel
-	int multisamples = 1;
+	int multisamples{ 1 };
 
 	/* Block rendering */
 	// The size in pixels of each block

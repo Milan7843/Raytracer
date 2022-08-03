@@ -63,6 +63,8 @@ public:
 	// Get a pointer to the name of this scene
 	std::string* getNamePointer();
 
+	bool* getUseHDRIAsBackgroundPointer();
+
 	std::vector<Material>& getMaterials();
 	std::vector<PointLight>& getPointLights();
 	std::vector<DirectionalLight>& getDirectionalLights();
@@ -100,6 +102,9 @@ private:
 
 	unsigned int sphereCount = 0;
 	unsigned int meshCount = 0;
+
+	// Whether to render the HDRI as a background or just plain colours
+	bool useHDRIAsBackground{ true };
 
 	// The buffer for storing mesh triangles
 	unsigned int triangleBufferSSBO = 0;

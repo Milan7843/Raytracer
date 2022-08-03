@@ -126,7 +126,7 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 	if (ImGui::BeginTabItem("Render settings"))
 	{
 		ImGui::BeginGroup();
-		drawRenderSettings(camera, renderer, inRaytraceMode);
+		drawRenderSettings(sceneManager, camera, renderer, inRaytraceMode);
 		ImGui::EndGroup();
 		ImGui::EndTabItem();
 	}
@@ -397,7 +397,7 @@ void ImGuiUserInterface::drawHelpMarker(const char* desc)
 	}
 }
 
-void ImGuiUserInterface::drawRenderSettings(Camera& camera, Renderer& renderer, bool* inRaytraceMode)
+void ImGuiUserInterface::drawRenderSettings(SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode)
 {
 	ImGui::SliderInt("Block size", renderer.getBlockSizePointer(), 1, 100);
 	drawHelpMarker("The size of a render block in pixels.");
@@ -413,6 +413,9 @@ void ImGuiUserInterface::drawRenderSettings(Camera& camera, Renderer& renderer, 
 	// Render passes per block
 	ImGui::SliderInt("Block passes", renderer.getRenderPassCountPointer(), 1, 100);
 	drawHelpMarker("The number of passes per block. Each pass will take the full number of samples for each pixel.");
+
+	ImGui::Checkbox("Use HDRI as background", sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer());
+	drawHelpMarker("Only if enabled, the HDRI will be drawn as the background.\nThe HDRI will be shown in reflections either way");
 
 	// Button to switch between raytraced and rasterized views
 	if (ImGui::Button(*inRaytraceMode ? "View rasterized" : "View raytraced"))

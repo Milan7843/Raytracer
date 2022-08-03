@@ -193,8 +193,9 @@ int Application::Start()
         }
         else
         {
-            // Drawing the HDRI (skybox)
-            hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI(), camera, WINDOW_SIZE_X, WINDOW_SIZE_Y);
+            // Drawing the HDRI (skybox) if using it as a background is enabled
+            if (*sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer())
+                hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI(), camera, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
             /* REGULAR RENDERING */
             solidColorShader.use();

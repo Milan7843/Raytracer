@@ -313,6 +313,11 @@ std::string* Scene::getNamePointer()
 	return &name;
 }
 
+bool* Scene::getUseHDRIAsBackgroundPointer()
+{
+	return &useHDRIAsBackground;
+}
+
 std::vector<Material>& Scene::getMaterials()
 {
 	return materials;
