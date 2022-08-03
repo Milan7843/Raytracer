@@ -69,9 +69,51 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 	ImGui::SameLine();
 	ImGui::Text(formatTime(renderer.getTimeLeft()).c_str());
 
+	static std::string renderSaveFileName{ "" };
+	static bool renderSaveFileNameError = false;
+
 	if (ImGui::Button("Save render"))
+		ImGui::OpenPopup("##save_render_popup");
+
+	if (ImGui::BeginPopup("##save_render_popup"))
 	{
-		FileUtility::saveRender("render.png", renderer.getWidth(), renderer.getHeight(), renderer.getPixelBuffer());
+		// Name input field
+		ImGui::InputText("Render name", &renderSaveFileName);
+		if (renderSaveFileNameError)
+			ImGui::Text("Invalid image name. Make sure it does not contain periods ('.'), slashes ('/') or backslashes ('\\'),\n"
+				"and it is not empty.");
+
+		if (ImGui::Button("Save"))
+		{
+			if (FileUtility::isValidInput(renderSaveFileName))
+			{
+				// Saving the render
+				FileUtility::saveRender(renderSaveFileName + ".png", renderer.getWidth(), renderer.getHeight(), renderer.getPixelBuffer());
+
+				// Empty input field
+				renderSaveFileName = {};
+				// Close error
+				renderSaveFileNameError = false;
+				// Then close the popup
+				ImGui::CloseCurrentPopup();
+			}
+			else
+			{
+				// Activating the error
+				renderSaveFileNameError = true;
+			}
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel"))
+		{
+			// Empty input field
+			renderSaveFileName = {};
+			// Close error
+			renderSaveFileNameError = false;
+			// Then close the popup
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
 	}
 
 	// Creating the tab bar
@@ -105,6 +147,7 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 
 		// Holds new scene name input
 		static std::string newSceneNameInput{};
+		static bool sceneNameInputError = false;
 
 		if (ImGui::Button("Save scene changes as new"))
 			ImGui::OpenPopup("##save_changes_new_popup");
@@ -114,13 +157,13 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 			// Name input field
 			ImGui::InputText("Scene name", &newSceneNameInput);
 
+			if (sceneNameInputError)
+				ImGui::Text("Invalid scene name. Make sure it does not contain periods ('.'), slashes ('/') or backslashes ('\\'),\n"
+					"and it is not empty.");
+
 			if (ImGui::Button("Save"))
 			{
-				if (sceneManager.containsInvalidSceneNameCharacters(newSceneNameInput))
-				{
-					ImGui::Text("Scene name cannot contain \\, / or .");
-				}
-				else
+				if (FileUtility::isValidInput(newSceneNameInput))
 				{
 					if (sceneManager.willSaveOverwrite(newSceneNameInput))
 					{
@@ -131,9 +174,15 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 						sceneManager.saveChangesAs(newSceneNameInput);
 						// Empty input field
 						newSceneNameInput = {};
+						sceneNameInputError = false;
 						// Then close the popup
 						ImGui::CloseCurrentPopup();
 					}
+				}
+				else
+				{
+					// Activating the error message
+					sceneNameInputError = true;
 				}
 			}
 
@@ -143,6 +192,7 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 			{
 				// Empty input field
 				newSceneNameInput = {};
+				sceneNameInputError = false;
 				// Then close the popup
 				ImGui::CloseCurrentPopup();
 			}
@@ -161,12 +211,14 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 					newSceneNameInput = {};
 					// Then close the popup
 					ImGui::CloseCurrentPopup();
+					sceneNameInputError = false;
 				}
 				ImGui::SameLine();
 				if (ImGui::Button("Cancel"))
 				{
 					// Then close the popup
 					ImGui::CloseCurrentPopup();
+					sceneNameInputError = false;
 				}
 				ImGui::EndPopup();
 			}

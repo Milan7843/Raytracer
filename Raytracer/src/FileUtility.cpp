@@ -51,6 +51,19 @@ void FileUtility::saveRender(const std::string& imageName, unsigned int width, u
 	stbi_write_png(("renders/" + imageName).c_str(), width, height, numberOfChannels, pixelsChars.data(), stride);
 }
 
+bool FileUtility::isValidInput(std::string& input)
+{
+	if (input.empty())
+		return false;
+	if (input.find('\\') != std::string::npos)
+		return false;
+	if (input.find('.') != std::string::npos)
+		return false;
+	if (input.find('/') != std::string::npos)
+		return false;
+	return true;
+}
+
 void removeFolderAndFiletype(std::vector<std::string>& fileNames, const char* folder, const char* filetype)
 {
 	for (std::string& fileName : fileNames)
