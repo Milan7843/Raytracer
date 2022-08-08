@@ -39,9 +39,14 @@ uniform int currentBlockRenderPassIndex;
 // Triangle
 struct Tri
 {
+    // Vertex positions
     vec4 v1;
     vec4 v2;
     vec4 v3;
+    // Normals (padded to be 4N each by std140)
+    vec4 n1;
+    vec4 n2;
+    vec4 n3;
     vec3 normal;
     float reflectiveness;
     vec3 color;
@@ -165,6 +170,48 @@ Ray fireSecondaryRay(vec3 pos, vec3 direction, bool reflect, int seed);
 vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit);
 
 vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex, int seed);
+
+float triangleArea(vec3 v1, vec3 v2, vec3 v3)
+{
+    /*
+    float a = length(v1 - v2);
+    float b = length(v2 - v3);
+    float c = length(v3 - v1);
+    float s = (a + b + c) / 2.0;
+
+    return sqrt(s*(s-a)*(s-b)*(s-c));*/
+    return 0.5 * length(cross(v2 - v1, v3 - v1));
+}
+
+vec3 getNormal(Tri tri, vec3 p)
+{
+    // Smooth normals
+    if (true)
+    {
+        vec3 vert1 = (meshes[tri.mesh].transformation * vec4(tri.v1.xyz, 1.0)).zyx;
+        vec3 vert2 = (meshes[tri.mesh].transformation * vec4(tri.v2.xyz, 1.0)).zyx;
+        vec3 vert3 = (meshes[tri.mesh].transformation * vec4(tri.v3.xyz, 1.0)).zyx;
+
+        //float area1 = triangleArea(p-tri.v2.xyz, p-tri.v3.xyz, tri.v2.xyz-tri.v3.xyz);
+        //float area2 = triangleArea(p-tri.v1.xyz, p-tri.v3.xyz, tri.v1.xyz-tri.v3.xyz);
+        //float area3 = triangleArea(p-tri.v1.xyz, p-tri.v2.xyz, tri.v1.xyz-tri.v2.xyz);
+
+        float area1 = triangleArea(p, vert2, vert3);
+        float area2 = triangleArea(p, vert1, vert3);
+        float area3 = triangleArea(p, vert1, vert2);
+
+        float totalArea = area1 + area2 + area3;
+
+        area1 = area1 / totalArea;
+        area2 = area2 / totalArea;
+        area3 = area3 / totalArea;
+
+        //return tri.n1.xyz;
+        return normalize(tri.n1 * area1 + tri.n2 * area2 + tri.n3 * area3).xyz;
+    }
+    // Default harsh normals
+    return tri.normal;
+}
 
 // Returns a random value between 0 and 1 [0, 1)
 float rand(float seed)
@@ -385,6 +432,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
 
                 ray.dir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
                 ray.pos = closestIntersection.pos + EPSILON * ray.dir;
+
                 continue; // reflecting
             }
             else if (closestIntersection.transparency > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed*13 + i * 47 + 5779) < closestIntersection.transparency)
@@ -615,7 +663,8 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         {
             closestIntersection = isec;
             closestIntersection.closestTriHit = j;
-            isec.normal = triangles[j].normal;
+            // TODO optimise this to to as few getNormal calls as possible (not on underlying faces)
+            closestIntersection.normal = getNormal(triangles[j], isec.pos);
         }
     }
 
