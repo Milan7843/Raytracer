@@ -11,11 +11,6 @@ Renderer::~Renderer()
 {
 }
 
-void Renderer::bindCamera(Camera* camera)
-{
-	this->cameraBound = camera;
-}
-
 void Renderer::bindSceneManager(SceneManager* sceneManager)
 {
 	this->sceneManagerBound = sceneManager;
@@ -27,7 +22,7 @@ void Renderer::render()
 
 	currentFrameSampleCount++;
 
-	setUpForRender(sceneManagerBound->getCurrentScene(), cameraBound);
+	setUpForRender(sceneManagerBound->getCurrentScene(), &sceneManagerBound->getCurrentScene().getActiveCamera());
 
 	computeShader.setBool("renderUsingBlocks", false);
 
@@ -50,7 +45,7 @@ void Renderer::startBlockRender()
 
 	blockSizeRendering = blockSize;
 
-	setUpForRender(sceneManagerBound->getCurrentScene(), cameraBound);
+	setUpForRender(sceneManagerBound->getCurrentScene(), &sceneManagerBound->getCurrentScene().getActiveCamera());
 
 	computeShader.setBool("renderUsingBlocks", true);
 	computeShader.setInt("blockSize", blockSizeRendering);

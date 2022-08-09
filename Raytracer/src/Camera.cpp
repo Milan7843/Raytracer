@@ -20,6 +20,33 @@ Camera::Camera(glm::vec3 pos)
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	forward = glm::normalize(direction);
 }
+Camera::Camera(glm::vec3 pos, float yaw, float pitch)
+	: position(pos)
+	, yaw(yaw)
+	, pitch(pitch)
+{
+	up = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 direction;
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	forward = glm::normalize(direction);
+}
+Camera::Camera(glm::vec3 pos, float yaw, float pitch, float sensitivity, float fov, float cameraSpeed)
+	: position(pos)
+	, yaw(yaw)
+	, pitch(pitch)
+	, sensitivity(sensitivity)
+	, fov(fov)
+	, cameraSpeed(cameraSpeed)
+{
+	up = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 direction;
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	forward = glm::normalize(direction);
+}
 Camera::~Camera()
 {
 	Logger::log("Camera destroyed");
@@ -83,6 +110,16 @@ void Camera::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 	direction.y = sin(glm::radians(pitch));
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	forward = glm::normalize(direction);
+}
+
+void Camera::writeDataToStream(std::ofstream& filestream)
+{
+	filestream << position.x << " " << position.y << " " << position.z << "\n";
+	filestream << pitch << "\n";
+	filestream << yaw << "\n";
+	filestream << sensitivity << "\n";
+	filestream << fov << "\n";
+	filestream << cameraSpeed << "\n";
 }
 
 std::string Camera::getInformation()

@@ -11,9 +11,6 @@ public:
 	Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height);
 	~Renderer();
 
-	// Bind the camera to be rendered with
-	void bindCamera(Camera* camera);
-
 	// Bind the scene to be rendered
 	void bindSceneManager(SceneManager* sceneManager);
 
@@ -57,7 +54,6 @@ public:
 private:
 
 	// Things to bind before rendering
-	Camera* cameraBound;
 	SceneManager* sceneManagerBound;
 
 	// Set everything up for rendering with the given scene and camera

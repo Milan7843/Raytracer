@@ -7,6 +7,7 @@ void readSpheres(std::ifstream& filestream, Scene& scene);
 void readPointLights	(std::ifstream& filestream, Scene& scene);
 void readDirectionalLights	(std::ifstream& filestream, Scene& scene);
 void readAmbientLights	(std::ifstream& filestream, Scene& scene);
+void readCameras(std::ifstream& filestream, Scene& scene);
 
 void SceneFileSaver::writeSceneToFile(Scene& scene, const std::string& fileName)
 {
@@ -50,6 +51,7 @@ Scene SceneFileSaver::readSceneFromFile(const std::string& fileName)
 	readPointLights(filestream, scene);
 	readDirectionalLights(filestream, scene);
 	readAmbientLights(filestream, scene);
+	readCameras(filestream, scene);
 
 	// Finally closing the file
 	filestream.close();
@@ -306,6 +308,49 @@ void readAmbientLights(std::ifstream& filestream, Scene& scene)
 		// Creating the light with the read properties
 		AmbientLight light(color, intensity);
 		scene.addLight(light);
+
+		// Skipping a line
+		std::getline(filestream, buffer);
+	}
+}
+
+void readCameras(std::ifstream& filestream, Scene& scene)
+{
+	// String buffer for any full-line reading
+	std::string buffer;
+
+	while (filestream)
+	{
+		// Reading the next line to find out whether we reached the end of spheres
+		std::getline(filestream, buffer);
+
+		// Reached end of spheres
+		if (buffer == std::string{ "# Cameras end" })
+		{
+			// Skip a line and stop parsing models
+			std::getline(filestream, buffer);
+			return;
+		}
+
+		// Defining all other data
+		glm::vec3 position;
+		float pitch;
+		float yaw;
+		float sensitivity;
+		float fov;
+		float cameraSpeed;
+
+		// Then getting said data
+		position = readVec3(filestream);
+		filestream >> pitch;
+		filestream >> yaw;
+		filestream >> sensitivity;
+		filestream >> fov;
+		filestream >> cameraSpeed;
+
+		// Creating the light with the read properties
+		Camera camera(position, yaw, pitch, sensitivity, fov, cameraSpeed);
+		scene.addCamera(camera);
 
 		// Skipping a line
 		std::getline(filestream, buffer);

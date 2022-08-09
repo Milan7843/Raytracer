@@ -81,6 +81,17 @@ void Scene::writeDataToStream(std::ofstream& filestream)
 			filestream << "\n";
 	}
 	filestream << "# Ambient lights end\n\n";
+
+	// Writing all cameras
+	filestream << "# Cameras\n";
+	for (Camera& camera : cameras)
+	{
+		camera.writeDataToStream(filestream);
+		// Write newline if it is not the last item
+		if (&camera != &cameras.back())
+			filestream << "\n";
+	}
+	filestream << "# Cameras end\n\n";
 }
 
 void Scene::setName(std::string name)
@@ -202,6 +213,21 @@ void Scene::addMaterial(Material& material)
 	// Adding a new material and incrementing the counter for this
 	materials.push_back(material);
 	this->materialCount++;
+}
+
+void Scene::addCamera(Camera& camera)
+{
+	this->cameras.push_back(camera);
+}
+
+void Scene::activateCamera(unsigned int index)
+{
+	this->activeCamera = index;
+}
+
+Camera& Scene::getActiveCamera()
+{
+	return cameras[activeCamera];
 }
 
 void Scene::draw(AbstractShader* shader)
