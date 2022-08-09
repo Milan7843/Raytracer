@@ -102,9 +102,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCou
 		if (mesh->HasNormals())
 		{
 			vertex.normal = aiVector3DToGLMVec4(mesh->mNormals[i]);
-			
-			// TEST REMOVE!
-			vertex.normal = glm::vec4(glm::normalize(glm::vec3(vertex.position)), 1.0f);
 		}
 
 		// Putting the new vertex into the vertices vector
