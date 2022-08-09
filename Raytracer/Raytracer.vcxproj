@@ -19,10 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\FileUtility.cpp" />
+    <ClCompile Include="src\file_handling\FileUtility.cpp" />
     <ClCompile Include="src\HDRIRenderer.cpp" />
     <ClCompile Include="src\SceneManager.cpp" />
-    <ClCompile Include="src\SceneFileSaver.cpp" />
+    <ClCompile Include="src\file_handling\SceneFileSaver.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Lights\AmbientLight.cpp" />
     <ClCompile Include="src\Lights\DirectionalLight.cpp" />
@@ -55,10 +55,10 @@
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\FileUtility.h" />
+    <ClInclude Include="src\file_handling\FileUtility.h" />
     <ClInclude Include="src\HDRIRenderer.h" />
     <ClInclude Include="src\SceneManager.h" />
-    <ClInclude Include="src\SceneFileSaver.h" />
+    <ClInclude Include="src\file_handling\SceneFileSaver.h" />
     <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\Lights\AmbientLight.h" />
     <ClInclude Include="src\Lights\DirectionalLight.h" />
@@ -686,11 +686,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)/include</IncludePath>
+    <IncludePath>$(ProjectDir)/src;$(ProjectDir)/src/file_handling;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)/include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)/libs</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)/src;$(ProjectDir)/src/file_handling;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)/include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)/libs</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

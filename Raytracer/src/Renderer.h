@@ -53,6 +53,11 @@ public:
 
 private:
 
+	// Read all the render settings from the save file
+	void readRenderSettings();
+	// Save the render settings to the save file
+	void writeRenderSettingsToFile();
+
 	// Things to bind before rendering
 	SceneManager* sceneManagerBound;
 

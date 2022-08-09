@@ -105,7 +105,7 @@
     <ClCompile Include="src\Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\SceneFileSaver.cpp">
+    <ClCompile Include="src\file_handling\SceneFileSaver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\SceneManager.cpp">
@@ -114,7 +114,7 @@
     <ClCompile Include="src\HDRIRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\FileUtility.cpp">
+    <ClCompile Include="src\file_handling\FileUtility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1301,7 +1301,7 @@
     <ClInclude Include="src\Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\SceneFileSaver.h">
+    <ClInclude Include="src\file_handling\SceneFileSaver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\SceneManager.h">
@@ -1310,7 +1310,7 @@
     <ClInclude Include="src\HDRIRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\FileUtility.h">
+    <ClInclude Include="src\file_handling\FileUtility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\stb_image_write.h">
