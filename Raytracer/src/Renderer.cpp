@@ -233,8 +233,11 @@ float Renderer::getRenderProgressPrecise()
 	float blocksInWidth = (float)width / (float)blockSizeRendering;
 
 	int blocksDone = blockIndexX + blockIndexY * blocksInWidth;
+	float iterationsDone = blocksDone * renderPassCount + currentBlockRenderPassIndex;
 
-	float progress = blocksDone / (blocksInWidth * blocksInHeight);
+	float totalIterations = blocksInWidth * blocksInHeight * renderPassCount;
+
+	float progress = iterationsDone / totalIterations;
 	return progress;
 }
 
