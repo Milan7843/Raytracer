@@ -7,12 +7,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Camera.h"
+#include "SceneManager.h"
 
 class Callbacks
 {
 public:
-    void setCamera(Camera* camera);
+    void bindSceneManager(SceneManager* sceneManager);
 
     static Callbacks& getInstance();
 
@@ -22,7 +22,7 @@ public:
     void mouseCallbackImpl(GLFWwindow* window, double xpos, double ypos);
 
 private:
-    static Camera* camera;
+    static SceneManager* sceneManager;
 
     Callbacks(void)
     {

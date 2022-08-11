@@ -3,29 +3,29 @@ hdri_default.png
 White
 1 1 1
 0
-0
 1
+0
 1 1 1
 
 Reflective
 1 1 1
 1
-0
 1
+0
 1 1 1
 
 Transparent
 1 1 1
 0.5
-0.01
 1
+0.01
 1 1 1
 
 Rose matte
 0.8 0.2 0.3
 1e-08
-0
 1
+0
 1 1 1
 # Materials end
 
@@ -82,9 +82,9 @@ src/models/highresicosphere.obj
 # Ambient lights end
 
 # Cameras
--1.78226 0.754264 2.42877
--4.796
-323.065
+-1.74392 1.99044 2.35949
+-22.496
+322.565
 1
 39.333
 1.844

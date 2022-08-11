@@ -10,6 +10,7 @@
 #include "Model.h"
 #include "Sphere.h"
 #include "Material.h"
+#include "Camera.h"
 
 #include <iostream>
 
@@ -29,25 +30,32 @@ public:
 	void loadHDRI(const std::string& imageName);
 	unsigned int getHDRI();
 
+
 	// Add a point light to the scene
 	void addLight(PointLight& pointLight);
-
 	// Add a directional light to the scene
 	void addLight(DirectionalLight& directionalLight);
-
 	// Add an ambient light to the scene
 	void addLight(AmbientLight& ambientLight);
+
 
 	Model* addModel(const std::string& path, unsigned int materialIndex);
 	Sphere* addSphere(glm::vec3 position, float radius, unsigned int materialIndex);
 	void addMaterial(Material& material);
+
+
+	// Add a camera to the scene
+	void addCamera(Camera& camera);
+	// Activate a camera by index
+	void activateCamera(unsigned int index);
+	// Get the active camera
+	Camera& getActiveCamera();
 
 	// Draw this scene with the given shader
 	void draw(AbstractShader* shader);
 
 	// Write the data in the lights vector into the shader
 	void writeLightsToShader(AbstractShader* shader);
-
 	// Write the data in the materials vector into the shader
 	void writeMaterialsToShader(AbstractShader* shader);
 
@@ -102,6 +110,9 @@ private:
 
 	unsigned int sphereCount = 0;
 	unsigned int meshCount = 0;
+
+	std::vector<Camera> cameras;
+	unsigned int activeCamera;
 
 	// Whether to render the HDRI as a background or just plain colours
 	bool useHDRIAsBackground{ true };

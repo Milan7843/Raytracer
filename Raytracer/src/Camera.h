@@ -12,6 +12,8 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <sstream>
 
 #include "Logger.h"
 
@@ -21,6 +23,8 @@ class Camera
 public:
 	Camera();
 	Camera(glm::vec3 pos);
+	Camera(glm::vec3 pos, float yaw, float pitch);
+	Camera(glm::vec3 pos, float yaw, float pitch, float sensitivity, float fov, float cameraSpeed);
 	~Camera();
 
 	glm::mat4 getViewMatrix();
@@ -39,6 +43,9 @@ public:
 	// Callback for when the mouse is moved
 	void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 
+	// Write this light to the given filestream
+	virtual void writeDataToStream(std::ofstream& filestream);
+
 	// Get important information of this camera (position, rotation)
 	std::string getInformation();
 
@@ -53,7 +60,7 @@ private:
 	glm::vec3 up;
 	glm::vec3 forward;
 	float lastx = 400, lasty = 300;
-	float yaw = 150.0f, pitch = -18.0f;
+	float yaw{ 0 }, pitch{ 0 };
 	bool firstMouse = true;
 	unsigned int ssbo;
 

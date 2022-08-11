@@ -29,4 +29,7 @@ namespace Logger
 	void logError(const char* message);
 
 	void write(const char* message);
+
+	// Stop this logger
+	void stop();
 }

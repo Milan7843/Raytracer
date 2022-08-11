@@ -30,6 +30,9 @@ public:
 	// Revert all changes to the current scene by reading it again
 	void revertChanges();
 
+	// Create a new and empty scene
+	void newScene();
+
 	// Load all the names of the available scenes
 	void loadAvailableScenesNames();
 

@@ -5,15 +5,14 @@ Renderer::Renderer(const char* raytraceComputeShaderPath, unsigned int width, un
 {
 	// Immediately creating the pixel buffer with the given width and height
 	setResolution(width, height);
+	// Retrieving the render settings from the save file
+	readRenderSettings();
 }
 
 Renderer::~Renderer()
 {
-}
-
-void Renderer::bindCamera(Camera* camera)
-{
-	this->cameraBound = camera;
+	// Saving all render settings on quitting
+	writeRenderSettingsToFile();
 }
 
 void Renderer::bindSceneManager(SceneManager* sceneManager)
@@ -27,7 +26,7 @@ void Renderer::render()
 
 	currentFrameSampleCount++;
 
-	setUpForRender(sceneManagerBound->getCurrentScene(), cameraBound);
+	setUpForRender(sceneManagerBound->getCurrentScene(), &sceneManagerBound->getCurrentScene().getActiveCamera());
 
 	computeShader.setBool("renderUsingBlocks", false);
 
@@ -50,7 +49,7 @@ void Renderer::startBlockRender()
 
 	blockSizeRendering = blockSize;
 
-	setUpForRender(sceneManagerBound->getCurrentScene(), cameraBound);
+	setUpForRender(sceneManagerBound->getCurrentScene(), &sceneManagerBound->getCurrentScene().getActiveCamera());
 
 	computeShader.setBool("renderUsingBlocks", true);
 	computeShader.setInt("blockSize", blockSizeRendering);
@@ -252,4 +251,41 @@ float Renderer::getTimeLeft()
 	float totalTime = currentRenderTime / std::max(getRenderProgressPrecise(), 0.001f);
 
 	return totalTime - getRenderProgress() * totalTime;
+}
+
+void Renderer::readRenderSettings()
+{
+	std::ifstream filestream{ "render_settings/saved_render_settings.settings" };
+
+	if (!filestream)
+	{
+		// No file was found to read: use default settings
+		return;
+	}
+
+	// Reading the data form the file
+	filestream >> blockSize;
+	filestream >> sampleCount;
+	filestream >> renderPassCount;
+	filestream >> multisamples;
+	filestream >> blockSize;
+
+	// Finally closing the file
+	filestream.close();
+}
+
+void Renderer::writeRenderSettingsToFile()
+{
+	// The data stream into the file
+	std::ofstream filestream{ "render_settings/saved_render_settings.settings" };
+
+	// Writing all render data
+	filestream << blockSize << "\n";
+	filestream << sampleCount << "\n";
+	filestream << renderPassCount << "\n";
+	filestream << multisamples << "\n";
+	filestream << blockSize << "\n";
+
+	// Done writing so flush data and close filestream
+	filestream.close();
 }

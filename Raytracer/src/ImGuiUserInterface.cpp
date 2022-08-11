@@ -27,7 +27,7 @@ void ImGuiUserInterface::initialiseImGui(GLFWwindow* window)
     ImGui_ImplOpenGL3_Init("#version 130");
 }
 
-void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode)
+void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode)
 {
 	if (!imGuiEnabled)
 	{
@@ -41,7 +41,7 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	bool showDemoWindow = false;
+	bool showDemoWindow = 0;
 	if (showDemoWindow)
 	{
 		ImGui::ShowDemoWindow();
@@ -50,8 +50,167 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 		return;
 	}
 
+	ImGuiWindowFlags window_flags{ 0 };
+	window_flags |= ImGuiWindowFlags_MenuBar;
+	//window_flags |= ImGuiWindowFlags_Popup;
+	bool windowOpen{ true };
+
 	// Creating the GUI window
-	ImGui::Begin(sceneManager.getCurrentScene().getNamePointer()->c_str());
+	ImGui::Begin("Editor", &windowOpen, window_flags);
+
+	static bool updateSceneNames{ true };
+
+	// Holds new scene name input
+	static std::string newSceneNameInput{};
+	static bool sceneNameInputError = false;
+	bool openSaveAsPopup{ false };
+
+	// Menu Bar
+	if (ImGui::BeginMenuBar())
+	{
+		if (ImGui::BeginMenu("Scene"))
+		{
+			if (ImGui::BeginMenu("Open scene"))
+			{
+				// Showing all possible scene names
+				for (std::string& name : sceneManager.getAvailableScenesNames(updateSceneNames))
+				{
+					// Making a button which loads the scene on click
+					if (ImGui::MenuItem(name.c_str()))
+					{
+						// Loading the scene
+						sceneManager.changeScene(name);
+						break;
+					}
+				}
+
+				updateSceneNames = false;
+
+				ImGui::EndMenu();
+			}
+			else
+			{
+				updateSceneNames = true;
+			}
+
+			if (ImGui::MenuItem("New scene"))
+			{
+				sceneManager.newScene();
+			}
+
+			if (ImGui::MenuItem("Save"))
+			{
+				// If this scene does not yet have a name, open the save as popup
+				if ((*sceneManager.getCurrentScene().getNamePointer()).empty())
+					openSaveAsPopup = true;
+				else
+					sceneManager.saveChanges();
+			}
+
+			if (ImGui::MenuItem("Save as"))
+			{
+				openSaveAsPopup = true;
+			}
+
+			if (ImGui::MenuItem("Revert changes"))
+			{
+				sceneManager.revertChanges();
+			}
+
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMenuBar();
+	}
+
+	if (openSaveAsPopup)
+		ImGui::OpenPopup("##save_changes_new_popup");
+
+	if (ImGui::BeginPopup("##save_changes_new_popup"))
+	{
+		// Name input field
+		ImGui::InputText("Scene name", &newSceneNameInput);
+
+		if (sceneNameInputError)
+			ImGui::Text("Invalid scene name. Make sure it does not contain periods ('.'), slashes ('/') or backslashes ('\\'),\n"
+				"and it is not empty.");
+
+		if (ImGui::Button("Save"))
+		{
+			if (FileUtility::isValidInput(newSceneNameInput))
+			{
+				if (sceneManager.willSaveOverwrite(newSceneNameInput))
+				{
+					ImGui::OpenPopup("##save_changes_overwrite_popup");
+				}
+				else
+				{
+					sceneManager.saveChangesAs(newSceneNameInput);
+					// Empty input field
+					newSceneNameInput = {};
+					sceneNameInputError = false;
+
+					// Then close the popup
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			else
+			{
+				// Activating the error message
+				sceneNameInputError = true;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Cancel"))
+		{
+			// Empty input field
+			newSceneNameInput = {};
+			sceneNameInputError = false;
+
+			// Then close the popup
+			ImGui::CloseCurrentPopup();
+		}
+
+		// Indicates whether the 'save as' popup should be closed by an action of the 
+		bool closeSaveSceneAsPopupAfterOverwritePopup{ false };
+
+		// Popup to ask whether you want to overwrite a scene
+		if (ImGui::BeginPopup("##save_changes_overwrite_popup"))
+		{
+			ImGui::Text(("Saving the scene with the name '" + newSceneNameInput
+				+ "' will overwrite the scene with the same name.").c_str());
+			ImGui::Text("Are you sure you want to overwrite this scene?");
+
+			if (ImGui::Button("Save anyway"))
+			{
+				sceneManager.saveChangesAs(newSceneNameInput);
+
+				// Empty input field
+				newSceneNameInput = {};
+
+				// Then close the popup
+				sceneNameInputError = false;
+				closeSaveSceneAsPopupAfterOverwritePopup = true;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel"))
+			{
+				// Then close the popup
+				sceneNameInputError = false;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		if (closeSaveSceneAsPopupAfterOverwritePopup)
+			ImGui::CloseCurrentPopup();
+
+		ImGui::EndPopup();
+	}
+
 	ImGui::Text("Press R to open or close this interface.");
 
 	if (ImGui::Button("Render frame"))
@@ -134,129 +293,6 @@ void ImGuiUserInterface::drawUserInterface(SceneManager& sceneManager, Camera& c
 	// Tab for editing any scene objects
 	if (ImGui::BeginTabItem("Scene editing"))
 	{
-		// Save/revert changes buttons
-		if (ImGui::Button("Save scene changes"))
-		{
-			sceneManager.saveChanges();
-		}
-
-		if (ImGui::Button("Revert scene changes"))
-		{
-			sceneManager.revertChanges();
-		}
-
-		// Holds new scene name input
-		static std::string newSceneNameInput{};
-		static bool sceneNameInputError = false;
-
-		if (ImGui::Button("Save scene changes as new"))
-			ImGui::OpenPopup("##save_changes_new_popup");
-
-		if (ImGui::BeginPopup("##save_changes_new_popup"))
-		{
-			// Name input field
-			ImGui::InputText("Scene name", &newSceneNameInput);
-
-			if (sceneNameInputError)
-				ImGui::Text("Invalid scene name. Make sure it does not contain periods ('.'), slashes ('/') or backslashes ('\\'),\n"
-					"and it is not empty.");
-
-			if (ImGui::Button("Save"))
-			{
-				if (FileUtility::isValidInput(newSceneNameInput))
-				{
-					if (sceneManager.willSaveOverwrite(newSceneNameInput))
-					{
-						ImGui::OpenPopup("##save_changes_overwrite_popup");
-					}
-					else
-					{
-						sceneManager.saveChangesAs(newSceneNameInput);
-						// Empty input field
-						newSceneNameInput = {};
-						sceneNameInputError = false;
-						// Then close the popup
-						ImGui::CloseCurrentPopup();
-					}
-				}
-				else
-				{
-					// Activating the error message
-					sceneNameInputError = true;
-				}
-			}
-
-			ImGui::SameLine();
-
-			if (ImGui::Button("Cancel"))
-			{
-				// Empty input field
-				newSceneNameInput = {};
-				sceneNameInputError = false;
-				// Then close the popup
-				ImGui::CloseCurrentPopup();
-			}
-
-			// Popup to ask whether you want to overwrite a scene
-			if (ImGui::BeginPopup("##save_changes_overwrite_popup"))
-			{
-				ImGui::Text(("Saving the scene with the name '" + newSceneNameInput
-					+ "' will overwrite the scene with the same name.").c_str());
-				ImGui::Text("Are you sure you want to overwrite this scene?");
-
-				if (ImGui::Button("Save anyway"))
-				{
-					sceneManager.saveChangesAs(newSceneNameInput);
-					// Empty input field
-					newSceneNameInput = {};
-					// Then close the popup
-					ImGui::CloseCurrentPopup();
-					sceneNameInputError = false;
-				}
-				ImGui::SameLine();
-				if (ImGui::Button("Cancel"))
-				{
-					// Then close the popup
-					ImGui::CloseCurrentPopup();
-					sceneNameInputError = false;
-				}
-				ImGui::EndPopup();
-			}
-			ImGui::EndPopup();
-		}
-
-		/* Popup for opening scene! */
-		if (ImGui::Button("Open scene"))
-			ImGui::OpenPopup("##open_scene_popup");
-
-		static bool updateSceneNames = true;
-
-		if (ImGui::BeginPopup("##open_scene_popup"))
-		{
-			// Stop updating while the popup is open
-			updateSceneNames = false;
-
-			// Showing all possible scene names
-			for (std::string& name : sceneManager.getAvailableScenesNames(updateSceneNames))
-			{
-				// Making a button which loads the scene on click
-				if (ImGui::Button(name.c_str()))
-				{
-					// Loading the scene
-					sceneManager.changeScene(name);
-
-					updateSceneNames = true;
-
-					// Closing the popup
-					ImGui::CloseCurrentPopup();
-					break;
-				}
-			}
-			ImGui::EndPopup();
-		}
-
-
-		/* Popup for opening scene! */
 		if (ImGui::Button("Set HDRI"))
 			ImGui::OpenPopup("##open_hdri_popup");
 
