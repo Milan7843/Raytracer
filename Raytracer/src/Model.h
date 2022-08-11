@@ -15,6 +15,8 @@
 class Model : public Object
 {
 public:
+	Model(std::string& name, const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex,
+		unsigned int MAX_MESH_COUNT);
 	Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex,
 		unsigned int MAX_MESH_COUNT);
 	~Model();

@@ -1,8 +1,14 @@
 #include "AmbientLight.h"
 
+AmbientLight::AmbientLight(std::string& name, glm::vec3 color, float intensity)
+	// Initialising the base class
+	: Light(name, glm::vec3(0.0f), color, intensity)
+{
+}
+
 AmbientLight::AmbientLight(glm::vec3 color, float intensity)
 	// Initialising the base class
-	: Light(glm::vec3(0.0f), color, intensity)
+	: Light(std::string("Ambient light"), glm::vec3(0.0f), color, intensity)
 {
 }
 

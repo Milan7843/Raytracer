@@ -136,6 +136,9 @@ void readSpheres(std::ifstream& filestream, Scene& scene)
 			return;
 		}
 
+		// Getting the object's name
+		std::getline(filestream, buffer);
+
 		// Defining all other data
 		glm::vec3 position;
 		glm::vec3 rotation;
@@ -148,8 +151,10 @@ void readSpheres(std::ifstream& filestream, Scene& scene)
 		scale = readVec3(filestream);
 		filestream >> materialIndex;
 
+		Sphere sphere(buffer, position, scale.x, materialIndex);
+
 		// Creating the sphere with the read properties
-		scene.addSphere(position, scale.x, materialIndex);
+		scene.addSphere(sphere);
 
 		// Skipping two lines
 		std::getline(filestream, buffer);
@@ -175,6 +180,9 @@ void readModels(std::ifstream& filestream, Scene& scene)
 			return;
 		}
 
+		std::string name;
+		std::getline(filestream, name);
+
 		// Defining all other data
 		glm::vec3 position;
 		glm::vec3 rotation;
@@ -190,7 +198,7 @@ void readModels(std::ifstream& filestream, Scene& scene)
 		filestream >> materialIndex;
 
 		// Creating the model with the read properties
-		Model* model = scene.addModel(buffer, materialIndex);
+		Model* model = scene.addModel(name, buffer, materialIndex);
 
 		// Then applying transformations
 		model->setPosition(position);
@@ -221,6 +229,10 @@ void readPointLights(std::ifstream& filestream, Scene& scene)
 			return;
 		}
 
+		// Getting this light's name
+		std::string name;
+		std::getline(filestream, name);
+
 		// Defining all other data
 		glm::vec3 color;
 		float intensity;
@@ -232,7 +244,7 @@ void readPointLights(std::ifstream& filestream, Scene& scene)
 		position = readVec3(filestream);
 
 		// Creating the light with the read properties
-		PointLight light(position, color, intensity);
+		PointLight light(name, position, color, intensity);
 		scene.addLight(light);
 
 		// Skipping a line
@@ -259,6 +271,10 @@ void readDirectionalLights(std::ifstream& filestream, Scene& scene)
 			return;
 		}
 
+		// Getting this light's name
+		std::string name;
+		std::getline(filestream, name);
+
 		// Defining all other data
 		glm::vec3 color;
 		float intensity;
@@ -270,7 +286,7 @@ void readDirectionalLights(std::ifstream& filestream, Scene& scene)
 		direction = readVec3(filestream);
 
 		// Creating the light with the read properties
-		DirectionalLight light(direction, color, intensity);
+		DirectionalLight light(name, direction, color, intensity);
 		scene.addLight(light);
 
 		// Skipping a line
@@ -297,6 +313,10 @@ void readAmbientLights(std::ifstream& filestream, Scene& scene)
 			return;
 		}
 
+		// Getting this light's name
+		std::string name;
+		std::getline(filestream, name);
+
 		// Defining all other data
 		glm::vec3 color;
 		float intensity;
@@ -306,7 +326,7 @@ void readAmbientLights(std::ifstream& filestream, Scene& scene)
 		filestream >> intensity;
 
 		// Creating the light with the read properties
-		AmbientLight light(color, intensity);
+		AmbientLight light(name, color, intensity);
 		scene.addLight(light);
 
 		// Skipping a line

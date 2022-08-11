@@ -30,16 +30,19 @@ Rose matte
 # Materials end
 
 # Spheres
+Cool sphere
 0 1 0
 0 0 0
 0.8 0.8 0.8
 1
 
+Cool sphere 2
 3 1 0
 0 0 0
 1.4 1.4 1.4
 1
 
+Cool sphere 3!!
 2 1 1
 0 0 0
 0.6 0.6 0.6
@@ -47,12 +50,14 @@ Rose matte
 # Spheres end
 
 # Models
+awesome sauce ground yeah!
 0 0 0
 0 0 0
 1 1 1
 src/models/plane.obj
 0
 
+yea this is the sphere model but cooler
 1 0.64 2
 0 0 0
 0.6 0.6 0.6
@@ -61,30 +66,34 @@ src/models/highresicosphere.obj
 # Models end
 
 # Point lights
+this is the awesome sauce red light! :D
 1 0 0
 2
 0 1.8 1.8
 
+seems green
 0 1 0
 2
 2 1.8 0
 # Point lights end
 
 # Directional lights
+basically the sun
 1 1 0.9
 0.3
 0.707 -0.707 0
 # Directional lights end
 
 # Ambient lights
+*ambience* ~
 0.8 0.8 1
 0.02
 # Ambient lights end
 
 # Cameras
--1.78226 0.754264 2.42877
--4.796
-323.065
+-1.78226 0.999353 2.42877
+-4.996
+324.865
 1
 39.333
 1.844

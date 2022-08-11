@@ -185,11 +185,31 @@ void Scene::addLight(AmbientLight& ambientLight)
 	this->ambientLightCount++;
 }
 
+Model* Scene::addModel(std::string& name, const std::string& path, unsigned int materialIndex)
+{
+	Model model(name, path, &meshCount, &triangleCount, materialIndex, MAX_MESH_COUNT);
+	models.push_back(model);
+	return &(models[models.size() - 1]);
+}
+
 Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
 {
 	Model model(path, &meshCount, &triangleCount, materialIndex, MAX_MESH_COUNT);
 	models.push_back(model);
 	return &(models[models.size() - 1]);
+}
+
+bool Scene::addSphere(Sphere& sphere)
+{
+	// Full of spheres
+	if (this->sphereCount >= MAX_SPHERE_COUNT)
+		return false;
+
+	sphere.setShaderSphereIndex(sphereCount);
+
+	sphereCount++;
+	spheres.push_back(sphere);
+	return true;
 }
 
 Sphere* Scene::addSphere(glm::vec3 position, float radius, unsigned int materialIndex)
