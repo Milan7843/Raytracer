@@ -60,7 +60,7 @@ private:
 	glm::vec3 up;
 	glm::vec3 forward;
 	float lastx = 400, lasty = 300;
-	float yaw, pitch;
+	float yaw{ 0 }, pitch{ 0 };
 	bool firstMouse = true;
 	unsigned int ssbo;
 

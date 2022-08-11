@@ -12,6 +12,10 @@ class AbstractShader;
 class Material
 {
 public:
+	// Default constructor
+	Material();
+
+	// Actual constructors
 	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness, glm::vec3 emission);
 	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, glm::vec3 emission);
 	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness);

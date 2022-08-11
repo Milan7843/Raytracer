@@ -49,6 +49,20 @@ void SceneManager::revertChanges()
 	changeScene(*currentScene.getNamePointer());
 }
 
+void SceneManager::newScene()
+{
+	Scene newScene;
+	currentScene = newScene;
+
+	// The new scene must have a camera
+	Camera camera;
+	currentScene.addCamera(camera);
+
+	// And at least one material
+	Material material;
+	currentScene.addMaterial(material);
+}
+
 void SceneManager::loadAvailableScenesNames()
 {
 	availableScenesNames = FileUtility::getFilesOfTypeInFolder("scenes", ".scene");

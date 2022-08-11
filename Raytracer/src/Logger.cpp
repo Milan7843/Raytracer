@@ -41,3 +41,8 @@ void Logger::write(const char* message)
     // Actually write the message in the console
     std::cout << message << std::endl;
 }
+
+void Logger::stop()
+{
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
+}

@@ -2,6 +2,16 @@
 
 #include "AbstractShader.h"
 
+Material::Material()
+	: name("Material 1"),
+	color(glm::vec3(0.8f)),
+	reflectiveness(0.0f),
+	transparency(0.0f),
+	refractiveness(0.0f),
+	emission(glm::vec3(0.0f))
+{
+}
+
 Material::Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness, glm::vec3 emission)
 	: name(name),
 	color(color),

@@ -39,7 +39,7 @@ public:
 	void initialiseImGui(GLFWwindow * window);
 
 	// Draw the user interface
-	void drawUserInterface(SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode);
+	void drawUserInterface(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode);
 
 	void handleInput(GLFWwindow* window, Camera& camera);
 

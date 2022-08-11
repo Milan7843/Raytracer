@@ -222,7 +222,7 @@ int Application::Start()
             sceneManager.getCurrentScene().draw(&rasterizedShader);
         }
 
-        userInterface.drawUserInterface(sceneManager, sceneManager.getCurrentScene().getActiveCamera(), raytracingRenderer, &inRaytraceMode);
+        userInterface.drawUserInterface(window, sceneManager, sceneManager.getCurrentScene().getActiveCamera(), raytracingRenderer, &inRaytraceMode);
 
         // Output
         glfwSwapBuffers(window);
@@ -235,6 +235,8 @@ int Application::Start()
     glDeleteVertexArrays(1, &screenQuadVAO);
     glDeleteBuffers(1, &screenQuadVBO);
     glDeleteBuffers(1, &screenQuadEBO);
+
+    Logger::stop();
 
     glfwTerminate();
 
