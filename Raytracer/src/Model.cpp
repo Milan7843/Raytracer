@@ -1,10 +1,24 @@
 #include "Model.h"
 
+Model::Model(std::string& name, const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex,
+	unsigned int MAX_MESH_COUNT)
+	: path(path)
+{
+	this->materialIndex = materialIndex;
+	// Automatically setting name based on model name
+	this->name = name;
+
+	loadModel(path, meshCount, triangleCount, MAX_MESH_COUNT);
+}
+
 Model::Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex,
 	unsigned int MAX_MESH_COUNT)
 	: path(path)
 {
 	this->materialIndex = materialIndex;
+	// Automatically setting name based on model name
+	this->name = path.substr(path.find_last_of('/')+1, path.find_last_of('.') - (path.find_last_of('/') + 1));
+
 	loadModel(path, meshCount, triangleCount, MAX_MESH_COUNT);
 }
 

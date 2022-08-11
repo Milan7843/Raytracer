@@ -62,7 +62,7 @@ private:
 
 	// Represent a material using ImGui
 	void drawMaterials(Scene& scene);
-	void drawMaterial(Material& material);
+	void drawMaterial(Material& material, unsigned int index);
 
 	// Represent a point light using ImGui
 	void drawLights(Scene& scene);

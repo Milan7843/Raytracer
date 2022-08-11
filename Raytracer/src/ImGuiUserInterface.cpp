@@ -464,11 +464,13 @@ void ImGuiUserInterface::drawMaterials(Scene& scene)
 {
 	ImGui::PushItemWidth(-1);
 	ImGui::BeginListBox("##");
+	int index = 0;
 	for (Material& material : scene.getMaterials())
 	{
 		// Drawing each material
-		drawMaterial(material);
+		drawMaterial(material, index);
 		material.refractiveness = 1.0f;
+		index++;
 	}
 
 	// Drawing the 'Add material' button
@@ -482,9 +484,15 @@ void ImGuiUserInterface::drawMaterials(Scene& scene)
 	ImGui::PopItemWidth();
 }
 
-void ImGuiUserInterface::drawMaterial(Material& material)
+void ImGuiUserInterface::drawMaterial(Material& material, unsigned int index)
 {
-	if (ImGui::TreeNode((*material.getNamePointer()).c_str()))
+	if (ImGui::TreeNode(
+		// Get the light name, then add a constant ID so that the 
+		// ID doesn't have to change when the light's name changes
+		((*material.getNamePointer())
+			+ "###material"
+			+ std::to_string(index)
+			).c_str()))
 	{
 		ImGui::InputText("Name", material.getNamePointer());
 		ImGui::ColorEdit3("Color", (float*)material.getColorPointer());
@@ -554,8 +562,15 @@ void ImGuiUserInterface::drawLights(Scene& scene)
 
 void ImGuiUserInterface::drawLight(PointLight& light, unsigned int index)
 {
-	if (ImGui::TreeNode(("Point light " + std::to_string(index + 1)).c_str()))
+	if (ImGui::TreeNode(
+		// Get the light name, then add a constant ID so that the 
+		// ID doesn't have to change when the light's name changes
+		(light.getName()
+			+ "###point_light_tree_node"
+			+ std::to_string(index)
+			).c_str()))
 	{
+		ImGui::InputText("##", &light.getName());
 		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
 		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
 		ImGui::DragFloat3("Position", (float*)light.getPositionPointer(), 0.01f);
@@ -566,8 +581,15 @@ void ImGuiUserInterface::drawLight(PointLight& light, unsigned int index)
 
 void ImGuiUserInterface::drawLight(DirectionalLight& light, unsigned int index)
 {
-	if (ImGui::TreeNode(("Directional light " + std::to_string(index + 1)).c_str()))
+	if (ImGui::TreeNode(
+		// Get the light name, then add a constant ID so that the 
+		// ID doesn't have to change when the light's name changes
+		(light.getName()
+			+ "###dir_light_tree_node"
+			+ std::to_string(index)
+			).c_str()))
 	{
+		ImGui::InputText("##", &light.getName());
 		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
 		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
 		ImGui::DragFloat3("Direction", (float*)light.getDirectionPointer(), 0.01f);
@@ -578,8 +600,15 @@ void ImGuiUserInterface::drawLight(DirectionalLight& light, unsigned int index)
 
 void ImGuiUserInterface::drawLight(AmbientLight& light, unsigned int index)
 {
-	if (ImGui::TreeNode(("Ambient light " + std::to_string(index + 1)).c_str()))
+	if (ImGui::TreeNode(
+		// Get the light name, then add a constant ID so that the 
+		// ID doesn't have to change when the light's name changes
+		(light.getName()
+			+ "###ambient_light_tree_node"
+			+ std::to_string(index)
+			).c_str()))
 	{
+		ImGui::InputText("##", &light.getName());
 		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
 		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
 		ImGui::TreePop();
@@ -601,15 +630,17 @@ void ImGuiUserInterface::drawObjects(Scene& scene)
 	if (ImGui::TreeNode("Models"))
 	{
 		ImGui::PushItemWidth(-1);
-		ImGui::BeginListBox("##");
-		unsigned int index = 0;
-		for (Model& model : scene.getModels())
+		if (ImGui::BeginListBox("##"))
 		{
-			// Drawing each model
-			drawObject(model, scene, index, materialSlotsCharArray);
-			index++;
+			unsigned int index = 0;
+			for (Model& model : scene.getModels())
+			{
+				// Drawing each model
+				drawObject(model, scene, index, materialSlotsCharArray);
+				index++;
+			}
+			ImGui::EndListBox();
 		}
-		ImGui::EndListBox();
 		ImGui::PopItemWidth();
 		ImGui::TreePop();
 	}
@@ -617,20 +648,22 @@ void ImGuiUserInterface::drawObjects(Scene& scene)
 	if (ImGui::TreeNode("Spheres"))
 	{
 		ImGui::PushItemWidth(-1);
-		ImGui::BeginListBox("##");
-		unsigned int index = 0;
-		for (Sphere& sphere : scene.getSpheres())
+		if (ImGui::BeginListBox("##"))
 		{
-			// Drawing each sphere
-			drawObject(sphere, scene, index, materialSlotsCharArray);
-			index++;
+			unsigned int index = 0;
+			for (Sphere& sphere : scene.getSpheres())
+			{
+				// Drawing each sphere
+				drawObject(sphere, scene, index, materialSlotsCharArray);
+				index++;
+			}
+
+			// Drawing the 'Add sphere' button
+			if (ImGui::Button("Add sphere"))
+				scene.addSphere(glm::vec3(0.0f), 1.0f, 0);
+
+			ImGui::EndListBox();
 		}
-
-		// Drawing the 'Add sphere' button
-		if (ImGui::Button("Add sphere"))
-			scene.addSphere(glm::vec3(0.0f), 1.0f, 0);
-
-		ImGui::EndListBox();
 		ImGui::PopItemWidth();
 		ImGui::TreePop();
 	}
@@ -638,8 +671,15 @@ void ImGuiUserInterface::drawObjects(Scene& scene)
 
 void ImGuiUserInterface::drawObject(Object& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray)
 {
-	if (ImGui::TreeNode(("Model " + std::to_string(index + 1)).c_str()))
+	if (ImGui::TreeNode(
+		// Get the object's name, then add a constant ID so that the 
+		// ID doesn't have to change when the light's name changes
+		(object.getName()
+			+ "###model"
+			+ std::to_string(index)
+			).c_str()))
 	{
+		ImGui::InputText("Name", &object.getName());
 		// Showing transformations
 		ImGui::DragFloat3("Position", (float*)object.getPositionPointer(), 0.01f);
 		ImGui::DragFloat3("Rotation", (float*)object.getRotationPointer(), 0.01f);
@@ -680,8 +720,16 @@ void ImGuiUserInterface::drawObject(Object& object, Scene& scene, unsigned int i
 
 void ImGuiUserInterface::drawObject(Sphere& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray)
 {
-	if (ImGui::TreeNode(("Sphere " + std::to_string(index + 1)).c_str()))
+	if (ImGui::TreeNode(
+		// Get the object's name, then add a constant ID so that the 
+		// ID doesn't have to change when the light's name changes
+		(object.getName()
+			+ "###sphere"
+			+ std::to_string(index)
+			).c_str()))
 	{
+		ImGui::InputText("Name", &object.getName());
+
 		// Showing transformations
 		ImGui::DragFloat3("Position", (float*)object.getPositionPointer(), 0.01f);
 

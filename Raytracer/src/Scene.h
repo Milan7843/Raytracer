@@ -39,7 +39,10 @@ public:
 	void addLight(AmbientLight& ambientLight);
 
 
+	Model* addModel(std::string& name, const std::string& path, unsigned int materialIndex);
 	Model* addModel(const std::string& path, unsigned int materialIndex);
+	// Add a sphere to the scene, returns whether the addition was succesfull
+	bool addSphere(Sphere& sphere);
 	Sphere* addSphere(glm::vec3 position, float radius, unsigned int materialIndex);
 	void addMaterial(Material& material);
 

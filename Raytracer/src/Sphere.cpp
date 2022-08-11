@@ -1,11 +1,21 @@
 #include "Sphere.h"
 
-Sphere::Sphere(glm::vec3 position, float radius, unsigned int materialIndex, unsigned int shaderSphereIndex)
+Sphere::Sphere(std::string& name, glm::vec3 position, float radius, unsigned int materialIndex)
 	: Model("src/models/defaultSphere.obj", &meshCount, &triangleCount, materialIndex, 1),
-	shaderSphereIndex(shaderSphereIndex)
+	shaderSphereIndex(0) // will be set later
 {
 	this->move(position);
 	this->scale(radius);
+	this->name = name;
+}
+
+Sphere::Sphere(glm::vec3 position, float radius, unsigned int materialIndex, unsigned int shaderSphereIndex)
+	: Model("src/models/defaultSphere.obj", &meshCount, &triangleCount, materialIndex, 1)
+	, shaderSphereIndex(shaderSphereIndex)
+{
+	this->move(position);
+	this->scale(radius);
+	this->name = "New sphere";
 }
 
 Sphere::~Sphere()
@@ -38,6 +48,11 @@ void Sphere::scale(float scale)
 void Sphere::scale(glm::vec3 scale)
 {
 	Logger::logWarning("Scale with vector was called on a sphere. This is not possible and should be avoided.");
+}
+
+void Sphere::setShaderSphereIndex(unsigned int shaderSphereIndex)
+{
+	this->shaderSphereIndex = shaderSphereIndex;
 }
 
 glm::mat4 Sphere::getTransformationMatrix()

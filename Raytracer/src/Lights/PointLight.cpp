@@ -2,8 +2,13 @@
 
 #include "PointLight.h"
 
+PointLight::PointLight(std::string& name, glm::vec3 position, glm::vec3 color, float intensity)
+	: Light(name, position, color, intensity)
+{
+}
+
 PointLight::PointLight(glm::vec3 position, glm::vec3 color, float intensity)
-	: Light(position, color, intensity)
+	: Light("Point light", position, color, intensity)
 {
 }
 
