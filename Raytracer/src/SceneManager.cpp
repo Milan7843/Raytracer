@@ -61,6 +61,9 @@ void SceneManager::newScene()
 	// And at least one material
 	Material material;
 	currentScene.addMaterial(material);
+
+	DirectionalLight directionalLight;
+	currentScene.addLight(directionalLight);
 }
 
 void SceneManager::loadAvailableScenesNames()

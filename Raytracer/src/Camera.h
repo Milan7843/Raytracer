@@ -56,11 +56,11 @@ public:
 	/* Private members */
 private:
 	// Camera postion data
-	glm::vec3 position = glm::vec3(-2.0f, 2.0f, 0.0f);
+	glm::vec3 position = glm::vec3(4.0f, 3.5f, 1.5f);
 	glm::vec3 up;
 	glm::vec3 forward;
 	float lastx = 400, lasty = 300;
-	float yaw{ 0 }, pitch{ 0 };
+	float yaw{ 200.0f }, pitch{ -40.0f };
 	bool firstMouse = true;
 	unsigned int ssbo;
 

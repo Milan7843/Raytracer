@@ -1,5 +1,12 @@
 #include "DirectionalLight.h"
 
+DirectionalLight::DirectionalLight()
+	: Light("Directional light", glm::vec3(0.0f), glm::vec3(1.0f), 1.0f),
+	direction(-1.0f, -1.0f, 1.0f)
+{
+
+}
+
 DirectionalLight::DirectionalLight(std::string& name, glm::vec3 direction, glm::vec3 color, float intensity)
 // Initialising the base class
 	: Light(name, glm::vec3(0.0f), color, intensity)

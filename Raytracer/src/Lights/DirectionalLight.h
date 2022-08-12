@@ -7,6 +7,7 @@
 class DirectionalLight : public Light
 {
 public:
+	DirectionalLight();
 	DirectionalLight(std::string& name, glm::vec3 direction, glm::vec3 color, float intensity);
 	DirectionalLight(glm::vec3 direction, glm::vec3 color, float intensity);
 	~DirectionalLight();
