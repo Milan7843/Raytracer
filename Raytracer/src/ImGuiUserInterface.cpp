@@ -329,7 +329,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 
 		if (ImGui::BeginTabItem("Objects"))
 		{
-			drawObjects(sceneManager.getCurrentScene());
+			drawObjects(sceneManager);
 			ImGui::EndTabItem();
 		}
 
@@ -616,11 +616,11 @@ void ImGuiUserInterface::drawLight(AmbientLight& light, unsigned int index)
 	}
 }
 
-void ImGuiUserInterface::drawObjects(Scene& scene)
+void ImGuiUserInterface::drawObjects(SceneManager& sceneManager)
 {
 	// Generating the char[] used for the material slots
 	std::string materialSlots = "";
-	for (Material& material : scene.getMaterials())
+	for (Material& material : sceneManager.getCurrentScene().getMaterials())
 	{
 		materialSlots += *material.getNamePointer() + "\000";
 	}
@@ -633,12 +633,42 @@ void ImGuiUserInterface::drawObjects(Scene& scene)
 		if (ImGui::BeginListBox("##"))
 		{
 			unsigned int index = 0;
-			for (Model& model : scene.getModels())
+			for (Model& model : sceneManager.getCurrentScene().getModels())
 			{
 				// Drawing each model
-				drawObject(model, scene, index, materialSlotsCharArray);
+				drawObject(model, sceneManager.getCurrentScene(), index, materialSlotsCharArray);
 				index++;
 			}
+
+			if (ImGui::Button("Add model"))
+				ImGui::OpenPopup("##add_model_popup");
+
+			static bool updateModelNames{ true };
+
+			if (ImGui::BeginPopup("##add_model_popup"))
+			{
+				// Showing all possible model names
+				for (std::string& name : sceneManager.getAvailableModelsNames(updateModelNames))
+				{
+					// Making a button which loads the scene on click
+					if (ImGui::MenuItem(name.c_str()))
+					{
+						// Loading the scene
+						sceneManager.getCurrentScene().addModel("src/models/" + name + ".obj", 0);
+						break;
+					}
+				}
+
+				updateModelNames = false;
+
+				ImGui::EndPopup();
+			}
+			else
+			{
+				// Mark for update again after closing
+				updateModelNames = true;
+			}
+
 			ImGui::EndListBox();
 		}
 		ImGui::PopItemWidth();
@@ -651,16 +681,16 @@ void ImGuiUserInterface::drawObjects(Scene& scene)
 		if (ImGui::BeginListBox("##"))
 		{
 			unsigned int index = 0;
-			for (Sphere& sphere : scene.getSpheres())
+			for (Sphere& sphere : sceneManager.getCurrentScene().getSpheres())
 			{
 				// Drawing each sphere
-				drawObject(sphere, scene, index, materialSlotsCharArray);
+				drawObject(sphere, sceneManager.getCurrentScene(), index, materialSlotsCharArray);
 				index++;
 			}
 
 			// Drawing the 'Add sphere' button
 			if (ImGui::Button("Add sphere"))
-				scene.addSphere(glm::vec3(0.0f), 1.0f, 0);
+				sceneManager.getCurrentScene().addSphere(glm::vec3(0.0f), 1.0f, 0);
 
 			ImGui::EndListBox();
 		}

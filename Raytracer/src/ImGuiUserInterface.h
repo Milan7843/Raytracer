@@ -74,7 +74,7 @@ private:
 	//void drawLight(PointLight& light);
 
 	// Represent an object using ImGui
-	void drawObjects(Scene& scene);
+	void drawObjects(SceneManager& sceneManager);
 	void drawObject(Object& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray);
 	void drawObject(Sphere& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray);
 };
