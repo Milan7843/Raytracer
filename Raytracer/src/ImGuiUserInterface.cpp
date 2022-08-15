@@ -737,7 +737,7 @@ void ImGuiUserInterface::drawMesh(Mesh& object, Scene& scene, const char* materi
 	ImGui::SameLine();
 
 	// Preview the currently selected name
-	if (ImGui::BeginCombo("##combo", (*(scene.getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
+	if (ImGui::BeginCombo((object.getName() + "##combo").c_str(), (*(scene.getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
 	{
 		// Looping over each material to check whether it was clicked;
 		// If it was: select the index of the material as the material index for this mesh
