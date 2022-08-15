@@ -252,6 +252,16 @@ Camera& Scene::getActiveCamera()
 
 void Scene::draw(AbstractShader* shader)
 {
+	// First writing all material data to the shader
+	writeMaterialsToShader(shader);
+	shader->setVector3("cameraPos", getActiveCamera().getPosition());
+
+	// Binding the hdri
+	shader->setInt("hdri", 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, getHDRI());
+
 	// Drawing each model with the given shader
 	for (Model& model : models)
 	{
