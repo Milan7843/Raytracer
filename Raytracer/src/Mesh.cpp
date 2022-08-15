@@ -1,7 +1,12 @@
 #include "Mesh.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int startIndex, unsigned int meshIndex)
-    : shaderArraybeginIndex(startIndex), shaderMeshIndex(meshIndex)
+#include "Scene.h"
+
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices
+    , unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex)
+    : shaderArraybeginIndex(startIndex)
+    , shaderMeshIndex(meshIndex)
+    , materialIndex(materialIndex)
 {
     this->vertices = vertices;
     this->indices = indices;
@@ -17,7 +22,7 @@ int Mesh::getTriangleSize()
     return sizeof(Triangle);
 }
 
-void Mesh::writeToShader(AbstractShader* shader, unsigned int ssbo, unsigned int materialIndex, const glm::mat4& transformation)
+void Mesh::writeToShader(AbstractShader* shader, unsigned int ssbo, const glm::mat4& transformation)
 {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     // Copying this mesh's data into the buffer at the right position
@@ -80,10 +85,19 @@ void Mesh::setupMesh()
     }
 }
 
-void Mesh::draw(AbstractShader* shader)
+void Mesh::draw(AbstractShader* shader, Scene* scene)
 {
+    // Setting up the shader for the material used by this mesh
+    // TODO move this to the Material class
+    shader->setVector3("inputColor", scene->getMaterials()[materialIndex].color);
+
     glBindVertexArray(VAO);
 
     glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+}
+
+unsigned int* Mesh::getMaterialIndexPointer()
+{
+    return &materialIndex;
 }

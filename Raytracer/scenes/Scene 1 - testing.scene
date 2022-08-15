@@ -34,19 +34,19 @@ Cool sphere
 0 1 0
 0 0 0
 0.8 0.8 0.8
-1
+0
 
 Cool sphere 2
 3 1 0
 0 0 0
 1.4 1.4 1.4
-1
+0
 
 Cool sphere 3!!
 2 1 1
 0 0 0
 0.6 0.6 0.6
-3
+0
 # Spheres end
 
 # Models
@@ -55,6 +55,7 @@ awesome sauce ground yeah!
 0 0 0
 1 1 1
 src/models/plane.obj
+1
 0
 
 yea this is the sphere model but cooler
@@ -62,6 +63,7 @@ yea this is the sphere model but cooler
 0 0 0
 0.6 0.6 0.6
 src/models/highresicosphere.obj
+1
 2
 # Models end
 

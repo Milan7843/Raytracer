@@ -187,7 +187,7 @@ void readModels(std::ifstream& filestream, Scene& scene)
 		glm::vec3 position;
 		glm::vec3 rotation;
 		glm::vec3 scale;
-		int materialIndex;
+		unsigned int numberOfSubmeshes;
 
 		// Then getting said data
 		position = readVec3(filestream);
@@ -195,10 +195,24 @@ void readModels(std::ifstream& filestream, Scene& scene)
 		scale = readVec3(filestream);
 		std::getline(filestream, buffer); // Skip a line
 		std::getline(filestream, buffer); // The path
-		filestream >> materialIndex;
+
+		// Reading all material indices for the submeshes
+		filestream >> numberOfSubmeshes;
+
+		// Will hold all the indices
+		std::vector<unsigned int> meshMaterialIndices;
+
+		// Reading each mesh material index
+		for (unsigned int i = 0; i < numberOfSubmeshes; i++)
+		{
+			unsigned int meshMaterialIndex;
+			filestream >> meshMaterialIndex;
+
+			meshMaterialIndices.push_back(meshMaterialIndex);
+		}
 
 		// Creating the model with the read properties
-		Model* model = scene.addModel(name, buffer, materialIndex);
+		Model* model = scene.addModel(name, meshMaterialIndices, buffer);
 
 		// Then applying transformations
 		model->setPosition(position);

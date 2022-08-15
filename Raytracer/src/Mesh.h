@@ -1,5 +1,10 @@
 #pragma once
 
+#include "AbstractShader.h"
+
+#include "CoordinateUtility.h"
+#include "Logger.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -9,13 +14,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "AbstractShader.h"
-
-#include "CoordinateUtility.h"
-#include "Logger.h"
-
 #include <vector>
 #include <iostream>
+
+class Scene;
 
 struct Vertex
 {
@@ -40,10 +42,10 @@ struct Triangle
 class Mesh
 {
 public:
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int startIndex, unsigned int meshIndex);
+	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex);
 	~Mesh();
 
-	void writeToShader(AbstractShader* shader, unsigned int ssbo, unsigned int materialIndex, const glm::mat4& transformation);
+	void writeToShader(AbstractShader* shader, unsigned int ssbo, const glm::mat4& transformation);
 	void writePositionToShader(AbstractShader* shader);
 
 	static int getTriangleSize();
@@ -57,12 +59,17 @@ public:
 	unsigned int shaderMeshIndex;
 
 	// Draws this mesh using the active shader
-	void draw(AbstractShader* shader);
+	void draw(AbstractShader* shader, Scene* scene);
 
-	glm::vec3 position = glm::vec3(0.0f);
+	glm::vec3 position{ glm::vec3(0.0f) };
 
 	unsigned int VAO, VBO, EBO;
 
+	unsigned int* getMaterialIndexPointer();
+
 private:
 	void setupMesh();
+
+	// The index of the material this mesh uses
+	unsigned int materialIndex;
 };
