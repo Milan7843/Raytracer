@@ -1,7 +1,7 @@
 #include "Sphere.h"
 
 Sphere::Sphere(std::string& name, glm::vec3 position, float radius, unsigned int materialIndex)
-	: Model("src/models/defaultSphere.obj", &meshCount, &triangleCount, materialIndex, 1),
+	: Model(materialIndex, "src/models/defaultSphere.obj", &meshCount, &triangleCount, 1),
 	shaderSphereIndex(0) // will be set later
 {
 	this->move(position);
@@ -10,7 +10,7 @@ Sphere::Sphere(std::string& name, glm::vec3 position, float radius, unsigned int
 }
 
 Sphere::Sphere(glm::vec3 position, float radius, unsigned int materialIndex, unsigned int shaderSphereIndex)
-	: Model("src/models/defaultSphere.obj", &meshCount, &triangleCount, materialIndex, 1)
+	: Model(materialIndex, "src/models/defaultSphere.obj", &meshCount, &triangleCount, 1)
 	, shaderSphereIndex(shaderSphereIndex)
 {
 	this->move(position);
@@ -67,6 +67,11 @@ glm::mat4 Sphere::getTransformationMatrix()
 float* Sphere::getRadiusPointer()
 {
 	return &radius;
+}
+
+unsigned int* Sphere::getMaterialIndexPointer()
+{
+	return &materialIndex;
 }
 
 std::ostream& operator<<(std::ostream& stream, const Sphere& sphere)

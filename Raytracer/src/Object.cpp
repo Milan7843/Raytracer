@@ -76,11 +76,6 @@ glm::vec3* Object::getScalePointer()
 	return &scaleVector;
 }
 
-unsigned int* Object::getMaterialIndexPointer()
-{
-	return &materialIndex;
-}
-
 std::string& Object::getName()
 {
 	return name;

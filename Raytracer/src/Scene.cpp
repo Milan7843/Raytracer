@@ -185,16 +185,16 @@ void Scene::addLight(AmbientLight& ambientLight)
 	this->ambientLightCount++;
 }
 
-Model* Scene::addModel(std::string& name, const std::string& path, unsigned int materialIndex)
+Model* Scene::addModel(std::string& name, std::vector<unsigned int>& meshMaterialIndices, const std::string& path)
 {
-	Model model(name, path, &meshCount, &triangleCount, materialIndex, MAX_MESH_COUNT);
+	Model model(name, meshMaterialIndices, path, &meshCount, &triangleCount, MAX_MESH_COUNT);
 	models.push_back(model);
 	return &(models[models.size() - 1]);
 }
 
 Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
 {
-	Model model(path, &meshCount, &triangleCount, materialIndex, MAX_MESH_COUNT);
+	Model model(materialIndex, path, &meshCount, &triangleCount, MAX_MESH_COUNT);
 	models.push_back(model);
 	return &(models[models.size() - 1]);
 }
@@ -255,13 +255,13 @@ void Scene::draw(AbstractShader* shader)
 	// Drawing each model with the given shader
 	for (Model& model : models)
 	{
-		model.draw(shader, &materials[model.materialIndex]);
+		model.draw(shader, (Scene*)this);
 	}
 
 	// Drawing each sphere with the given shader
 	for (Sphere& sphere : spheres)
 	{
-		sphere.draw(shader, &materials[sphere.materialIndex]);
+		sphere.draw(shader, (Scene*)this);
 	}
 }
 

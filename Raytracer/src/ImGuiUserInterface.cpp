@@ -699,7 +699,7 @@ void ImGuiUserInterface::drawObjects(SceneManager& sceneManager)
 	}
 }
 
-void ImGuiUserInterface::drawObject(Object& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray)
+void ImGuiUserInterface::drawObject(Model& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray)
 {
 	if (ImGui::TreeNode(
 		// Get the object's name, then add a constant ID so that the 
@@ -715,34 +715,53 @@ void ImGuiUserInterface::drawObject(Object& object, Scene& scene, unsigned int i
 		ImGui::DragFloat3("Rotation", (float*)object.getRotationPointer(), 0.01f);
 		ImGui::DragFloat3("Scale", (float*)object.getScalePointer(), 0.01f);
 
-		// Preview the currently selected name
-		if (ImGui::BeginCombo("##combo", (*(scene.getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
+		if (ImGui::BeginListBox("Materials##"))
 		{
-			unsigned int i = 0;
-			for (Material& material : scene.getMaterials())
+			// Drawing all the meshes of this model
+			for (Mesh& mesh : object.getMeshes())
 			{
-				bool thisMaterialSelected = (i == *object.getMaterialIndexPointer());
-				
-				if (ImGui::Selectable((*(scene.getMaterials()[i].getNamePointer())).c_str()))
-				{
-					*object.getMaterialIndexPointer() = i;
-				}
-
-				if (thisMaterialSelected)
-				{
-					ImGui::SetItemDefaultFocus();
-				}
-
-				// Increment material counter
-				i++;
+				drawMesh(mesh, scene, materialSlotsCharArray);
 			}
-
-			// End this combo selector
-			ImGui::EndCombo();
+			ImGui::EndListBox();
 		}
 
 		ImGui::TreePop();
 		ImGui::Separator();
+	}
+}
+
+void ImGuiUserInterface::drawMesh(Mesh& object, Scene& scene, const char* materialSlotsCharArray)
+{
+	unsigned int i = 0;
+	ImGui::Text((object.getName() + " - ").c_str());
+	ImGui::SameLine();
+
+	// Preview the currently selected name
+	if (ImGui::BeginCombo((object.getName() + "##combo").c_str(), (*(scene.getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
+	{
+		// Looping over each material to check whether it was clicked;
+		// If it was: select the index of the material as the material index for this mesh
+		for (Material& material : scene.getMaterials())
+		{
+			bool thisMaterialSelected = (i == *object.getMaterialIndexPointer());
+
+			// Button for selecting material
+			if (ImGui::Selectable((*(scene.getMaterials()[i].getNamePointer())).c_str()))
+			{
+				*object.getMaterialIndexPointer() = i;
+			}
+
+			if (thisMaterialSelected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
+
+			// Increment material counter
+			i++;
+		}
+
+		// End this combo selector
+		ImGui::EndCombo();
 	}
 }
 
