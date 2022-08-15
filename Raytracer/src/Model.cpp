@@ -191,7 +191,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCou
 		(*triangleCount)++;
 	}
 
-	return Mesh(vertices, indices, beginTriangleCount, meshCount, mesh->mMaterialIndex);
+	std::string meshName{ mesh->mName.C_Str() };
+
+	return Mesh(meshName, vertices, indices, beginTriangleCount, meshCount, mesh->mMaterialIndex);
 }
 
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materialIndex, unsigned int meshCount, unsigned int* triangleCount)
@@ -233,7 +235,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 		(*triangleCount)++;
 	}
 
-	return Mesh(vertices, indices, beginTriangleCount, meshCount, materialIndex);
+	std::string meshName{ mesh->mName.C_Str() };
+
+	return Mesh(meshName, vertices, indices, beginTriangleCount, meshCount, materialIndex);
 }
 
 

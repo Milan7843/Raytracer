@@ -732,11 +732,13 @@ void ImGuiUserInterface::drawObject(Model& object, Scene& scene, unsigned int in
 
 void ImGuiUserInterface::drawMesh(Mesh& object, Scene& scene, const char* materialSlotsCharArray)
 {
+	unsigned int i = 0;
+	ImGui::Text((object.getName() + " - ").c_str());
+	ImGui::SameLine();
+
 	// Preview the currently selected name
 	if (ImGui::BeginCombo("##combo", (*(scene.getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
 	{
-		unsigned int i = 0;
-
 		// Looping over each material to check whether it was clicked;
 		// If it was: select the index of the material as the material index for this mesh
 		for (Material& material : scene.getMaterials())

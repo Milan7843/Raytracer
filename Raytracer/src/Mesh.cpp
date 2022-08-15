@@ -2,9 +2,10 @@
 
 #include "Scene.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices
+Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices
     , unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex)
-    : shaderArraybeginIndex(startIndex)
+    : name(name)
+    , shaderArraybeginIndex(startIndex)
     , shaderMeshIndex(meshIndex)
     , materialIndex(materialIndex)
 {
@@ -12,6 +13,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices
     this->indices = indices;
     setupMesh();
 }
+
 Mesh::~Mesh()
 {
 
@@ -100,4 +102,9 @@ void Mesh::draw(AbstractShader* shader, Scene* scene)
 unsigned int* Mesh::getMaterialIndexPointer()
 {
     return &materialIndex;
+}
+
+std::string& Mesh::getName()
+{
+    return name;
 }

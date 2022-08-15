@@ -42,7 +42,8 @@ struct Triangle
 class Mesh
 {
 public:
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex);
+	Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices,
+		unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex);
 	~Mesh();
 
 	void writeToShader(AbstractShader* shader, unsigned int ssbo, const glm::mat4& transformation);
@@ -67,9 +68,13 @@ public:
 
 	unsigned int* getMaterialIndexPointer();
 
+	std::string& getName();
+
 private:
 	void setupMesh();
 
 	// The index of the material this mesh uses
 	unsigned int materialIndex;
+
+	std::string name;
 };
