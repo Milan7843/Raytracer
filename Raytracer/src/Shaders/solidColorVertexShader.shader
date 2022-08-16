@@ -7,6 +7,7 @@ out vec3 Color;
 out vec3 Normal;
 
 uniform mat4 model;
+uniform mat4 rotation; // Only the rotation part of the model matrix
 uniform mat4 view;
 uniform mat4 projection;
 uniform vec3 inputColor;
@@ -16,5 +17,5 @@ void main()
 	FragPos = vec3(model * vec4(aPos, 1.0));
 	gl_Position = projection * view * vec4(FragPos, 1.0);
     Color = inputColor;
-	Normal = aNormal;
+	Normal = normalize(vec3(rotation * vec4(aNormal, 1.0)));
 }

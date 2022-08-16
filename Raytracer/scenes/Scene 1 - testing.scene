@@ -3,10 +3,10 @@ hdri_default.png
 White
 1 1 1
 0
-1
+0
 1
 0
-1 1 1
+0 0 0
 
 Reflective
 1 1 1
@@ -100,7 +100,7 @@ yea this is the sphere model but cooler
 0.6 0.6 0.6
 src/models/highresicosphere.obj
 1
-2
+0
 
 low poly car
 -2.35 1.22 -0.13
@@ -143,9 +143,9 @@ basically the sun
 # Ambient lights end
 
 # Cameras
--4.52738 1.25641 -3.51995
--13.8
-771.764
+-0.806117 1.40207 0.78899
+-18.4
+744.965
 1
 39.333
 1.844
