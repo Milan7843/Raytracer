@@ -127,6 +127,9 @@ struct AmbientLight
 uniform AmbientLight ambientLights[NUM_AMBIENT_LIGHTS];
 uniform int ambientLightCount;
 
+
+
+
 // Mesh
 struct Mesh
 {
@@ -136,15 +139,22 @@ struct Mesh
 };
 uniform Mesh meshes[NUM_MESHES];
 
+
+
+
 struct Material
 {
     vec3 color;
     float reflectiveness;
     float transparency;
     float refractiveness;
+    float reflectionDiffusion;
 };
 uniform Material materials[NUM_MATERIALS];
 uniform int materialCount;
+
+
+
 
 struct Intersection
 {

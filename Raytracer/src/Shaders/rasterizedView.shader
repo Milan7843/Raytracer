@@ -48,6 +48,7 @@ struct Material
     float reflectiveness;
     float transparency;
     float refractiveness;
+    float reflectionDiffusion;
 };
 uniform Material materials[NUM_MATERIALS];
 
@@ -66,17 +67,35 @@ float atan2(float x, float z)
     return mix(PI / 2.0 - atan(x, z), atan(z, x), s);
 }
 
+float rand(vec2 co)
+{
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 vec3 sampleHDRI(vec3 direction)
 {
     vec3 dir = normalize(direction);
 
-    // Calculating HDRI position
+    // Calculating HDRI base position
     float yaw = atan2(dir.x, dir.z);
     float pitch = (dir.y / 2 + 0.5);
 
-    vec3 skyColor = texture(hdri, vec2(yaw / (2 * PI), -pitch)).rgb;
+    float randomness = materials[materialIndex].reflectionDiffusion * 0.01;
 
-    return skyColor;
+    vec3 skyColor = vec3(0.0);
+
+    int sampleCount = 50;
+
+    // Then for the randomness we move the pitch and yaw some random amount and then sample the HDRI
+    for (int i = 0; i < sampleCount; i++)
+    {
+        float movedYaw = yaw + (rand(vec2(yaw + i * 3001, pitch - i * 149)) * 2.0 - 1.0) * randomness;
+        float movedPitch = pitch + (rand(vec2(pitch - i * 797, yaw + i * 73)) * 2.0 - 1.0) * randomness;
+
+        skyColor += texture(hdri, vec2(movedYaw / (2 * PI), -movedPitch)).rgb;
+    }
+
+    return skyColor / sampleCount;
 }
 
 // Defines how much the specularity should be taken into account if the reflectiveness is 0.0

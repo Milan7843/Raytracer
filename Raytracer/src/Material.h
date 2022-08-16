@@ -16,7 +16,7 @@ public:
 	Material();
 
 	// Actual constructors
-	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness, glm::vec3 emission);
+	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness, float reflectionDiffusion, glm::vec3 emission);
 	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, glm::vec3 emission);
 	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness);
 	~Material();
@@ -28,6 +28,7 @@ public:
 	float reflectiveness;
 	float transparency;
 	float refractiveness;
+	float reflectionDiffusion;
 	glm::vec3 emission;
 
 	// Write this material into the shader at the provided index
@@ -39,6 +40,7 @@ public:
 	float* getReflectivenessPointer();
 	float* getTransparencyPointer();
 	float* getRefractivenessPointer();
+	float* getReflectionDiffusionPointer();
 	glm::vec3* getEmissionPointer();
 
 	// Write this material to the stream (human readable format)
