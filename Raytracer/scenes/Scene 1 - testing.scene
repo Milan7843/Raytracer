@@ -4,14 +4,16 @@ White
 1 1 1
 0
 1
-1
-1 1 1
+0
+0
+0 0 0
 
 Reflective
 1 1 1
 1
 1
 1
+0
 1 1 1
 
 Transparent
@@ -19,6 +21,7 @@ Transparent
 0.5
 1
 1
+0
 1 1 1
 
 Rose matte
@@ -26,32 +29,37 @@ Rose matte
 1e-08
 1
 1
+0
 1 1 1
 
 Tire
 0.147059 0.143454 0.143454
 0
 1
+1
 0
 0 0 0
 
 Car
 0.921569 0.225875 0.225875
-0.01
+0.1
 1
-0
+1
+0.65
 0 0 0
 
 Window
 0 1 1
-0
 1
-0.9
+1
+1
+0.23
 0 0 0
 
 Wheel
 0.607843 0.607843 0.607843
-0.25
+0.1
+1
 1
 0
 0 0 0
@@ -92,13 +100,13 @@ yea this is the sphere model but cooler
 0.6 0.6 0.6
 src/models/highresicosphere.obj
 1
-2
+0
 
 low poly car
 -2.35 1.22 -0.13
 0 0 0
 1 1 1
-src/models/low poly car.obj
+src/models/low poly car optimised.obj
 7
 5
 0
@@ -135,9 +143,9 @@ basically the sun
 # Ambient lights end
 
 # Cameras
--5.97361 2.95536 -6.75531
--16.396
-409.365
+-4.2244 1.40783 -3.83322
+-17.9
+774.665
 1
 39.333
 1.844

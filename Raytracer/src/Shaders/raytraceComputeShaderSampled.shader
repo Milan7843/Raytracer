@@ -127,6 +127,9 @@ struct AmbientLight
 uniform AmbientLight ambientLights[NUM_AMBIENT_LIGHTS];
 uniform int ambientLightCount;
 
+
+
+
 // Mesh
 struct Mesh
 {
@@ -136,15 +139,22 @@ struct Mesh
 };
 uniform Mesh meshes[NUM_MESHES];
 
+
+
+
 struct Material
 {
     vec3 color;
     float reflectiveness;
     float transparency;
     float refractiveness;
+    float reflectionDiffusion;
 };
 uniform Material materials[NUM_MATERIALS];
 uniform int materialCount;
+
+
+
 
 struct Intersection
 {
@@ -173,13 +183,6 @@ vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex, int seed);
 
 float triangleArea(vec3 v1, vec3 v2, vec3 v3)
 {
-    /*
-    float a = length(v1 - v2);
-    float b = length(v2 - v3);
-    float c = length(v3 - v1);
-    float s = (a + b + c) / 2.0;
-
-    return sqrt(s*(s-a)*(s-b)*(s-c));*/
     return 0.5 * length(cross(v2 - v1, v3 - v1));
 }
 
@@ -192,19 +195,15 @@ vec3 getNormal(Tri tri, vec3 p)
         vec3 vert2 = (meshes[tri.mesh].transformation * vec4(tri.v2.xyz, 1.0)).zyx;
         vec3 vert3 = (meshes[tri.mesh].transformation * vec4(tri.v3.xyz, 1.0)).zyx;
 
-        //float area1 = triangleArea(p-tri.v2.xyz, p-tri.v3.xyz, tri.v2.xyz-tri.v3.xyz);
-        //float area2 = triangleArea(p-tri.v1.xyz, p-tri.v3.xyz, tri.v1.xyz-tri.v3.xyz);
-        //float area3 = triangleArea(p-tri.v1.xyz, p-tri.v2.xyz, tri.v1.xyz-tri.v2.xyz);
-
         float area1 = triangleArea(p, vert2, vert3);
         float area2 = triangleArea(p, vert1, vert3);
         float area3 = triangleArea(p, vert1, vert2);
 
         float totalArea = area1 + area2 + area3;
 
-        area1 = area1 / totalArea;
-        area2 = area2 / totalArea;
-        area3 = area3 / totalArea;
+        //area1 = area1 / totalArea;
+        //area2 = area2 / totalArea;
+        //area3 = area3 / totalArea;
 
         //return tri.n1.xyz;
         return normalize(tri.n1 * area1 + tri.n2 * area2 + tri.n3 * area3).xyz;

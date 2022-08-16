@@ -47,6 +47,7 @@ void Model::draw(AbstractShader* shader, Scene* scene)
 {
 	// Setting transformations
 	shader->setMat4("model", getTransformationMatrix());
+	shader->setMat4("rotation", getRotationMatrix());
 
 	// Drawing each mesh
 	for (unsigned int i = 0; i < meshes.size(); i++)

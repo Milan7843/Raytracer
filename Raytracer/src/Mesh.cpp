@@ -90,8 +90,8 @@ void Mesh::setupMesh()
 void Mesh::draw(AbstractShader* shader, Scene* scene)
 {
     // Setting up the shader for the material used by this mesh
-    // TODO move this to the Material class
     shader->setVector3("inputColor", scene->getMaterials()[materialIndex].color);
+    shader->setInt("materialIndex", materialIndex);
 
     glBindVertexArray(VAO);
 

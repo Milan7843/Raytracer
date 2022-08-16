@@ -500,6 +500,8 @@ void ImGuiUserInterface::drawMaterial(Material& material, unsigned int index)
 		ImGui::DragFloat("Reflectiveness", material.getReflectivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 		ImGui::DragFloat("Transparency", material.getTransparencyPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 		ImGui::DragFloat("Refractiveness", material.getRefractivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
+		ImGui::DragFloat("Reflective diffusion", material.getReflectionDiffusionPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
+		drawHelpMarker("How much the reflection can be diffused. Basically acts as a blur.");
 		ImGui::TreePop();
 		ImGui::Separator();
 	}
