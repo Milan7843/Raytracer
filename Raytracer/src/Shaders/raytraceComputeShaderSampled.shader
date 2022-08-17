@@ -189,7 +189,8 @@ float triangleArea(vec3 v1, vec3 v2, vec3 v3)
 vec3 getNormal(Tri tri, vec3 p)
 {
     // Smooth normals
-    //if (true)
+    /*
+    if (false)
     {
         vec3 vert1 = (meshes[tri.mesh].transformation * vec4(tri.v1.xyz, 1.0)).zyx;
         vec3 vert2 = (meshes[tri.mesh].transformation * vec4(tri.v2.xyz, 1.0)).zyx;
@@ -208,6 +209,7 @@ vec3 getNormal(Tri tri, vec3 p)
         //return tri.n1.xyz;
         return normalize(tri.n1 * area1 + tri.n2 * area2 + tri.n3 * area3).xyz;
     }
+    */
     // Default harsh normals
     return tri.normal;
 }

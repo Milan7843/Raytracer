@@ -102,8 +102,8 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		// Then getting said data
 		color = readVec3(filestream);
 		filestream >> reflectiveness;
-		filestream >> refractiveness;
 		filestream >> transparency;
+		filestream >> refractiveness;
 		filestream >> reflectionDiffusion;
 		emission = readVec3(filestream);
 
