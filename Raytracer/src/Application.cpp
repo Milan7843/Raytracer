@@ -141,7 +141,7 @@ int Application::Start()
         lastFrame = currentFrame;
 
         // TODO: optimise the following lines by adding data changed checks for the lights and materials
-        sceneManager.getCurrentScene().writeLightsToShader(&rasterizedShader);
+        sceneManager.getCurrentScene().writeLightsToShader(&rasterizedShader, false);
         sceneManager.getCurrentScene().writeMaterialsToShader(&rasterizedShader);
         //raytracingRenderer.updateMeshData(&scene);
         //scene.checkObjectUpdates(&rasterizedShader);

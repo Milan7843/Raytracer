@@ -84,7 +84,7 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	scene.checkObjectUpdates(&computeShader);
 
 	scene.bindTriangleBuffer();
-	scene.writeLightsToShader(&computeShader);
+	scene.writeLightsToShader(&computeShader, true);
 	scene.writeMaterialsToShader(&computeShader);
 
 	// Writing camera data to the compute shader

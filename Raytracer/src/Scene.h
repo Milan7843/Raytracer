@@ -58,7 +58,7 @@ public:
 	void draw(AbstractShader* shader);
 
 	// Write the data in the lights vector into the shader
-	void writeLightsToShader(AbstractShader* shader);
+	void writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates);
 	// Write the data in the materials vector into the shader
 	void writeMaterialsToShader(AbstractShader* shader);
 

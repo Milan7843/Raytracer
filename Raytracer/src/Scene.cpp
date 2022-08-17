@@ -275,7 +275,7 @@ void Scene::draw(AbstractShader* shader)
 	}
 }
 
-void Scene::writeLightsToShader(AbstractShader* shader)
+void Scene::writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates)
 {
 	shader->use();
 
@@ -287,11 +287,11 @@ void Scene::writeLightsToShader(AbstractShader* shader)
 	// Writing lights to shader
 	for (PointLight& light : getPointLights())
 	{
-		light.writeToShader(shader);
+		light.writeToShader(shader, useGlslCoordinates);
 	}
 	for (DirectionalLight& light : getDirectionalLights())
 	{
-		light.writeToShader(shader);
+		light.writeToShader(shader, useGlslCoordinates);
 	}
 	for (AmbientLight& light : getAmbientLights())
 	{

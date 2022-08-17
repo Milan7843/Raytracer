@@ -34,9 +34,10 @@ void DirectionalLight::writeDataToStream(std::ofstream& filestream)
 	filestream << direction.x << " " << direction.y << " " << direction.z << "\n";
 }
 
-void DirectionalLight::writeToShader(AbstractShader* shader)
+void DirectionalLight::writeToShader(AbstractShader* shader, bool useGlslCoordinates)
 {
-	shader->setVector3(("dirLights[" + std::to_string(this->index) + "].dir").c_str(), direction);
+	shader->setVector3(("dirLights[" + std::to_string(this->index) + "].dir").c_str(),
+		useGlslCoordinates ? CoordinateUtility::vec3ToGLSLVec3(direction) : direction);
 	shader->setVector3(("dirLights[" + std::to_string(this->index) + "].color").c_str(), color);
 	shader->setFloat(("dirLights[" + std::to_string(this->index) + "].intensity").c_str(), intensity);
 }
