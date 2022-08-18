@@ -263,7 +263,7 @@ void main()
     {
         for (int x = 0; x < multisamples; x++)
         {
-            finalColor += fireRayAtPixelPositionIndex(vec2(cx, cy) + vec2(x * d, -y * d), pixelIndex*1319* pixelIndex + pixelIndex + pixelIndex*x*107*x*x + pixelIndex*y*2549*y + currentBlockRenderPassIndex*89) / (multisamples * multisamples);
+            finalColor += fireRayAtPixelPositionIndex(vec2(cx + 0.5, cy + 0.5) + vec2(x * d, -y * d), pixelIndex*1319* pixelIndex + pixelIndex + pixelIndex*x*107*x*x + pixelIndex*y*2549*y + currentBlockRenderPassIndex*89) / (multisamples * multisamples);
         }
     }
 
