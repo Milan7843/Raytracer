@@ -11,6 +11,7 @@ uniform int sampleCount;
 uniform int multisamples;
 
 uniform bool renderUsingBlocks;
+uniform bool useHDRIAsBackground;
 uniform vec2 currentBlockOrigin;
 uniform int blockSize;
 uniform int renderPassCount;
@@ -18,12 +19,11 @@ uniform int currentBlockRenderPassIndex;
 
 #define EPSILON 0.0001f
 
-#define NUM_TRIANGLES $numTriangles
 #define NUM_SPHERES 10
 #define NUM_POINT_LIGHTS 10
 #define NUM_DIR_LIGHTS 10
 #define NUM_AMBIENT_LIGHTS 10
-#define NUM_MESHES $numMeshes
+#define NUM_MESHES 10
 #define NUM_MATERIALS 10
 
 //#define NUM_TRIANGLES 1
@@ -39,18 +39,24 @@ uniform int currentBlockRenderPassIndex;
 // Triangle
 struct Tri
 {
+    // Vertex positions
     vec4 v1;
     vec4 v2;
     vec4 v3;
+    // Normals (padded to be 4N each by std140)
+    vec4 n1;
+    vec4 n2;
+    vec4 n3;
     vec3 normal;
     float reflectiveness;
     vec3 color;
     int mesh;
 };
 
+// TODO: make this variable length
 layout(std140, binding = 2) buffer Tris
 {
-    Tri triangles[NUM_TRIANGLES];
+    Tri triangles[];
 };
 
 uniform vec3 cameraPosition;
@@ -92,6 +98,9 @@ vec3 getSphereNormal(Sphere sph, vec3 pos);
 
 
 // LIGHTS
+// Skybox
+uniform sampler2D hdri;
+
 struct PointLight
 {
     vec3 pos;
@@ -118,6 +127,9 @@ struct AmbientLight
 uniform AmbientLight ambientLights[NUM_AMBIENT_LIGHTS];
 uniform int ambientLightCount;
 
+
+
+
 // Mesh
 struct Mesh
 {
@@ -127,15 +139,22 @@ struct Mesh
 };
 uniform Mesh meshes[NUM_MESHES];
 
+
+
+
 struct Material
 {
     vec3 color;
     float reflectiveness;
     float transparency;
     float refractiveness;
+    float reflectionDiffusion;
 };
 uniform Material materials[NUM_MATERIALS];
 uniform int materialCount;
+
+
+
 
 struct Intersection
 {
@@ -162,6 +181,39 @@ vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit);
 
 vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex, int seed);
 
+float triangleArea(vec3 v1, vec3 v2, vec3 v3)
+{
+    return 0.5 * length(cross(v2 - v1, v3 - v1));
+}
+
+vec3 getNormal(Tri tri, vec3 p)
+{
+    // Smooth normals
+    /*
+    if (false)
+    {
+        vec3 vert1 = (meshes[tri.mesh].transformation * vec4(tri.v1.xyz, 1.0)).zyx;
+        vec3 vert2 = (meshes[tri.mesh].transformation * vec4(tri.v2.xyz, 1.0)).zyx;
+        vec3 vert3 = (meshes[tri.mesh].transformation * vec4(tri.v3.xyz, 1.0)).zyx;
+
+        float area1 = triangleArea(p, vert2, vert3);
+        float area2 = triangleArea(p, vert1, vert3);
+        float area3 = triangleArea(p, vert1, vert2);
+
+        float totalArea = area1 + area2 + area3;
+
+        //area1 = area1 / totalArea;
+        //area2 = area2 / totalArea;
+        //area3 = area3 / totalArea;
+
+        //return tri.n1.xyz;
+        return normalize(tri.n1 * area1 + tri.n2 * area2 + tri.n3 * area3).xyz;
+    }
+    */
+    // Default harsh normals
+    return tri.normal;
+}
+
 // Returns a random value between 0 and 1 [0, 1)
 float rand(float seed)
 {
@@ -171,6 +223,13 @@ float rand(float seed)
 float rand(int seed)
 {
     return fract(sin(float(seed)) * 43758.5453);
+}
+
+#define PI 3.14159265359
+float atan2(float x, float z)
+{
+    bool s = (abs(x) > abs(z));
+    return mix(PI/2.0 - atan(x, z), atan(z, x), s);
 }
 
 
@@ -204,10 +263,10 @@ void main()
     {
         for (int x = 0; x < multisamples; x++)
         {
-            finalColor += fireRayAtPixelPositionIndex(vec2(cx, cy) + vec2(x * d, -y * d), pixelIndex*1319* pixelIndex + pixelIndex*x*107*x*x + pixelIndex*y*2549*y + currentBlockRenderPassIndex*89) / (multisamples * multisamples);
+            finalColor += fireRayAtPixelPositionIndex(vec2(cx + 0.5, cy + 0.5) + vec2(x * d, -y * d),
+                /*pixelIndex * 1319 * pixelIndex + pixelIndex + */pixelIndex * x * 107 * x * x + pixelIndex * y * 2549 * y + currentBlockRenderPassIndex * 89) / (multisamples * multisamples);
         }
     }
-
 
     // TODO make buffer empty on begin of render!
     if (currentBlockRenderPassIndex == 0)
@@ -255,7 +314,7 @@ vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex, int seed)
     float cc = cos(c);
 
     // Calculating ray direction
-    float   x = dir.x * cos(a) * cos(b);
+    float   x = dir.x * ca * cb;
     x += dir.y * (ca * sb * sc - sa * cc);
     x += dir.z * (ca * sb * cc + sa * sc);
 
@@ -272,7 +331,7 @@ vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex, int seed)
 
     for (int i = 0; i < sampleCount; i++)
     {
-        Ray ray = fireRay(cameraPosition, dir, true, i * 67 + seed * 1471 * seed);
+        Ray ray = fireRay(cameraPosition, dir, true, i * 67 * i + seed * 1471 * seed);
         finalColor += ray.finalColor;
     }
     finalColor = finalColor / float(sampleCount);
@@ -295,8 +354,16 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
             // Calculating sky color
             vec3 up = vec3(0., 1., 0.);
             float t = dot(up, ray.dir) + 0.6;
-            vec3 skyColor = skyboxColorTop * (t)+skyboxColorHorizon * (1. - t);
+            vec3 skyColor = skyboxColorTop* (t)+skyboxColorHorizon * (1. - t);
 
+            if (useHDRIAsBackground || i != 0)
+            {
+                // Calculating HDRI position
+                float yaw = atan2(ray.dir.z, ray.dir.x);
+                float pitch = (ray.dir.y / 2 + 0.5);
+
+                skyColor = texture(hdri, vec2(yaw / (2 * PI), -pitch)).rgb;
+            }
             vec3 finalColor = skyColor;
 
 
@@ -367,6 +434,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
 
                 ray.dir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
                 ray.pos = closestIntersection.pos + EPSILON * ray.dir;
+
                 continue; // reflecting
             }
             else if (closestIntersection.transparency > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed*13 + i * 47 + 5779) < closestIntersection.transparency)
@@ -585,9 +653,10 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
     closestIntersection.depth = 1000.;
     closestIntersection.intersected = false;
     closestIntersection.closestTriHit = -1;
+    closestIntersection.closestSphereHit = -1;
 
     // Checking triangle ray hits 
-    for (int j = 0; j < NUM_TRIANGLES; j++)
+    for (int j = 0; j < triangles.length(); j++)
     {
         // Skip already hit tri
         if (j == skipTri) continue;
@@ -597,14 +666,15 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         {
             closestIntersection = isec;
             closestIntersection.closestTriHit = j;
-            isec.normal = triangles[j].normal;
+            // TODO optimise this to to as few getNormal calls as possible (not on underlying faces)
+            closestIntersection.normal = getNormal(triangles[j], isec.pos);
         }
     }
 
     // Calculating ray-sphere intersections
     for (int j = 0; j < sphereCount; j++)
     {
-        // Skip already hit tri
+        // Skip already hit sphere
         if (j == skipSphere) continue;
 
         // Calculating this sphere's intersection
@@ -666,9 +736,9 @@ Intersection triangleIntersection(Tri tri, Ray ray)
     vec3 vert2 = (meshes[tri.mesh].transformation * vec4(tri.v2.xyz, 1.0)).zyx;
     vec3 vert3 = (meshes[tri.mesh].transformation * vec4(tri.v3.xyz, 1.0)).zyx;
 
-    /*
+    /* optimisation?
     vec3 toVertex = normalize(tri.v1.xyz - ray.pos);
-    if (dot(ray.dir, toVertex) < 0.9999f)
+    if (dot(ray.dir, toVertex) > 0.9999f)
     {
         return i;
     }*/

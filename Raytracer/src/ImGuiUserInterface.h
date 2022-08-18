@@ -23,8 +23,10 @@
 #endif
 
 #include "Scene.h"
+#include "SceneManager.h"
 #include "Camera.h"
 #include "Renderer.h"
+#include "FileUtility.h"
 
 class ImGuiUserInterface
 {
@@ -37,9 +39,9 @@ public:
 	void initialiseImGui(GLFWwindow * window);
 
 	// Draw the user interface
-	void drawUserInterface(Scene * scene, Camera * camera, Renderer * renderer, bool* inRaytraceMode);
+	void drawUserInterface(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode);
 
-	void handleInput(GLFWwindow* window, Camera* camera);
+	void handleInput(GLFWwindow* window, Camera& camera);
 
 	bool isEnabled();
 
@@ -56,14 +58,14 @@ private:
 	void drawHelpMarker(const char* desc);
 
 	// Draw all the render settings
-	void drawRenderSettings(Camera* camera, Renderer* renderer, bool* inRaytraceMode);
+	void drawRenderSettings(SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode);
 
 	// Represent a material using ImGui
-	void drawMaterials(Scene* scene);
-	void drawMaterial(Material& material);
+	void drawMaterials(Scene& scene);
+	void drawMaterial(Material& material, unsigned int index);
 
 	// Represent a point light using ImGui
-	void drawLights(Scene* scene);
+	void drawLights(Scene& scene);
 	virtual void drawLight(PointLight& light, unsigned int index);
 	virtual void drawLight(DirectionalLight& light, unsigned int index);
 	virtual void drawLight(AmbientLight& light, unsigned int index);
@@ -72,7 +74,8 @@ private:
 	//void drawLight(PointLight& light);
 
 	// Represent an object using ImGui
-	void drawObjects(Scene* scene);
-	void drawObject(Object& object, Scene* scene, unsigned int index, const char* materialSlotsCharArray);
-	void drawObject(Sphere& object, Scene* scene, unsigned int index, const char* materialSlotsCharArray);
+	void drawObjects(SceneManager& sceneManager);
+	void drawObject(Model& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray);
+	void drawMesh(Mesh& object, Scene& scene, const char* materialSlotsCharArray);
+	void drawObject(Sphere& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray);
 };

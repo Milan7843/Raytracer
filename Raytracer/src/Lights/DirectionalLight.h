@@ -7,11 +7,16 @@
 class DirectionalLight : public Light
 {
 public:
+	DirectionalLight();
+	DirectionalLight(std::string& name, glm::vec3 direction, glm::vec3 color, float intensity);
 	DirectionalLight(glm::vec3 direction, glm::vec3 color, float intensity);
 	~DirectionalLight();
 
+	// Write this light to the given filestream
+	virtual void writeDataToStream(std::ofstream& filestream);
+
 	// Write all the data of this directional light into the given shader
-	void writeToShader(AbstractShader* shader);
+	virtual void writeToShader(AbstractShader* shader, bool useGlslCoordinates);
 
 	// Get a pointer the the direction vector of this light
 	glm::vec3* getDirectionPointer();

@@ -11,8 +11,16 @@ namespace CoordinateUtility
     {
         return glm::vec3(v.z, v.y, v.x);
     }
-    inline glm::vec4 vec4ToGLSLVec4(glm::vec3 v)
+    inline glm::vec4 vec3ToGLSLVec4(glm::vec3 v)
     {
         return glm::vec4(v.z, v.y, v.x, 1.0f);
+    }
+    inline glm::vec3 vec4ToGLSLVec3(glm::vec4 v)
+    {
+        return glm::vec3(v.z, v.y, v.x);
+    }
+    inline glm::vec4 vec4ToGLSLVec4(glm::vec4 v)
+    {
+        return glm::vec4(v.z, v.y, v.x, v.w);
     }
 }

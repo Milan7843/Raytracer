@@ -2,7 +2,6 @@
 
 Camera::Camera()
 {
-	position = glm::vec3(0.0f, 0.0f, 0.0f);
 	up = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::vec3 direction;
 	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -12,6 +11,33 @@ Camera::Camera()
 }
 Camera::Camera(glm::vec3 pos)
 	: position(pos)
+{
+	up = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 direction;
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	forward = glm::normalize(direction);
+}
+Camera::Camera(glm::vec3 pos, float yaw, float pitch)
+	: position(pos)
+	, yaw(yaw)
+	, pitch(pitch)
+{
+	up = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 direction;
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	forward = glm::normalize(direction);
+}
+Camera::Camera(glm::vec3 pos, float yaw, float pitch, float sensitivity, float fov, float cameraSpeed)
+	: position(pos)
+	, yaw(yaw)
+	, pitch(pitch)
+	, sensitivity(sensitivity)
+	, fov(fov)
+	, cameraSpeed(cameraSpeed)
 {
 	up = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::vec3 direction;
@@ -32,7 +58,7 @@ glm::mat4 Camera::getViewMatrix()
 }
 glm::mat4 Camera::getProjectionMatrix(int width, int height)
 {   //                           cam pos,  target,            up vector
-	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 1000.0f);
 	return projection;
 }
 
@@ -83,6 +109,16 @@ void Camera::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 	direction.y = sin(glm::radians(pitch));
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	forward = glm::normalize(direction);
+}
+
+void Camera::writeDataToStream(std::ofstream& filestream)
+{
+	filestream << position.x << " " << position.y << " " << position.z << "\n";
+	filestream << pitch << "\n";
+	filestream << yaw << "\n";
+	filestream << sensitivity << "\n";
+	filestream << fov << "\n";
+	filestream << cameraSpeed << "\n";
 }
 
 std::string Camera::getInformation()

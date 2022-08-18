@@ -19,6 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\file_handling\FileUtility.cpp" />
+    <ClCompile Include="src\HDRIRenderer.cpp" />
+    <ClCompile Include="src\SceneManager.cpp" />
+    <ClCompile Include="src\file_handling\SceneFileSaver.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Lights\AmbientLight.cpp" />
     <ClCompile Include="src\Lights\DirectionalLight.cpp" />
@@ -51,6 +55,10 @@
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\file_handling\FileUtility.h" />
+    <ClInclude Include="src\HDRIRenderer.h" />
+    <ClInclude Include="src\SceneManager.h" />
+    <ClInclude Include="src\file_handling\SceneFileSaver.h" />
     <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\Lights\AmbientLight.h" />
     <ClInclude Include="src\Lights\DirectionalLight.h" />
@@ -445,6 +453,7 @@
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Sphere.h" />
     <ClInclude Include="src\stb_image.h" />
+    <ClInclude Include="src\stb_image_write.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc142-mtd.dll" />
@@ -595,6 +604,8 @@
     <None Include="src\Shaders\backup.shader" />
     <None Include="src\Shaders\bufferedIndirectLightingRaytracingFragmentShader.shader" />
     <None Include="src\Shaders\bufferedRaytracingFragmentShader.shader" />
+    <None Include="src\Shaders\hdriFragment.shader" />
+    <None Include="src\Shaders\hdriVertex.shader" />
     <None Include="src\Shaders\rasterizedView.shader" />
     <None Include="src\Shaders\raymarchFragmentShader.shader" />
     <None Include="src\Shaders\raymarchFragmentShaderBackup.shader" />
@@ -675,11 +686,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)/include</IncludePath>
+    <IncludePath>$(ProjectDir)/src;$(ProjectDir)/src/file_handling;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)/include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)/libs</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)/src;$(ProjectDir)/src/file_handling;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)/include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)/libs</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -732,6 +745,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);GLFW_INCLUDE_NONE;GLFW_INCLUDE_NONE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

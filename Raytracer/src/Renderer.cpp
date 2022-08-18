@@ -1,23 +1,32 @@
 #include "Renderer.h"
 
-Renderer::Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height, Scene* scene)
-	: computeShader(raytraceComputeShaderPath, scene), width(width), height(height)
+Renderer::Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height)
+	: computeShader(raytraceComputeShaderPath), width(width), height(height)
 {
 	// Immediately creating the pixel buffer with the given width and height
 	setResolution(width, height);
+	// Retrieving the render settings from the save file
+	readRenderSettings();
 }
 
 Renderer::~Renderer()
 {
+	// Saving all render settings on quitting
+	writeRenderSettingsToFile();
 }
 
-void Renderer::render(Scene* scene, Camera* camera)
+void Renderer::bindSceneManager(SceneManager* sceneManager)
+{
+	this->sceneManagerBound = sceneManager;
+}
+
+void Renderer::render()
 {
 	currentlyBlockRendering = false;
 
 	currentFrameSampleCount++;
 
-	setUpForRender(scene, camera);
+	setUpForRender(sceneManagerBound->getCurrentScene(), &sceneManagerBound->getCurrentScene().getActiveCamera());
 
 	computeShader.setBool("renderUsingBlocks", false);
 
@@ -29,7 +38,7 @@ void Renderer::render(Scene* scene, Camera* camera)
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
-void Renderer::startBlockRender(Scene* scene, Camera* camera)
+void Renderer::startBlockRender()
 {
 	currentlyBlockRendering = true;
 
@@ -40,7 +49,7 @@ void Renderer::startBlockRender(Scene* scene, Camera* camera)
 
 	blockSizeRendering = blockSize;
 
-	setUpForRender(scene, camera);
+	setUpForRender(sceneManagerBound->getCurrentScene(), &sceneManagerBound->getCurrentScene().getActiveCamera());
 
 	computeShader.setBool("renderUsingBlocks", true);
 	computeShader.setInt("blockSize", blockSizeRendering);
@@ -65,23 +74,25 @@ void Renderer::blockRenderStep()
 	currentBlockRenderPassIndex++;
 }
 
-void Renderer::setUpForRender(Scene* scene, Camera* camera)
+void Renderer::setUpForRender(Scene& scene, Camera* camera)
 {
 	// Reset current render time
 	currentRenderTime = 0.0f;
 
 	computeShader.use();
 
-	scene->checkObjectUpdates(&computeShader);
+	scene.checkObjectUpdates(&computeShader);
 
-	scene->bindTriangleBuffer();
-	scene->writeLightsToShader(&computeShader);
-	scene->writeMaterialsToShader(&computeShader);
+	scene.bindTriangleBuffer();
+	scene.writeLightsToShader(&computeShader, true);
+	scene.writeMaterialsToShader(&computeShader);
 
 	// Writing camera data to the compute shader
 	computeShader.setVector3("cameraPosition", CoordinateUtility::vec3ToGLSLVec3(camera->getPosition()));
 	computeShader.setVector3("cameraRotation", camera->getRotation());
 	computeShader.setFloat("fov", camera->getFov());
+
+	computeShader.setBool("useHDRIAsBackground", *scene.getUseHDRIAsBackgroundPointer());
 
 	// Writing rendering data to the compute shader
 	computeShader.setInt("screenWidth", width);
@@ -89,6 +100,12 @@ void Renderer::setUpForRender(Scene* scene, Camera* camera)
 	computeShader.setInt("sampleCount", sampleCount);
 	computeShader.setInt("multisamples", multisamples);
 	computeShader.setInt("currentFrameSampleCount", currentFrameSampleCount);
+
+	// Binding the hdri
+	computeShader.setInt("hdri", 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.getHDRI());
 
 	bindPixelBuffer();
 }
@@ -158,10 +175,25 @@ void Renderer::setResolution(unsigned int width, unsigned int height)
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
+unsigned int Renderer::getWidth()
+{
+	return width;
+}
+
+unsigned int Renderer::getHeight()
+{
+	return height;
+}
+
 void Renderer::bindPixelBuffer()
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelBuffer);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, pixelBuffer);
+}
+
+unsigned int Renderer::getPixelBuffer()
+{
+	return pixelBuffer;
 }
 
 glm::vec2 Renderer::getBlockOrigin()
@@ -200,8 +232,11 @@ float Renderer::getRenderProgressPrecise()
 	float blocksInWidth = (float)width / (float)blockSizeRendering;
 
 	int blocksDone = blockIndexX + blockIndexY * blocksInWidth;
+	float iterationsDone = blocksDone * renderPassCount + currentBlockRenderPassIndex;
 
-	float progress = blocksDone / (blocksInWidth * blocksInHeight);
+	float totalIterations = blocksInWidth * blocksInHeight * renderPassCount;
+
+	float progress = iterationsDone / totalIterations;
 	return progress;
 }
 
@@ -216,4 +251,41 @@ float Renderer::getTimeLeft()
 	float totalTime = currentRenderTime / std::max(getRenderProgressPrecise(), 0.001f);
 
 	return totalTime - getRenderProgress() * totalTime;
+}
+
+void Renderer::readRenderSettings()
+{
+	std::ifstream filestream{ "render_settings/saved_render_settings.settings" };
+
+	if (!filestream)
+	{
+		// No file was found to read: use default settings
+		return;
+	}
+
+	// Reading the data form the file
+	filestream >> blockSize;
+	filestream >> sampleCount;
+	filestream >> renderPassCount;
+	filestream >> multisamples;
+	filestream >> blockSize;
+
+	// Finally closing the file
+	filestream.close();
+}
+
+void Renderer::writeRenderSettingsToFile()
+{
+	// The data stream into the file
+	std::ofstream filestream{ "render_settings/saved_render_settings.settings" };
+
+	// Writing all render data
+	filestream << blockSize << "\n";
+	filestream << sampleCount << "\n";
+	filestream << renderPassCount << "\n";
+	filestream << multisamples << "\n";
+	filestream << blockSize << "\n";
+
+	// Done writing so flush data and close filestream
+	filestream.close();
 }

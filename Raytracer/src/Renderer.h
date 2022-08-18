@@ -1,30 +1,29 @@
 #pragma once
 
 #include "Scene.h"
+#include "SceneManager.h"
 #include "Camera.h"
 #include "ComputeShader.h"
 
 class Renderer
 {
 public:
-	Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height, Scene* scene);
+	Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height);
 	~Renderer();
 
+	// Bind the scene to be rendered
+	void bindSceneManager(SceneManager* sceneManager);
+
 	// Render the given scene with the given camera to the given buffer
-	void render(Scene* scene, Camera* camera);
+	void render();
 
 	// Render the scene in blocks (not all at once)
-	void startBlockRender(Scene* scene, Camera* camera);
+	void startBlockRender();
 
 	void blockRenderStep();
 
-	// Set everything up for rendering
-	void setUpForRender(Scene* scene, Camera* camera);
-
 	// Update this renderer; must be called every frame
 	void update(float deltaTime);
-
-
 
 	// Check for updates in the mesh data of the scene and update the data in the buffer if necessary
 	void updateMeshData(Scene* scene);
@@ -32,8 +31,14 @@ public:
 	// Set the resolution used to render
 	void setResolution(unsigned int width, unsigned int height);
 
+	// Get the resolution used to render
+	unsigned int getWidth();
+	unsigned int getHeight();
+
 	// Bind the pixel buffer to the GL_SHADER_STORAGE_BUFFER
 	void bindPixelBuffer();
+
+	unsigned int getPixelBuffer();
 
 	// Set the sample count
 	void setSampleCount(unsigned int sampleCount);
@@ -47,6 +52,17 @@ public:
 
 
 private:
+
+	// Read all the render settings from the save file
+	void readRenderSettings();
+	// Save the render settings to the save file
+	void writeRenderSettingsToFile();
+
+	// Things to bind before rendering
+	SceneManager* sceneManagerBound;
+
+	// Set everything up for rendering with the given scene and camera
+	void setUpForRender(Scene& scene, Camera* camera);
 
 	float getRenderProgressPrecise();
 
@@ -63,16 +79,16 @@ private:
 	unsigned int width, height;
 
 	// The sample count used to render (= number of rays per pixel)
-	int sampleCount = 20;
+	int sampleCount{ 20 };
 
 	// The numbers of render passes per block
-	int renderPassCount = 1;
+	int renderPassCount{ 1 };
 
 	// The number of sample frames already rendered
-	unsigned int currentFrameSampleCount = 0;
+	unsigned int currentFrameSampleCount{ 0 };
 
 	// The number of sample points per pixel
-	int multisamples = 1;
+	int multisamples{ 1 };
 
 	/* Block rendering */
 	// The size in pixels of each block

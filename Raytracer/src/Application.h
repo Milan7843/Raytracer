@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stb_image.h"
+//#include "stb_image.h"
 
 #include <iostream>
 
@@ -14,15 +14,18 @@
 #include "Shader.h"
 #include "ComputeShader.h"
 #include "Scene.h"
+#include "SceneManager.h"
 #include "Camera.h"
 #include "Callbacks.h"
 #include "Model.h"
 #include "Material.h"
 #include "Renderer.h"
+#include "HDRIRenderer.h"
 #include "ImGuiUserInterface.h"
 
 #include "CoordinateUtility.h"
 #include "Logger.h"
+#include "SceneFileSaver.h"
 
 
 class Application
@@ -66,5 +69,6 @@ private:
 	// Holds the vertices required for rendering the axes
 	unsigned int axesVAO;
 
+	// Hold the vertices required to render the skybox
 	void processInput(GLFWwindow* window);
 };

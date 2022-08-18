@@ -1,12 +1,148 @@
 #pragma once
 #include "Scene.h"
 
+// For HDRI loading
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 Scene::Scene()
 {
 }
 
 Scene::~Scene()
 {
+}
+
+void Scene::writeDataToStream(std::ofstream& filestream)
+{
+	// Writing the scene's data to the filestream
+	filestream << loadedHDRIName << "\n";
+
+	// Writing all materials
+	filestream << "# Materials\n";
+	for (Material& material : materials)
+	{
+		material.writeDataToStream(filestream);
+		// Write newline if it is not the last item
+		if (&material != &materials.back())
+			filestream << "\n";
+	}
+	filestream << "# Materials end\n\n";
+
+	// Writing all spheres
+	filestream << "# Spheres\n";
+	for (Sphere& sphere : getSpheres())
+	{
+		sphere.writeDataToStream(filestream);
+		// Write newline if it is not the last item
+		if (&sphere != &getSpheres().back())
+			filestream << "\n";
+	}
+	filestream << "# Spheres end\n\n";
+
+	// Writing all models
+	filestream << "# Models\n";
+	for (Model& model : getModels())
+	{
+		model.writeDataToStream(filestream);
+		// Write newline if it is not the last item
+		if (&model != &getModels().back())
+			filestream << "\n";
+	}
+	filestream << "# Models end\n\n";
+
+	// Writing all lights
+	filestream << "# Point lights\n";
+	for (PointLight& light : getPointLights())
+	{
+		light.writeDataToStream(filestream);
+		// Write newline if it is not the last item
+		if (&light != &getPointLights().back())
+			filestream << "\n";
+	}
+	filestream << "# Point lights end\n\n";
+
+	filestream << "# Directional lights\n";
+	for (DirectionalLight& light : getDirectionalLights())
+	{
+		light.writeDataToStream(filestream);
+		// Write newline if it is not the last item
+		if (&light != &getDirectionalLights().back())
+			filestream << "\n";
+	}
+	filestream << "# Directional lights end\n\n";
+
+	filestream << "# Ambient lights\n";
+	for (AmbientLight& light : getAmbientLights())
+	{
+		light.writeDataToStream(filestream);
+		// Write newline if it is not the last item
+		if (&light != &getAmbientLights().back())
+			filestream << "\n";
+	}
+	filestream << "# Ambient lights end\n\n";
+
+	// Writing all cameras
+	filestream << "# Cameras\n";
+	for (Camera& camera : cameras)
+	{
+		camera.writeDataToStream(filestream);
+		// Write newline if it is not the last item
+		if (&camera != &cameras.back())
+			filestream << "\n";
+	}
+	filestream << "# Cameras end\n\n";
+}
+
+void Scene::setName(std::string name)
+{
+	this->name = name;
+}
+
+void Scene::loadHDRI(const std::string& imageName)
+{
+	std::string fileName = "HDRIs/" + imageName;
+
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(fileName.c_str(), &width, &height, &nrComponents, 0);
+
+	if (data)
+	{
+		GLenum format;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+	else
+	{
+		Logger::logError("Failed to load HDRI: " + fileName + ".\nReason: " + stbi_failure_reason());
+	}
+
+	stbi_image_free(data);
+
+	// Saving the data to this scene
+	this->hdri = textureID;
+	this->loadedHDRIName = imageName;
+}
+
+unsigned int Scene::getHDRI()
+{
+	return hdri;
 }
 
 
@@ -49,11 +185,31 @@ void Scene::addLight(AmbientLight& ambientLight)
 	this->ambientLightCount++;
 }
 
-Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
+Model* Scene::addModel(std::string& name, std::vector<unsigned int>& meshMaterialIndices, const std::string& path)
 {
-	Model model(path, &meshCount, &triangleCount, materialIndex);
+	Model model(name, meshMaterialIndices, path, &meshCount, &triangleCount, MAX_MESH_COUNT);
 	models.push_back(model);
 	return &(models[models.size() - 1]);
+}
+
+Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
+{
+	Model model(materialIndex, path, &meshCount, &triangleCount, MAX_MESH_COUNT);
+	models.push_back(model);
+	return &(models[models.size() - 1]);
+}
+
+bool Scene::addSphere(Sphere& sphere)
+{
+	// Full of spheres
+	if (this->sphereCount >= MAX_SPHERE_COUNT)
+		return false;
+
+	sphere.setShaderSphereIndex(sphereCount);
+
+	sphereCount++;
+	spheres.push_back(sphere);
+	return true;
 }
 
 Sphere* Scene::addSphere(glm::vec3 position, float radius, unsigned int materialIndex)
@@ -79,35 +235,47 @@ void Scene::addMaterial(Material& material)
 	this->materialCount++;
 }
 
-std::string& Scene::setShaderVariables(std::string& input)
+void Scene::addCamera(Camera& camera)
 {
-	replace(input, "$numTriangles", std::to_string(triangleCount));
-	replace(input, "$numMeshes", std::to_string(meshCount));
-	replace(input, "$numPointLights", std::to_string(pointLightCount));
-	replace(input, "$numMaterials", std::to_string(materialCount));
-	replace(input, "$numSpheres", std::to_string(sphereCount));
+	this->cameras.push_back(camera);
+}
 
-	Logger::logWarning("TODO: get pixels into Scene::setShaderVariables");
-	replace(input, "$numPixels", std::to_string(1200 * 700));
-	return input;
+void Scene::activateCamera(unsigned int index)
+{
+	this->activeCamera = index;
+}
+
+Camera& Scene::getActiveCamera()
+{
+	return cameras[activeCamera];
 }
 
 void Scene::draw(AbstractShader* shader)
 {
+	// First writing all material data to the shader
+	writeMaterialsToShader(shader);
+	shader->setVector3("cameraPos", getActiveCamera().getPosition());
+
+	// Binding the hdri
+	shader->setInt("hdri", 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, getHDRI());
+
 	// Drawing each model with the given shader
 	for (Model& model : models)
 	{
-		model.draw(shader, &materials[model.materialIndex]);
+		model.draw(shader, (Scene*)this);
 	}
 
 	// Drawing each sphere with the given shader
 	for (Sphere& sphere : spheres)
 	{
-		sphere.draw(shader, &materials[sphere.materialIndex]);
+		sphere.draw(shader, (Scene*)this);
 	}
 }
 
-void Scene::writeLightsToShader(AbstractShader* shader)
+void Scene::writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates)
 {
 	shader->use();
 
@@ -117,15 +285,15 @@ void Scene::writeLightsToShader(AbstractShader* shader)
 	shader->setInt("ambientLightCount", ambientLightCount);
 
 	// Writing lights to shader
-	for (PointLight light : getPointLights())
+	for (PointLight& light : getPointLights())
 	{
-		light.writeToShader(shader);
+		light.writeToShader(shader, useGlslCoordinates);
 	}
-	for (DirectionalLight light : getDirectionalLights())
+	for (DirectionalLight& light : getDirectionalLights())
 	{
-		light.writeToShader(shader);
+		light.writeToShader(shader, useGlslCoordinates);
 	}
-	for (AmbientLight light : getAmbientLights())
+	for (AmbientLight& light : getAmbientLights())
 	{
 		light.writeToShader(shader);
 	}
@@ -140,7 +308,7 @@ void Scene::writeMaterialsToShader(AbstractShader* shader)
 
 	// Writing materials to shader
 	unsigned int index = 0;
-	for (Material material : materials)
+	for (Material& material : materials)
 	{
 		material.writeToShader(shader, index++);
 	}
@@ -148,6 +316,9 @@ void Scene::writeMaterialsToShader(AbstractShader* shader)
 
 void Scene::checkObjectUpdates(AbstractShader* shader)
 {
+	// Activate the shader program so that uniforms can be set
+	shader->use();
+
 	// Writing current sphere count to shader
 	shader->setInt("sphereCount", sphereCount);
 
@@ -179,8 +350,9 @@ void Scene::generateTriangleBuffer()
 	glGenBuffers(1, &triangleBufferSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
 
-	Logger::log("Making room for " + std::to_string(triangleCount) + " triangles");
+	Logger::log("Making room for " + std::to_string(triangleCount) + " triangles in SSBO " + std::to_string(triangleBufferSSBO));
 
+	// Loading zero-data into the new buffer
 	glBufferData(GL_SHADER_STORAGE_BUFFER, triangleCount * Mesh::getTriangleSize(), 0, GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -190,6 +362,16 @@ void Scene::bindTriangleBuffer()
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
+}
+
+std::string* Scene::getNamePointer()
+{
+	return &name;
+}
+
+bool* Scene::getUseHDRIAsBackgroundPointer()
+{
+	return &useHDRIAsBackground;
 }
 
 std::vector<Material>& Scene::getMaterials()
