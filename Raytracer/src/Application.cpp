@@ -90,7 +90,7 @@ int Application::Start()
     */
 
     SceneManager sceneManager{};
-    sceneManager.changeScene(std::string("Scene 1 - testing"));
+    sceneManager.changeScene(std::string("light testing"));
     //sceneManager.getCurrentScene().addCamera(camera);
     //Scene scene{ SceneFileSaver::readSceneFromFile(std::string("Scene 1 - testing")) };
 

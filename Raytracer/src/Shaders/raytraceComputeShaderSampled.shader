@@ -263,7 +263,8 @@ void main()
     {
         for (int x = 0; x < multisamples; x++)
         {
-            finalColor += fireRayAtPixelPositionIndex(vec2(cx + 0.5, cy + 0.5) + vec2(x * d, -y * d), pixelIndex*1319* pixelIndex + pixelIndex + pixelIndex*x*107*x*x + pixelIndex*y*2549*y + currentBlockRenderPassIndex*89) / (multisamples * multisamples);
+            finalColor += fireRayAtPixelPositionIndex(vec2(cx + 0.5, cy + 0.5) + vec2(x * d, -y * d),
+                /*pixelIndex * 1319 * pixelIndex + pixelIndex + */pixelIndex * x * 107 * x * x + pixelIndex * y * 2549 * y + currentBlockRenderPassIndex * 89) / (multisamples * multisamples);
         }
     }
 
@@ -652,6 +653,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
     closestIntersection.depth = 1000.;
     closestIntersection.intersected = false;
     closestIntersection.closestTriHit = -1;
+    closestIntersection.closestSphereHit = -1;
 
     // Checking triangle ray hits 
     for (int j = 0; j < triangles.length(); j++)
@@ -672,7 +674,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
     // Calculating ray-sphere intersections
     for (int j = 0; j < sphereCount; j++)
     {
-        // Skip already hit tri
+        // Skip already hit sphere
         if (j == skipSphere) continue;
 
         // Calculating this sphere's intersection
@@ -734,9 +736,9 @@ Intersection triangleIntersection(Tri tri, Ray ray)
     vec3 vert2 = (meshes[tri.mesh].transformation * vec4(tri.v2.xyz, 1.0)).zyx;
     vec3 vert3 = (meshes[tri.mesh].transformation * vec4(tri.v3.xyz, 1.0)).zyx;
 
-    /*
+    /* optimisation?
     vec3 toVertex = normalize(tri.v1.xyz - ray.pos);
-    if (dot(ray.dir, toVertex) < 0.9999f)
+    if (dot(ray.dir, toVertex) > 0.9999f)
     {
         return i;
     }*/
