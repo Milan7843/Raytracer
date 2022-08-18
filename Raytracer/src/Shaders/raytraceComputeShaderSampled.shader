@@ -263,7 +263,7 @@ void main()
     {
         for (int x = 0; x < multisamples; x++)
         {
-            finalColor += fireRayAtPixelPositionIndex(vec2(cx, cy) + vec2(x * d, -y * d), pixelIndex*1319* pixelIndex + pixelIndex*x*107*x*x + pixelIndex*y*2549*y + currentBlockRenderPassIndex*89) / (multisamples * multisamples);
+            finalColor += fireRayAtPixelPositionIndex(vec2(cx, cy) + vec2(x * d, -y * d), pixelIndex*1319* pixelIndex + pixelIndex + pixelIndex*x*107*x*x + pixelIndex*y*2549*y + currentBlockRenderPassIndex*89) / (multisamples * multisamples);
         }
     }
 
@@ -313,7 +313,7 @@ vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex, int seed)
     float cc = cos(c);
 
     // Calculating ray direction
-    float   x = dir.x * cos(a) * cos(b);
+    float   x = dir.x * ca * cb;
     x += dir.y * (ca * sb * sc - sa * cc);
     x += dir.z * (ca * sb * cc + sa * sc);
 

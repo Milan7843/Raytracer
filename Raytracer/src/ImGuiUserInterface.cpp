@@ -213,10 +213,12 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 
 	ImGui::Text("Press R to open or close this interface.");
 
+	/*
 	if (ImGui::Button("Render frame"))
 	{
 		renderer.render();
 	}
+	*/
 	if (ImGui::Button("Render frame in blocks"))
 	{
 		renderer.startBlockRender();
