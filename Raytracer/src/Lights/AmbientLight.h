@@ -7,6 +7,7 @@
 class AmbientLight : public Light
 {
 public:
+	AmbientLight(std::string& name, glm::vec3 color, float intensity);
 	AmbientLight(glm::vec3 color, float intensity);
 	~AmbientLight();
 

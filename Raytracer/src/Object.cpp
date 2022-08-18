@@ -7,6 +7,7 @@ void Object::writeToShader(AbstractShader* shader, unsigned int ssbo)
 
 void Object::writeDataToStream(std::ofstream& filestream)
 {
+	filestream << getName() << "\n";
 	filestream << position.x << " " << position.y << " " << position.z << "\n";
 	filestream << rotation.x << " " << rotation.y << " " << rotation.z << "\n";
 	filestream << scaleVector.x << " " << scaleVector.y << " " << scaleVector.z << "\n";
@@ -75,9 +76,9 @@ glm::vec3* Object::getScalePointer()
 	return &scaleVector;
 }
 
-unsigned int* Object::getMaterialIndexPointer()
+std::string& Object::getName()
 {
-	return &materialIndex;
+	return name;
 }
 
 Object::Object()

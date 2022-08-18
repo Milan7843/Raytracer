@@ -4,7 +4,7 @@ White
 1 1 1
 0
 0
-0
+1
 0
 0 0 0
 
@@ -42,7 +42,7 @@ Tire
 
 Car
 0.921569 0.225875 0.225875
-0.1
+0
 0
 1
 0.65
@@ -81,20 +81,6 @@ awesome sauce ground yeah!
 src/models/plane.obj
 1
 0
-
-low poly car
--2.35 1.22 -0.13
-0 0 0
-1 1 1
-src/models/low poly car optimised.obj
-7
-5
-0
-4
-7
-6
-0
-0
 # Models end
 
 # Point lights
@@ -123,9 +109,9 @@ basically the sun
 # Ambient lights end
 
 # Cameras
--4.2244 1.40783 -3.83322
--17.9
-774.665
+0.0337927 12.0827 -0.152387
+-89
+809.265
 1
 39.333
 1.844

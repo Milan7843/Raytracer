@@ -30,17 +30,23 @@ public:
 	// Revert all changes to the current scene by reading it again
 	void revertChanges();
 
+	// Create a new and empty scene
+	void newScene();
+
 	// Load all the names of the available scenes
 	void loadAvailableScenesNames();
-
 	// Get all the names of the available scenes
 	std::vector<std::string>& getAvailableScenesNames(bool update);
 
 	// Load all the names of the available HDRI's
 	void loadAvailableHDRINames();
-
 	// Get all the names of the available HDRI's
 	std::vector<std::string>& getAvailableHDRINames(bool update);
+
+	// Load all the names of the available Models
+	void loadAvailableModelsNames();
+	// Get all the names of the available Models
+	std::vector<std::string>& getAvailableModelsNames(bool update);
 
 	// Get whether saving a scene under this name will overwrite a scene
 	bool willSaveOverwrite(std::string& sceneName);
@@ -67,6 +73,14 @@ private:
 	// The scene names in the HDRIs folder
 	std::vector<std::string> availableHDRINames;
 
+	// The scene names in the models folder
+	std::vector<std::string> availableModelsNames;
+
 	// Split a string by the delimiter
 	std::vector<std::string> split(const std::string& input, char delim);
+
+	// PATHS
+	const char* scenePath{ "scenes" };
+	const char* HDRIsPath{ "HDRIs" };
+	const char* modelsPath{ "src/models" };
 };

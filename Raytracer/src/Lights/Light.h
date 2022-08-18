@@ -29,11 +29,15 @@ public:
 	glm::vec3* getColorPointer();
 	float* getIntensityPointer();
 
+	std::string& getName();
+
 	~Light();
 protected:
-	Light(glm::vec3 position, glm::vec3 color, float intensity);
+	Light(const std::string& name, glm::vec3 position, glm::vec3 color, float intensity);
 	unsigned int index = 0;
 	glm::vec3 position = glm::vec3(0.0f);
 	glm::vec3 color = glm::vec3(0.0f);
 	float intensity = 1.0f;
+
+	std::string name;
 };

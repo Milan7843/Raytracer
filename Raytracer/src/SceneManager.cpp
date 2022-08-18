@@ -49,9 +49,26 @@ void SceneManager::revertChanges()
 	changeScene(*currentScene.getNamePointer());
 }
 
+void SceneManager::newScene()
+{
+	Scene newScene;
+	currentScene = newScene;
+
+	// The new scene must have a camera
+	Camera camera;
+	currentScene.addCamera(camera);
+
+	// And at least one material
+	Material material;
+	currentScene.addMaterial(material);
+
+	DirectionalLight directionalLight;
+	currentScene.addLight(directionalLight);
+}
+
 void SceneManager::loadAvailableScenesNames()
 {
-	availableScenesNames = FileUtility::getFilesOfTypeInFolder("scenes", ".scene");
+	availableScenesNames = FileUtility::getFilesOfTypeInFolder(scenePath, ".scene");
 }
 
 std::vector<std::string>& SceneManager::getAvailableScenesNames(bool update)
@@ -63,7 +80,7 @@ std::vector<std::string>& SceneManager::getAvailableScenesNames(bool update)
 
 void SceneManager::loadAvailableHDRINames()
 {
-	availableHDRINames = FileUtility::getFilesOfTypeInFolder("HDRIs", "");
+	availableHDRINames = FileUtility::getFilesOfTypeInFolder(HDRIsPath, "");
 }
 
 std::vector<std::string>& SceneManager::getAvailableHDRINames(bool update)
@@ -71,6 +88,18 @@ std::vector<std::string>& SceneManager::getAvailableHDRINames(bool update)
 	if (update)
 		loadAvailableHDRINames();
 	return availableHDRINames;
+}
+
+void SceneManager::loadAvailableModelsNames()
+{
+	availableModelsNames = FileUtility::getFilesOfTypeInFolder(modelsPath, ".obj");
+}
+
+std::vector<std::string>& SceneManager::getAvailableModelsNames(bool update)
+{
+	if (update)
+		loadAvailableModelsNames();
+	return availableModelsNames;
 }
 
 bool SceneManager::willSaveOverwrite(std::string& sceneName)

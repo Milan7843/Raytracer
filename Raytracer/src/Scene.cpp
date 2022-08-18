@@ -81,6 +81,17 @@ void Scene::writeDataToStream(std::ofstream& filestream)
 			filestream << "\n";
 	}
 	filestream << "# Ambient lights end\n\n";
+
+	// Writing all cameras
+	filestream << "# Cameras\n";
+	for (Camera& camera : cameras)
+	{
+		camera.writeDataToStream(filestream);
+		// Write newline if it is not the last item
+		if (&camera != &cameras.back())
+			filestream << "\n";
+	}
+	filestream << "# Cameras end\n\n";
 }
 
 void Scene::setName(std::string name)
@@ -174,11 +185,31 @@ void Scene::addLight(AmbientLight& ambientLight)
 	this->ambientLightCount++;
 }
 
-Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
+Model* Scene::addModel(std::string& name, std::vector<unsigned int>& meshMaterialIndices, const std::string& path)
 {
-	Model model(path, &meshCount, &triangleCount, materialIndex, MAX_MESH_COUNT);
+	Model model(name, meshMaterialIndices, path, &meshCount, &triangleCount, MAX_MESH_COUNT);
 	models.push_back(model);
 	return &(models[models.size() - 1]);
+}
+
+Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
+{
+	Model model(materialIndex, path, &meshCount, &triangleCount, MAX_MESH_COUNT);
+	models.push_back(model);
+	return &(models[models.size() - 1]);
+}
+
+bool Scene::addSphere(Sphere& sphere)
+{
+	// Full of spheres
+	if (this->sphereCount >= MAX_SPHERE_COUNT)
+		return false;
+
+	sphere.setShaderSphereIndex(sphereCount);
+
+	sphereCount++;
+	spheres.push_back(sphere);
+	return true;
 }
 
 Sphere* Scene::addSphere(glm::vec3 position, float radius, unsigned int materialIndex)
@@ -204,22 +235,47 @@ void Scene::addMaterial(Material& material)
 	this->materialCount++;
 }
 
+void Scene::addCamera(Camera& camera)
+{
+	this->cameras.push_back(camera);
+}
+
+void Scene::activateCamera(unsigned int index)
+{
+	this->activeCamera = index;
+}
+
+Camera& Scene::getActiveCamera()
+{
+	return cameras[activeCamera];
+}
+
 void Scene::draw(AbstractShader* shader)
 {
+	// First writing all material data to the shader
+	writeMaterialsToShader(shader);
+	shader->setVector3("cameraPos", getActiveCamera().getPosition());
+
+	// Binding the hdri
+	shader->setInt("hdri", 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, getHDRI());
+
 	// Drawing each model with the given shader
 	for (Model& model : models)
 	{
-		model.draw(shader, &materials[model.materialIndex]);
+		model.draw(shader, (Scene*)this);
 	}
 
 	// Drawing each sphere with the given shader
 	for (Sphere& sphere : spheres)
 	{
-		sphere.draw(shader, &materials[sphere.materialIndex]);
+		sphere.draw(shader, (Scene*)this);
 	}
 }
 
-void Scene::writeLightsToShader(AbstractShader* shader)
+void Scene::writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates)
 {
 	shader->use();
 
@@ -231,11 +287,11 @@ void Scene::writeLightsToShader(AbstractShader* shader)
 	// Writing lights to shader
 	for (PointLight& light : getPointLights())
 	{
-		light.writeToShader(shader);
+		light.writeToShader(shader, useGlslCoordinates);
 	}
 	for (DirectionalLight& light : getDirectionalLights())
 	{
-		light.writeToShader(shader);
+		light.writeToShader(shader, useGlslCoordinates);
 	}
 	for (AmbientLight& light : getAmbientLights())
 	{
@@ -311,6 +367,11 @@ void Scene::bindTriangleBuffer()
 std::string* Scene::getNamePointer()
 {
 	return &name;
+}
+
+bool* Scene::getUseHDRIAsBackgroundPointer()
+{
+	return &useHDRIAsBackground;
 }
 
 std::vector<Material>& Scene::getMaterials()

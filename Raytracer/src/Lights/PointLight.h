@@ -9,6 +9,7 @@
 class PointLight : public Light
 {
 public:
+	PointLight(std::string& name, glm::vec3 position, glm::vec3 color, float intensity);
 	PointLight(glm::vec3 position, glm::vec3 color, float intensity);
 	~PointLight();
 
@@ -16,10 +17,10 @@ public:
 	virtual void writeDataToStream(std::ofstream& filestream);
 
 	// Write all the data of this point light into the given shader
-	void writeToShader(AbstractShader* shader);
+	void writeToShader(AbstractShader* shader, bool useGlslCoordinates);
 
 	// Write only the position of this point light into the given shader
-	void writePositionToShader(AbstractShader* shader);
+	void writePositionToShader(AbstractShader* shader, bool useGlslCoordinates);
 
 private:
 };

@@ -1,6 +1,9 @@
 #pragma once
 
+#include "Object.h"
+#include "Material.h"
 #include "Mesh.h"
+
 #include <iostream>
 
 #include <assimp/Importer.hpp>
@@ -9,13 +12,16 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Object.h"
-#include "Material.h"
+class Scene;
 
 class Model : public Object
 {
 public:
-	Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex,
+	Model(std::string& name, std::vector<unsigned int>& meshMaterialIndices,
+		const std::string& path, unsigned int* meshCount, unsigned int* triangleCount,
+		unsigned int MAX_MESH_COUNT);
+	Model(unsigned int meshMaterialIndex,
+		const std::string& path, unsigned int* meshCount, unsigned int* triangleCount,
 		unsigned int MAX_MESH_COUNT);
 	~Model();
 
@@ -26,10 +32,12 @@ public:
 	friend std::ostream& operator<< (std::ostream& stream, const Model& model);
 
 	// Draw this object given the shader
-	virtual void draw(AbstractShader* shader, Material* material);
+	virtual void draw(AbstractShader* shader, Scene* scene);
 
 	// Write this object's data to the given shader
 	virtual void writeToShader(AbstractShader* shader, unsigned int ssbo);
+
+	std::vector<Mesh>& getMeshes();
 
 	std::vector<Mesh> meshes;
 
@@ -37,8 +45,11 @@ private:
 	std::string directory;
 	std::string path;
 
-	void loadModel(std::string path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
-	void processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
+	void loadModel(std::string path, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
+	void loadModel(std::string path, unsigned int meshMaterialIndex, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
+	void processNode(aiNode* node, const aiScene* scene, unsigned int meshMaterialIndex, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
+	void processNode(aiNode* node, const aiScene* scene, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCount, unsigned int* triangleCount);
+	Mesh processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materialIndex, unsigned int meshCount, unsigned int* triangleCount);
 	glm::vec4 aiVector3DToGLMVec4(aiVector3D v);
 };

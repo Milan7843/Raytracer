@@ -5,15 +5,14 @@ Renderer::Renderer(const char* raytraceComputeShaderPath, unsigned int width, un
 {
 	// Immediately creating the pixel buffer with the given width and height
 	setResolution(width, height);
+	// Retrieving the render settings from the save file
+	readRenderSettings();
 }
 
 Renderer::~Renderer()
 {
-}
-
-void Renderer::bindCamera(Camera* camera)
-{
-	this->cameraBound = camera;
+	// Saving all render settings on quitting
+	writeRenderSettingsToFile();
 }
 
 void Renderer::bindSceneManager(SceneManager* sceneManager)
@@ -27,7 +26,7 @@ void Renderer::render()
 
 	currentFrameSampleCount++;
 
-	setUpForRender(sceneManagerBound->getCurrentScene(), cameraBound);
+	setUpForRender(sceneManagerBound->getCurrentScene(), &sceneManagerBound->getCurrentScene().getActiveCamera());
 
 	computeShader.setBool("renderUsingBlocks", false);
 
@@ -50,7 +49,7 @@ void Renderer::startBlockRender()
 
 	blockSizeRendering = blockSize;
 
-	setUpForRender(sceneManagerBound->getCurrentScene(), cameraBound);
+	setUpForRender(sceneManagerBound->getCurrentScene(), &sceneManagerBound->getCurrentScene().getActiveCamera());
 
 	computeShader.setBool("renderUsingBlocks", true);
 	computeShader.setInt("blockSize", blockSizeRendering);
@@ -85,13 +84,15 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	scene.checkObjectUpdates(&computeShader);
 
 	scene.bindTriangleBuffer();
-	scene.writeLightsToShader(&computeShader);
+	scene.writeLightsToShader(&computeShader, true);
 	scene.writeMaterialsToShader(&computeShader);
 
 	// Writing camera data to the compute shader
 	computeShader.setVector3("cameraPosition", CoordinateUtility::vec3ToGLSLVec3(camera->getPosition()));
 	computeShader.setVector3("cameraRotation", camera->getRotation());
 	computeShader.setFloat("fov", camera->getFov());
+
+	computeShader.setBool("useHDRIAsBackground", *scene.getUseHDRIAsBackgroundPointer());
 
 	// Writing rendering data to the compute shader
 	computeShader.setInt("screenWidth", width);
@@ -174,10 +175,25 @@ void Renderer::setResolution(unsigned int width, unsigned int height)
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
+unsigned int Renderer::getWidth()
+{
+	return width;
+}
+
+unsigned int Renderer::getHeight()
+{
+	return height;
+}
+
 void Renderer::bindPixelBuffer()
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelBuffer);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, pixelBuffer);
+}
+
+unsigned int Renderer::getPixelBuffer()
+{
+	return pixelBuffer;
 }
 
 glm::vec2 Renderer::getBlockOrigin()
@@ -216,8 +232,11 @@ float Renderer::getRenderProgressPrecise()
 	float blocksInWidth = (float)width / (float)blockSizeRendering;
 
 	int blocksDone = blockIndexX + blockIndexY * blocksInWidth;
+	float iterationsDone = blocksDone * renderPassCount + currentBlockRenderPassIndex;
 
-	float progress = blocksDone / (blocksInWidth * blocksInHeight);
+	float totalIterations = blocksInWidth * blocksInHeight * renderPassCount;
+
+	float progress = iterationsDone / totalIterations;
 	return progress;
 }
 
@@ -232,4 +251,41 @@ float Renderer::getTimeLeft()
 	float totalTime = currentRenderTime / std::max(getRenderProgressPrecise(), 0.001f);
 
 	return totalTime - getRenderProgress() * totalTime;
+}
+
+void Renderer::readRenderSettings()
+{
+	std::ifstream filestream{ "render_settings/saved_render_settings.settings" };
+
+	if (!filestream)
+	{
+		// No file was found to read: use default settings
+		return;
+	}
+
+	// Reading the data form the file
+	filestream >> blockSize;
+	filestream >> sampleCount;
+	filestream >> renderPassCount;
+	filestream >> multisamples;
+	filestream >> blockSize;
+
+	// Finally closing the file
+	filestream.close();
+}
+
+void Renderer::writeRenderSettingsToFile()
+{
+	// The data stream into the file
+	std::ofstream filestream{ "render_settings/saved_render_settings.settings" };
+
+	// Writing all render data
+	filestream << blockSize << "\n";
+	filestream << sampleCount << "\n";
+	filestream << renderPassCount << "\n";
+	filestream << multisamples << "\n";
+	filestream << blockSize << "\n";
+
+	// Done writing so flush data and close filestream
+	filestream.close();
 }

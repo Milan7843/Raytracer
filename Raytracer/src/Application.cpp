@@ -45,10 +45,6 @@ int Application::Start()
     // Enabling depth testing for rasterized view: makes sure objects get drawn on top of each other in the correct order
     glEnable(GL_DEPTH_TEST);
 
-    // Setting the callback for window resizing
-    Callbacks& callbacks = Callbacks::getInstance();
-    callbacks.setCamera(&camera);
-
     // Change the viewport size if the window is resized
     glfwSetFramebufferSizeCallback(window, &Callbacks::framebuffer_size_callback);
 
@@ -95,7 +91,12 @@ int Application::Start()
 
     SceneManager sceneManager{};
     sceneManager.changeScene(std::string("Scene 1 - testing"));
+    //sceneManager.getCurrentScene().addCamera(camera);
     //Scene scene{ SceneFileSaver::readSceneFromFile(std::string("Scene 1 - testing")) };
+
+    // Setting the callback for window resizing and camera input
+    Callbacks& callbacks = Callbacks::getInstance();
+    callbacks.bindSceneManager(&sceneManager);
 
     // Unused shaders... (should remove)
     //Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
@@ -119,7 +120,6 @@ int Application::Start()
 
     HDRIRenderer hdriRenderer("src/shaders/hdriVertex.shader", "src/shaders/hdriFragment.shader");
 
-    raytracingRenderer.bindCamera(&camera);
     raytracingRenderer.bindSceneManager(&sceneManager);
 
     sceneManager.getCurrentScene().generateTriangleBuffer();
@@ -141,7 +141,7 @@ int Application::Start()
         lastFrame = currentFrame;
 
         // TODO: optimise the following lines by adding data changed checks for the lights and materials
-        sceneManager.getCurrentScene().writeLightsToShader(&rasterizedShader);
+        sceneManager.getCurrentScene().writeLightsToShader(&rasterizedShader, false);
         sceneManager.getCurrentScene().writeMaterialsToShader(&rasterizedShader);
         //raytracingRenderer.updateMeshData(&scene);
         //scene.checkObjectUpdates(&rasterizedShader);
@@ -159,14 +159,14 @@ int Application::Start()
             // Calling the mouse callback
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
-            camera.mouseCallback(window, xpos, ypos);
+            sceneManager.getCurrentScene().getActiveCamera().mouseCallback(window, xpos, ypos);
 
             // Process camera movement input
-            camera.processInput(window, deltaTime);
+            sceneManager.getCurrentScene().getActiveCamera().processInput(window, deltaTime);
         }
 
         //std::cout << camera.getInformation() << std::endl;
-        userInterface.handleInput(window, camera);
+        userInterface.handleInput(window, sceneManager.getCurrentScene().getActiveCamera());
 
         // Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -193,14 +193,15 @@ int Application::Start()
         }
         else
         {
-            // Drawing the HDRI (skybox)
-            hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI(), camera, WINDOW_SIZE_X, WINDOW_SIZE_Y);
+            // Drawing the HDRI (skybox) if using it as a background is enabled
+            if (*sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer())
+                hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI(), sceneManager.getCurrentScene().getActiveCamera(), WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
             /* REGULAR RENDERING */
             solidColorShader.use();
 
             // Drawing axes
-            drawAxes(axesVAO, &solidColorShader, &camera);
+            drawAxes(axesVAO, &solidColorShader, &sceneManager.getCurrentScene().getActiveCamera());
 
             /* Rasterized scene rendering */
             rasterizedShader.use();
@@ -210,18 +211,18 @@ int Application::Start()
 
             // View matrix
             glm::mat4 view = glm::mat4(1.0f);
-            view = camera.getViewMatrix();
+            view = sceneManager.getCurrentScene().getActiveCamera().getViewMatrix();
             rasterizedShader.setMat4("view", view);
 
             // Projection matrix
             glm::mat4 projection;
-            projection = camera.getProjectionMatrix(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+            projection = sceneManager.getCurrentScene().getActiveCamera().getProjectionMatrix(WINDOW_SIZE_X, WINDOW_SIZE_Y);
             rasterizedShader.setMat4("projection", projection);
 
             sceneManager.getCurrentScene().draw(&rasterizedShader);
         }
 
-        userInterface.drawUserInterface(sceneManager, camera, raytracingRenderer, &inRaytraceMode);
+        userInterface.drawUserInterface(window, sceneManager, sceneManager.getCurrentScene().getActiveCamera(), raytracingRenderer, &inRaytraceMode);
 
         // Output
         glfwSwapBuffers(window);
@@ -234,6 +235,8 @@ int Application::Start()
     glDeleteVertexArrays(1, &screenQuadVAO);
     glDeleteBuffers(1, &screenQuadVBO);
     glDeleteBuffers(1, &screenQuadEBO);
+
+    Logger::stop();
 
     glfwTerminate();
 

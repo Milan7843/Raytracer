@@ -1,11 +1,26 @@
 #include "Model.h"
 
-Model::Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int materialIndex,
+#include "Scene.h"
+
+Model::Model(std::string& name, std::vector<unsigned int>& meshMaterialIndices,
+	const std::string& path, unsigned int* meshCount, unsigned int* triangleCount,
 	unsigned int MAX_MESH_COUNT)
 	: path(path)
 {
-	this->materialIndex = materialIndex;
-	loadModel(path, meshCount, triangleCount, MAX_MESH_COUNT);
+	this->name = name;
+
+	loadModel(path, meshMaterialIndices, meshCount, triangleCount, MAX_MESH_COUNT);
+}
+
+Model::Model(unsigned int meshMaterialIndex,
+	const std::string& path, unsigned int* meshCount, unsigned int* triangleCount,
+	unsigned int MAX_MESH_COUNT)
+	: path(path)
+{
+	// Automatically setting name based on model name
+	this->name = path.substr(path.find_last_of('/') + 1, path.find_last_of('.') - (path.find_last_of('/') + 1));
+
+	loadModel(path, meshMaterialIndex, meshCount, triangleCount, MAX_MESH_COUNT);
 }
 
 Model::~Model()
@@ -19,19 +34,25 @@ void Model::writeDataToStream(std::ofstream& filestream)
 
 	// Writing specific model data
 	filestream << path << "\n";
-	filestream << materialIndex << "\n";
+
+	// Writing the number of submeshes, then all mesh's material indices to filestream
+	filestream << meshes.size() << "\n";
+	for (Mesh& mesh : meshes)
+	{
+		filestream << *mesh.getMaterialIndexPointer() << "\n";
+	}
 }
 
-void Model::draw(AbstractShader* shader, Material* material)
+void Model::draw(AbstractShader* shader, Scene* scene)
 {
-	// Setting up the shader
+	// Setting transformations
 	shader->setMat4("model", getTransformationMatrix());
-	shader->setVector3("inputColor", material->color);
+	shader->setMat4("rotation", getRotationMatrix());
 
 	// Drawing each mesh
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
-		meshes[i].draw(shader);
+		meshes[i].draw(shader, scene);
 	}
 }
 
@@ -39,11 +60,16 @@ void Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
-		meshes[i].writeToShader(shader, ssbo, materialIndex, getTransformationMatrix());
+		meshes[i].writeToShader(shader, ssbo, getTransformationMatrix());
 	}
 }
 
-void Model::loadModel(std::string path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT)
+std::vector<Mesh>& Model::getMeshes()
+{
+	return meshes;
+}
+
+void Model::loadModel(std::string path, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);
@@ -56,10 +82,26 @@ void Model::loadModel(std::string path, unsigned int* meshCount, unsigned int* t
 	}
 	directory = path.substr(0, path.find_last_of('/'));
 
-	processNode(scene->mRootNode, scene, meshCount, triangleCount, MAX_MESH_COUNT);
+	processNode(scene->mRootNode, scene, meshMaterialIndices, meshCount, triangleCount, MAX_MESH_COUNT);
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* triangleCount,
+void Model::loadModel(std::string path, unsigned int meshMaterialIndex, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT)
+{
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);
+
+	// Checking for errors
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+	{
+		Logger::logError(std::string("Assimp error: model loading failed:") + importer.GetErrorString());
+		return;
+	}
+	directory = path.substr(0, path.find_last_of('/'));
+
+	processNode(scene->mRootNode, scene, meshMaterialIndex, meshCount, triangleCount, MAX_MESH_COUNT);
+}
+
+void Model::processNode(aiNode* node, const aiScene* scene, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* triangleCount,
 	unsigned int MAX_MESH_COUNT)
 {
 	// Reading mesh data for each mesh
@@ -73,7 +115,7 @@ void Model::processNode(aiNode* node, const aiScene* scene, unsigned int* meshCo
 		}
 
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene, *meshCount, triangleCount));
+		meshes.push_back(processMesh(mesh, scene, meshMaterialIndices[i], *meshCount, triangleCount));
 
 		(*meshCount)++;
 	}
@@ -81,7 +123,33 @@ void Model::processNode(aiNode* node, const aiScene* scene, unsigned int* meshCo
 	// Reading all the data from all children
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
-		processNode(node->mChildren[i], scene, meshCount, triangleCount, MAX_MESH_COUNT);
+		processNode(node->mChildren[i], scene, meshMaterialIndices, meshCount, triangleCount, MAX_MESH_COUNT);
+	}
+}
+
+void Model::processNode(aiNode* node, const aiScene* scene, unsigned int meshMaterialIndex, unsigned int* meshCount, unsigned int* triangleCount,
+	unsigned int MAX_MESH_COUNT)
+{
+	// Reading mesh data for each mesh
+	for (unsigned int i = 0; i < node->mNumMeshes; i++)
+	{
+		// Reached maximum number of meshes
+		if (*meshCount >= MAX_MESH_COUNT)
+		{
+			// Stop loading more meshes
+			return;
+		}
+
+		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+		meshes.push_back(processMesh(mesh, scene, meshMaterialIndex, *meshCount, triangleCount));
+
+		(*meshCount)++;
+	}
+
+	// Reading all the data from all children
+	for (unsigned int i = 0; i < node->mNumChildren; i++)
+	{
+		processNode(node->mChildren[i], scene, meshMaterialIndex, meshCount, triangleCount, MAX_MESH_COUNT);
 	}
 }
 
@@ -124,8 +192,55 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCou
 		(*triangleCount)++;
 	}
 
-	return Mesh(vertices, indices, beginTriangleCount, meshCount);
+	std::string meshName{ mesh->mName.C_Str() };
+
+	return Mesh(meshName, vertices, indices, beginTriangleCount, meshCount, mesh->mMaterialIndex);
 }
+
+Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materialIndex, unsigned int meshCount, unsigned int* triangleCount)
+{
+	int beginTriangleCount = *triangleCount;
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices;
+
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+	{
+		// New vertex
+		Vertex vertex;
+
+		vertex.position = aiVector3DToGLMVec4(mesh->mVertices[i]);
+
+		// Adding normals if possible
+		if (mesh->HasNormals())
+		{
+			vertex.normal = aiVector3DToGLMVec4(mesh->mNormals[i]);
+		}
+
+		// Putting the new vertex into the vertices vector
+		vertices.push_back(vertex);
+	}
+
+	// Getting indices
+	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+	{
+		aiFace face = mesh->mFaces[i];
+		// Pushing each index of the face
+		if (face.mNumIndices < 3) continue;
+		for (unsigned int j = 0; j < face.mNumIndices; j++)
+		{
+			indices.push_back(face.mIndices[j]);
+		}
+		// Another triangle has been added
+
+		// This variable is used to generate start indices for mesh's triangles
+		(*triangleCount)++;
+	}
+
+	std::string meshName{ mesh->mName.C_Str() };
+
+	return Mesh(meshName, vertices, indices, beginTriangleCount, meshCount, materialIndex);
+}
+
 
 glm::vec4 Model::aiVector3DToGLMVec4(aiVector3D v)
 {
@@ -139,8 +254,15 @@ std::ostream& operator<<(std::ostream& stream, const Model& model)
 		<< "\nposition: (" << model.position.x << ", " << model.position.y << ", " << model.position.z << ")"
 		<< "\nrotation: (" << model.rotation.x << ", " << model.rotation.y << ", " << model.rotation.z << ")"
 		<< "\nscale: (" << model.scaleVector.x << ", " << model.scaleVector.y << ", " << model.scaleVector.z << ")"
-		<< "\nmaterial: " << model.materialIndex
-		<< std::endl;
+		<< "\nmaterials: ";
+
+	/* TODO make this work
+	for (Mesh& mesh : model.meshes)
+	{
+		stream << *mesh.getMaterialIndexPointer();
+	}*/
+
+	stream << std::endl;
 
 	return stream;
 }

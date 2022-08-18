@@ -38,13 +38,11 @@ public:
 	// Whether this object's data has been modified
 	bool updated = true;
 
-	// The index of the material this object uses
-	unsigned int materialIndex = 0;
-
 	glm::vec3* getPositionPointer();
 	glm::vec3* getRotationPointer();
 	glm::vec3* getScalePointer();
-	unsigned int* getMaterialIndexPointer();
+
+	std::string& getName();
 
 protected:
 	// Abstract class, no need to instantiate this class
@@ -55,7 +53,9 @@ protected:
 	glm::mat4 getRotationMatrix();
 
 	// Transformations
-	glm::vec3 position = glm::vec3(0.0f);
-	glm::vec3 rotation = glm::vec3(0.0f);
-	glm::vec3 scaleVector = glm::vec3(1.0f);
+	glm::vec3 position{ glm::vec3(0.0f) };
+	glm::vec3 rotation{ glm::vec3(0.0f) };
+	glm::vec3 scaleVector{ glm::vec3(1.0f) };
+
+	std::string name;
 };

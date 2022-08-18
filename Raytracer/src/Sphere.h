@@ -5,6 +5,7 @@
 class Sphere : public Model
 {
 public:
+	Sphere(std::string& name, glm::vec3 position, float radius, unsigned int materialIndex);
 	Sphere(glm::vec3 position, float radius, unsigned int materialIndex, unsigned int shaderSphereIndex);
 	~Sphere();
 
@@ -21,15 +22,22 @@ public:
 	virtual void scale(float scale);
 	virtual void scale(glm::vec3 scale);
 
+	void setShaderSphereIndex(unsigned int shaderSphereIndex);
+
 	// Get a single matrix which includes all transformations
 	glm::mat4 getTransformationMatrix();
 
 	// Get a pointer to the radius of this sphere
 	float* getRadiusPointer();
 
+	unsigned int* getMaterialIndexPointer();
+
 private:
-	float radius = 1.0f;
+	float radius{ 1.0f };
 	unsigned int shaderSphereIndex;
-	unsigned int meshCount = 0;
-	unsigned int triangleCount = 0;
+	unsigned int meshCount{ 0 };
+	unsigned int triangleCount{ 0 };
+
+	// The index of the material this sphere uses
+	unsigned int materialIndex{ 0 };
 };

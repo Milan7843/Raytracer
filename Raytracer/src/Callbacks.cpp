@@ -1,10 +1,10 @@
 #include "Callbacks.h"
 
-Camera* Callbacks::camera;
+SceneManager* Callbacks::sceneManager;
 
-void Callbacks::setCamera(Camera* camera)
+void Callbacks::bindSceneManager(SceneManager* sceneManager)
 {
-    Callbacks::camera = camera;
+    Callbacks::sceneManager = sceneManager;
 }
 
 Callbacks& Callbacks::getInstance()
@@ -30,5 +30,5 @@ void Callbacks::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 
 void Callbacks::mouseCallbackImpl(GLFWwindow* window, double xpos, double ypos)
 {
-    camera->mouseCallback(window, xpos, ypos);
+    //sceneManager->getCurrentScene().getActiveCamera().mouseCallback(window, xpos, ypos);
 }
