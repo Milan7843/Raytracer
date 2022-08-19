@@ -124,3 +124,8 @@ std::string& Mesh::getName()
 {
     return name;
 }
+
+unsigned int Mesh::getMaterialIndex() const
+{
+    return materialIndex;
+}

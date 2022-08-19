@@ -41,7 +41,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	bool showDemoWindow = 0;
+	bool showDemoWindow{ false };
 	if (showDemoWindow)
 	{
 		ImGui::ShowDemoWindow();
@@ -488,13 +488,18 @@ void ImGuiUserInterface::drawMaterials(Scene& scene)
 
 void ImGuiUserInterface::drawMaterial(Material& material, unsigned int index)
 {
-	if (ImGui::TreeNode(
-		// Get the light name, then add a constant ID so that the 
-		// ID doesn't have to change when the light's name changes
-		((*material.getNamePointer())
-			+ "###material"
-			+ std::to_string(index)
-			).c_str()))
+	// Get the material name, then add a constant ID so that the 
+	// ID doesn't have to change when the material's name changes
+	std::string popupID{
+		(*material.getNamePointer())
+		+ "###material"
+		+ std::to_string(index)
+	};
+
+	if (ImGui::Button(popupID.c_str()))
+		ImGui::OpenPopup(popupID.c_str());
+
+	if (ImGui::BeginPopup(popupID.c_str()))
 	{
 		ImGui::InputText("Name", material.getNamePointer());
 		ImGui::ColorEdit3("Color", (float*)material.getColorPointer());
@@ -504,8 +509,8 @@ void ImGuiUserInterface::drawMaterial(Material& material, unsigned int index)
 		ImGui::DragFloat("Refractiveness", material.getRefractivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 		ImGui::DragFloat("Reflective diffusion", material.getReflectionDiffusionPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 		drawHelpMarker("How much the reflection can be diffused. Basically acts as a blur.");
-		ImGui::TreePop();
-		ImGui::Separator();
+
+		ImGui::EndPopup();
 	}
 }
 
@@ -566,51 +571,66 @@ void ImGuiUserInterface::drawLights(Scene& scene)
 
 void ImGuiUserInterface::drawLight(PointLight& light, unsigned int index)
 {
-	if (ImGui::TreeNode(
-		// Get the light name, then add a constant ID so that the 
-		// ID doesn't have to change when the light's name changes
-		(light.getName()
-			+ "###point_light_tree_node"
-			+ std::to_string(index)
-			).c_str()))
+	// Get the light name, then add a constant ID so that the 
+	// ID doesn't have to change when the light's name changes
+	std::string popupID{
+		light.getName()
+		+ "###point_light_tree_node"
+		+ std::to_string(index)
+	};
+
+	if (ImGui::Button(popupID.c_str()))
+		ImGui::OpenPopup(popupID.c_str());
+
+	if (ImGui::BeginPopup(popupID.c_str()))
 	{
 		ImGui::InputText("##", &light.getName());
 		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
 		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
 		ImGui::DragFloat3("Position", (float*)light.getPositionPointer(), 0.01f);
-		ImGui::TreePop();
-		ImGui::Separator();
+		ImGui::EndPopup();
 	}
 }
 
 void ImGuiUserInterface::drawLight(DirectionalLight& light, unsigned int index)
 {
-	if (ImGui::TreeNode(
-		// Get the light name, then add a constant ID so that the 
-		// ID doesn't have to change when the light's name changes
-		(light.getName()
-			+ "###dir_light_tree_node"
-			+ std::to_string(index)
-			).c_str()))
+	// Get the light name, then add a constant ID so that the 
+	// ID doesn't have to change when the light's name changes
+	std::string popupID{
+		light.getName()
+		+ "###dir_light_tree_node"
+		+ std::to_string(index)
+	};
+
+	if (ImGui::Button(popupID.c_str()))
+		ImGui::OpenPopup(popupID.c_str());
+
+	if (ImGui::BeginPopup(popupID.c_str()))
 	{
+		// Data inputs
 		ImGui::InputText("##", &light.getName());
 		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
 		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
 		ImGui::DragFloat3("Direction", (float*)light.getDirectionPointer(), 0.01f);
-		ImGui::TreePop();
-		ImGui::Separator();
+
+		ImGui::EndPopup();
 	}
 }
 
 void ImGuiUserInterface::drawLight(AmbientLight& light, unsigned int index)
 {
-	if (ImGui::TreeNode(
-		// Get the light name, then add a constant ID so that the 
-		// ID doesn't have to change when the light's name changes
-		(light.getName()
-			+ "###ambient_light_tree_node"
-			+ std::to_string(index)
-			).c_str()))
+	// Get the light name, then add a constant ID so that the 
+	// ID doesn't have to change when the light's name changes
+	std::string popupID{
+		light.getName()
+		+ "###ambient_light_tree_node"
+		+ std::to_string(index)
+	};
+
+	if (ImGui::Button(popupID.c_str()))
+		ImGui::OpenPopup(popupID.c_str());
+
+	if (ImGui::TreeNode(popupID.c_str()))
 	{
 		ImGui::InputText("##", &light.getName());
 		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
@@ -706,13 +726,18 @@ void ImGuiUserInterface::drawObjects(SceneManager& sceneManager)
 
 void ImGuiUserInterface::drawObject(Model& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray)
 {
-	if (ImGui::TreeNode(
-		// Get the object's name, then add a constant ID so that the 
-		// ID doesn't have to change when the light's name changes
-		(object.getName()
-			+ "###model"
-			+ std::to_string(index)
-			).c_str()))
+	// Get the object's name, then add a constant ID so that the 
+	// ID doesn't have to change when the light's name changes
+	std::string popupID {
+		object.getName()
+		+ "###model"
+		+ std::to_string(index)
+	};
+
+	if (ImGui::Button(popupID.c_str()))
+		ImGui::OpenPopup(popupID.c_str());
+	
+	if (ImGui::BeginPopup(popupID.c_str()))
 	{
 		ImGui::InputText("Name", &object.getName());
 		// Showing transformations
@@ -720,14 +745,11 @@ void ImGuiUserInterface::drawObject(Model& object, Scene& scene, unsigned int in
 		ImGui::DragFloat3("Rotation", (float*)object.getRotationPointer(), 0.01f);
 		ImGui::DragFloat3("Scale", (float*)object.getScalePointer(), 0.01f);
 
-		if (ImGui::BeginListBox("Materials##"))
+		int meshIndex = 0;
+		// Drawing all the meshes of this model
+		for (Mesh& mesh : object.getMeshes())
 		{
-			// Drawing all the meshes of this model
-			for (Mesh& mesh : object.getMeshes())
-			{
-				drawMesh(mesh, scene, materialSlotsCharArray);
-			}
-			ImGui::EndListBox();
+			drawMesh(mesh, scene, materialSlotsCharArray, meshIndex++);
 		}
 
 		if (ImGui::Button("Delete"))
@@ -735,16 +757,13 @@ void ImGuiUserInterface::drawObject(Model& object, Scene& scene, unsigned int in
 			scene.deleteModel(index);
 		}
 
-		ImGui::TreePop();
-		ImGui::Separator();
+		ImGui::EndPopup();
 	}
 }
 
-void ImGuiUserInterface::drawMesh(Mesh& object, Scene& scene, const char* materialSlotsCharArray)
+void ImGuiUserInterface::drawMesh(Mesh& object, Scene& scene, const char* materialSlotsCharArray, unsigned int index)
 {
 	unsigned int i = 0;
-	ImGui::Text((object.getName() + " - ").c_str());
-	ImGui::SameLine();
 
 	// Preview the currently selected name
 	if (ImGui::BeginCombo((object.getName() + "##combo").c_str(), (*(scene.getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
@@ -779,13 +798,18 @@ void ImGuiUserInterface::drawMesh(Mesh& object, Scene& scene, const char* materi
 
 void ImGuiUserInterface::drawObject(Sphere& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray)
 {
-	if (ImGui::TreeNode(
-		// Get the object's name, then add a constant ID so that the 
-		// ID doesn't have to change when the light's name changes
-		(object.getName()
-			+ "###sphere"
-			+ std::to_string(index)
-			).c_str()))
+	// Get the object's name, then add a constant ID so that the 
+	// ID doesn't have to change when the light's name changes
+	std::string popupID {
+		object.getName()
+		+ "###sphere"
+		+ std::to_string(index)
+	};
+
+	if (ImGui::Button(popupID.c_str()))
+		ImGui::OpenPopup(popupID.c_str());
+
+	if (ImGui::BeginPopup(popupID.c_str()))
 	{
 		ImGui::InputText("Name", &object.getName());
 
@@ -796,40 +820,14 @@ void ImGuiUserInterface::drawObject(Sphere& object, Scene& scene, unsigned int i
 		Sphere& sphere = (Sphere&)object;
 		ImGui::DragFloat("Radius", sphere.getRadiusPointer(), 0.01f, 0.01f, 100.0f, "%.02f");
 
-		// Preview the currently selected name
-		if (ImGui::BeginCombo("##combo", (*(scene.getMaterials()[*object.getMaterialIndexPointer()].getNamePointer())).c_str()))
-		{
-			unsigned int i = 0;
-			for (Material& material : scene.getMaterials())
-			{
-				bool thisMaterialSelected = (i == *object.getMaterialIndexPointer());
-
-				// Material index selector
-				if (ImGui::Selectable((*(scene.getMaterials()[i].getNamePointer())).c_str()))
-				{
-					*object.getMaterialIndexPointer() = i;
-				}
-
-				// Set this material to be 'focused' if it is the selected material
-				if (thisMaterialSelected)
-				{
-					ImGui::SetItemDefaultFocus();
-				}
-
-				// Increment material counter
-				i++;
-			}
-
-			// End this combo selector
-			ImGui::EndCombo();
-		}
+		// Draw the first and only mesh
+		drawMesh(sphere.getMeshes()[0], scene, materialSlotsCharArray, index);
 
 		if (ImGui::Button("Delete"))
 		{
 			scene.deleteSphere(index);
 		}
 
-		ImGui::TreePop();
-		ImGui::Separator();
+		ImGui::EndPopup();
 	}
 }

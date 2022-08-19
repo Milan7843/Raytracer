@@ -76,6 +76,9 @@ public:
 
 	std::string& getName();
 
+	// Get the index of the material this mesh uses
+	unsigned int getMaterialIndex() const;
+
 private:
 	void setupMesh();
 

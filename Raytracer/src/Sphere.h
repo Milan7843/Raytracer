@@ -31,14 +31,9 @@ public:
 	// Get a pointer to the radius of this sphere
 	float* getRadiusPointer();
 
-	unsigned int* getMaterialIndexPointer();
-
 private:
 	float radius{ 1.0f };
 	unsigned int shaderSphereIndex;
 	unsigned int meshCount{ 0 };
 	unsigned int triangleCount{ 0 };
-
-	// The index of the material this sphere uses
-	unsigned int materialIndex{ 0 };
 };
