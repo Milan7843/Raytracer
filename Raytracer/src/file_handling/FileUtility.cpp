@@ -64,6 +64,38 @@ bool FileUtility::isValidInput(std::string& input)
 	return true;
 }
 
+void FileUtility::saveSettings(std::string& loadedSceneName)
+{
+	// The data stream into the file
+	std::ofstream filestream{ "saved_settings.save" };
+
+	// Writing all settings data
+	filestream << loadedSceneName << "\n";
+
+	// Done writing so flush data and close filestream
+	filestream.close();
+}
+
+void FileUtility::readSavedSettings(std::string& savedSceneName)
+{
+	// Opening the save file into a stream
+	std::ifstream filestream{ "saved_settings.save" };
+
+	// Throw an error if the file could not be opened
+	if (!filestream)
+	{
+		Logger::logError("Saved settings could not be opened.");
+		
+		return;
+	}
+
+	// Reading the recently opened scene name
+	std::getline(filestream, savedSceneName);
+
+	// Finally closing the file
+	filestream.close();
+}
+
 void removeFolderAndFiletype(std::vector<std::string>& fileNames, const char* folder, const char* filetype)
 {
 	for (std::string& fileName : fileNames)

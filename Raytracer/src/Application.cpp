@@ -90,7 +90,11 @@ int Application::Start()
     */
 
     SceneManager sceneManager{};
-    sceneManager.changeScene(std::string("light testing"));
+
+    std::string lastLoadedSceneName{};
+    FileUtility::readSavedSettings(lastLoadedSceneName);
+
+    sceneManager.changeScene(lastLoadedSceneName);
     //sceneManager.getCurrentScene().addCamera(camera);
     //Scene scene{ SceneFileSaver::readSceneFromFile(std::string("Scene 1 - testing")) };
 
@@ -232,6 +236,9 @@ int Application::Start()
         frame++;
     }
 
+    // Saving the last opened scene
+    FileUtility::saveSettings(*sceneManager.getCurrentScene().getNamePointer());
+
     glDeleteVertexArrays(1, &screenQuadVAO);
     glDeleteBuffers(1, &screenQuadVBO);
     glDeleteBuffers(1, &screenQuadEBO);
@@ -304,7 +311,6 @@ void Application::processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
-
 
 void Application::generateAxesVAO()
 {

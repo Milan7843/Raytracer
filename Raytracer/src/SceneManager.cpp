@@ -25,22 +25,29 @@ void SceneManager::saveChangesAs(std::string& sceneName)
 
 void SceneManager::changeScene(const std::string& sceneName)
 {
-	try
-	{
-		// Trying to read the file
-		Scene newScene{ SceneFileSaver::readSceneFromFile(sceneName) };
+	// Trying to read the file
+	bool success{ false };
+	Scene loadedScene{ SceneFileSaver::readSceneFromFile(sceneName, &success) };
 
-		// If it could be read, set it as the new scene
-		// and set the scene name to the new one
-		currentScene = newScene;
-	}
-	catch (const char* e)
+	if (!success)
 	{
-		Logger::logError(e);
-		// If it cannot be read: reload available scene names; should be done automatically on opening scene choose menu ?
-		// maybe it was removed?
-		//loadAvailableScenesNames();
+		if (!hasSceneLoaded)
+		{
+			// Loading an empty scene into the current scene slot
+			newScene();
+		}
+		else
+		{
+			// Do nothing; keep the old scene active
+		}
+
+		return;
 	}
+
+	// If it could be read, set it as the new scene
+	// and set the scene name to the new one
+	currentScene = loadedScene;
+	hasSceneLoaded = true;
 }
 
 void SceneManager::revertChanges()
@@ -64,6 +71,8 @@ void SceneManager::newScene()
 
 	DirectionalLight directionalLight;
 	currentScene.addLight(directionalLight);
+
+	hasSceneLoaded = true;
 }
 
 void SceneManager::loadAvailableScenesNames()
