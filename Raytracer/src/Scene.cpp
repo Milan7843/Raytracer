@@ -185,6 +185,60 @@ void Scene::addLight(AmbientLight& ambientLight)
 	this->ambientLightCount++;
 }
 
+void Scene::deletePointLight(unsigned int index)
+{
+	pointLights.erase(pointLights.begin() + index);
+	this->pointLightCount--;
+	recalculatePointLightIndices();
+}
+
+void Scene::deleteDirectionalLight(unsigned int index)
+{
+	directionalLights.erase(directionalLights.begin() + index);
+	this->directionalLightCount--;
+	recalculateDirectionalLightIndices();
+}
+
+void Scene::deleteAmbientLight(unsigned int index)
+{
+	ambientLights.erase(ambientLights.begin() + index);
+	this->ambientLightCount--;
+	recalculateAmbientLightIndices();
+}
+
+void Scene::recalculatePointLightIndices()
+{
+	unsigned int i = 0;
+
+	// Updating each light's index
+	for (Light& light : pointLights)
+	{
+		light.setIndex(i++);
+	}
+}
+
+void Scene::recalculateDirectionalLightIndices()
+{
+	unsigned int i = 0;
+
+	// Updating each light's index
+	for (Light& light : directionalLights)
+	{
+		light.setIndex(i++);
+	}
+}
+
+void Scene::recalculateAmbientLightIndices()
+{
+	unsigned int i = 0;
+
+	// Updating each light's index
+	for (Light& light : ambientLights)
+	{
+		light.setIndex(i++);
+	}
+}
+
 Model* Scene::addModel(std::string& name, std::vector<unsigned int>& meshMaterialIndices, const std::string& path)
 {
 	Model model(name, meshMaterialIndices, path, &meshCount, &triangleCount, MAX_MESH_COUNT);

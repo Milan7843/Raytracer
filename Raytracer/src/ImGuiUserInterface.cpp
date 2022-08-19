@@ -523,19 +523,25 @@ void ImGuiUserInterface::drawLights(Scene& scene)
 	// Drawing the lights themselves
 	for (PointLight& light : scene.getPointLights())
 	{
-		drawLight(light, index);
+		drawLight(light, scene, index);
 		index++;
 	}
+
+	ImGui::Separator();
+
 	index = 0;
 	for (DirectionalLight& light : scene.getDirectionalLights())
 	{
-		drawLight(light, index);
+		drawLight(light, scene, index);
 		index++;
 	}
+
+	ImGui::Separator();
+
 	index = 0;
 	for (AmbientLight& light : scene.getAmbientLights())
 	{
-		drawLight(light, index);
+		drawLight(light, scene, index);
 		index++;
 	}
 
@@ -569,7 +575,7 @@ void ImGuiUserInterface::drawLights(Scene& scene)
 	ImGui::PopItemWidth();	
 }
 
-void ImGuiUserInterface::drawLight(PointLight& light, unsigned int index)
+void ImGuiUserInterface::drawLight(PointLight& light, Scene& scene, unsigned int index)
 {
 	// Get the light name, then add a constant ID so that the 
 	// ID doesn't have to change when the light's name changes
@@ -588,11 +594,17 @@ void ImGuiUserInterface::drawLight(PointLight& light, unsigned int index)
 		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
 		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
 		ImGui::DragFloat3("Position", (float*)light.getPositionPointer(), 0.01f);
+
+		if (ImGui::Button("Delete"))
+		{
+			scene.deletePointLight(index);
+		}
+
 		ImGui::EndPopup();
 	}
 }
 
-void ImGuiUserInterface::drawLight(DirectionalLight& light, unsigned int index)
+void ImGuiUserInterface::drawLight(DirectionalLight& light, Scene& scene, unsigned int index)
 {
 	// Get the light name, then add a constant ID so that the 
 	// ID doesn't have to change when the light's name changes
@@ -613,11 +625,16 @@ void ImGuiUserInterface::drawLight(DirectionalLight& light, unsigned int index)
 		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
 		ImGui::DragFloat3("Direction", (float*)light.getDirectionPointer(), 0.01f);
 
+		if (ImGui::Button("Delete"))
+		{
+			scene.deleteDirectionalLight(index);
+		}
+
 		ImGui::EndPopup();
 	}
 }
 
-void ImGuiUserInterface::drawLight(AmbientLight& light, unsigned int index)
+void ImGuiUserInterface::drawLight(AmbientLight& light, Scene& scene, unsigned int index)
 {
 	// Get the light name, then add a constant ID so that the 
 	// ID doesn't have to change when the light's name changes
@@ -635,6 +652,12 @@ void ImGuiUserInterface::drawLight(AmbientLight& light, unsigned int index)
 		ImGui::InputText("##", &light.getName());
 		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
 		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
+
+		if (ImGui::Button("Delete"))
+		{
+			scene.deleteAmbientLight(index);
+		}
+
 		ImGui::EndPopup();
 	}
 }

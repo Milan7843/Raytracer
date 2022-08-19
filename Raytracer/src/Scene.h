@@ -38,6 +38,18 @@ public:
 	// Add an ambient light to the scene
 	void addLight(AmbientLight& ambientLight);
 
+	// Remove a point light from the scene
+	void deletePointLight(unsigned int index);
+	// Remove a directional light from the scene
+	void deleteDirectionalLight(unsigned int index);
+	// Remove an ambient light from the scene
+	void deleteAmbientLight(unsigned int index);
+
+	// Recalculate the indices in the respective light type vector
+	void recalculatePointLightIndices();
+	void recalculateDirectionalLightIndices();
+	void recalculateAmbientLightIndices();
+
 
 	Model* addModel(std::string& name, std::vector<unsigned int>& meshMaterialIndices, const std::string& path);
 	Model* addModel(const std::string& path, unsigned int materialIndex);
