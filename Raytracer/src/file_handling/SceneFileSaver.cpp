@@ -21,20 +21,23 @@ void SceneFileSaver::writeSceneToFile(Scene& scene, const std::string& fileName)
 	filestream.close();
 }
 
-Scene SceneFileSaver::readSceneFromFile(const std::string& fileName)
+Scene SceneFileSaver::readSceneFromFile(const std::string& fileName, bool* success)
 {
 	// Opening the scene file into a stream
 	std::ifstream filestream{ "scenes/" + fileName + ".scene" };
 
-	// Throw an error if the file could not be opened
-	if (!filestream)
-	{
-		throw "Scene " + fileName + " could not be opened. "
-			"Make sure it is in the scene directory and ends in '.scene'.";
-	}
-
 	// Otherwise create a scene
 	Scene scene{};
+
+	// Throw an error and return an empty scene if the file could not be opened
+	if (!filestream)
+	{
+		Logger::logError("Scene " + fileName + " could not be opened. "
+			"Make sure it is in the scene directory and ends in '.scene'.");
+
+		*success = false;
+		return scene;
+	}
 
 	scene.setName(fileName);
 
@@ -58,6 +61,8 @@ Scene SceneFileSaver::readSceneFromFile(const std::string& fileName)
 
 	// Generating a buffer big enough for all triangles to go into
 	scene.generateTriangleBuffer();
+
+	*success = true;
 
 	return scene;
 }

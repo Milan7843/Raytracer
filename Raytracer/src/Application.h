@@ -71,4 +71,6 @@ private:
 
 	// Hold the vertices required to render the skybox
 	void processInput(GLFWwindow* window);
+
+	const char* saveFileName{ "saved_settings.save" };
 };

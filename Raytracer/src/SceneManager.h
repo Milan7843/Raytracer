@@ -24,7 +24,7 @@ public:
 	// Save the changes in a new file
 	void saveChangesAs(std::string& sceneName);
 
-	// Set the new scene by name
+	// Change to another scene by name, will not overwrite current with empty scene on fail to load
 	void changeScene(const std::string& sceneName);
 
 	// Revert all changes to the current scene by reading it again
@@ -66,6 +66,9 @@ public:
 private:
 	// Keeps the current scene loaded in memory
 	Scene currentScene;
+
+	// Indicates whether a working scene has been loaded
+	bool hasSceneLoaded{ false };
 
 	// The scene names in the scene folder
 	std::vector<std::string> availableScenesNames;
