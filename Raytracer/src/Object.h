@@ -35,8 +35,13 @@ public:
 	// Write this object's data to the given shader
 	virtual void writeToShader(AbstractShader* shader, unsigned int ssbo);
 
-	// Whether this object's data has been modified
-	bool updated = true;
+	// Get whether this object has been updated
+	bool isUpdated();
+	// Mark this object as being updated
+	void setUpdated();
+	// Mark this object as being not updated
+	void setNotUpdated();
+
 
 	glm::vec3* getPositionPointer();
 	glm::vec3* getRotationPointer();
@@ -56,6 +61,9 @@ protected:
 	glm::vec3 position{ glm::vec3(0.0f) };
 	glm::vec3 rotation{ glm::vec3(0.0f) };
 	glm::vec3 scaleVector{ glm::vec3(1.0f) };
+
+	// Whether this object's data has been modified
+	bool updated = true;
 
 	std::string name;
 };

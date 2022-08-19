@@ -41,10 +41,15 @@ public:
 
 	Model* addModel(std::string& name, std::vector<unsigned int>& meshMaterialIndices, const std::string& path);
 	Model* addModel(const std::string& path, unsigned int materialIndex);
+	void deleteModel(unsigned int modelIndex);
 	// Add a sphere to the scene, returns whether the addition was succesfull
 	bool addSphere(Sphere& sphere);
 	Sphere* addSphere(glm::vec3 position, float radius, unsigned int materialIndex);
+	void deleteSphere(unsigned int sphereIndex);
 	void addMaterial(Material& material);
+
+	void recalculateModelIndices();
+	void recalculateSphereIndices();
 
 
 	// Add a camera to the scene
@@ -116,6 +121,8 @@ private:
 
 	std::vector<Camera> cameras;
 	unsigned int activeCamera;
+
+	bool changedTriangleBuffer{ true };
 
 	// Whether to render the HDRI as a background or just plain colours
 	bool useHDRIAsBackground{ true };

@@ -659,6 +659,7 @@ void ImGuiUserInterface::drawObjects(SceneManager& sceneManager)
 					{
 						// Loading the scene
 						sceneManager.getCurrentScene().addModel("src/models/" + name + ".obj", 0);
+						sceneManager.getCurrentScene().generateTriangleBuffer();
 						break;
 					}
 				}
@@ -727,6 +728,11 @@ void ImGuiUserInterface::drawObject(Model& object, Scene& scene, unsigned int in
 				drawMesh(mesh, scene, materialSlotsCharArray);
 			}
 			ImGui::EndListBox();
+		}
+
+		if (ImGui::Button("Delete"))
+		{
+			scene.deleteModel(index);
 		}
 
 		ImGui::TreePop();
@@ -816,6 +822,11 @@ void ImGuiUserInterface::drawObject(Sphere& object, Scene& scene, unsigned int i
 
 			// End this combo selector
 			ImGui::EndCombo();
+		}
+
+		if (ImGui::Button("Delete"))
+		{
+			scene.deleteSphere(index);
 		}
 
 		ImGui::TreePop();
