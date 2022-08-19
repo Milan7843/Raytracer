@@ -621,7 +621,7 @@ void ImGuiUserInterface::drawLight(AmbientLight& light, unsigned int index)
 {
 	// Get the light name, then add a constant ID so that the 
 	// ID doesn't have to change when the light's name changes
-	std::string popupID{
+	std::string popupID {
 		light.getName()
 		+ "###ambient_light_tree_node"
 		+ std::to_string(index)
@@ -630,13 +630,12 @@ void ImGuiUserInterface::drawLight(AmbientLight& light, unsigned int index)
 	if (ImGui::Button(popupID.c_str()))
 		ImGui::OpenPopup(popupID.c_str());
 
-	if (ImGui::TreeNode(popupID.c_str()))
+	if (ImGui::BeginPopup(popupID.c_str()))
 	{
 		ImGui::InputText("##", &light.getName());
 		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
 		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
-		ImGui::TreePop();
-		ImGui::Separator();
+		ImGui::EndPopup();
 	}
 }
 
