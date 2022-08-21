@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\file_handling\FileUtility.cpp" />
     <ClCompile Include="src\HDRIRenderer.cpp" />
+    <ClCompile Include="src\OutlineRenderer.cpp" />
     <ClCompile Include="src\SceneManager.cpp" />
     <ClCompile Include="src\file_handling\SceneFileSaver.cpp" />
     <ClCompile Include="src\Logger.cpp" />
@@ -57,6 +58,7 @@
   <ItemGroup>
     <ClInclude Include="src\file_handling\FileUtility.h" />
     <ClInclude Include="src\HDRIRenderer.h" />
+    <ClInclude Include="src\OutlineRenderer.h" />
     <ClInclude Include="src\SceneManager.h" />
     <ClInclude Include="src\file_handling\SceneFileSaver.h" />
     <ClInclude Include="src\Logger.h" />

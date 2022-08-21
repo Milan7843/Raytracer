@@ -88,6 +88,9 @@ public:
 	// Bind the buffer holding all triangles
 	void bindTriangleBuffer();
 
+	// Mark all objects in this scene as unselected
+	void markAllUnselected();
+
 	// Get a pointer to the name of this scene
 	std::string* getNamePointer();
 

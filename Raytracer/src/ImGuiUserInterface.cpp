@@ -67,6 +67,9 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 	static bool sceneNameInputError = false;
 	bool openSaveAsPopup{ false };
 
+	// Unselecting all objects: they will be marked as selected as needed later in this function
+	sceneManager.getCurrentScene().markAllUnselected();
+
 	// Menu Bar
 	if (ImGui::BeginMenuBar())
 	{
@@ -759,9 +762,12 @@ void ImGuiUserInterface::drawObject(Model& object, Scene& scene, unsigned int in
 
 	if (ImGui::Button(popupID.c_str()))
 		ImGui::OpenPopup(popupID.c_str());
-	
+
 	if (ImGui::BeginPopup(popupID.c_str()))
 	{
+		// Then marking it as selected again if it's popup is open
+		object.setSelected(true);
+
 		ImGui::InputText("Name", &object.getName());
 		// Showing transformations
 		ImGui::DragFloat3("Position", (float*)object.getPositionPointer(), 0.01f);
@@ -834,6 +840,9 @@ void ImGuiUserInterface::drawObject(Sphere& object, Scene& scene, unsigned int i
 
 	if (ImGui::BeginPopup(popupID.c_str()))
 	{
+		// Then marking it as selected again if it's popup is open
+		object.setSelected(true);
+
 		ImGui::InputText("Name", &object.getName());
 
 		// Showing transformations

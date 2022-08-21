@@ -471,6 +471,19 @@ std::string* Scene::getNamePointer()
 	return &name;
 }
 
+void Scene::markAllUnselected()
+{
+	for (Model& model : models)
+	{
+		model.setSelected(false);
+	}
+
+	for (Sphere& sphere : spheres)
+	{
+		sphere.setSelected(false);
+	}
+}
+
 bool* Scene::getUseHDRIAsBackgroundPointer()
 {
 	return &useHDRIAsBackground;

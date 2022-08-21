@@ -150,7 +150,6 @@ int Application::Start()
         //raytracingRenderer.updateMeshData(&scene);
         //sceneManager.getCurrentScene().checkObjectUpdates(&rasterizedShader);
 
-
         if (frame % 10 == 0 && false)
             std::cout << "FPS: " << 1.0f / deltaTime << std::endl;
 
