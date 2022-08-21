@@ -136,7 +136,7 @@ int Application::Start()
 
     unsigned int frame = 0;
 
-    Logger::logWarning("change pointer passes to references");
+    // TODO change pointer passes to references
 
     while (!glfwWindowShouldClose(window))
     {

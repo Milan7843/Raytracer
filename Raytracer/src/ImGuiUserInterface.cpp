@@ -52,6 +52,8 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 
 	ImGuiWindowFlags window_flags{ 0 };
 	window_flags |= ImGuiWindowFlags_MenuBar;
+	window_flags |= ImGuiWindowFlags_NoNavInputs;
+	window_flags |= ImGuiWindowFlags_NoNav;
 	//window_flags |= ImGuiWindowFlags_Popup;
 	bool windowOpen{ true };
 
@@ -211,7 +213,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 		ImGui::EndPopup();
 	}
 
-	ImGui::Text("Press R to open or close this interface.");
+	ImGui::Text("Press TAB to open or close this interface.");
 
 	/*
 	if (ImGui::Button("Render frame"))
