@@ -87,6 +87,22 @@ void Mesh::setupMesh()
     }
 }
 
+unsigned int Mesh::getTriangleCount()
+{
+    return triangles.size();
+}
+
+void Mesh::setShaderMeshIndex(unsigned int shaderMeshIndex)
+{
+    this->shaderMeshIndex = shaderMeshIndex;
+
+    // Setting this shader mesh index in all triangle data
+    for (Triangle& tri : triangles)
+    {
+        tri.mesh = shaderMeshIndex;
+    }
+}
+
 void Mesh::draw(AbstractShader* shader, Scene* scene)
 {
     // Setting up the shader for the material used by this mesh
@@ -107,4 +123,9 @@ unsigned int* Mesh::getMaterialIndexPointer()
 std::string& Mesh::getName()
 {
     return name;
+}
+
+unsigned int Mesh::getMaterialIndex() const
+{
+    return materialIndex;
 }

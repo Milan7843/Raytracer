@@ -28,7 +28,7 @@ void Sphere::writeDataToStream(std::ofstream& filestream)
 	Object::writeDataToStream(filestream);
 
 	//filestream << radius << "\n";
-	filestream << materialIndex << "\n";
+	filestream << meshes[0].getMaterialIndex() << "\n";
 }
 
 void Sphere::writeToShader(AbstractShader* shader, unsigned int ssbo)
@@ -36,7 +36,7 @@ void Sphere::writeToShader(AbstractShader* shader, unsigned int ssbo)
 	shader->setVector3(("spheres[" + std::to_string(shaderSphereIndex) + "].pos").c_str(), 
 		CoordinateUtility::vec4ToGLSLVec4(getTransformationMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 	shader->setFloat(("spheres[" + std::to_string(shaderSphereIndex) + "].radius").c_str(), radius);
-	shader->setInt(("spheres[" + std::to_string(shaderSphereIndex) + "].material").c_str(), materialIndex);
+	shader->setInt(("spheres[" + std::to_string(shaderSphereIndex) + "].material").c_str(), meshes[0].getMaterialIndex());
 }
 
 void Sphere::scale(float scale)
@@ -69,18 +69,13 @@ float* Sphere::getRadiusPointer()
 	return &radius;
 }
 
-unsigned int* Sphere::getMaterialIndexPointer()
-{
-	return &materialIndex;
-}
-
 std::ostream& operator<<(std::ostream& stream, const Sphere& sphere)
 {
 	// Writing this object to the stream
 	stream << "[Sphere]"
 		<< "\nposition: (" << sphere.position.x << ", " << sphere.position.y << ", " << sphere.position.z << ")"
 		<< "\nradius: " << sphere.radius
-		<< "\nmaterial: " << sphere.materialIndex
+		<< "\nmaterial: " << sphere.meshes[0].getMaterialIndex()
 		<< std::endl;
 
 	return stream;

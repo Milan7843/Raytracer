@@ -148,7 +148,7 @@ int Application::Start()
         sceneManager.getCurrentScene().writeLightsToShader(&rasterizedShader, false);
         sceneManager.getCurrentScene().writeMaterialsToShader(&rasterizedShader);
         //raytracingRenderer.updateMeshData(&scene);
-        //scene.checkObjectUpdates(&rasterizedShader);
+        //sceneManager.getCurrentScene().checkObjectUpdates(&rasterizedShader);
 
 
         if (frame % 10 == 0 && false)

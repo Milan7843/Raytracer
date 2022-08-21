@@ -185,6 +185,60 @@ void Scene::addLight(AmbientLight& ambientLight)
 	this->ambientLightCount++;
 }
 
+void Scene::deletePointLight(unsigned int index)
+{
+	pointLights.erase(pointLights.begin() + index);
+	this->pointLightCount--;
+	recalculatePointLightIndices();
+}
+
+void Scene::deleteDirectionalLight(unsigned int index)
+{
+	directionalLights.erase(directionalLights.begin() + index);
+	this->directionalLightCount--;
+	recalculateDirectionalLightIndices();
+}
+
+void Scene::deleteAmbientLight(unsigned int index)
+{
+	ambientLights.erase(ambientLights.begin() + index);
+	this->ambientLightCount--;
+	recalculateAmbientLightIndices();
+}
+
+void Scene::recalculatePointLightIndices()
+{
+	unsigned int i = 0;
+
+	// Updating each light's index
+	for (Light& light : pointLights)
+	{
+		light.setIndex(i++);
+	}
+}
+
+void Scene::recalculateDirectionalLightIndices()
+{
+	unsigned int i = 0;
+
+	// Updating each light's index
+	for (Light& light : directionalLights)
+	{
+		light.setIndex(i++);
+	}
+}
+
+void Scene::recalculateAmbientLightIndices()
+{
+	unsigned int i = 0;
+
+	// Updating each light's index
+	for (Light& light : ambientLights)
+	{
+		light.setIndex(i++);
+	}
+}
+
 Model* Scene::addModel(std::string& name, std::vector<unsigned int>& meshMaterialIndices, const std::string& path)
 {
 	Model model(name, meshMaterialIndices, path, &meshCount, &triangleCount, MAX_MESH_COUNT);
@@ -197,6 +251,12 @@ Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
 	Model model(materialIndex, path, &meshCount, &triangleCount, MAX_MESH_COUNT);
 	models.push_back(model);
 	return &(models[models.size() - 1]);
+}
+
+void Scene::deleteModel(unsigned int modelIndex)
+{
+	models.erase(models.begin() + modelIndex);
+	recalculateModelIndices();
 }
 
 bool Scene::addSphere(Sphere& sphere)
@@ -224,6 +284,14 @@ Sphere* Scene::addSphere(glm::vec3 position, float radius, unsigned int material
 	return &(spheres[spheres.size() - 1]);
 }
 
+void Scene::deleteSphere(unsigned int sphereIndex)
+{
+	// Removing it
+	spheres.erase(spheres.begin() + sphereIndex);
+	// Then making sure the sphere indices are still contiguous
+	recalculateSphereIndices();
+}
+
 void Scene::addMaterial(Material& material)
 {
 	// Full of materials
@@ -233,6 +301,34 @@ void Scene::addMaterial(Material& material)
 	// Adding a new material and incrementing the counter for this
 	materials.push_back(material);
 	this->materialCount++;
+}
+
+void Scene::recalculateModelIndices()
+{
+	unsigned int triangleCount{ 0 };
+
+	this->meshCount = 0;
+
+	// Updating each model
+	for (Model& model : models)
+	{
+		model.resetShaderIndices(&triangleCount, &meshCount);
+	}
+
+	// Must create a new triangle buffer for the new number of triangles
+	generateTriangleBuffer();
+}
+
+void Scene::recalculateSphereIndices()
+{
+	unsigned int i = 0;
+
+	// Updating each sphere's index
+	for (Sphere& sphere : spheres)
+	{
+		sphere.setShaderSphereIndex(i);
+		i++;
+	}
 }
 
 void Scene::addCamera(Camera& camera)
@@ -325,22 +421,25 @@ void Scene::checkObjectUpdates(AbstractShader* shader)
 	// Updating each model as needed
 	for (Model& model : models)
 	{
-		if (model.updated)
+		if (model.isUpdated() || changedTriangleBuffer)
 		{
 			model.writeToShader(shader, triangleBufferSSBO);
-			model.updated = false;
+			model.setNotUpdated();
 		}
 	}
 
 	// Updating each sphere as needed
 	for (Sphere& sphere : spheres)
 	{
-		if (sphere.updated)
+		if (sphere.isUpdated())
 		{
 			sphere.writeToShader(shader, triangleBufferSSBO);
-			//sphere.updated = false;
+			//sphere.setNotUpdated();
 		}
 	}
+
+	// Must have written data to the new triangle buffer
+	changedTriangleBuffer = false;
 }
 
 void Scene::generateTriangleBuffer()
@@ -356,6 +455,9 @@ void Scene::generateTriangleBuffer()
 	glBufferData(GL_SHADER_STORAGE_BUFFER, triangleCount * Mesh::getTriangleSize(), 0, GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	// Give a signal that the triangle buffer has changed and data needs to be written to it
+	changedTriangleBuffer = true;
 }
 
 void Scene::bindTriangleBuffer()

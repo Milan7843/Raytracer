@@ -64,6 +64,20 @@ void Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
 	}
 }
 
+void Model::resetShaderIndices(unsigned int* triangleCount, unsigned int* meshCount)
+{
+	for (Mesh& mesh : meshes)
+	{
+		// Setting the shader index
+		mesh.shaderArraybeginIndex = *triangleCount;
+		mesh.setShaderMeshIndex(*meshCount);
+
+		// Incrementing the triangle and mesh count to include the last mesh
+		*triangleCount += mesh.getTriangleCount();
+		(*meshCount)++;
+	}
+}
+
 std::vector<Mesh>& Model::getMeshes()
 {
 	return meshes;

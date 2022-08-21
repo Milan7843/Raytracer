@@ -37,6 +37,9 @@ public:
 	// Write this object's data to the given shader
 	virtual void writeToShader(AbstractShader* shader, unsigned int ssbo);
 
+
+	void resetShaderIndices(unsigned int* triangleCount, unsigned int* meshCount);
+
 	std::vector<Mesh>& getMeshes();
 
 	std::vector<Mesh> meshes;

@@ -59,6 +59,12 @@ public:
 	unsigned int shaderArraybeginIndex;
 	unsigned int shaderMeshIndex;
 
+	// Get the number of triangles in this single mesh
+	unsigned int getTriangleCount();
+
+	// Set the index of the mesh this triangle belongs to
+	void setShaderMeshIndex(unsigned int shaderMeshIndex);
+
 	// Draws this mesh using the active shader
 	void draw(AbstractShader* shader, Scene* scene);
 
@@ -69,6 +75,9 @@ public:
 	unsigned int* getMaterialIndexPointer();
 
 	std::string& getName();
+
+	// Get the index of the material this mesh uses
+	unsigned int getMaterialIndex() const;
 
 private:
 	void setupMesh();
