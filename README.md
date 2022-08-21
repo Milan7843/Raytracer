@@ -1,10 +1,8 @@
 # Raytracer
-Raytracer made in c++ / OpenGL
+Raytracer made in C++, using [OpenGL](https://www.opengl.org/), [GLFW](https://www.glfw.org/), [Glad](https://glad.dav1d.de/), [assimp](https://github.com/assimp/assimp)
 
-# How it works
-Currently, the raytracer fires rays from the camera, checking where they intersect with objects.
-From there, the ray is either reflected or stopped. From there, lighting is calculated.
+# How to run
+Simply clone the repository and run `Raytracer.exe` from inside the `Build` folder.
 
 # Plans
-The new and improved lighting system will introduce area lights using emmissive materials, more realistic point lights, and indirect lighting.
-These systems are still a work in progress.
+To see the current plans for the future of this project, please see the issues. However, more issues will likely be added later.
