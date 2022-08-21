@@ -149,16 +149,18 @@ void readSpheres(std::ifstream& filestream, Scene& scene)
 		// Defining all other data
 		glm::vec3 position;
 		glm::vec3 rotation;
-		glm::vec3 scale;
+		glm::vec3 scale; // will be (1, 1, 1) due to sphere)
+		float radius; // the radius will hold the actual radius value
 		int materialIndex;
 
 		// Then getting said data
 		position = readVec3(filestream);
 		rotation = readVec3(filestream);
 		scale = readVec3(filestream);
+		filestream >> radius;
 		filestream >> materialIndex;
 
-		Sphere sphere(buffer, position, scale.x, materialIndex);
+		Sphere sphere(buffer, position, radius, materialIndex);
 
 		// Creating the sphere with the read properties
 		scene.addSphere(sphere);
