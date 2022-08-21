@@ -49,7 +49,7 @@ private:
 	bool imGuiEnabled = true;
 	unsigned int guiSwitchKeyPreviousState = 0;
 
-	unsigned int interfaceToggleKey = GLFW_KEY_R;
+	unsigned int interfaceToggleKey = GLFW_KEY_TAB;
 
 	// Format a number of seconds
 	std::string formatTime(float time);

@@ -7,6 +7,14 @@ Ground
 0
 0
 0 0 0
+
+Reflective
+1 1 1
+1
+0
+0
+0
+1 1 1
 # Materials end
 
 # Spheres
@@ -15,6 +23,12 @@ Nice sphere
 0 0 0
 1 1 1
 0
+
+Reflective sphere
+-2.66 0.79 1.37
+0 0 0
+1 1 1
+1
 # Spheres end
 
 # Models
@@ -28,9 +42,9 @@ src/models/plane.obj
 # Models end
 
 # Point lights
-Red lamp
+Purple lamp
 1 0.419608 1
-1
+0.46
 -1.33 0.51 1.46
 # Point lights end
 
@@ -48,9 +62,9 @@ Ambient light
 # Ambient lights end
 
 # Cameras
-2.62893 1.56704 3.98283
--12.1
-233
+0.860845 1.42802 4.55932
+-12.6
+238.6
 1
 40
 1
