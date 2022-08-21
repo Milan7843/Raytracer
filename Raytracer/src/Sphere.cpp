@@ -27,7 +27,7 @@ void Sphere::writeDataToStream(std::ofstream& filestream)
 {
 	Object::writeDataToStream(filestream);
 
-	//filestream << radius << "\n";
+	filestream << radius << "\n";
 	filestream << meshes[0].getMaterialIndex() << "\n";
 }
 
