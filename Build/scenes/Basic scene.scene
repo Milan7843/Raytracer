@@ -1,0 +1,58 @@
+hdri_default.png
+# Materials
+Ground
+0.8 0.8 0.8
+0
+0
+0
+0
+0 0 0
+# Materials end
+
+# Spheres
+Nice sphere
+-0.8 0.98 -1.15
+0 0 0
+1 1 1
+0
+# Spheres end
+
+# Models
+plane
+0 0 0
+0 0 0
+1 1 1
+src/models/plane.obj
+1
+0
+# Models end
+
+# Point lights
+Red lamp
+1 0.419608 1
+1
+-1.33 0.51 1.46
+# Point lights end
+
+# Directional lights
+Sun
+1 1 0.784314
+1
+-1 -1 1
+# Directional lights end
+
+# Ambient lights
+Ambient light
+1 1 1
+0.1
+# Ambient lights end
+
+# Cameras
+2.62893 1.56704 3.98283
+-12.1
+233
+1
+40
+1
+# Cameras end
+

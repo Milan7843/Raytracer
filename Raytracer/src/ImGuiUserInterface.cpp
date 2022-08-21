@@ -471,7 +471,6 @@ void ImGuiUserInterface::drawMaterials(Scene& scene)
 	{
 		// Drawing each material
 		drawMaterial(material, index);
-		material.refractiveness = 1.0f;
 		index++;
 	}
 
