@@ -9,5 +9,8 @@ uniform sampler2D textureToRender;
 void main()
 {
     vec2 uv = pixelPos * 0.5 + vec2(0.5);
-    FragColor = texture(textureToRender, uv);
+    vec4 col = texture(textureToRender, uv);
+    if (col.a < 0.001)
+        discard;
+    FragColor = col;
 }

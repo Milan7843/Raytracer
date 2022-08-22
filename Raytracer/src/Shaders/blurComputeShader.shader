@@ -20,7 +20,7 @@ vec4 sampleOriginalTexture(vec2 pos)
 void main()
 {
     int blurSize = 6;
-    float cutoff = blurSize* blurSize;
+    float cutoff = blurSize * blurSize;
 
     vec4 cummulativeSample = vec4(0.0);
 
@@ -29,7 +29,8 @@ void main()
     if (sampleOriginalTexture(gl_GlobalInvocationID.xy) == vec4(1.0, 1.0, 1.0, 0.0))
     {
         // Pixel was on geometry
-        imageStore(blurredTexture, ivec2(gl_GlobalInvocationID.xy), vec4(1.0));
+
+        imageStore(blurredTexture, ivec2(gl_GlobalInvocationID.xy), vec4(1.0, 0.0, 0.0, 1.0));
         return;
     }
 
@@ -48,5 +49,5 @@ void main()
 
     //vec4 originalColor = sampleOriginalTexture(gl_GlobalInvocationID.xy);
 
-    imageStore(blurredTexture, ivec2(gl_GlobalInvocationID.xy), foundOutline * vec4(0.8, 0.4, 0.7, 1.0));
+    //imageStore(blurredTexture, ivec2(gl_GlobalInvocationID.xy), foundOutline * vec4(0.8, 0.4, 0.7, 1.0));
 }
