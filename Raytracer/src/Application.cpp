@@ -39,9 +39,6 @@ int Application::Start()
         return -1;
     }
 
-    // Setting viewport size
-    glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
-
     // Enabling depth testing for rasterized view: makes sure objects get drawn on top of each other in the correct order
     glEnable(GL_DEPTH_TEST);
 
@@ -131,6 +128,8 @@ int Application::Start()
     // Generating the screen quad on which the raytraced image is rendered
     generateScreenQuad();
 
+    OutlineRenderer outlineRenderer(WINDOW_SIZE_X, WINDOW_SIZE_Y, screenQuadVAO);
+
     // Generating a VAO for the axes so that they can be rendered easily
     generateAxesVAO();
 
@@ -140,6 +139,9 @@ int Application::Start()
 
     while (!glfwWindowShouldClose(window))
     {
+        // Setting viewport size
+        glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -223,6 +225,8 @@ int Application::Start()
             rasterizedShader.setMat4("projection", projection);
 
             sceneManager.getCurrentScene().draw(&rasterizedShader);
+
+            outlineRenderer.render(sceneManager.getCurrentScene());
         }
 
         userInterface.drawUserInterface(window, sceneManager, sceneManager.getCurrentScene().getActiveCamera(), raytracingRenderer, &inRaytraceMode);

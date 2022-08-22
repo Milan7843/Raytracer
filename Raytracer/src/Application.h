@@ -22,6 +22,7 @@
 #include "Renderer.h"
 #include "HDRIRenderer.h"
 #include "ImGuiUserInterface.h"
+#include "OutlineRenderer.h"
 
 #include "CoordinateUtility.h"
 #include "Logger.h"

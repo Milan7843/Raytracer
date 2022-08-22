@@ -608,12 +608,14 @@
     <None Include="src\Shaders\bufferedRaytracingFragmentShader.shader" />
     <None Include="src\Shaders\hdriFragment.shader" />
     <None Include="src\Shaders\hdriVertex.shader" />
+    <None Include="src\Shaders\outlineRenderToTextureFragment.shader" />
     <None Include="src\Shaders\rasterizedView.shader" />
     <None Include="src\Shaders\raymarchFragmentShader.shader" />
     <None Include="src\Shaders\raymarchFragmentShaderBackup.shader" />
     <None Include="src\Shaders\raymarchVertexShader.shader" />
     <None Include="src\Shaders\raytraceComputeShaderSampled.shader" />
     <None Include="src\Shaders\raytracingFragmentShader.shader" />
+    <None Include="src\Shaders\screenTextureFragment.shader" />
     <None Include="src\Shaders\solidColorFragmentShader.shader" />
     <None Include="src\Shaders\solidColorVertexShader.shader" />
     <None Include="src\Shaders\textureFragmentShader.shader" />

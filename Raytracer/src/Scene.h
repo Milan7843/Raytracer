@@ -74,6 +74,9 @@ public:
 	// Draw this scene with the given shader
 	void draw(AbstractShader* shader);
 
+	// Draw only the selected objects in this scene with the given shader
+	void drawSelected(AbstractShader* shader);
+
 	// Write the data in the lights vector into the shader
 	void writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates);
 	// Write the data in the materials vector into the shader
