@@ -1777,6 +1777,7 @@
     <None Include="src\Shaders\hdriFragment.shader" />
     <None Include="src\Shaders\outlineRenderToTextureFragment.shader" />
     <None Include="src\Shaders\screenTextureFragment.shader" />
+    <None Include="src\Shaders\blurComputeShader.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />

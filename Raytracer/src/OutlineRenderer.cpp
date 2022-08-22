@@ -6,6 +6,7 @@ OutlineRenderer::OutlineRenderer(unsigned int width, unsigned int height, unsign
 	, screenQuadVAO(screenQuadVAO)
 	, blurRenderShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/screenTextureFragment.shader")
 	, objectRenderShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/outlineRenderToTextureFragment.shader")
+	, textureBlurrerShader("src/Shaders/blurComputeShader.shader")
 {
 	setup();
 }
@@ -27,7 +28,7 @@ void OutlineRenderer::setup()
 	glBindTexture(GL_TEXTURE_2D, sharpTexture);
 
 	// Making it an empty image
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
 	// Setting texture filter settings
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -38,7 +39,7 @@ void OutlineRenderer::setup()
 	glBindTexture(GL_TEXTURE_2D, blurTexture);
 
 	// Making it an empty image
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
 	// Setting texture filter settings
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -64,6 +65,8 @@ void OutlineRenderer::render(Scene& scene)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
+
+
 	/* DRAWING TO THE TEXTURES */
 
 	// Setting viewport size
@@ -87,9 +90,30 @@ void OutlineRenderer::render(Scene& scene)
 	// Stop using our custom framebuffer to write to the screen again
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+
+
 	/* BLURRING */
 
+
+	// Binding the correct sharp texture
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, sharpTexture);
+
+	// And the to-be-blurred texture
+	glBindImageTexture(1, blurTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+
+	textureBlurrerShader.use();
+	textureBlurrerShader.setInt("originalTexture", 0);
+	textureBlurrerShader.setInt("blurredTexture", 1);
+	textureBlurrerShader.setFloat("width", 0);
+	textureBlurrerShader.setFloat("height", 0);
+
+	glDispatchCompute(textureWidth, textureHeight, 1);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+
 	/* DRAWING BLUR */
+
 	glBindVertexArray(screenQuadVAO);
 
 	// Binding the shader which simply renders a texture over the entire screen
@@ -97,7 +121,7 @@ void OutlineRenderer::render(Scene& scene)
 
 	// Binding the texure to render
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, sharpTexture);
+	glBindTexture(GL_TEXTURE_2D, blurTexture);
 	blurRenderShader.setInt("textureToRender", 0);
 
 	// Draw call for the quad

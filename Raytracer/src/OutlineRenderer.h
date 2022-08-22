@@ -56,5 +56,5 @@ private:
 	Shader blurRenderShader;
 
 	// The shader to blur the texture
-	//ComputeShader textureBlurrerShader;
+	ComputeShader textureBlurrerShader;
 };
