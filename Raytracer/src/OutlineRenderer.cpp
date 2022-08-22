@@ -48,13 +48,13 @@ void OutlineRenderer::setup()
 
 	// Binding the textures to be drawn to
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sharpTexture, 0);
-	//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, blurTexture, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, blurTexture, 0);
 
 	// Set the list of draw buffers
-	//GLenum drawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	//glDrawBuffers(2, drawBuffers);
-	GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-	glDrawBuffers(1, drawBuffers);
+	GLenum drawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, drawBuffers);
+	//GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+	//glDrawBuffers(1, drawBuffers);
 
 
 	// Unbinding the frame buffer
@@ -65,6 +65,15 @@ void OutlineRenderer::render(Scene& scene)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
+	GLenum drawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, drawBuffers);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	// Clearing everything from the previous frame
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	GLenum drawBuffer[1] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, drawBuffer);
 
 
 	/* DRAWING TO THE TEXTURES */
@@ -94,7 +103,6 @@ void OutlineRenderer::render(Scene& scene)
 
 	/* BLURRING */
 
-
 	// Binding the correct sharp texture
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, sharpTexture);
@@ -105,10 +113,10 @@ void OutlineRenderer::render(Scene& scene)
 	textureBlurrerShader.use();
 	textureBlurrerShader.setInt("originalTexture", 0);
 	textureBlurrerShader.setInt("blurredTexture", 1);
-	textureBlurrerShader.setFloat("width", 0);
-	textureBlurrerShader.setFloat("height", 0);
+	textureBlurrerShader.setFloat("width", width);
+	textureBlurrerShader.setFloat("height", height);
 
-	glDispatchCompute(textureWidth, textureHeight, 1);
+	glDispatchCompute(textureWidth/8, textureHeight/8, 1);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 

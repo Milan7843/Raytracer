@@ -1,6 +1,6 @@
 #version 460 core
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 uniform sampler2D originalTexture;
 
@@ -10,42 +10,43 @@ uniform float width;
 uniform float height;
 
 vec4 sampleOriginalTexture(vec2 pos)
-{/*
-    if (pos.x < 0)
-        pos.x = -pos.x;
-    if (pos.y < 0)
-        pos.y = -pos.y;
-    if (pos.x > width)
-        pos.x = width;
-    if (pos.y > height)
-        pos.y = height;
-    */
+{
+    if (pos.x < 0 || pos.y < 0 || pos.x >= width || pos.y >= height)
+        return vec4(0.0);
+    
     return texture(originalTexture, pos / vec2(width, height));
 }
 
 void main()
 {
-    // 2 dimensional indices
-    int cx = int(gl_GlobalInvocationID.x);
-    int cy = int(gl_GlobalInvocationID.y);
+    int blurSize = 6;
+    float cutoff = blurSize* blurSize;
 
-    int blurSize = 0;
-    float cutoff = 16;
+    vec4 cummulativeSample = vec4(0.0);
 
-    float samples = (blurSize*2 + 1.) * (blurSize*2 + 1.);
+    float foundOutline = 0.0;
 
-    vec4 cummulativeSample = sampleOriginalTexture(gl_GlobalInvocationID.xy);
-
-    for (int y = -blurSize; y <= blurSize; y++)
+    if (sampleOriginalTexture(gl_GlobalInvocationID.xy) == vec4(1.0, 1.0, 1.0, 0.0))
     {
-        for (int x = -blurSize; x <= blurSize; x++)
+        // Pixel was on geometry
+        imageStore(blurredTexture, ivec2(gl_GlobalInvocationID.xy), vec4(1.0));
+        return;
+    }
+
+    for (int y = -blurSize * 2; y <= blurSize * 2; y++)
+    {
+        for (int x = -blurSize * 2; x <= blurSize * 2; x++)
         {
-            //cummulativeSample += sampleOriginalTexture(gl_GlobalInvocationID.xy + vec2(x, y)) / samples;
+            if (x*x + y*y < cutoff && 
+                sampleOriginalTexture(gl_GlobalInvocationID.xy + vec2(x, y)) != 0.0)
+            {
+                foundOutline = 1.0;
+                break;
+            }
         }
     }
 
     //vec4 originalColor = sampleOriginalTexture(gl_GlobalInvocationID.xy);
 
-    //imageStore(blurredTexture, ivec2(gl_GlobalInvocationID.xy), texture(originalTexture, gl_GlobalInvocationID.xy / vec2(width, height))/ 2.);
-    imageStore(blurredTexture, ivec2(gl_GlobalInvocationID.xy), vec4(0.8, 0.3, 0.6, 1.0));
+    imageStore(blurredTexture, ivec2(gl_GlobalInvocationID.xy), foundOutline * vec4(0.8, 0.4, 0.7, 1.0));
 }
