@@ -359,15 +359,25 @@ void Scene::draw(AbstractShader* shader)
 	glBindTexture(GL_TEXTURE_2D, getHDRI());
 
 	// Drawing each model with the given shader
+	unsigned int objectIndex{ 0 };
+	// Setting the object type to model
+	shader->setInt("objectType", 1);
 	for (Model& model : models)
 	{
+		shader->setInt("objectIndex", objectIndex);
 		model.draw(shader, (Scene*)this);
+		objectIndex++;
 	}
 
 	// Drawing each sphere with the given shader
+	objectIndex = 0;
+	// Setting the object type to sphere
+	shader->setInt("objectType", 2);
 	for (Sphere& sphere : spheres)
 	{
+		shader->setInt("objectIndex", objectIndex);
 		sphere.draw(shader, (Scene*)this);
+		objectIndex++;
 	}
 }
 
@@ -524,6 +534,27 @@ std::vector<DirectionalLight>& Scene::getDirectionalLights()
 std::vector<AmbientLight>& Scene::getAmbientLights()
 {
 	return ambientLights;
+}
+
+void Scene::markSelected(unsigned int objectType, unsigned int objectIndex)
+{
+	// There can only be one selected at a time
+	markAllUnselected();
+
+	switch (objectType)
+	{
+		case 0:
+			// No object was selected: unselect all and stop
+			return;
+		case 1:
+			// Model was selected
+			models[objectIndex].setSelected(true);
+			return;
+		case 2:
+			// Sphere was selected
+			spheres[objectIndex].setSelected(true);
+			return;
+	}
 }
 
 std::vector<Model>& Scene::getModels()

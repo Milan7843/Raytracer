@@ -43,6 +43,10 @@ public:
 
 	void handleInput(GLFWwindow* window, Camera& camera);
 
+	// Give a signal that a new object has been selected.
+	// This will open it's editor on the next frame
+	void markNewObjectSelected();
+
 	bool isEnabled();
 
 private:
@@ -50,6 +54,10 @@ private:
 	unsigned int guiSwitchKeyPreviousState = 0;
 
 	unsigned int interfaceToggleKey = GLFW_KEY_TAB;
+
+	// Signal that a new object has been selected.
+	// This will open it's editor on the next frame.
+	bool newObjectSelected{ false };
 
 	// Format a number of seconds
 	std::string formatTime(float time);

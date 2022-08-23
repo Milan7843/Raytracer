@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ObjectScreenSelector.cpp" />
     <ClCompile Include="src\file_handling\FileUtility.cpp" />
     <ClCompile Include="src\HDRIRenderer.cpp" />
     <ClCompile Include="src\OutlineRenderer.cpp" />
@@ -56,6 +57,7 @@
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ObjectScreenSelector.h" />
     <ClInclude Include="src\file_handling\FileUtility.h" />
     <ClInclude Include="src\HDRIRenderer.h" />
     <ClInclude Include="src\OutlineRenderer.h" />
@@ -609,6 +611,7 @@
     <None Include="src\Shaders\bufferedRaytracingFragmentShader.shader" />
     <None Include="src\Shaders\hdriFragment.shader" />
     <None Include="src\Shaders\hdriVertex.shader" />
+    <None Include="src\Shaders\objectClickColoringShader.shader" />
     <None Include="src\Shaders\outlineRenderToTextureFragment.shader" />
     <None Include="src\Shaders\rasterizedView.shader" />
     <None Include="src\Shaders\raymarchFragmentShader.shader" />

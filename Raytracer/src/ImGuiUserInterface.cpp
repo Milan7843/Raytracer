@@ -68,7 +68,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 	bool openSaveAsPopup{ false };
 
 	// Unselecting all objects: they will be marked as selected as needed later in this function
-	sceneManager.getCurrentScene().markAllUnselected();
+	//sceneManager.getCurrentScene().markAllUnselected();
 
 	// Menu Bar
 	if (ImGui::BeginMenuBar())
@@ -404,6 +404,11 @@ void ImGuiUserInterface::handleInput(GLFWwindow* window, Camera& camera)
 	}
 
 	guiSwitchKeyPreviousState = glfwGetKey(window, interfaceToggleKey);
+}
+
+void ImGuiUserInterface::markNewObjectSelected()
+{
+	this->newObjectSelected = true;
 }
 
 bool ImGuiUserInterface::isEnabled()

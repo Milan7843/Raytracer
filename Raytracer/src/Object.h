@@ -70,7 +70,7 @@ protected:
 	bool updated{ true };
 
 	// Whether this object is selected by the user, used for deciding whether to draw an outline
-	bool selected{ true };
+	bool selected{ false };
 
 	std::string name;
 };

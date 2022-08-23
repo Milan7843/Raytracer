@@ -121,6 +121,8 @@ int Application::Start()
 
     HDRIRenderer hdriRenderer("src/shaders/hdriVertex.shader", "src/shaders/hdriFragment.shader");
 
+    ObjectScreenSelector objectScreenSelector(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
     raytracingRenderer.bindSceneManager(&sceneManager);
 
     sceneManager.getCurrentScene().generateTriangleBuffer();
@@ -198,6 +200,18 @@ int Application::Start()
         }
         else
         {
+            // Checking for a click on an object on mouse click
+            if (userInterface.isEnabled() && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+            {
+                double xpos, ypos;
+                glfwGetCursorPos(window, &xpos, &ypos);
+                if (objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), xpos, ypos))
+                {
+                    // An object was clicked; force it's editor open
+                    userInterface.markNewObjectSelected();
+                }
+            }
+
             glDisable(GL_DEPTH_TEST);
             // Drawing the HDRI (skybox) if using it as a background is enabled
             if (*sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer())
@@ -229,7 +243,11 @@ int Application::Start()
 
             sceneManager.getCurrentScene().draw(&rasterizedShader);
 
+            // Rendering the outlines for selected objects
             outlineRenderer.render(sceneManager.getCurrentScene());
+
+            // Rendering a preview of the colours used to select an object by clicking on it
+            //objectScreenSelector.renderTexturePreview(sceneManager.getCurrentScene(), screenQuadVAO);
         }
 
         userInterface.drawUserInterface(window, sceneManager, sceneManager.getCurrentScene().getActiveCamera(), raytracingRenderer, &inRaytraceMode);

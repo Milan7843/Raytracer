@@ -94,6 +94,9 @@ public:
 	// Mark all objects in this scene as unselected
 	void markAllUnselected();
 
+	// Mark an object of the given type and the index as selected
+	void markSelected(unsigned int objectType, unsigned int objectIndex);
+
 	// Get a pointer to the name of this scene
 	std::string* getNamePointer();
 

@@ -23,6 +23,7 @@
 #include "HDRIRenderer.h"
 #include "ImGuiUserInterface.h"
 #include "OutlineRenderer.h"
+#include "ObjectScreenSelector.h"
 
 #include "CoordinateUtility.h"
 #include "Logger.h"
