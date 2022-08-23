@@ -29,7 +29,11 @@ public:
 	// Render an outline for the given objects
 	void render(Scene& scene);
 
+
+
 private:
+
+	glm::vec3 outlineColor{ glm::vec3(0.9f, 0.3f, 0.8f) };
 
 	unsigned int screenQuadVAO{ 0 };
 
@@ -46,8 +50,8 @@ private:
 	unsigned int height;
 
 	// Texture parameters
-	const unsigned int textureWidth{ 1280 };
-	const unsigned int textureHeight{ 720 };
+	const unsigned int textureWidth{ 1200 };
+	const unsigned int textureHeight{ 700 };
 
 	// The shader to render the objects to the textures
 	Shader objectRenderShader;

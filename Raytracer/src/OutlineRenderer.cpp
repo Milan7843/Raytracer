@@ -113,8 +113,9 @@ void OutlineRenderer::render(Scene& scene)
 	textureBlurrerShader.use();
 	textureBlurrerShader.setInt("originalTexture", 0);
 	textureBlurrerShader.setInt("blurredTexture", 1);
-	textureBlurrerShader.setFloat("width", width);
-	textureBlurrerShader.setFloat("height", height);
+	textureBlurrerShader.setFloat("width", textureWidth);
+	textureBlurrerShader.setFloat("height", textureHeight);
+	textureBlurrerShader.setVector3("outlineColor", outlineColor);
 
 	glDispatchCompute(textureWidth/8, textureHeight/8, 1);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -136,4 +137,7 @@ void OutlineRenderer::render(Scene& scene)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 	glBindBuffer(GL_VERTEX_ARRAY, 0);
+
+	// Setting viewport size back to normal
+	glViewport(0, 0, width, height);
 }

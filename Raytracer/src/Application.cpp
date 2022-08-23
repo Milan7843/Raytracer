@@ -198,9 +198,12 @@ int Application::Start()
         }
         else
         {
+            glDisable(GL_DEPTH_TEST);
             // Drawing the HDRI (skybox) if using it as a background is enabled
             if (*sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer())
                 hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI(), sceneManager.getCurrentScene().getActiveCamera(), WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
+            glEnable(GL_DEPTH_TEST);
 
             /* REGULAR RENDERING */
             solidColorShader.use();
