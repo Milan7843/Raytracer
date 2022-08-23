@@ -74,6 +74,9 @@ public:
 	// Draw this scene with the given shader
 	void draw(AbstractShader* shader);
 
+	// Draw only the selected objects in this scene with the given shader
+	void drawSelected(AbstractShader* shader);
+
 	// Write the data in the lights vector into the shader
 	void writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates);
 	// Write the data in the materials vector into the shader
@@ -87,6 +90,9 @@ public:
 
 	// Bind the buffer holding all triangles
 	void bindTriangleBuffer();
+
+	// Mark all objects in this scene as unselected
+	void markAllUnselected();
 
 	// Get a pointer to the name of this scene
 	std::string* getNamePointer();

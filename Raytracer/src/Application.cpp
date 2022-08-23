@@ -39,9 +39,6 @@ int Application::Start()
         return -1;
     }
 
-    // Setting viewport size
-    glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
-
     // Enabling depth testing for rasterized view: makes sure objects get drawn on top of each other in the correct order
     glEnable(GL_DEPTH_TEST);
 
@@ -131,6 +128,8 @@ int Application::Start()
     // Generating the screen quad on which the raytraced image is rendered
     generateScreenQuad();
 
+    OutlineRenderer outlineRenderer(WINDOW_SIZE_X, WINDOW_SIZE_Y, screenQuadVAO);
+
     // Generating a VAO for the axes so that they can be rendered easily
     generateAxesVAO();
 
@@ -140,6 +139,9 @@ int Application::Start()
 
     while (!glfwWindowShouldClose(window))
     {
+        // Setting viewport size
+        glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -149,7 +151,6 @@ int Application::Start()
         sceneManager.getCurrentScene().writeMaterialsToShader(&rasterizedShader);
         //raytracingRenderer.updateMeshData(&scene);
         //sceneManager.getCurrentScene().checkObjectUpdates(&rasterizedShader);
-
 
         if (frame % 10 == 0 && false)
             std::cout << "FPS: " << 1.0f / deltaTime << std::endl;
@@ -197,9 +198,12 @@ int Application::Start()
         }
         else
         {
+            glDisable(GL_DEPTH_TEST);
             // Drawing the HDRI (skybox) if using it as a background is enabled
             if (*sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer())
                 hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI(), sceneManager.getCurrentScene().getActiveCamera(), WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
+            glEnable(GL_DEPTH_TEST);
 
             /* REGULAR RENDERING */
             solidColorShader.use();
@@ -224,6 +228,8 @@ int Application::Start()
             rasterizedShader.setMat4("projection", projection);
 
             sceneManager.getCurrentScene().draw(&rasterizedShader);
+
+            outlineRenderer.render(sceneManager.getCurrentScene());
         }
 
         userInterface.drawUserInterface(window, sceneManager, sceneManager.getCurrentScene().getActiveCamera(), raytracingRenderer, &inRaytraceMode);

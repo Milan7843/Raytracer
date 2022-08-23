@@ -371,6 +371,23 @@ void Scene::draw(AbstractShader* shader)
 	}
 }
 
+void Scene::drawSelected(AbstractShader* shader)
+{
+	// Drawing each model with the given shader if it is selected
+	for (Model& model : models)
+	{
+		if (model.isSelected())
+			model.draw(shader, (Scene*)this);
+	}
+
+	// Drawing each sphere with the given shader if it is selected
+	for (Sphere& sphere : spheres)
+	{
+		if (sphere.isSelected())
+			sphere.draw(shader, (Scene*)this);
+	}
+}
+
 void Scene::writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates)
 {
 	shader->use();
@@ -469,6 +486,19 @@ void Scene::bindTriangleBuffer()
 std::string* Scene::getNamePointer()
 {
 	return &name;
+}
+
+void Scene::markAllUnselected()
+{
+	for (Model& model : models)
+	{
+		model.setSelected(false);
+	}
+
+	for (Sphere& sphere : spheres)
+	{
+		sphere.setSelected(false);
+	}
 }
 
 bool* Scene::getUseHDRIAsBackgroundPointer()

@@ -117,6 +117,9 @@
     <ClCompile Include="src\file_handling\FileUtility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\OutlineRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -1316,6 +1319,9 @@
     <ClInclude Include="src\stb_image_write.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\OutlineRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\assimp\color4.inl">
@@ -1769,6 +1775,9 @@
     <None Include="src\Shaders\rasterizedView.shader" />
     <None Include="src\Shaders\hdriVertex.shader" />
     <None Include="src\Shaders\hdriFragment.shader" />
+    <None Include="src\Shaders\outlineRenderToTextureFragment.shader" />
+    <None Include="src\Shaders\screenTextureFragment.shader" />
+    <None Include="src\Shaders\blurComputeShader.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />

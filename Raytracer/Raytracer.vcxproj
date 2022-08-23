@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\file_handling\FileUtility.cpp" />
     <ClCompile Include="src\HDRIRenderer.cpp" />
+    <ClCompile Include="src\OutlineRenderer.cpp" />
     <ClCompile Include="src\SceneManager.cpp" />
     <ClCompile Include="src\file_handling\SceneFileSaver.cpp" />
     <ClCompile Include="src\Logger.cpp" />
@@ -57,6 +58,7 @@
   <ItemGroup>
     <ClInclude Include="src\file_handling\FileUtility.h" />
     <ClInclude Include="src\HDRIRenderer.h" />
+    <ClInclude Include="src\OutlineRenderer.h" />
     <ClInclude Include="src\SceneManager.h" />
     <ClInclude Include="src\file_handling\SceneFileSaver.h" />
     <ClInclude Include="src\Logger.h" />
@@ -602,16 +604,19 @@
     <None Include="include\glm\gtx\vector_query.inl" />
     <None Include="include\glm\gtx\wrap.inl" />
     <None Include="src\Shaders\backup.shader" />
+    <None Include="src\Shaders\blurComputeShader.shader" />
     <None Include="src\Shaders\bufferedIndirectLightingRaytracingFragmentShader.shader" />
     <None Include="src\Shaders\bufferedRaytracingFragmentShader.shader" />
     <None Include="src\Shaders\hdriFragment.shader" />
     <None Include="src\Shaders\hdriVertex.shader" />
+    <None Include="src\Shaders\outlineRenderToTextureFragment.shader" />
     <None Include="src\Shaders\rasterizedView.shader" />
     <None Include="src\Shaders\raymarchFragmentShader.shader" />
     <None Include="src\Shaders\raymarchFragmentShaderBackup.shader" />
     <None Include="src\Shaders\raymarchVertexShader.shader" />
     <None Include="src\Shaders\raytraceComputeShaderSampled.shader" />
     <None Include="src\Shaders\raytracingFragmentShader.shader" />
+    <None Include="src\Shaders\screenTextureFragment.shader" />
     <None Include="src\Shaders\solidColorFragmentShader.shader" />
     <None Include="src\Shaders\solidColorVertexShader.shader" />
     <None Include="src\Shaders\textureFragmentShader.shader" />

@@ -42,6 +42,10 @@ public:
 	// Mark this object as being not updated
 	void setNotUpdated();
 
+	// Get whether this object is selected
+	bool isSelected();
+	// Mark this object as selected or unselected
+	void setSelected(bool selected);
 
 	glm::vec3* getPositionPointer();
 	glm::vec3* getRotationPointer();
@@ -63,7 +67,10 @@ protected:
 	glm::vec3 scaleVector{ glm::vec3(1.0f) };
 
 	// Whether this object's data has been modified
-	bool updated = true;
+	bool updated{ true };
+
+	// Whether this object is selected by the user, used for deciding whether to draw an outline
+	bool selected{ true };
 
 	std::string name;
 };
