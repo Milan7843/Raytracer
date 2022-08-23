@@ -376,14 +376,14 @@ void Scene::drawSelected(AbstractShader* shader)
 	// Drawing each model with the given shader if it is selected
 	for (Model& model : models)
 	{
-		//if (model.isSelected())
+		if (model.isSelected())
 			model.draw(shader, (Scene*)this);
 	}
 
 	// Drawing each sphere with the given shader if it is selected
 	for (Sphere& sphere : spheres)
 	{
-		//if (sphere.isSelected())
+		if (sphere.isSelected())
 			sphere.draw(shader, (Scene*)this);
 	}
 }
