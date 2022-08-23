@@ -97,6 +97,9 @@ public:
 	// Mark an object of the given type and the index as selected
 	void markSelected(unsigned int objectType, unsigned int objectIndex);
 
+	// Get the data of the selected object into the integers
+	void getSelectedObjectData(unsigned int* objectType, unsigned int* objectIndex);
+
 	// Get a pointer to the name of this scene
 	std::string* getNamePointer();
 

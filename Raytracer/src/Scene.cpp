@@ -557,6 +557,31 @@ void Scene::markSelected(unsigned int objectType, unsigned int objectIndex)
 	}
 }
 
+void Scene::getSelectedObjectData(unsigned int* objectType, unsigned int* objectIndex)
+{
+	unsigned int currentObjectIndex{ 0 };
+	for (Model& model : models)
+	{
+		if (model.isSelected())
+		{
+			*objectType = 1;
+			*objectIndex = currentObjectIndex;
+		}
+		currentObjectIndex++;
+	}
+
+	currentObjectIndex = 0;
+	for (Sphere& sphere : spheres)
+	{
+		if (sphere.isSelected())
+		{
+			*objectType = 2;
+			*objectIndex = currentObjectIndex;
+		}
+		currentObjectIndex++;
+	}
+}
+
 std::vector<Model>& Scene::getModels()
 {
 	return models;

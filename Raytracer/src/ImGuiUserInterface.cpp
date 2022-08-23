@@ -282,6 +282,15 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 		ImGui::EndPopup();
 	}
 
+
+	// Data used to automatically open the selected object's editor window
+	unsigned int selectedObjectType{ 0 };
+	unsigned int selectedObjectIndex{ 0 };
+	if (newObjectSelected)
+	{
+		sceneManager.getCurrentScene().getSelectedObjectData(&selectedObjectType, &selectedObjectIndex);
+	}
+
 	// Creating the tab bar
 	ImGui::BeginTabBar("full_tab_bar");
 
@@ -334,19 +343,38 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 		ImGui::BeginTabBar("scene_edit_tab_bar");
 		ImGui::BeginGroup();
 
-		if (ImGui::BeginTabItem("Objects"))
+		ImGuiTabItemFlags_ objectsFlag{ ImGuiTabItemFlags_None };
+		ImGuiTabItemFlags_ materialsFlag{ ImGuiTabItemFlags_None };
+		ImGuiTabItemFlags_ lightsFlag{ ImGuiTabItemFlags_None };
+
+		// Automatically open correct tab on selection
+		if (newObjectSelected)
 		{
-			drawObjects(sceneManager);
+			std::cout << selectedObjectType << std::endl;
+			switch (selectedObjectType)
+			{
+				// Model or sphere: open the objects tab
+				case 1: // model
+				case 2: // sphere
+					objectsFlag = ImGuiTabItemFlags_SetSelected;
+					break;
+			}
+		}
+
+
+		if (ImGui::BeginTabItem("Objects", (bool*)0, objectsFlag))
+		{
+			drawObjects(sceneManager, selectedObjectType);
 			ImGui::EndTabItem();
 		}
 
-		if (ImGui::BeginTabItem("Materials"))
+		if (ImGui::BeginTabItem("Materials", (bool*)0, materialsFlag))
 		{
 			drawMaterials(sceneManager.getCurrentScene());
 			ImGui::EndTabItem();
 		}
 
-		if (ImGui::BeginTabItem("Lights"))
+		if (ImGui::BeginTabItem("Lights", (bool*)0, lightsFlag))
 		{
 			drawLights(sceneManager.getCurrentScene());
 			ImGui::EndTabItem();
@@ -371,6 +399,8 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 
 	ImGui::End();
 
+	// Must reset each frame as the marking only lasts for a single frame
+	newObjectSelected = false;
 
 	// Rendering
 	ImGui::Render();
@@ -671,7 +701,7 @@ void ImGuiUserInterface::drawLight(AmbientLight& light, Scene& scene, unsigned i
 	}
 }
 
-void ImGuiUserInterface::drawObjects(SceneManager& sceneManager)
+void ImGuiUserInterface::drawObjects(SceneManager& sceneManager, unsigned int selectedObjectType)
 {
 	// Generating the char[] used for the material slots
 	std::string materialSlots = "";
@@ -682,6 +712,13 @@ void ImGuiUserInterface::drawObjects(SceneManager& sceneManager)
 	const char* materialSlotsCharArray = materialSlots.c_str();
 
 	// Drawing the models
+
+	// Automatically opening the model treenode
+	if (newObjectSelected && selectedObjectType == 1)
+	{
+		ImGui::SetNextItemOpen(true, ImGuiCond_Always);
+	}
+
 	if (ImGui::TreeNode("Models"))
 	{
 		ImGui::PushItemWidth(-1);
@@ -730,7 +767,15 @@ void ImGuiUserInterface::drawObjects(SceneManager& sceneManager)
 		ImGui::PopItemWidth();
 		ImGui::TreePop();
 	}
+
 	// Drawing the spheres
+
+	// Automatically opening the sphere treenode
+	if (newObjectSelected && selectedObjectType == 2)
+	{
+		ImGui::SetNextItemOpen(true, ImGuiCond_Always);
+	}
+
 	if (ImGui::TreeNode("Spheres"))
 	{
 		ImGui::PushItemWidth(-1);
@@ -768,9 +813,15 @@ void ImGuiUserInterface::drawObject(Model& object, Scene& scene, unsigned int in
 	if (ImGui::Button(popupID.c_str()))
 		ImGui::OpenPopup(popupID.c_str());
 
+	if (newObjectSelected && object.isSelected())
+		ImGui::OpenPopup(popupID.c_str());
+
 	if (ImGui::BeginPopup(popupID.c_str()))
 	{
-		// Then marking it as selected again if it's popup is open
+		// Then making sure no other objects are selected simultaneously
+		scene.markAllUnselected();
+
+		// Marking the object as selected if its popup is open
 		object.setSelected(true);
 
 		ImGui::InputText("Name", &object.getName());
@@ -843,9 +894,15 @@ void ImGuiUserInterface::drawObject(Sphere& object, Scene& scene, unsigned int i
 	if (ImGui::Button(popupID.c_str()))
 		ImGui::OpenPopup(popupID.c_str());
 
+	if (newObjectSelected && object.isSelected())
+		ImGui::OpenPopup(popupID.c_str());
+
 	if (ImGui::BeginPopup(popupID.c_str()))
 	{
-		// Then marking it as selected again if it's popup is open
+		// Then making sure no other objects are selected simultaneously
+		scene.markAllUnselected();
+
+		// Marking the object as selected if its popup is open
 		object.setSelected(true);
 
 		ImGui::InputText("Name", &object.getName());
