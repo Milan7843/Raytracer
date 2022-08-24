@@ -19,17 +19,6 @@ void Object::setNotUpdated()
 {
 	this->updated = false;
 }
-
-bool Object::isSelected()
-{
-	return this->selected;
-}
-
-void Object::setSelected(bool selected)
-{
-	this->selected = selected;
-}
-
 void Object::writeDataToStream(std::ofstream& filestream)
 {
 	filestream << getName() << "\n";

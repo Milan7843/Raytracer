@@ -19,6 +19,39 @@ Mesh::~Mesh()
 
 }
 
+void Mesh::drawInterface(Scene& scene)
+{
+    unsigned int i = 0;
+
+    // Preview the currently selected name
+    if (ImGui::BeginCombo((getName() + "##combo").c_str(), (*(scene.getMaterials()[*getMaterialIndexPointer()].getNamePointer())).c_str()))
+    {
+        // Looping over each material to check whether it was clicked;
+        // If it was: select the index of the material as the material index for this mesh
+        for (Material& material : scene.getMaterials())
+        {
+            bool thisMaterialSelected = (i == *getMaterialIndexPointer());
+
+            // Button for selecting material
+            if (ImGui::Selectable((*(scene.getMaterials()[i].getNamePointer())).c_str()))
+            {
+                *getMaterialIndexPointer() = i;
+            }
+
+            if (thisMaterialSelected)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
+
+            // Increment material counter
+            i++;
+        }
+
+        // End this combo selector
+        ImGui::EndCombo();
+    }
+}
+
 int Mesh::getTriangleSize()
 {
     return sizeof(Triangle);

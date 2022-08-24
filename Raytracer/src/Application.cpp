@@ -201,14 +201,17 @@ int Application::Start()
         else
         {
             // Checking for a click on an object on mouse click
-            if (userInterface.isEnabled() && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+            if (userInterface.isEnabled()
+                && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS
+                && !userInterface.isMouseOnGUI()
+                )
             {
                 double xpos, ypos;
                 glfwGetCursorPos(window, &xpos, &ypos);
+
                 if (objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), xpos, ypos))
                 {
-                    // An object was clicked; force it's editor open
-                    userInterface.markNewObjectSelected();
+                    // An object was clicked
                 }
             }
 

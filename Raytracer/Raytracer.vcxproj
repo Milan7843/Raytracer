@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ImGuiUtility.cpp" />
+    <ClCompile Include="src\ImGuiEditorInterface.cpp" />
     <ClCompile Include="src\ObjectScreenSelector.cpp" />
     <ClCompile Include="src\file_handling\FileUtility.cpp" />
     <ClCompile Include="src\HDRIRenderer.cpp" />
@@ -57,6 +59,8 @@
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ImGuiUtility.h" />
+    <ClInclude Include="src\ImGuiEditorInterface.h" />
     <ClInclude Include="src\ObjectScreenSelector.h" />
     <ClInclude Include="src\file_handling\FileUtility.h" />
     <ClInclude Include="src\HDRIRenderer.h" />

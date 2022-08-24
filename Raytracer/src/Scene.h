@@ -7,12 +7,24 @@
 #include "Lights/PointLight.h"
 #include "Lights/DirectionalLight.h"
 #include "Lights/AmbientLight.h"
+#include "ImGuiEditorInterface.h"
 #include "Model.h"
 #include "Sphere.h"
 #include "Material.h"
 #include "Camera.h"
 
 #include <iostream>
+
+enum ObjectType
+{
+	NONE,
+	MODEL,
+	SPHERE,
+	POINT_LIGHT,
+	DIRECTIONAL_LIGHT,
+	AMBIENT_LIGHT,
+	MATERIAL
+};
 
 class Scene
 {
@@ -91,11 +103,11 @@ public:
 	// Bind the buffer holding all triangles
 	void bindTriangleBuffer();
 
-	// Mark all objects in this scene as unselected
-	void markAllUnselected();
-
 	// Mark an object of the given type and the index as selected
-	void markSelected(unsigned int objectType, unsigned int objectIndex);
+	void markSelected(ObjectType objectType, unsigned int objectIndex);
+
+	// Draw the currently selected object using ImGui
+	void drawCurrentlySelectedObjectInterface();
 
 	// Get the data of the selected object into the integers
 	void getSelectedObjectData(unsigned int* objectType, unsigned int* objectIndex);
@@ -118,6 +130,12 @@ public:
 private:
 
 	std::string name{};
+
+	// Keeping track of the currently selected object
+	ImGuiEditorInterface* currentlySelectedObject;
+
+	// Get a pointer to the currently selected objects
+	ImGuiEditorInterface* getSelectedObject();
 
 	// The hdri currently loaded
 	unsigned int hdri = 0;

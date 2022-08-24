@@ -16,6 +16,14 @@ PointLight::~PointLight()
 {
 }
 
+void PointLight::drawInterface(Scene& scene)
+{
+	ImGui::InputText("##", &getName());
+	ImGui::ColorEdit3("Color", (float*)getColorPointer());
+	ImGui::DragFloat("Intensity", getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
+	ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
+}
+
 void PointLight::writeDataToStream(std::ofstream& filestream)
 {
 	// Writing basic data using the base class

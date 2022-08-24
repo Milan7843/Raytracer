@@ -22,6 +22,7 @@
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+#include "ImGuiUtility.h"
 #include "Scene.h"
 #include "SceneManager.h"
 #include "Camera.h"
@@ -43,11 +44,9 @@ public:
 
 	void handleInput(GLFWwindow* window, Camera& camera);
 
-	// Give a signal that a new object has been selected.
-	// This will open it's editor on the next frame
-	void markNewObjectSelected();
-
 	bool isEnabled();
+
+	bool isMouseOnGUI();
 
 private:
 	bool imGuiEnabled = true;
@@ -55,22 +54,15 @@ private:
 
 	unsigned int interfaceToggleKey = GLFW_KEY_TAB;
 
-	// Signal that a new object has been selected.
-	// This will open it's editor on the next frame.
-	bool newObjectSelected{ false };
-
 	// Format a number of seconds
 	std::string formatTime(float time);
-
-	// Draw a help marker
-	void drawHelpMarker(const char* desc);
 
 	// Draw all the render settings
 	void drawRenderSettings(SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode);
 
 	// Represent a material using ImGui
 	void drawMaterials(Scene& scene);
-	void drawMaterial(Material& material, unsigned int index);
+	void drawMaterial(Material& material, Scene& scene, unsigned int index);
 
 	// Represent a point light using ImGui
 	void drawLights(Scene& scene);
@@ -82,7 +74,7 @@ private:
 	//void drawLight(PointLight& light);
 
 	// Represent an object using ImGui
-	void drawObjects(SceneManager& sceneManager, unsigned int selectedObjectType);
+	void drawObjects(SceneManager& sceneManager);
 	void drawObject(Model& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray);
 	void drawMesh(Mesh& object, Scene& scene, const char* materialSlotsCharArray, unsigned int index);
 	void drawObject(Sphere& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray);

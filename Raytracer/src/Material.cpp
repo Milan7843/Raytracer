@@ -8,6 +8,7 @@ Material::Material()
 	reflectiveness(0.0f),
 	transparency(0.0f),
 	refractiveness(0.0f),
+	reflectionDiffusion(0.0f),
 	emission(glm::vec3(0.0f))
 {
 }
@@ -59,6 +60,18 @@ void Material::writeDataToStream(std::ofstream& filestream)
 	filestream << reflectionDiffusion << "\n";
 	filestream << emission.r << " " << emission.g << " " << emission.b << "\n";
 
+}
+
+void Material::drawInterface()
+{
+	ImGui::InputText("Name", getNamePointer());
+	ImGui::ColorEdit3("Color", (float*)getColorPointer());
+	ImGui::ColorEdit3("Emission", (float*)getEmissionPointer());
+	ImGui::DragFloat("Reflectiveness", getReflectivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
+	ImGui::DragFloat("Transparency", getTransparencyPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
+	ImGui::DragFloat("Refractiveness", getRefractivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
+	ImGui::DragFloat("Reflective diffusion", getReflectionDiffusionPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
+	ImGuiUtility::drawHelpMarker("How much the reflection can be diffused. Basically acts as a blur.");
 }
 
 void Material::writeToShader(AbstractShader* shader, unsigned int index)

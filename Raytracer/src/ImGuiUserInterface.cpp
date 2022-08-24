@@ -283,14 +283,6 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 	}
 
 
-	// Data used to automatically open the selected object's editor window
-	unsigned int selectedObjectType{ 0 };
-	unsigned int selectedObjectIndex{ 0 };
-	if (newObjectSelected)
-	{
-		sceneManager.getCurrentScene().getSelectedObjectData(&selectedObjectType, &selectedObjectIndex);
-	}
-
 	// Creating the tab bar
 	ImGui::BeginTabBar("full_tab_bar");
 
@@ -343,6 +335,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 		ImGui::BeginTabBar("scene_edit_tab_bar");
 		ImGui::BeginGroup();
 
+		/*
 		ImGuiTabItemFlags_ objectsFlag{ ImGuiTabItemFlags_None };
 		ImGuiTabItemFlags_ materialsFlag{ ImGuiTabItemFlags_None };
 		ImGuiTabItemFlags_ lightsFlag{ ImGuiTabItemFlags_None };
@@ -360,21 +353,22 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 					break;
 			}
 		}
+		*/
 
-
-		if (ImGui::BeginTabItem("Objects", (bool*)0, objectsFlag))
+		//if (ImGui::BeginTabItem("Objects", (bool*)0, objectsFlag))
+		if (ImGui::BeginTabItem("Objects"))
 		{
-			drawObjects(sceneManager, selectedObjectType);
+			drawObjects(sceneManager);
 			ImGui::EndTabItem();
 		}
 
-		if (ImGui::BeginTabItem("Materials", (bool*)0, materialsFlag))
+		if (ImGui::BeginTabItem("Materials"))
 		{
 			drawMaterials(sceneManager.getCurrentScene());
 			ImGui::EndTabItem();
 		}
 
-		if (ImGui::BeginTabItem("Lights", (bool*)0, lightsFlag))
+		if (ImGui::BeginTabItem("Lights"))
 		{
 			drawLights(sceneManager.getCurrentScene());
 			ImGui::EndTabItem();
@@ -397,10 +391,12 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 
 	ImGui::EndTabBar();
 
-	ImGui::End();
 
-	// Must reset each frame as the marking only lasts for a single frame
-	newObjectSelected = false;
+	// Drawing the selected object
+	ImGui::Separator();
+	sceneManager.getCurrentScene().drawCurrentlySelectedObjectInterface();
+
+	ImGui::End();
 
 	// Rendering
 	ImGui::Render();
@@ -436,14 +432,15 @@ void ImGuiUserInterface::handleInput(GLFWwindow* window, Camera& camera)
 	guiSwitchKeyPreviousState = glfwGetKey(window, interfaceToggleKey);
 }
 
-void ImGuiUserInterface::markNewObjectSelected()
-{
-	this->newObjectSelected = true;
-}
-
 bool ImGuiUserInterface::isEnabled()
 {
 	return imGuiEnabled;
+}
+
+bool ImGuiUserInterface::isMouseOnGUI()
+{
+	std::cout << ImGui::GetIO().WantCaptureMouse << std::endl;
+	return ImGui::GetIO().WantCaptureMouse;
 }
 
 std::string ImGuiUserInterface::formatTime(float time)
@@ -456,44 +453,25 @@ std::string ImGuiUserInterface::formatTime(float time)
 	return std::format("{}h {}m {}s", hours, minutes, seconds);
 }
 
-void ImGuiUserInterface::drawHelpMarker(const char* desc)
-{
-	// Draw the help marker after whatever has already been drawn on this line
-	ImGui::SameLine();
-
-	// Gray text [?]
-	ImGui::TextDisabled("[?]");
-
-	// Drawing the help marker on hover
-	if (ImGui::IsItemHovered())
-	{
-		ImGui::BeginTooltip();
-		ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-		ImGui::TextUnformatted(desc);
-		ImGui::PopTextWrapPos();
-		ImGui::EndTooltip();
-	}
-}
-
 void ImGuiUserInterface::drawRenderSettings(SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode)
 {
 	ImGui::SliderInt("Block size", renderer.getBlockSizePointer(), 1, 100);
-	drawHelpMarker("The size of a render block in pixels.");
+	ImGuiUtility::drawHelpMarker("The size of a render block in pixels.");
 
 	ImGui::SliderInt("Multisamples", renderer.getMultisamplePointer(), 1, 5);
-	drawHelpMarker("The number of different sample points per pixel, works as anti-aliasing.");
+	ImGuiUtility::drawHelpMarker("The number of different sample points per pixel, works as anti-aliasing.");
 	ImGui::Text(camera.getInformation().c_str());
 
 	// Samples per render pass
 	ImGui::SliderInt("Sample count", renderer.getSampleCountPointer(), 1, 100);
-	drawHelpMarker("The number of samples per pixel per render pass.");
+	ImGuiUtility::drawHelpMarker("The number of samples per pixel per render pass.");
 
 	// Render passes per block
 	ImGui::SliderInt("Block passes", renderer.getRenderPassCountPointer(), 1, 100);
-	drawHelpMarker("The number of passes per block. Each pass will take the full number of samples for each pixel.");
+	ImGuiUtility::drawHelpMarker("The number of passes per block. Each pass will take the full number of samples for each pixel.");
 
 	ImGui::Checkbox("Use HDRI as background", sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer());
-	drawHelpMarker("Only if enabled, the HDRI will be drawn as the background.\nThe HDRI will be shown in reflections either way");
+	ImGuiUtility::drawHelpMarker("Only if enabled, the HDRI will be drawn as the background.\nThe HDRI will be shown in reflections either way");
 
 	// Button to switch between raytraced and rasterized views
 	if (ImGui::Button(*inRaytraceMode ? "View rasterized" : "View raytraced"))
@@ -510,7 +488,7 @@ void ImGuiUserInterface::drawMaterials(Scene& scene)
 	for (Material& material : scene.getMaterials())
 	{
 		// Drawing each material
-		drawMaterial(material, index);
+		drawMaterial(material, scene, index);
 		index++;
 	}
 
@@ -525,7 +503,7 @@ void ImGuiUserInterface::drawMaterials(Scene& scene)
 	ImGui::PopItemWidth();
 }
 
-void ImGuiUserInterface::drawMaterial(Material& material, unsigned int index)
+void ImGuiUserInterface::drawMaterial(Material& material, Scene& scene, unsigned int index)
 {
 	// Get the material name, then add a constant ID so that the 
 	// ID doesn't have to change when the material's name changes
@@ -536,21 +514,7 @@ void ImGuiUserInterface::drawMaterial(Material& material, unsigned int index)
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		ImGui::OpenPopup(popupID.c_str());
-
-	if (ImGui::BeginPopup(popupID.c_str()))
-	{
-		ImGui::InputText("Name", material.getNamePointer());
-		ImGui::ColorEdit3("Color", (float*)material.getColorPointer());
-		ImGui::ColorEdit3("Emission", (float*)material.getEmissionPointer());
-		ImGui::DragFloat("Reflectiveness", material.getReflectivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
-		ImGui::DragFloat("Transparency", material.getTransparencyPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
-		ImGui::DragFloat("Refractiveness", material.getRefractivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
-		ImGui::DragFloat("Reflective diffusion", material.getReflectionDiffusionPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
-		drawHelpMarker("How much the reflection can be diffused. Basically acts as a blur.");
-
-		ImGui::EndPopup();
-	}
+		scene.markSelected(ObjectType::MATERIAL, index);
 }
 
 void ImGuiUserInterface::drawLights(Scene& scene)
@@ -625,20 +589,14 @@ void ImGuiUserInterface::drawLight(PointLight& light, Scene& scene, unsigned int
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		ImGui::OpenPopup(popupID.c_str());
+		scene.markSelected(ObjectType::POINT_LIGHT, index);
 
-	if (ImGui::BeginPopup(popupID.c_str()))
+	if (ImGui::BeginPopupContextItem())
 	{
-		ImGui::InputText("##", &light.getName());
-		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
-		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
-		ImGui::DragFloat3("Position", (float*)light.getPositionPointer(), 0.01f);
-
 		if (ImGui::Button("Delete"))
 		{
 			scene.deletePointLight(index);
 		}
-
 		ImGui::EndPopup();
 	}
 }
@@ -647,28 +605,21 @@ void ImGuiUserInterface::drawLight(DirectionalLight& light, Scene& scene, unsign
 {
 	// Get the light name, then add a constant ID so that the 
 	// ID doesn't have to change when the light's name changes
-	std::string popupID{
+	std::string popupID {
 		light.getName()
 		+ "###dir_light_tree_node"
 		+ std::to_string(index)
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		ImGui::OpenPopup(popupID.c_str());
+		scene.markSelected(ObjectType::DIRECTIONAL_LIGHT, index);
 
-	if (ImGui::BeginPopup(popupID.c_str()))
+	if (ImGui::BeginPopupContextItem())
 	{
-		// Data inputs
-		ImGui::InputText("##", &light.getName());
-		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
-		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
-		ImGui::DragFloat3("Direction", (float*)light.getDirectionPointer(), 0.01f);
-
 		if (ImGui::Button("Delete"))
 		{
 			scene.deleteDirectionalLight(index);
 		}
-
 		ImGui::EndPopup();
 	}
 }
@@ -684,24 +635,19 @@ void ImGuiUserInterface::drawLight(AmbientLight& light, Scene& scene, unsigned i
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		ImGui::OpenPopup(popupID.c_str());
+		scene.markSelected(ObjectType::AMBIENT_LIGHT, index);
 
-	if (ImGui::BeginPopup(popupID.c_str()))
+	if (ImGui::BeginPopupContextItem())
 	{
-		ImGui::InputText("##", &light.getName());
-		ImGui::ColorEdit3("Color", (float*)light.getColorPointer());
-		ImGui::DragFloat("Intensity", light.getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
-
 		if (ImGui::Button("Delete"))
 		{
 			scene.deleteAmbientLight(index);
 		}
-
 		ImGui::EndPopup();
 	}
 }
 
-void ImGuiUserInterface::drawObjects(SceneManager& sceneManager, unsigned int selectedObjectType)
+void ImGuiUserInterface::drawObjects(SceneManager& sceneManager)
 {
 	// Generating the char[] used for the material slots
 	std::string materialSlots = "";
@@ -712,12 +658,6 @@ void ImGuiUserInterface::drawObjects(SceneManager& sceneManager, unsigned int se
 	const char* materialSlotsCharArray = materialSlots.c_str();
 
 	// Drawing the models
-
-	// Automatically opening the model treenode
-	if (newObjectSelected && selectedObjectType == 1)
-	{
-		ImGui::SetNextItemOpen(true, ImGuiCond_Always);
-	}
 
 	if (ImGui::TreeNode("Models"))
 	{
@@ -770,12 +710,6 @@ void ImGuiUserInterface::drawObjects(SceneManager& sceneManager, unsigned int se
 
 	// Drawing the spheres
 
-	// Automatically opening the sphere treenode
-	if (newObjectSelected && selectedObjectType == 2)
-	{
-		ImGui::SetNextItemOpen(true, ImGuiCond_Always);
-	}
-
 	if (ImGui::TreeNode("Spheres"))
 	{
 		ImGui::PushItemWidth(-1);
@@ -811,37 +745,14 @@ void ImGuiUserInterface::drawObject(Model& object, Scene& scene, unsigned int in
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		ImGui::OpenPopup(popupID.c_str());
+		scene.markSelected(ObjectType::MODEL, index);
 
-	if (newObjectSelected && object.isSelected())
-		ImGui::OpenPopup(popupID.c_str());
-
-	if (ImGui::BeginPopup(popupID.c_str()))
+	if (ImGui::BeginPopupContextItem())
 	{
-		// Then making sure no other objects are selected simultaneously
-		scene.markAllUnselected();
-
-		// Marking the object as selected if its popup is open
-		object.setSelected(true);
-
-		ImGui::InputText("Name", &object.getName());
-		// Showing transformations
-		ImGui::DragFloat3("Position", (float*)object.getPositionPointer(), 0.01f);
-		ImGui::DragFloat3("Rotation", (float*)object.getRotationPointer(), 0.01f);
-		ImGui::DragFloat3("Scale", (float*)object.getScalePointer(), 0.01f);
-
-		int meshIndex = 0;
-		// Drawing all the meshes of this model
-		for (Mesh& mesh : object.getMeshes())
-		{
-			drawMesh(mesh, scene, materialSlotsCharArray, meshIndex++);
-		}
-
 		if (ImGui::Button("Delete"))
 		{
 			scene.deleteModel(index);
 		}
-
 		ImGui::EndPopup();
 	}
 }
@@ -892,36 +803,14 @@ void ImGuiUserInterface::drawObject(Sphere& object, Scene& scene, unsigned int i
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		ImGui::OpenPopup(popupID.c_str());
+		scene.markSelected(ObjectType::SPHERE, index);
 
-	if (newObjectSelected && object.isSelected())
-		ImGui::OpenPopup(popupID.c_str());
-
-	if (ImGui::BeginPopup(popupID.c_str()))
+	if (ImGui::BeginPopupContextItem())
 	{
-		// Then making sure no other objects are selected simultaneously
-		scene.markAllUnselected();
-
-		// Marking the object as selected if its popup is open
-		object.setSelected(true);
-
-		ImGui::InputText("Name", &object.getName());
-
-		// Showing transformations
-		ImGui::DragFloat3("Position", (float*)object.getPositionPointer(), 0.01f);
-
-		// Drawing a dragfloat for the sphere's radius
-		Sphere& sphere = (Sphere&)object;
-		ImGui::DragFloat("Radius", sphere.getRadiusPointer(), 0.01f, 0.01f, 100.0f, "%.02f");
-
-		// Draw the first and only mesh
-		drawMesh(sphere.getMeshes()[0], scene, materialSlotsCharArray, index);
-
 		if (ImGui::Button("Delete"))
 		{
 			scene.deleteSphere(index);
 		}
-
 		ImGui::EndPopup();
 	}
 }

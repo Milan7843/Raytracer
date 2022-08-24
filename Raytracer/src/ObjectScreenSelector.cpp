@@ -30,13 +30,13 @@ bool ObjectScreenSelector::checkObjectClicked(Scene& scene, double x, double y)
 	unsigned int objectIndex{ (unsigned int)colorData[1] };
 
 	// Using the data to select/deselect an object
-	scene.markSelected(objectType, objectIndex);
+	scene.markSelected((ObjectType)objectType, objectIndex);
 
 	// Unbinding the frame buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Only found an object if objectType is not 0
-	return objectType != 0;
+	return objectType != ObjectType::NONE;
 }
 
 void ObjectScreenSelector::renderTexturePreview(Scene& scene, unsigned int screenQuadVAO)

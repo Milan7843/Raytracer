@@ -49,6 +49,9 @@ public:
 	void writeToShader(AbstractShader* shader, unsigned int ssbo, const glm::mat4& transformation);
 	void writePositionToShader(AbstractShader* shader);
 
+	// Draw an interface for this model using ImGui
+	virtual void drawInterface(Scene& scene);
+
 	static int getTriangleSize();
 
 	std::vector<Vertex> vertices;
