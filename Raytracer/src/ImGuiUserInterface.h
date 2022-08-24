@@ -46,6 +46,7 @@ public:
 
 	bool isEnabled();
 
+	// Get whether the mouse is currently on the GUI
 	bool isMouseOnGUI();
 
 private:

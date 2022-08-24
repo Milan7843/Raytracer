@@ -62,7 +62,7 @@ void Material::writeDataToStream(std::ofstream& filestream)
 
 }
 
-void Material::drawInterface()
+void Material::drawInterface(Scene& scene)
 {
 	ImGui::InputText("Name", getNamePointer());
 	ImGui::ColorEdit3("Color", (float*)getColorPointer());

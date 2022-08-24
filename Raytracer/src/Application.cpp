@@ -200,7 +200,7 @@ int Application::Start()
         }
         else
         {
-            // Checking for a click on an object on mouse click
+            // Checking for a click on an object on mouse click and mouse not on GUI
             if (userInterface.isEnabled()
                 && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS
                 && !userInterface.isMouseOnGUI()

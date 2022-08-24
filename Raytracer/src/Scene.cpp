@@ -556,6 +556,7 @@ void Scene::markSelected(ObjectType objectType, unsigned int objectIndex)
 
 		case MATERIAL:
 			// Material was selected
+			std::cout << "Material picked" << std::endl;
 			currentlySelectedObject = &materials[objectIndex];
 			return;
 	}

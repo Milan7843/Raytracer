@@ -483,23 +483,25 @@ void ImGuiUserInterface::drawRenderSettings(SceneManager& sceneManager, Camera& 
 void ImGuiUserInterface::drawMaterials(Scene& scene)
 {
 	ImGui::PushItemWidth(-1);
-	ImGui::BeginListBox("##");
-	int index = 0;
-	for (Material& material : scene.getMaterials())
+	if (ImGui::BeginListBox("##"));
 	{
-		// Drawing each material
-		drawMaterial(material, scene, index);
-		index++;
-	}
+		int index = 0;
+		for (Material& material : scene.getMaterials())
+		{
+			// Drawing each material
+			drawMaterial(material, scene, index);
+			index++;
+		}
 
-	// Drawing the 'Add material' button
-	if (ImGui::Button("Add material"))
-	{
-		Material material("New material", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f);
-		scene.addMaterial(material);
-	}
+		// Drawing the 'Add material' button
+		if (ImGui::Button("Add material"))
+		{
+			Material material("New material", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f);
+			scene.addMaterial(material);
+		}
 
-	ImGui::EndListBox();
+		ImGui::EndListBox();
+	}
 	ImGui::PopItemWidth();
 }
 

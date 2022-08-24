@@ -28,7 +28,7 @@ public:
 	void writeDataToStream(std::ofstream& filestream);
 
 	// Draw an interface for this model using ImGui
-	virtual void drawInterface();
+	virtual void drawInterface(Scene& scene);
 
 	glm::vec3 color;
 	float reflectiveness;
