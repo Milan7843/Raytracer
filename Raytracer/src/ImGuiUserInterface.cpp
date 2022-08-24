@@ -439,7 +439,6 @@ bool ImGuiUserInterface::isEnabled()
 
 bool ImGuiUserInterface::isMouseOnGUI()
 {
-	std::cout << ImGui::GetIO().WantCaptureMouse << std::endl;
 	return ImGui::GetIO().WantCaptureMouse;
 }
 
