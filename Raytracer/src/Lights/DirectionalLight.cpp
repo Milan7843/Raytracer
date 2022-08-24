@@ -25,6 +25,14 @@ DirectionalLight::~DirectionalLight()
 {
 }
 
+void DirectionalLight::drawInterface(Scene& scene)
+{
+	ImGui::InputText("##", &getName());
+	ImGui::ColorEdit3("Color", (float*)getColorPointer());
+	ImGui::DragFloat("Intensity", getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
+	ImGui::DragFloat3("Direction", (float*)getDirectionPointer(), 0.01f);
+}
+
 void DirectionalLight::writeDataToStream(std::ofstream& filestream)
 {
 	// Writing basic data using the base class

@@ -13,6 +13,8 @@ public:
 	PointLight(glm::vec3 position, glm::vec3 color, float intensity);
 	~PointLight();
 
+	virtual void drawInterface(Scene& scene);
+
 	// Write this light to the given filestream
 	virtual void writeDataToStream(std::ofstream& filestream);
 

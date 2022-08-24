@@ -50,6 +50,20 @@ void Sphere::scale(glm::vec3 scale)
 	Logger::logWarning("Scale with vector was called on a sphere. This is not possible and should be avoided.");
 }
 
+void Sphere::drawInterface()
+{
+	ImGui::InputText("Name", &getName());
+
+	// Showing transformations
+	ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
+
+	// Drawing a dragfloat for the radius
+	ImGui::DragFloat("Radius", getRadiusPointer(), 0.01f, 0.01f, 100.0f, "%.02f");
+
+	// Draw the first and only mesh
+	//drawMesh(getMeshes()[0], scene, materialSlotsCharArray, index);
+}
+
 void Sphere::setShaderSphereIndex(unsigned int shaderSphereIndex)
 {
 	this->shaderSphereIndex = shaderSphereIndex;

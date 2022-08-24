@@ -14,8 +14,7 @@
 * How it works:
 * The OutlineRenderer holds a framebuffer, holding 2 textures to which the given objects are rendered in black/white.
 * Then, it takes the first texture and applies a blur.
-* This blurred texture is then rendered to the screen using the second texture as a stencil mask,
-* which results in only the blur being rendered, which works as an outline.
+* This blurred texture is then rendered to the screen, which works as an outline.
  */
 class OutlineRenderer
 {

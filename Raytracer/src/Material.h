@@ -1,5 +1,8 @@
 #pragma once
 
+#include "ImGuiEditorInterface.h"
+#include "ImGuiUtility.h"
+
 #include <glm/glm.hpp>
 #include <string>
 #include <fstream>
@@ -9,7 +12,7 @@
 // Forward declaration of the Shader class
 class AbstractShader;
 
-class Material
+class Material : public ImGuiEditorInterface
 {
 public:
 	// Default constructor
@@ -23,6 +26,9 @@ public:
 
 	// Write this light to the given filestream
 	void writeDataToStream(std::ofstream& filestream);
+
+	// Draw an interface for this model using ImGui
+	virtual void drawInterface(Scene& scene);
 
 	glm::vec3 color;
 	float reflectiveness;

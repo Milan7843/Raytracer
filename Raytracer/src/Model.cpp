@@ -56,6 +56,23 @@ void Model::draw(AbstractShader* shader, Scene* scene)
 	}
 }
 
+void Model::drawInterface(Scene& scene)
+{
+	ImGui::InputText("Name", &getName());
+	// Showing transformations
+	ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
+	ImGui::DragFloat3("Rotation", (float*)getRotationPointer(), 0.01f);
+	ImGui::DragFloat3("Scale", (float*)getScalePointer(), 0.01f);
+
+	int meshIndex = 0;
+	// Drawing all the meshes of this model
+	for (Mesh& mesh : getMeshes())
+	{
+		//drawMesh(mesh, scene, materialSlotsCharArray, meshIndex++);
+		mesh.drawInterface(scene);
+	}
+}
+
 void Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)

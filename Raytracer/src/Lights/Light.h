@@ -11,10 +11,11 @@
 #include <iostream>
 
 #include "../AbstractShader.h"
+#include "../ImGuiEditorInterface.h"
 
 #include "../CoordinateUtility.h"
 
-class Light
+class Light : public ImGuiEditorInterface
 {
 public:
 	void writeToShader(AbstractShader* shader);

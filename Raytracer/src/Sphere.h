@@ -22,6 +22,9 @@ public:
 	virtual void scale(float scale);
 	virtual void scale(glm::vec3 scale);
 
+	// Draw an interface for this sphere using ImGui
+	virtual void drawInterface();
+
 	// Set the index of this sphere in the shader (all sphere must have contiguous indices)
 	void setShaderSphereIndex(unsigned int shaderSphereIndex);
 

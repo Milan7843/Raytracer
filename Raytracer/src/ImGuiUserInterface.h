@@ -22,6 +22,7 @@
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+#include "ImGuiUtility.h"
 #include "Scene.h"
 #include "SceneManager.h"
 #include "Camera.h"
@@ -45,6 +46,9 @@ public:
 
 	bool isEnabled();
 
+	// Get whether the mouse is currently on the GUI
+	bool isMouseOnGUI();
+
 private:
 	bool imGuiEnabled = true;
 	unsigned int guiSwitchKeyPreviousState = 0;
@@ -54,15 +58,12 @@ private:
 	// Format a number of seconds
 	std::string formatTime(float time);
 
-	// Draw a help marker
-	void drawHelpMarker(const char* desc);
-
 	// Draw all the render settings
 	void drawRenderSettings(SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode);
 
 	// Represent a material using ImGui
 	void drawMaterials(Scene& scene);
-	void drawMaterial(Material& material, unsigned int index);
+	void drawMaterial(Material& material, Scene& scene, unsigned int index);
 
 	// Represent a point light using ImGui
 	void drawLights(Scene& scene);

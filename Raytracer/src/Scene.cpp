@@ -359,15 +359,25 @@ void Scene::draw(AbstractShader* shader)
 	glBindTexture(GL_TEXTURE_2D, getHDRI());
 
 	// Drawing each model with the given shader
+	unsigned int objectIndex{ 0 };
+	// Setting the object type to model
+	shader->setInt("objectType", MODEL);
 	for (Model& model : models)
 	{
+		shader->setInt("objectIndex", objectIndex);
 		model.draw(shader, (Scene*)this);
+		objectIndex++;
 	}
 
 	// Drawing each sphere with the given shader
+	objectIndex = 0;
+	// Setting the object type to sphere
+	shader->setInt("objectType", SPHERE);
 	for (Sphere& sphere : spheres)
 	{
+		shader->setInt("objectIndex", objectIndex);
 		sphere.draw(shader, (Scene*)this);
+		objectIndex++;
 	}
 }
 
@@ -376,14 +386,14 @@ void Scene::drawSelected(AbstractShader* shader)
 	// Drawing each model with the given shader if it is selected
 	for (Model& model : models)
 	{
-		if (model.isSelected())
+		if (&model == getSelectedObject())
 			model.draw(shader, (Scene*)this);
 	}
 
 	// Drawing each sphere with the given shader if it is selected
 	for (Sphere& sphere : spheres)
 	{
-		if (sphere.isSelected())
+		if (&sphere == getSelectedObject())
 			sphere.draw(shader, (Scene*)this);
 	}
 }
@@ -488,19 +498,6 @@ std::string* Scene::getNamePointer()
 	return &name;
 }
 
-void Scene::markAllUnselected()
-{
-	for (Model& model : models)
-	{
-		model.setSelected(false);
-	}
-
-	for (Sphere& sphere : spheres)
-	{
-		sphere.setSelected(false);
-	}
-}
-
 bool* Scene::getUseHDRIAsBackgroundPointer()
 {
 	return &useHDRIAsBackground;
@@ -524,6 +521,85 @@ std::vector<DirectionalLight>& Scene::getDirectionalLights()
 std::vector<AmbientLight>& Scene::getAmbientLights()
 {
 	return ambientLights;
+}
+
+void Scene::markSelected(ObjectType objectType, unsigned int objectIndex)
+{
+	switch (objectType)
+	{
+		case NONE:
+			// No object was selected: unselect all and stop
+			currentlySelectedObject = nullptr;
+			return;
+
+		case MODEL:
+			// Model was selected
+			currentlySelectedObject = &models[objectIndex];
+			return;
+		case SPHERE:
+			// Sphere was selected
+			currentlySelectedObject = &spheres[objectIndex];
+			return;
+
+		case POINT_LIGHT:
+			// Point light was selected
+			currentlySelectedObject = &pointLights[objectIndex];
+			return;
+		case DIRECTIONAL_LIGHT:
+			// Directional light was selected
+			currentlySelectedObject = &directionalLights[objectIndex];
+			return;
+		case AMBIENT_LIGHT:
+			// Ambient light was selected
+			currentlySelectedObject = &ambientLights[objectIndex];
+			return;
+
+		case MATERIAL:
+			// Material was selected
+			currentlySelectedObject = &materials[objectIndex];
+			return;
+	}
+}
+
+void Scene::drawCurrentlySelectedObjectInterface()
+{
+	// Can't draw selected object if there isn't one
+	if (getSelectedObject() == nullptr)
+	{
+		return;
+	}
+
+	getSelectedObject()->drawInterface(*this);
+}
+
+ImGuiEditorInterface* Scene::getSelectedObject()
+{
+	return currentlySelectedObject;
+}
+
+void Scene::getSelectedObjectData(unsigned int* objectType, unsigned int* objectIndex)
+{
+	unsigned int currentObjectIndex{ 0 };
+	for (Model& model : models)
+	{
+		if (&model == getSelectedObject())
+		{
+			*objectType = 1;
+			*objectIndex = currentObjectIndex;
+		}
+		currentObjectIndex++;
+	}
+
+	currentObjectIndex = 0;
+	for (Sphere& sphere : spheres)
+	{
+		if (&sphere == getSelectedObject())
+		{
+			*objectType = 2;
+			*objectIndex = currentObjectIndex;
+		}
+		currentObjectIndex++;
+	}
 }
 
 std::vector<Model>& Scene::getModels()
