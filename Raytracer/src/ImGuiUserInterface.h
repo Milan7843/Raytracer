@@ -61,6 +61,9 @@ private:
 	// Draw all the render settings
 	void drawRenderSettings(SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode);
 
+	// Draw the help menu window
+	void drawHelpMenu();
+
 	// Represent a material using ImGui
 	void drawMaterials(Scene& scene);
 	void drawMaterial(Material& material, Scene& scene, unsigned int index);

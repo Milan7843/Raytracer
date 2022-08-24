@@ -70,6 +70,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 	// Unselecting all objects: they will be marked as selected as needed later in this function
 	//sceneManager.getCurrentScene().markAllUnselected();
 
+	bool openHelpMenuButtonPressed{ false };
 	// Menu Bar
 	if (ImGui::BeginMenuBar())
 	{
@@ -125,7 +126,30 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 			ImGui::EndMenu();
 		}
 
+		// Help menu
+		static bool helpMenuWindowOpen{ false };
+
+		if (ImGui::BeginMenu("Help"))
+		{
+			if (ImGui::MenuItem("Open help"))
+			{
+				std::cout << "menu clicked?" << std::endl;
+				openHelpMenuButtonPressed = true;
+			}
+
+			ImGui::EndMenu();
+		}
+
 		ImGui::EndMenuBar();
+	}
+
+	if (openHelpMenuButtonPressed)
+		ImGui::OpenPopup("##help_popup");
+
+	if (ImGui::BeginPopup("##help_popup"))
+	{
+		drawHelpMenu();
+		ImGui::EndPopup();
 	}
 
 	if (openSaveAsPopup)
@@ -479,10 +503,131 @@ void ImGuiUserInterface::drawRenderSettings(SceneManager& sceneManager, Camera& 
 	}
 }
 
+void ImGuiUserInterface::drawHelpMenu()
+{
+	ImGui::BeginTabBar("help_menu_tab_bar");
+
+	ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+
+	if (ImGui::BeginTabItem("Scene##scene_help_tab"))
+	{
+		ImGui::Text(
+			"Everything exists inside one single scene at a time."
+			"This means all models, spheres, lights, materials, the HDRI and the camera "
+			"belong to the scene and will be saved and loaded with the scene."
+
+		);
+		if (ImGui::CollapsingHeader("Saving and loading"))
+		{
+			ImGui::Text(
+				"To save a scene, press the 'Scene' button on the top bar, and select 'Save'."
+				"This will save the scene to it's current name, which it will have if it was loaded in."
+				"In case the scene does not yet have a name, you must choose one to have it saved by."
+			);
+			ImGui::Text(
+				"By using the 'Save as' button in the same menu, the scene "
+				"will be copied under another name, but you will stay in the same scene."
+			);
+
+			ImGui::Separator();
+
+			ImGui::Text(
+				"In order to load a scene from the disk, press the 'Scene' button on the top bar, then hover over 'Open scene'."
+				"This will open a menu with the names of all scenes available on your disk."
+				"To choose one simply press its name and it will be loaded as the current scene."
+			);
+		}
+		if (ImGui::CollapsingHeader("Manually importing a scene"))
+		{
+			ImGui::Text(
+				"In order to manually import a scene from another location, place a valid scene file in the 'scenes' folder."
+				"It can then be loaded into the program using the usual loading method."
+			);
+		}
+		if (ImGui::CollapsingHeader("Loading an HDRI"))
+		{
+			ImGui::Text(
+				"In order to load an HDRI from the disk, navigate to the 'Scene editing' tab"
+				"and press the button labeled 'Set HDRI'."
+			);
+			ImGui::Text(
+				"If your HDRI does not show up here, make sure it is:"
+			);
+			ImGui::BulletText("An image file of PNG type.");
+			ImGui::BulletText("Inside of the 'HDRIs' folder.");
+		}
+		ImGui::EndTabItem();
+	}
+
+	if (ImGui::BeginTabItem("Objects##objects_help_tab"))
+	{
+		ImGui::Text(
+			"In order to do anything to the objects in the scene, navigate to the 'Scene editing' tab."
+		);
+
+		ImGui::Text(
+			"From there, you can select any object by clicking on the correct tab, then clicking on it."
+			"Doing this opens up an editor panel for the selected object below, and the selected object also receives an outline."
+			"To edit any of the values in this editor panel, you can"
+		);
+		ImGui::BulletText("Click for a dropdown");
+		ImGui::BulletText("Click and drag for a numerical value");
+		ImGui::BulletText("Click and drag for a slider");
+
+		ImGui::Text("Any numerical value van also be changed manually by holding down the Ctrl key and clicking it.");
+
+		if (ImGui::CollapsingHeader("Materials"))
+		{
+			ImGui::Text(
+				"These are the properties of the materials:"
+			);
+			ImGui::BulletText("Color: the base color of the material");
+			ImGui::BulletText("Emission: not currently implemented");
+			ImGui::BulletText("Reflectiveness: how much the material reflects light.");
+			ImGui::BulletText("Transparency: how much the material lets light pass through.");
+			ImGui::BulletText("Refractiveness: how much light is bent when passing through the material.");
+			ImGui::BulletText("Reflective diffusion: how much light may be scattered on reflecting, which acts to blur the reflection.");
+		}
+
+		ImGui::EndTabItem();
+	}
+
+	if (ImGui::BeginTabItem("Camera##camera_help_tab"))
+	{
+		ImGui::Text(
+			"There is always a single camera available to move around and look through."
+			"Rendering is also done through this camera's perspective."
+			"To change any of said camera's settings check out the 'Camera settings' tab in the 'Editor' panel."
+		);
+		if (ImGui::CollapsingHeader("Available settings"))
+		{
+			ImGui::BulletText("Sensitivity: how fast the camera rotates with mouse movement.");
+			ImGui::BulletText("Movement speed: how fast the camera moves on keyboard input.");
+			ImGui::BulletText("Field of view: the wideness of the lens in degrees.");
+		}
+		if (ImGui::CollapsingHeader("Moving the camera"))
+		{
+			ImGui::Text("To move the camera, use the following keys:");
+			ImGui::BulletText("'W' to go forward.");
+			ImGui::BulletText("'S' to go backward.");
+			ImGui::BulletText("'A' to go left.");
+			ImGui::BulletText("'D' to go right.");
+			ImGui::BulletText("'Q' to go up.");
+			ImGui::BulletText("'E' to go down.");
+			ImGui::Text("Additionaly, you can hold the shift key to temporarily increase the camera's speed.");
+		}
+		ImGui::EndTabItem();
+	}
+
+	ImGui::PopTextWrapPos();
+
+	ImGui::EndTabBar();
+}
+
 void ImGuiUserInterface::drawMaterials(Scene& scene)
 {
 	ImGui::PushItemWidth(-1);
-	if (ImGui::BeginListBox("##"));
+	if (ImGui::BeginListBox("##"))
 	{
 		int index = 0;
 		for (Material& material : scene.getMaterials())
