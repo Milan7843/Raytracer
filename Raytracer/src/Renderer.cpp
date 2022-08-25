@@ -65,7 +65,7 @@ void Renderer::blockRenderStep()
 	computeShader.setInt("currentBlockRenderPassIndex", currentBlockRenderPassIndex);
 
 	// Running the compute shader once for each pixel in the block
-	glDispatchCompute(blockSizeRendering, blockSizeRendering, 1);
+	glDispatchCompute(blockSizeRendering / 16, blockSizeRendering / 16, 1);
 	//glDispatchCompute(std::ceil(float(size / 8.0f)), std::ceil(float(size / 8.0f)), 1);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
@@ -102,9 +102,9 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	computeShader.setInt("currentFrameSampleCount", currentFrameSampleCount);
 
 	// Binding the hdri
-	computeShader.setInt("hdri", 0);
+	computeShader.setInt("hdri", 3);
 
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, scene.getHDRI());
 
 	bindPixelBuffer();
@@ -146,6 +146,7 @@ void Renderer::update(float deltaTime)
 		// Check for finished render
 		if (getBlockOrigin().y >= height)
 		{
+			Logger::log("Finished render in " + formatTime(currentRenderTime));
 			currentlyBlockRendering = false;
 		}
 	}
@@ -206,6 +207,11 @@ void Renderer::setSampleCount(unsigned int sampleCount)
 	this->sampleCount = sampleCount;
 }
 
+void Renderer::verifyBlockSize()
+{
+	blockSize = (blockSize / 16)*16;
+}
+
 int* Renderer::getBlockSizePointer()
 {
 	return &blockSize;
@@ -251,6 +257,16 @@ float Renderer::getTimeLeft()
 	float totalTime = currentRenderTime / std::max(getRenderProgressPrecise(), 0.001f);
 
 	return totalTime - getRenderProgress() * totalTime;
+}
+
+std::string Renderer::formatTime(float time)
+{
+	int secondsTotal = (int)time;
+	int seconds = secondsTotal % 60;
+	int minutes = (secondsTotal / 60) % 60;
+	int hours = secondsTotal / 3600;
+
+	return std::format("{}h {}m {}s", hours, minutes, seconds);
 }
 
 void Renderer::readRenderSettings()

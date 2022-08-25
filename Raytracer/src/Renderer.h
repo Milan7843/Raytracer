@@ -43,6 +43,9 @@ public:
 	// Set the sample count
 	void setSampleCount(unsigned int sampleCount);
 
+	// Verify the block size: it must be a multiple of 16
+	void verifyBlockSize();
+
 	int* getBlockSizePointer();
 	int* getMultisamplePointer();
 	int* getSampleCountPointer();
@@ -52,6 +55,9 @@ public:
 
 
 private:
+
+	// Format a number of seconds
+	std::string formatTime(float time);
 
 	// Read all the render settings from the save file
 	void readRenderSettings();
@@ -92,8 +98,8 @@ private:
 
 	/* Block rendering */
 	// The size in pixels of each block
-	int blockSize = 100;
-	int blockSizeRendering = 100;
+	int blockSize = 64;
+	int blockSizeRendering = 64;
 	bool currentlyBlockRendering = false;
 	unsigned int blockIndexX = 0, blockIndexY = 0;
 
