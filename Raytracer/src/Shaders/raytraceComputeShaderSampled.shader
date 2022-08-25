@@ -1,5 +1,5 @@
 #version 460 core
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
 layout(std140, binding = 3) buffer Pixels
 {
@@ -214,18 +214,21 @@ vec3 getNormal(Tri tri, vec3 p)
     return tri.normal;
 }
 
+#define PI 3.14159265359
+
 // Returns a random value between 0 and 1 [0, 1)
 float rand(float seed)
 {
-    return fract(sin(seed) * 43758.5453);
+    float seedUsed = mod(seed, 2 * PI);
+    return fract(sin(seedUsed) * 43758.5453);
 }
 
 float rand(int seed)
 {
-    return fract(sin(float(seed)) * 43758.5453);
+    float seedUsed = mod(float(seed), 2*PI);
+    return fract(sin(seedUsed) * 43758.5453);
 }
 
-#define PI 3.14159265359
 float atan2(float x, float z)
 {
     bool s = (abs(x) > abs(z));
@@ -264,6 +267,7 @@ void main()
         for (int x = 0; x < multisamples; x++)
         {
             finalColor += fireRayAtPixelPositionIndex(vec2(cx + 0.5, cy + 0.5) + vec2(x * d, -y * d),
+                //pixelIndex * 13 * pixelIndex + pixelIndex + x * 3 + y * 17 + currentBlockRenderPassIndex * 2) / (multisamples * multisamples);
                 pixelIndex * 1319 * pixelIndex + pixelIndex + pixelIndex * x * 107 * x * x + pixelIndex * y * 2549 * y + currentBlockRenderPassIndex * 89) / (multisamples * multisamples);
         }
     }
@@ -331,7 +335,9 @@ vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex, int seed)
 
     for (int i = 0; i < sampleCount; i++)
     {
-        Ray ray = fireRay(cameraPosition, dir, true, i * 67 * i + seed * 1471 * seed);
+        //Ray ray = fireRay(cameraPosition, dir, true, i + seed * 53);
+        //Ray ray = fireRay(cameraPosition, dir, true, i * 67 * i + seed * 1471 * seed);
+        Ray ray = fireRay(cameraPosition, dir, true, i * 67 * i + seed * 17 * seed);
         finalColor += ray.finalColor;
     }
     finalColor = finalColor / float(sampleCount);
@@ -369,16 +375,16 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
 
             // Rendering each directional light as a sort of sun, by doing the final color dot the -direction, 
             // to calculate how much the ray is going into the sun
-            for (int i = 0; i < dirLightCount; i++)
+            for (int lightIndex = 0; lightIndex < dirLightCount; lightIndex++)
             {
-                t = dot(ray.dir, -dirLights[i].dir);
+                t = dot(ray.dir, -dirLights[lightIndex].dir);
                 float threshold = 0.98f;
                 if (t > threshold)
                 {
                     // Normalize (threshold, 1.0] to (0.0, 1.0]
                     t = (t - threshold) / (1. - threshold);
 
-                    finalColor = dirLights[i].color * (t)+finalColor * (1. - t);
+                    finalColor = dirLights[lightIndex].color * (t)+finalColor * (1. - t);
                 }
             }
 
@@ -427,7 +433,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
                 break;
             }*/
 
-            if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed*17 + i * 1559) < closestIntersection.reflectiveness)
+            if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed*5 + i * 3) < closestIntersection.reflectiveness)
             {
                 // Calculating the new ray direction for a reflection
                 //ray.finalColor += closestIntersection.color;
