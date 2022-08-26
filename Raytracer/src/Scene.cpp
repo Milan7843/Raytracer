@@ -24,6 +24,10 @@ void Scene::writeDataToStream(std::ofstream& filestream)
 	filestream << "# Materials\n";
 	for (Material& material : materials)
 	{
+		// Skip the first material: it is the None material
+		if (&material == &materials.front())
+			continue;
+
 		material.writeDataToStream(filestream);
 		// Write newline if it is not the last item
 		if (&material != &materials.back())
@@ -317,6 +321,17 @@ void Scene::deleteMaterial(unsigned int index)
 
 	// If there were more materials: delete the one at the index
 	this->materials.erase(materials.begin() + index);
+
+	// Then verifying each model's material indices
+	for (Sphere& sphere : getSpheres())
+	{
+		sphere.onDeleteMaterial(index);
+	}
+
+	for (Model& model : getModels())
+	{
+		model.onDeleteMaterial(index);
+	}
 }
 
 void Scene::recalculateModelIndices()
