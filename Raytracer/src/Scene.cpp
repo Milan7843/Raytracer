@@ -7,6 +7,8 @@
 
 Scene::Scene()
 {
+	Material material(Material::generateErrorMaterial());
+	materials.push_back(material);
 }
 
 Scene::~Scene()
@@ -301,6 +303,20 @@ void Scene::addMaterial(Material& material)
 	// Adding a new material and incrementing the counter for this
 	materials.push_back(material);
 	this->materialCount++;
+}
+
+void Scene::deleteMaterial(unsigned int index)
+{
+	// Must have at least one material: the NONE material
+	if (this->materials.size() <= 1)
+		return;
+
+	// Cannot delete the NONE material at index 0
+	if (index <= 0)
+		return;
+
+	// If there were more materials: delete the one at the index
+	this->materials.erase(materials.begin() + index);
 }
 
 void Scene::recalculateModelIndices()

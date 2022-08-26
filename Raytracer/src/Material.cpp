@@ -74,6 +74,18 @@ void Material::drawInterface(Scene& scene)
 	ImGuiUtility::drawHelpMarker("How much the reflection can be diffused. Basically acts as a blur.");
 }
 
+Material Material::generateErrorMaterial()
+{
+	return Material(
+		"None",
+		glm::vec3(1.0f, 0.18f, 0.9f),
+		0.0f,
+		0.0f,
+		0.0f,
+		0.0f,
+		glm::vec3(0.0f));
+}
+
 void Material::writeToShader(AbstractShader* shader, unsigned int index)
 {
 	shader->setVector3(("materials[" + std::to_string(index) + "].color").c_str(), color);

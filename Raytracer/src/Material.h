@@ -30,6 +30,9 @@ public:
 	// Draw an interface for this model using ImGui
 	virtual void drawInterface(Scene& scene);
 
+	// Generate a material with easily distinguishable error properties
+	static Material generateErrorMaterial();
+
 	glm::vec3 color;
 	float reflectiveness;
 	float transparency;

@@ -72,6 +72,9 @@ public:
 	void deleteSphere(unsigned int sphereIndex);
 	void addMaterial(Material& material);
 
+	// Remove a material from the scene
+	void deleteMaterial(unsigned int index);
+
 	void recalculateModelIndices();
 	void recalculateSphereIndices();
 
