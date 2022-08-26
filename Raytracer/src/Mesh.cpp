@@ -136,6 +136,22 @@ void Mesh::setShaderMeshIndex(unsigned int shaderMeshIndex)
     }
 }
 
+void Mesh::onDeleteMaterial(unsigned int index)
+{
+    // Deleted this mesh' material
+    if (this->materialIndex == index)
+    {
+        this->materialIndex = 0;
+        return;
+    }
+
+    // Deleted a material with an index below this mesh'
+    if (index < this->materialIndex)
+    {
+        this->materialIndex--;
+    }
+}
+
 void Mesh::draw(AbstractShader* shader, Scene* scene)
 {
     // Setting up the shader for the material used by this mesh

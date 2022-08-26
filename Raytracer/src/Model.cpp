@@ -81,6 +81,15 @@ void Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
 	}
 }
 
+void Model::onDeleteMaterial(unsigned int index)
+{
+	// Verifying each submesh
+	for (Mesh& mesh : meshes)
+	{
+		mesh.onDeleteMaterial(index);
+	}
+}
+
 void Model::resetShaderIndices(unsigned int* triangleCount, unsigned int* meshCount)
 {
 	for (Mesh& mesh : meshes)

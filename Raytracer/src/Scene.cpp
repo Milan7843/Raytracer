@@ -7,6 +7,8 @@
 
 Scene::Scene()
 {
+	Material material(Material::generateErrorMaterial());
+	materials.push_back(material);
 }
 
 Scene::~Scene()
@@ -22,6 +24,10 @@ void Scene::writeDataToStream(std::ofstream& filestream)
 	filestream << "# Materials\n";
 	for (Material& material : materials)
 	{
+		// Skip the first material: it is the None material
+		if (&material == &materials.front())
+			continue;
+
 		material.writeDataToStream(filestream);
 		// Write newline if it is not the last item
 		if (&material != &materials.back())
@@ -301,6 +307,31 @@ void Scene::addMaterial(Material& material)
 	// Adding a new material and incrementing the counter for this
 	materials.push_back(material);
 	this->materialCount++;
+}
+
+void Scene::deleteMaterial(unsigned int index)
+{
+	// Must have at least one material: the NONE material
+	if (this->materials.size() <= 1)
+		return;
+
+	// Cannot delete the NONE material at index 0
+	if (index <= 0)
+		return;
+
+	// If there were more materials: delete the one at the index
+	this->materials.erase(materials.begin() + index);
+
+	// Then verifying each model's material indices
+	for (Sphere& sphere : getSpheres())
+	{
+		sphere.onDeleteMaterial(index);
+	}
+
+	for (Model& model : getModels())
+	{
+		model.onDeleteMaterial(index);
+	}
 }
 
 void Scene::recalculateModelIndices()

@@ -81,7 +81,7 @@ awesome sauce ground yeah!
 1 1 1
 src/models/plane.obj
 1
-0
+1
 
 low poly car
 -2.35 1.22 -0.13
@@ -89,13 +89,13 @@ low poly car
 1 1 1
 src/models/low poly car optimised.obj
 7
-5
-0
-4
-7
 6
-0
-0
+1
+5
+8
+7
+5
+5
 # Models end
 
 # Point lights

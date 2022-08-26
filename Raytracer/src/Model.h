@@ -40,6 +40,9 @@ public:
 	// Write this object's data to the given shader
 	virtual void writeToShader(AbstractShader* shader, unsigned int ssbo);
 
+	// Should be called when a material was deleted
+	void onDeleteMaterial(unsigned int index);
+
 
 	void resetShaderIndices(unsigned int* triangleCount, unsigned int* meshCount);
 

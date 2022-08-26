@@ -68,6 +68,9 @@ public:
 	// Set the index of the mesh this triangle belongs to
 	void setShaderMeshIndex(unsigned int shaderMeshIndex);
 
+	// Should be called when a material was deleted
+	void onDeleteMaterial(unsigned int index);
+
 	// Draws this mesh using the active shader
 	void draw(AbstractShader* shader, Scene* scene);
 

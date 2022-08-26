@@ -633,6 +633,13 @@ void ImGuiUserInterface::drawMaterials(Scene& scene)
 		int index = 0;
 		for (Material& material : scene.getMaterials())
 		{
+			// Skip the first material: it is the NONE material used if none are selected on an object
+			if (index == 0)
+			{
+				index++;
+				continue;
+			}
+
 			// Drawing each material
 			drawMaterial(material, scene, index);
 			index++;
@@ -662,6 +669,16 @@ void ImGuiUserInterface::drawMaterial(Material& material, Scene& scene, unsigned
 
 	if (ImGui::Button(popupID.c_str()))
 		scene.markSelected(ObjectType::MATERIAL, index);
+
+	// Drawing the 'delete' button
+	if (ImGui::BeginPopupContextItem())
+	{
+		if (ImGui::Button("Delete"))
+		{
+			scene.deleteMaterial(index);
+		}
+		ImGui::EndPopup();
+	}
 }
 
 void ImGuiUserInterface::drawLights(Scene& scene)
