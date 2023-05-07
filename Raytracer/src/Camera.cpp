@@ -77,7 +77,7 @@ float Camera::getFov()
 }
 
 
-void Camera::mouseCallback(GLFWwindow* window, double xpos, double ypos)
+bool Camera::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 {
 	// Sets the mouse offset by frame appropriately for the first frame
 	if (firstMouse)
@@ -91,6 +91,12 @@ void Camera::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 	float yoffset = lasty - ypos; // reversed since y-coordinates range from bottom to top
 	lastx = xpos;
 	lasty = ypos;
+
+	if (xoffset == 0.0f && yoffset == 0.0f)
+	{
+		// No change in camera direction
+		return false;
+	}
 
 	xoffset *= sensitivity * 0.1f;
 	yoffset *= sensitivity * 0.1f;
@@ -109,6 +115,9 @@ void Camera::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 	direction.y = sin(glm::radians(pitch));
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	forward = glm::normalize(direction);
+
+	// The camera moved
+	return true;
 }
 
 void Camera::writeDataToStream(std::ofstream& filestream)
@@ -152,8 +161,11 @@ void Camera::resetMouseOffset()
 }
 
 // Processes the input
-void Camera::processInput(GLFWwindow* window, float deltaTime)
+bool Camera::processInput(GLFWwindow* window, float deltaTime)
 {
+	// Saving the previous camera position to compare to the new to determine if the camera moved
+	glm::vec3 prevPosition = position;
+
 	float realSpeed = cameraSpeed * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 		realSpeed *= 3;
@@ -178,4 +190,7 @@ void Camera::processInput(GLFWwindow* window, float deltaTime)
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+
+	// Return that the camera moved if its position is not the same anymore
+	return prevPosition != position;
 }

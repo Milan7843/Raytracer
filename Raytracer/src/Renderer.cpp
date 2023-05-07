@@ -22,16 +22,15 @@ void Renderer::bindSceneManager(SceneManager* sceneManager)
 
 void Renderer::render()
 {
-	currentlyBlockRendering = false;
-
 	currentFrameSampleCount++;
 
 	setUpForRender(sceneManagerBound->getCurrentScene(), &sceneManagerBound->getCurrentScene().getActiveCamera());
 
 	computeShader.setBool("renderUsingBlocks", false);
+	computeShader.setInt("pixelRenderSize", 4);
 
 	// Running the compute shader once for each pixel
-	glDispatchCompute(width, height, 1);
+	glDispatchCompute(width / 16 * 4, height / 16 * 4, 1);
 	//glDispatchCompute(std::ceil(float(size / 8.0f)), std::ceil(float(size / 8.0f)), 1);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
@@ -40,45 +39,26 @@ void Renderer::render()
 
 void Renderer::startBlockRender()
 {
-	currentlyBlockRendering = true;
-
-	// Resetting block indices
-	blockIndexX = 0;
-	blockIndexY = 0;
-	currentBlockRenderPassIndex = 0;
-
-	blockSizeRendering = blockSize;
+	delete currentRenderProcess;
 
 	setUpForRender(sceneManagerBound->getCurrentScene(), &sceneManagerBound->getCurrentScene().getActiveCamera());
 
-	computeShader.setBool("renderUsingBlocks", true);
-	computeShader.setInt("blockSize", blockSizeRendering);
-	computeShader.setInt("renderPassCount", renderPassCount);
-
-	blockRenderStep();
+	// Starting a new render process
+	currentRenderProcess = new BlockRenderProcess(computeShader, width, height, blockSize, renderPassCount);
 }
 
-void Renderer::blockRenderStep()
+void Renderer::startRealtimeFrameRender()
 {
-	computeShader.use();
-	computeShader.setVector2("currentBlockOrigin", getBlockOrigin());
-	computeShader.setInt("currentBlockRenderPassIndex", currentBlockRenderPassIndex);
+	delete currentRenderProcess;
 
-	// Running the compute shader once for each pixel in the block
-	glDispatchCompute(blockSizeRendering / 16, blockSizeRendering / 16, 1);
-	//glDispatchCompute(std::ceil(float(size / 8.0f)), std::ceil(float(size / 8.0f)), 1);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	setUpForRender(sceneManagerBound->getCurrentScene(), &sceneManagerBound->getCurrentScene().getActiveCamera());
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-	currentBlockRenderPassIndex++;
+	// Starting a new render process
+	currentRenderProcess = new RealtimeRenderProcess(computeShader, width, height);
 }
 
 void Renderer::setUpForRender(Scene& scene, Camera* camera)
 {
-	// Reset current render time
-	currentRenderTime = 0.0f;
-
 	computeShader.use();
 
 	scene.checkObjectUpdates(&computeShader);
@@ -100,6 +80,7 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	computeShader.setInt("sampleCount", sampleCount);
 	computeShader.setInt("multisamples", multisamples);
 	computeShader.setInt("currentFrameSampleCount", currentFrameSampleCount);
+	computeShader.setInt("pixelRenderSize", 1);
 
 	// Binding the hdri
 	computeShader.setInt("hdri", 3);
@@ -110,46 +91,35 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	bindPixelBuffer();
 }
 
-void Renderer::update(float deltaTime)
+void Renderer::update(float deltaTime, bool realtimeRaytracing, bool cameraMoved)
 {
-	if (currentlyBlockRendering)
+	// If we should be realtime rendering, and the camera has actually moved,
+	// we start a new realtime render
+	if (realtimeRaytracing && cameraMoved)
 	{
-		// Render a block
-		blockRenderStep();
-
-		// Add past time to current render time
-		currentRenderTime += deltaTime;
-
-		// Check if we need to render more passes on this specific block
-		if (currentBlockRenderPassIndex < renderPassCount)
-		{
-			// Stay on this block
-			return;
-		}
-
-		// Check if it is at the right side of the screen
-		if (getBlockOrigin().x + blockSizeRendering >= width)
-		{
-			// Move down a layer
-			blockIndexY++;
-			blockIndexX = 0;
-
-			currentBlockRenderPassIndex = 0;
-		}
-		else
-		{
-			// Just move right
-			blockIndexX++;
-
-			currentBlockRenderPassIndex = 0;
-		}
-		// Check for finished render
-		if (getBlockOrigin().y >= height)
-		{
-			Logger::log("Finished render in " + formatTime(currentRenderTime));
-			currentlyBlockRendering = false;
-		}
+		startRealtimeFrameRender();
 	}
+
+	if (currentRenderProcess == nullptr)
+	{
+		return;
+	}
+
+	// Check if the process is finished; if it is, no need to update it anymore
+	if (currentRenderProcess->isFinished())
+	{
+		Logger::log("Finished render in " + formatTime(currentRenderProcess->getCurrentProcessTime()));
+		delete currentRenderProcess;
+		currentRenderProcess = nullptr;
+		return;
+	}
+
+	computeShader.use();
+
+	bindPixelBuffer();
+
+	// There is a process going on, so we update it
+	return currentRenderProcess->update(deltaTime, computeShader);
 }
 
 void Renderer::updateMeshData(Scene* scene)
@@ -197,11 +167,6 @@ unsigned int Renderer::getPixelBuffer()
 	return pixelBuffer;
 }
 
-glm::vec2 Renderer::getBlockOrigin()
-{
-	return glm::vec2(blockIndexX * blockSizeRendering, blockIndexY * blockSizeRendering);
-}
-
 void Renderer::setSampleCount(unsigned int sampleCount)
 {
 	this->sampleCount = sampleCount;
@@ -234,16 +199,13 @@ int* Renderer::getRenderPassCountPointer()
 
 float Renderer::getRenderProgressPrecise()
 {
-	float blocksInHeight = (float)height / (float)blockSizeRendering;
-	float blocksInWidth = (float)width / (float)blockSizeRendering;
+	if (currentRenderProcess == nullptr)
+	{
+		return 0.0f;
+	}
 
-	int blocksDone = blockIndexX + blockIndexY * blocksInWidth;
-	float iterationsDone = blocksDone * renderPassCount + currentBlockRenderPassIndex;
-
-	float totalIterations = blocksInWidth * blocksInHeight * renderPassCount;
-
-	float progress = iterationsDone / totalIterations;
-	return progress;
+	// There is a process going on, so we get the precise render progress from it directly
+	return currentRenderProcess->getRenderProgressPrecise();
 }
 
 float Renderer::getRenderProgress()
@@ -254,7 +216,13 @@ float Renderer::getRenderProgress()
 
 float Renderer::getTimeLeft()
 {
-	float totalTime = currentRenderTime / std::max(getRenderProgressPrecise(), 0.001f);
+	// If there is no process currently running, return 0.0
+	if (currentRenderProcess == nullptr)
+	{
+		return 0.0f;
+	}
+
+	float totalTime = currentRenderProcess->getCurrentProcessTime() / std::max(getRenderProgressPrecise(), 0.001f);
 
 	return totalTime - getRenderProgress() * totalTime;
 }

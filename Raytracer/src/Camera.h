@@ -37,11 +37,13 @@ public:
 	// Don't use the current mouse offset, but start from where the cursor is
 	void resetMouseOffset();
 
-	// Process the input to the camera
-	void processInput(GLFWwindow* window, float deltaTime);
+	// Process the input to the camera.
+	// Returns whether the camera moved.
+	bool processInput(GLFWwindow* window, float deltaTime);
 
-	// Callback for when the mouse is moved
-	void mouseCallback(GLFWwindow* window, double xpos, double ypos);
+	// Callback for when the mouse is moved.
+	// Returns whether the camera moved.
+	bool mouseCallback(GLFWwindow* window, double xpos, double ypos);
 
 	// Write this light to the given filestream
 	virtual void writeDataToStream(std::ofstream& filestream);

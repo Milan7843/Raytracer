@@ -160,16 +160,24 @@ int Application::Start()
         // Input
         processInput(window);
 
+        bool cameraMoved{ false };
+
         // Check whether the UI is enabled
-        if (!userInterface.isEnabled() && !inRaytraceMode)
+        if (!userInterface.isEnabled() && currentRenderMode != ApplicationRenderMode::RAYTRACED)
         {
             // Calling the mouse callback
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
-            sceneManager.getCurrentScene().getActiveCamera().mouseCallback(window, xpos, ypos);
+            if (sceneManager.getCurrentScene().getActiveCamera().mouseCallback(window, xpos, ypos))
+            {
+                cameraMoved = true;
+            }
 
             // Process camera movement input
-            sceneManager.getCurrentScene().getActiveCamera().processInput(window, deltaTime);
+            if (sceneManager.getCurrentScene().getActiveCamera().processInput(window, deltaTime))
+            {
+                cameraMoved = true;
+            }
         }
 
         //std::cout << camera.getInformation() << std::endl;
@@ -179,9 +187,9 @@ int Application::Start()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        raytracingRenderer.update(deltaTime);
+        raytracingRenderer.update(deltaTime, currentRenderMode == ApplicationRenderMode::REALTIME_RAYTRACED, cameraMoved);
 
-        if (inRaytraceMode)
+        if (currentRenderMode == ApplicationRenderMode::RAYTRACED || currentRenderMode == ApplicationRenderMode::REALTIME_RAYTRACED)
         {
             /* Raytraced result rendering */
             Shader* usedShader = &raytracedImageRendererShader;
@@ -253,7 +261,7 @@ int Application::Start()
             //objectScreenSelector.renderTexturePreview(sceneManager.getCurrentScene(), screenQuadVAO);
         }
 
-        userInterface.drawUserInterface(window, sceneManager, sceneManager.getCurrentScene().getActiveCamera(), raytracingRenderer, &inRaytraceMode);
+        userInterface.drawUserInterface(window, sceneManager, sceneManager.getCurrentScene().getActiveCamera(), raytracingRenderer, currentRenderMode);
 
         // Output
         glfwSwapBuffers(window);

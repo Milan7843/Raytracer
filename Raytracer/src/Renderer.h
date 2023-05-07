@@ -4,6 +4,9 @@
 #include "SceneManager.h"
 #include "Camera.h"
 #include "ComputeShader.h"
+#include "Render processes/RenderProcess.h"
+#include "Render processes/BlockRenderProcess.h"
+#include "Render processes/RealtimeRenderProcess.h"
 
 class Renderer
 {
@@ -20,10 +23,11 @@ public:
 	// Render the scene in blocks (not all at once)
 	void startBlockRender();
 
-	void blockRenderStep();
+	// Render the scene using the realtime render process
+	void startRealtimeFrameRender();
 
 	// Update this renderer; must be called every frame
-	void update(float deltaTime);
+	void update(float deltaTime, bool realtimeRaytracing, bool cameraMoved);
 
 	// Check for updates in the mesh data of the scene and update the data in the buffer if necessary
 	void updateMeshData(Scene* scene);
@@ -72,9 +76,6 @@ private:
 
 	float getRenderProgressPrecise();
 
-	// Get the top-left coordinate of the currently rendering block
-	glm::vec2 getBlockOrigin();
-
 	// The compute shader used to render to the buffer
 	ComputeShader computeShader;
 
@@ -96,14 +97,9 @@ private:
 	// The number of sample points per pixel
 	int multisamples{ 1 };
 
-	/* Block rendering */
 	// The size in pixels of each block
-	int blockSize = 64;
-	int blockSizeRendering = 64;
-	bool currentlyBlockRendering = false;
-	unsigned int blockIndexX = 0, blockIndexY = 0;
+	int blockSize{ 64 };
 
-	float currentRenderTime = 0.0f;
-	int currentBlockRenderPassIndex = 0;
+	RenderProcess* currentRenderProcess = nullptr;
 };
 
