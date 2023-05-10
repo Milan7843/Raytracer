@@ -117,7 +117,8 @@ void OutlineRenderer::render(Scene& scene)
 	textureBlurrerShader.setFloat("height", textureHeight);
 	textureBlurrerShader.setVector3("outlineColor", outlineColor);
 
-	glDispatchCompute(textureWidth/8, textureHeight/8, 1);
+	//glDispatchCompute(textureWidth/8, textureHeight/8, 1);
+	glDispatchCompute((textureWidth + 7) / 8, (textureHeight + 7) / 8, 1);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 

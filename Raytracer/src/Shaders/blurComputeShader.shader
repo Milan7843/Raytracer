@@ -15,7 +15,7 @@ vec4 sampleOriginalTexture(vec2 pos)
     if (pos.x < 0 || pos.y < 0 || pos.x >= width || pos.y >= height)
         return vec4(0.0);
     
-    return texture(originalTexture, pos / vec2(width-1, height-1));
+    return texture(originalTexture, pos / vec2(width, height));
 }
 
 void main()
@@ -26,6 +26,9 @@ void main()
     vec4 cummulativeSample = vec4(0.0);
 
     float foundOutline = 0.0;
+
+    if (gl_GlobalInvocationID.x < 0 || gl_GlobalInvocationID.y < 0 || gl_GlobalInvocationID.x >= width || gl_GlobalInvocationID.y >= height)
+        return;
 
     if (sampleOriginalTexture(gl_GlobalInvocationID.xy) == vec4(1.0, 1.0, 1.0, 1.0))
     {
@@ -40,8 +43,10 @@ void main()
     {
         for (int x = -blurSize * 2; x <= blurSize * 2; x++)
         {
+            vec2 samplePosition = gl_GlobalInvocationID.xy + vec2(x, y);
+
             if (x*x + y*y < cutoff && 
-                sampleOriginalTexture(gl_GlobalInvocationID.xy + vec2(x, y)) != 0.0)
+                sampleOriginalTexture(samplePosition) != vec4(0.0))
             {
                 foundOutline = 1.0;
                 break;
