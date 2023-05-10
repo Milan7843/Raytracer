@@ -27,7 +27,7 @@ void ImGuiUserInterface::initialiseImGui(GLFWwindow* window)
     ImGui_ImplOpenGL3_Init("#version 130");
 }
 
-void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode)
+void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode)
 {
 	if (!imGuiEnabled)
 	{
@@ -317,7 +317,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 	if (ImGui::BeginTabItem("Render settings"))
 	{
 		ImGui::BeginGroup();
-		drawRenderSettings(sceneManager, camera, renderer, inRaytraceMode);
+		drawRenderSettings(sceneManager, camera, renderer, applicationRenderMode);
 		ImGui::EndGroup();
 		ImGui::EndTabItem();
 	}
@@ -476,7 +476,7 @@ std::string ImGuiUserInterface::formatTime(float time)
 	return std::format("{}h {}m {}s", hours, minutes, seconds);
 }
 
-void ImGuiUserInterface::drawRenderSettings(SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode)
+void ImGuiUserInterface::drawRenderSettings(SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode)
 {
 	ImGui::SliderInt("Block size", renderer.getBlockSizePointer(), 16, 160, "%d", ImGuiSliderFlags_AlwaysClamp);
 	renderer.verifyBlockSize();
@@ -497,11 +497,12 @@ void ImGuiUserInterface::drawRenderSettings(SceneManager& sceneManager, Camera& 
 	ImGui::Checkbox("Use HDRI as background", sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer());
 	ImGuiUtility::drawHelpMarker("Only if enabled, the HDRI will be drawn as the background.\nThe HDRI will be shown in reflections either way");
 
+	int renderMode = (int)applicationRenderMode;
 	// Button to switch between raytraced and rasterized views
-	if (ImGui::Button(*inRaytraceMode ? "View rasterized" : "View raytraced"))
-	{
-		*inRaytraceMode = !(*inRaytraceMode);
-	}
+    ImGui::RadioButton("Rasterized", &renderMode, 0); ImGui::SameLine();
+    ImGui::RadioButton("Raytraced", &renderMode, 1); ImGui::SameLine();
+    ImGui::RadioButton("Realtime raytraced", &renderMode, 2);
+	applicationRenderMode = (ApplicationRenderMode)renderMode;
 }
 
 void ImGuiUserInterface::drawHelpMenu()

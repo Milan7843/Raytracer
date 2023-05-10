@@ -16,6 +16,7 @@ uniform vec2 currentBlockOrigin;
 uniform int blockSize;
 uniform int renderPassCount;
 uniform int currentBlockRenderPassIndex;
+uniform int pixelRenderSize;
 
 #define EPSILON 0.0001f
 
@@ -210,6 +211,26 @@ vec3 getNormal(Tri tri, vec3 p)
         return normalize(tri.n1 * area1 + tri.n2 * area2 + tri.n3 * area3).xyz;
     }
     */
+    if (true)
+    {
+        vec3 v1 = (meshes[tri.mesh].transformation * vec4(tri.v1.xyz, 1.0)).zyx;
+        vec3 v2 = (meshes[tri.mesh].transformation * vec4(tri.v2.xyz, 1.0)).zyx;
+        vec3 v3 = (meshes[tri.mesh].transformation * vec4(tri.v3.xyz, 1.0)).zyx;
+
+        vec3 a = v2 - v1;
+        vec3 b = v3 - v1;
+        vec3 c = p - v1;
+        float daa = dot(a, a);
+        float dab = dot(a, b);
+        float dbb = dot(b, b);
+        float dca = dot(c, a);
+        float dcb = dot(c, b);
+        float denom = daa * dbb - dab * dab;
+        float y = (dbb * dca - dab * dcb) / denom;
+        float z = (daa * dcb - dab * dca) / denom;
+        float x = 1.0f - y - z;
+        return normalize(tri.n1 * x + tri.n2 * y + tri.n3 * z).xyz;
+    }
     // Default harsh normals
     return tri.normal;
 }
@@ -241,6 +262,9 @@ void main()
     // 2 dimensional indices
     int cx = int(gl_GlobalInvocationID.x);
     int cy = int(gl_GlobalInvocationID.y);
+    // The pixel positions used for calculating the ray direction to be used
+    int raydir_cx = 0;
+    int raydir_cy = 0;
 
     if (renderUsingBlocks)
     {
@@ -252,6 +276,17 @@ void main()
         {
             return;
         }
+    }
+
+    raydir_cx = cx;
+    raydir_cy = cy;
+
+    if (pixelRenderSize != 1)
+    {
+        cx *= pixelRenderSize;
+        cy *= pixelRenderSize;
+        raydir_cx = cx + pixelRenderSize / 2;
+        raydir_cy = cy + pixelRenderSize / 2;
     }
 
     // Calculating the total index, used to map the 2D indices to a 1D array
@@ -266,7 +301,7 @@ void main()
     {
         for (int x = 0; x < multisamples; x++)
         {
-            finalColor += fireRayAtPixelPositionIndex(vec2(cx + 0.5, cy + 0.5) + vec2(x * d, -y * d),
+            finalColor += fireRayAtPixelPositionIndex(vec2(raydir_cx + 0.5, raydir_cy + 0.5) + vec2(x * d, -y * d),
                 //pixelIndex * 13 * pixelIndex + pixelIndex + x * 3 + y * 17 + currentBlockRenderPassIndex * 2) / (multisamples * multisamples);
                 pixelIndex * 1319 * pixelIndex + pixelIndex + pixelIndex * x * 107 * x * x + pixelIndex * y * 2549 * y + currentBlockRenderPassIndex * 89) / (multisamples * multisamples);
         }
@@ -290,6 +325,21 @@ void main()
     5: 0.83 - 0.17 t= 0.17
     */
     colors[pixelIndex] = colors[pixelIndex] * (1.0 - t) + vec4(finalColor, 1.0) * t;
+    if (pixelRenderSize != 1)
+    {
+        for (int y = 0; y < pixelRenderSize; y++)
+        {
+            for (int x = 0; x < pixelRenderSize; x++)
+            {
+                if (cx+x >= screenSize.x || cy+y >= screenSize.y)
+                {
+                    continue;
+                }
+                int localPixelIndex = int((cx+x) + screenWidth * (cy+y));
+                colors[localPixelIndex] = colors[pixelIndex];
+            }
+        }
+    }
 }
 
 
@@ -392,7 +442,15 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
             break;
         }
         else
-        {
+        {/*
+            Tri tri = triangles[closestIntersection.closestTriHit];
+            vec3 pos = closestIntersection.pos;
+            vec3 v1 = (meshes[tri.mesh].transformation * vec4(tri.v1.xyz, 1.0)).zyx;
+            vec3 v2 = (meshes[tri.mesh].transformation * vec4(tri.v2.xyz, 1.0)).zyx;
+            vec3 v3 = (meshes[tri.mesh].transformation * vec4(tri.v3.xyz, 1.0)).zyx;
+            ray.finalColor = vec3(distance(v1, pos), distance(v2, pos), distance(v3, pos));
+            ray.hit = true;
+            break;*/
             /*
             if (closestIntersection.transparency > 0.0 && closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
             {

@@ -19,6 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Render processes\BlockRenderProcess.cpp" />
+    <ClCompile Include="src\Render processes\RealtimeRenderProcess.cpp" />
+    <ClCompile Include="src\Render processes\RenderProcess.cpp" />
     <ClCompile Include="src\ImGuiUtility.cpp" />
     <ClCompile Include="src\ImGuiEditorInterface.cpp" />
     <ClCompile Include="src\ObjectScreenSelector.cpp" />
@@ -59,6 +62,10 @@
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Render processes\BlockRenderProcess.h" />
+    <ClInclude Include="src\Render processes\RealtimeRenderProcess.h" />
+    <ClInclude Include="src\Render processes\RenderProcess.h" />
+    <ClInclude Include="src\ApplicationRenderMode.h" />
     <ClInclude Include="src\ImGuiUtility.h" />
     <ClInclude Include="src\ImGuiEditorInterface.h" />
     <ClInclude Include="src\ObjectScreenSelector.h" />

@@ -28,6 +28,7 @@
 #include "Camera.h"
 #include "Renderer.h"
 #include "FileUtility.h"
+#include "ApplicationRenderMode.h"
 
 class ImGuiUserInterface
 {
@@ -40,7 +41,7 @@ public:
 	void initialiseImGui(GLFWwindow * window);
 
 	// Draw the user interface
-	void drawUserInterface(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode);
+	void drawUserInterface(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode);
 
 	void handleInput(GLFWwindow* window, Camera& camera);
 
@@ -59,7 +60,7 @@ private:
 	std::string formatTime(float time);
 
 	// Draw all the render settings
-	void drawRenderSettings(SceneManager& sceneManager, Camera& camera, Renderer& renderer, bool* inRaytraceMode);
+	void drawRenderSettings(SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode);
 
 	// Draw the help menu window
 	void drawHelpMenu();

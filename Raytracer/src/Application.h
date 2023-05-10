@@ -1,4 +1,4 @@
-#pragma once
+ #pragma once
 
 //#include "stb_image.h"
 
@@ -29,6 +29,7 @@
 #include "Logger.h"
 #include "SceneFileSaver.h"
 
+#include "ApplicationRenderMode.h"
 
 class Application
 {
@@ -49,7 +50,7 @@ private:
 	float deltaTime = 0.0f;	// Time between current frame and last frame
 	float lastFrame = 0.0f; // Time of last frame
 
-	bool inRaytraceMode = false;
+	ApplicationRenderMode currentRenderMode = ApplicationRenderMode::RASTERIZED;
 
 	unsigned int WINDOW_SIZE_X = 1200, WINDOW_SIZE_Y = 700;
 
