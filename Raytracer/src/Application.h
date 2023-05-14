@@ -54,7 +54,7 @@ private:
 
 	unsigned int WINDOW_SIZE_X = 1200, WINDOW_SIZE_Y = 700;
 
-	// Initiatialise GLFW
+	// Initialise GLFW
 	void initialiseGLFW();
 
 	// Draw the axes given by the VAO using the given shader from the given camera's perspective
