@@ -229,7 +229,7 @@ vec3 getNormal(Tri tri, vec3 p)
         float y = (dbb * dca - dab * dcb) / denom;
         float z = (daa * dcb - dab * dca) / denom;
         float x = 1.0f - y - z;
-        return normalize(tri.n1 * x + tri.n2 * y + tri.n3 * z).xyz;
+        return normalize(tri.n1.xyz * x + tri.n2.xyz * y + tri.n3.xyz * z).xyz;
     }
     // Default harsh normals
     return tri.normal;
