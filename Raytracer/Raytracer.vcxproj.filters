@@ -1818,6 +1818,7 @@
     <None Include="src\Shaders\screenTextureFragment.shader" />
     <None Include="src\Shaders\blurComputeShader.shader" />
     <None Include="src\Shaders\objectClickColoringShader.shader" />
+    <None Include="src\Shaders\raytraceComputeShaderSampledUpdated.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />
