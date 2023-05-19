@@ -31,12 +31,24 @@ void Sphere::writeDataToStream(std::ofstream& filestream)
 	filestream << meshes[0].getMaterialIndex() << "\n";
 }
 
-void Sphere::writeToShader(AbstractShader* shader, unsigned int ssbo)
+bool Sphere::writeToShader(AbstractShader* shader, unsigned int ssbo)
 {
+	if (hasWrittenToShader(shader))
+	{
+		// No data was updated
+		return false;
+	}
+
 	shader->setVector3(("spheres[" + std::to_string(shaderSphereIndex) + "].pos").c_str(), 
 		CoordinateUtility::vec4ToGLSLVec4(getTransformationMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 	shader->setFloat(("spheres[" + std::to_string(shaderSphereIndex) + "].radius").c_str(), radius);
 	shader->setInt(("spheres[" + std::to_string(shaderSphereIndex) + "].material").c_str(), meshes[0].getMaterialIndex());
+
+	// The given shader now has updated data
+	markShaderAsWrittenTo(shader);
+
+	// New data was written
+	return true;
 }
 
 void Sphere::scale(float scale)
@@ -52,16 +64,24 @@ void Sphere::scale(glm::vec3 scale)
 
 void Sphere::drawInterface()
 {
-	ImGui::InputText("Name", &getName());
+	bool anyPropertiesChanged{ false };
+
+	anyPropertiesChanged |= ImGui::InputText("Name", &getName());
 
 	// Showing transformations
-	ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
+	anyPropertiesChanged |= ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
 
 	// Drawing a dragfloat for the radius
-	ImGui::DragFloat("Radius", getRadiusPointer(), 0.01f, 0.01f, 100.0f, "%.02f");
+	anyPropertiesChanged |= ImGui::DragFloat("Radius", getRadiusPointer(), 0.01f, 0.01f, 100.0f, "%.02f");
 
 	// Draw the first and only mesh
 	//drawMesh(getMeshes()[0], scene, materialSlotsCharArray, index);
+
+	// If anything changed, no shader will have the updated data
+	if (anyPropertiesChanged)
+	{
+		clearShaderWrittenTo();
+	}
 }
 
 void Sphere::setShaderSphereIndex(unsigned int shaderSphereIndex)

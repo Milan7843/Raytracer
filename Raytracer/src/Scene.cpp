@@ -472,7 +472,32 @@ bool Scene::writeMaterialsToShader(AbstractShader* shader)
 	return anyDataWritten;
 }
 
-void Scene::checkObjectUpdates(AbstractShader* shader)
+bool Scene::checkObjectUpdates(AbstractShader* shader)
+{
+	// Checking each model for updated data
+	for (Model& model : models)
+	{
+		if (!model.hasWrittenToShader(shader) || changedTriangleBuffer)
+		{
+			Logger::log(std::to_string(changedTriangleBuffer) + " model updated");
+			return true;
+		}
+	}
+
+	// Checking each sphere for updated data
+	for (Sphere& sphere : spheres)
+	{
+		if (!sphere.hasWrittenToShader(shader))
+		{
+			Logger::log("sphere updated");
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void Scene::writeObjectsToShader(AbstractShader* shader)
 {
 	// Activate the shader program so that uniforms can be set
 	shader->use();
@@ -483,21 +508,13 @@ void Scene::checkObjectUpdates(AbstractShader* shader)
 	// Updating each model as needed
 	for (Model& model : models)
 	{
-		if (model.isUpdated() || changedTriangleBuffer)
-		{
-			model.writeToShader(shader, triangleBufferSSBO);
-			model.setNotUpdated();
-		}
+		model.writeToShader(shader, triangleBufferSSBO);
 	}
 
 	// Updating each sphere as needed
 	for (Sphere& sphere : spheres)
 	{
-		if (sphere.isUpdated())
-		{
-			sphere.writeToShader(shader, triangleBufferSSBO);
-			//sphere.setNotUpdated();
-		}
+		sphere.writeToShader(shader, triangleBufferSSBO);
 	}
 
 	// Must have written data to the new triangle buffer

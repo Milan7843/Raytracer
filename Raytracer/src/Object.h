@@ -5,11 +5,11 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "AbstractShader.h"
-#include "ImGuiEditorInterface.h"
+#include "ShaderWritable.h"
 
 #include "Logger.h"
 
-class Object : public ImGuiEditorInterface
+class Object : public ShaderWritable
 {
 public:
 
@@ -34,14 +34,7 @@ public:
 	virtual void draw(AbstractShader* shader);
 
 	// Write this object's data to the given shader
-	virtual void writeToShader(AbstractShader* shader, unsigned int ssbo);
-
-	// Get whether this object has been updated
-	bool isUpdated();
-	// Mark this object as being updated
-	void setUpdated();
-	// Mark this object as being not updated
-	void setNotUpdated();
+	virtual bool writeToShader(AbstractShader* shader, unsigned int ssbo);
 
 	glm::vec3* getPositionPointer();
 	glm::vec3* getRotationPointer();

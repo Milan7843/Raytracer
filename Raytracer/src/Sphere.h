@@ -16,7 +16,7 @@ public:
 	friend std::ostream& operator<< (std::ostream& stream, const Sphere& sphere);
 
 	// Write this object's data to the given shader
-	virtual void writeToShader(AbstractShader* shader, unsigned int ssbo);
+	virtual bool writeToShader(AbstractShader* shader, unsigned int ssbo);
 
 	// Scale this sphere
 	virtual void scale(float scale);

@@ -38,7 +38,7 @@ public:
 	virtual void drawInterface(Scene& scene);
 
 	// Write this object's data to the given shader
-	virtual void writeToShader(AbstractShader* shader, unsigned int ssbo);
+	virtual bool writeToShader(AbstractShader* shader, unsigned int ssbo);
 
 	// Should be called when a material was deleted
 	void onDeleteMaterial(unsigned int index);

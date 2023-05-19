@@ -50,7 +50,7 @@ public:
 	void writePositionToShader(AbstractShader* shader);
 
 	// Draw an interface for this model using ImGui
-	virtual void drawInterface(Scene& scene);
+	virtual bool drawInterface(Scene& scene);
 
 	static int getTriangleSize();
 

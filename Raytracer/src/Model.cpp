@@ -58,27 +58,44 @@ void Model::draw(AbstractShader* shader, Scene* scene)
 
 void Model::drawInterface(Scene& scene)
 {
-	ImGui::InputText("Name", &getName());
+	bool anyPropertiesChanged{ false };
+
+	anyPropertiesChanged |= ImGui::InputText("Name", &getName());
 	// Showing transformations
-	ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
-	ImGui::DragFloat3("Rotation", (float*)getRotationPointer(), 0.01f);
-	ImGui::DragFloat3("Scale", (float*)getScalePointer(), 0.01f);
+	anyPropertiesChanged |= ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
+	anyPropertiesChanged |= ImGui::DragFloat3("Rotation", (float*)getRotationPointer(), 0.01f);
+	anyPropertiesChanged |= ImGui::DragFloat3("Scale", (float*)getScalePointer(), 0.01f);
 
 	int meshIndex = 0;
 	// Drawing all the meshes of this model
 	for (Mesh& mesh : getMeshes())
 	{
 		//drawMesh(mesh, scene, materialSlotsCharArray, meshIndex++);
-		mesh.drawInterface(scene);
+		anyPropertiesChanged |= mesh.drawInterface(scene);
+	}
+
+	// If anything changed, no shader will have the updated data
+	if (anyPropertiesChanged)
+	{
+		clearShaderWrittenTo();
 	}
 }
 
-void Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
+bool Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
 {
+	if (hasWrittenToShader(shader))
+	{
+		return false;
+	}
+
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
 		meshes[i].writeToShader(shader, ssbo, getTransformationMatrix());
 	}
+
+	markShaderAsWrittenTo(shader);
+
+	return true;
 }
 
 void Model::onDeleteMaterial(unsigned int index)

@@ -153,8 +153,6 @@ int Application::Start()
         // TODO: optimise the following lines by adding data changed checks for the lights and materials
         shouldReRender |= sceneManager.getCurrentScene().writeLightsToShader(&rasterizedShader, false);
         shouldReRender |= sceneManager.getCurrentScene().writeMaterialsToShader(&rasterizedShader);
-        //raytracingRenderer.updateMeshData(&scene);
-        //sceneManager.getCurrentScene().checkObjectUpdates(&rasterizedShader);
 
         if (frame % 10 == 0 && false)
             std::cout << "FPS: " << 1.0f / deltaTime << std::endl;
@@ -181,7 +179,7 @@ int Application::Start()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        raytracingRenderer.update(deltaTime, currentRenderMode == ApplicationRenderMode::REALTIME_RAYTRACED, shouldReRender);
+        raytracingRenderer.update(deltaTime, currentRenderMode == ApplicationRenderMode::REALTIME_RAYTRACED, shouldReRender, sceneManager.getCurrentScene());
 
         if (currentRenderMode == ApplicationRenderMode::RAYTRACED || currentRenderMode == ApplicationRenderMode::REALTIME_RAYTRACED)
         {

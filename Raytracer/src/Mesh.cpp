@@ -19,9 +19,11 @@ Mesh::~Mesh()
 
 }
 
-void Mesh::drawInterface(Scene& scene)
+bool Mesh::drawInterface(Scene& scene)
 {
     unsigned int i = 0;
+
+    unsigned int oldMaterialIndex = materialIndex;
 
     // Preview the currently selected name
     if (ImGui::BeginCombo((getName() + "##combo").c_str(), (*(scene.getMaterials()[*getMaterialIndexPointer()].getNamePointer())).c_str()))
@@ -50,6 +52,8 @@ void Mesh::drawInterface(Scene& scene)
         // End this combo selector
         ImGui::EndCombo();
     }
+
+    return materialIndex != materialIndex;
 }
 
 int Mesh::getTriangleSize()
