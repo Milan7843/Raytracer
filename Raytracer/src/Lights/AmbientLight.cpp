@@ -18,13 +18,34 @@ AmbientLight::~AmbientLight()
 
 void AmbientLight::drawInterface(Scene& scene)
 {
-	ImGui::InputText("##", &getName());
-	ImGui::ColorEdit3("Color", (float*)getColorPointer());
-	ImGui::DragFloat("Intensity", getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
+	bool anyPropertiesChanged{ false };
+	anyPropertiesChanged |= ImGui::InputText("##", &getName());
+	anyPropertiesChanged |= ImGui::ColorEdit3("Color", (float*)getColorPointer());
+	anyPropertiesChanged |= ImGui::DragFloat("Intensity", getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
+
+	// If anything changed, no shader will have the updated data
+	if (anyPropertiesChanged)
+	{
+		clearShaderWrittenTo();
+	}
 }
 
-void AmbientLight::writeToShader(AbstractShader* shader)
+bool AmbientLight::writeToShader(AbstractShader* shader)
 {
+	if (hasWrittenToShader(shader))
+	{
+		// No data was updated
+		return false;
+	}
+
+	//Logger::log("wrote ambient light to shader");
+
 	shader->setVector3(("ambientLights[" + std::to_string(this->index) + "].color").c_str(), color);
 	shader->setFloat(("ambientLights[" + std::to_string(this->index) + "].intensity").c_str(), intensity);
+
+	// The given shader now has updated data
+	markShaderAsWrittenTo(shader);
+
+	// New data was written
+	return true;
 }

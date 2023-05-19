@@ -138,6 +138,9 @@
     <ClCompile Include="src\Render processes\RealtimeRenderProcess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ShaderWritable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -1359,6 +1362,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Render processes\RealtimeRenderProcess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ShaderWritable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

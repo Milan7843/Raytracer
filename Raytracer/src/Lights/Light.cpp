@@ -15,12 +15,14 @@ Light::~Light()
 {
 }
 
-void Light::writeToShader(AbstractShader* shader)
+bool Light::writeToShader(AbstractShader* shader)
 {
+	return false;
 }
 
-void Light::writePositionToShader(AbstractShader* shader)
+bool Light::writePositionToShader(AbstractShader* shader)
 {
+	return false;
 }
 
 void Light::writeDataToStream(std::ofstream& filestream)

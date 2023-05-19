@@ -93,9 +93,12 @@ public:
 	void drawSelected(AbstractShader* shader);
 
 	// Write the data in the lights vector into the shader
-	void writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates);
+	// Returns whether any new data was written to the shader
+	bool writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates);
+
 	// Write the data in the materials vector into the shader
-	void writeMaterialsToShader(AbstractShader* shader);
+	// Returns whether any new data was written to the shader
+	bool writeMaterialsToShader(AbstractShader* shader);
 
 	// Update any changed data on the given shader
 	void checkObjectUpdates(AbstractShader* shader);

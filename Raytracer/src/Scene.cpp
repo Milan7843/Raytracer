@@ -429,7 +429,7 @@ void Scene::drawSelected(AbstractShader* shader)
 	}
 }
 
-void Scene::writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates)
+bool Scene::writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates)
 {
 	shader->use();
 
@@ -438,22 +438,24 @@ void Scene::writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates)
 	shader->setInt("dirLightCount", directionalLightCount);
 	shader->setInt("ambientLightCount", ambientLightCount);
 
+	bool anyDataWritten = false;
 	// Writing lights to shader
 	for (PointLight& light : getPointLights())
 	{
-		light.writeToShader(shader, useGlslCoordinates);
+		anyDataWritten |= light.writeToShader(shader, useGlslCoordinates);
 	}
 	for (DirectionalLight& light : getDirectionalLights())
 	{
-		light.writeToShader(shader, useGlslCoordinates);
+		anyDataWritten |= light.writeToShader(shader, useGlslCoordinates);
 	}
 	for (AmbientLight& light : getAmbientLights())
 	{
-		light.writeToShader(shader);
+		anyDataWritten |= light.writeToShader(shader);
 	}
+	return anyDataWritten;
 }
 
-void Scene::writeMaterialsToShader(AbstractShader* shader)
+bool Scene::writeMaterialsToShader(AbstractShader* shader)
 {
 	shader->use();
 
@@ -462,10 +464,12 @@ void Scene::writeMaterialsToShader(AbstractShader* shader)
 
 	// Writing materials to shader
 	unsigned int index = 0;
+	bool anyDataWritten = false;
 	for (Material& material : materials)
 	{
-		material.writeToShader(shader, index++);
+		anyDataWritten |= material.writeToShader(shader, index++);
 	}
+	return anyDataWritten;
 }
 
 void Scene::checkObjectUpdates(AbstractShader* shader)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ImGuiEditorInterface.h"
+#include "ShaderWritable.h"
 #include "ImGuiUtility.h"
 
 #include <glm/glm.hpp>
@@ -12,7 +12,7 @@
 // Forward declaration of the Shader class
 class AbstractShader;
 
-class Material : public ImGuiEditorInterface
+class Material : public ShaderWritable
 {
 public:
 	// Default constructor
@@ -41,7 +41,8 @@ public:
 	glm::vec3 emission;
 
 	// Write this material into the shader at the provided index
-	void writeToShader(AbstractShader* shader, unsigned int index);
+	// Returns whether any data was written
+	bool writeToShader(AbstractShader* shader, unsigned int index);
 
 	// Get a pointer to the name of this material
 	std::string* getNamePointer();

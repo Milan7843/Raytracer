@@ -27,10 +27,17 @@ DirectionalLight::~DirectionalLight()
 
 void DirectionalLight::drawInterface(Scene& scene)
 {
-	ImGui::InputText("##", &getName());
-	ImGui::ColorEdit3("Color", (float*)getColorPointer());
-	ImGui::DragFloat("Intensity", getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
-	ImGui::DragFloat3("Direction", (float*)getDirectionPointer(), 0.01f);
+	bool anyPropertiesChanged{ false };
+	anyPropertiesChanged |= ImGui::InputText("##", &getName());
+	anyPropertiesChanged |= ImGui::ColorEdit3("Color", (float*)getColorPointer());
+	anyPropertiesChanged |= ImGui::DragFloat("Intensity", getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
+	anyPropertiesChanged |= ImGui::DragFloat3("Direction", (float*)getDirectionPointer(), 0.01f);
+
+	// If anything changed, no shader will have the updated data
+	if (anyPropertiesChanged)
+	{
+		clearShaderWrittenTo();
+	}
 }
 
 void DirectionalLight::writeDataToStream(std::ofstream& filestream)
@@ -42,12 +49,26 @@ void DirectionalLight::writeDataToStream(std::ofstream& filestream)
 	filestream << direction.x << " " << direction.y << " " << direction.z << "\n";
 }
 
-void DirectionalLight::writeToShader(AbstractShader* shader, bool useGlslCoordinates)
+bool DirectionalLight::writeToShader(AbstractShader* shader, bool useGlslCoordinates)
 {
+	if (hasWrittenToShader(shader))
+	{
+		// No data was updated
+		return false;
+	}
+
+	//Logger::log("wrote directional light to shader");
+
 	shader->setVector3(("dirLights[" + std::to_string(this->index) + "].dir").c_str(),
 		useGlslCoordinates ? CoordinateUtility::vec3ToGLSLVec3(direction) : direction);
 	shader->setVector3(("dirLights[" + std::to_string(this->index) + "].color").c_str(), color);
 	shader->setFloat(("dirLights[" + std::to_string(this->index) + "].intensity").c_str(), intensity);
+
+	// The given shader now has updated data
+	markShaderAsWrittenTo(shader);
+
+	// New data was written
+	return true;
 }
 
 glm::vec3* DirectionalLight::getDirectionPointer()

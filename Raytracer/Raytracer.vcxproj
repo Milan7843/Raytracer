@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ShaderWritable.cpp" />
     <ClCompile Include="src\Render processes\BlockRenderProcess.cpp" />
     <ClCompile Include="src\Render processes\RealtimeRenderProcess.cpp" />
     <ClCompile Include="src\Render processes\RenderProcess.cpp" />
@@ -62,6 +63,7 @@
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ShaderWritable.h" />
     <ClInclude Include="src\Render processes\BlockRenderProcess.h" />
     <ClInclude Include="src\Render processes\RealtimeRenderProcess.h" />
     <ClInclude Include="src\Render processes\RenderProcess.h" />

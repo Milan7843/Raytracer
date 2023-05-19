@@ -14,6 +14,6 @@ public:
 	virtual void drawInterface(Scene& scene);
 
 	// Write all the data of this directional light into the given shader
-	virtual void writeToShader(AbstractShader* shader);
+	virtual bool writeToShader(AbstractShader* shader);
 };
 
