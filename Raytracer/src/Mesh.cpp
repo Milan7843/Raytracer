@@ -23,7 +23,7 @@ bool Mesh::drawInterface(Scene& scene)
 {
     unsigned int i = 0;
 
-    unsigned int oldMaterialIndex = materialIndex;
+    bool materialUpdated{ false };
 
     // Preview the currently selected name
     if (ImGui::BeginCombo((getName() + "##combo").c_str(), (*(scene.getMaterials()[*getMaterialIndexPointer()].getNamePointer())).c_str()))
@@ -38,6 +38,7 @@ bool Mesh::drawInterface(Scene& scene)
             if (ImGui::Selectable((*(scene.getMaterials()[i].getNamePointer())).c_str()))
             {
                 *getMaterialIndexPointer() = i;
+                materialUpdated = true;
             }
 
             if (thisMaterialSelected)
@@ -53,7 +54,7 @@ bool Mesh::drawInterface(Scene& scene)
         ImGui::EndCombo();
     }
 
-    return materialIndex != materialIndex;
+    return materialUpdated;
 }
 
 int Mesh::getTriangleSize()
