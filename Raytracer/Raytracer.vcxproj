@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ShaderWritable.cpp" />
     <ClCompile Include="src\Render processes\BlockRenderProcess.cpp" />
     <ClCompile Include="src\Render processes\RealtimeRenderProcess.cpp" />
     <ClCompile Include="src\Render processes\RenderProcess.cpp" />
@@ -62,6 +63,7 @@
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ShaderWritable.h" />
     <ClInclude Include="src\Render processes\BlockRenderProcess.h" />
     <ClInclude Include="src\Render processes\RealtimeRenderProcess.h" />
     <ClInclude Include="src\Render processes\RenderProcess.h" />
@@ -629,6 +631,7 @@
     <None Include="src\Shaders\raymarchFragmentShaderBackup.shader" />
     <None Include="src\Shaders\raymarchVertexShader.shader" />
     <None Include="src\Shaders\raytraceComputeShaderSampled.shader" />
+    <None Include="src\Shaders\raytraceComputeShaderSampledUpdated.shader" />
     <None Include="src\Shaders\raytracingFragmentShader.shader" />
     <None Include="src\Shaders\screenTextureFragment.shader" />
     <None Include="src\Shaders\solidColorFragmentShader.shader" />

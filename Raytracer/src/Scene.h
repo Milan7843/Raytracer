@@ -93,12 +93,17 @@ public:
 	void drawSelected(AbstractShader* shader);
 
 	// Write the data in the lights vector into the shader
-	void writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates);
-	// Write the data in the materials vector into the shader
-	void writeMaterialsToShader(AbstractShader* shader);
+	// Returns whether any new data was written to the shader
+	bool writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates);
 
+	// Write the data in the materials vector into the shader
+	// Returns whether any new data was written to the shader
+	bool writeMaterialsToShader(AbstractShader* shader);
+
+	// Return whether there are any updates to the scene data required on this shader
+	bool checkObjectUpdates(AbstractShader* shader);
 	// Update any changed data on the given shader
-	void checkObjectUpdates(AbstractShader* shader);
+	void writeObjectsToShader(AbstractShader* shader);
 
 	// Generate and fill up the buffer holding all triangles
 	void generateTriangleBuffer();

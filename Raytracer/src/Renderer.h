@@ -27,7 +27,7 @@ public:
 	void startRealtimeFrameRender();
 
 	// Update this renderer; must be called every frame
-	void update(float deltaTime, bool realtimeRaytracing, bool cameraMoved);
+	void update(float deltaTime, bool realtimeRaytracing, bool cameraMoved, Scene& currentScene);
 
 	// Check for updates in the mesh data of the scene and update the data in the buffer if necessary
 	void updateMeshData(Scene* scene);

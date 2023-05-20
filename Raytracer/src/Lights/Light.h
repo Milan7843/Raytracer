@@ -11,15 +11,15 @@
 #include <iostream>
 
 #include "../AbstractShader.h"
-#include "../ImGuiEditorInterface.h"
+#include "../ShaderWritable.h"
 
 #include "../CoordinateUtility.h"
 
-class Light : public ImGuiEditorInterface
+class Light : public ShaderWritable
 {
 public:
-	void writeToShader(AbstractShader* shader);
-	void writePositionToShader(AbstractShader* shader);
+	bool writeToShader(AbstractShader* shader);
+	bool writePositionToShader(AbstractShader* shader);
 
 	// Write this light to the given filestream
 	virtual void writeDataToStream(std::ofstream& filestream);

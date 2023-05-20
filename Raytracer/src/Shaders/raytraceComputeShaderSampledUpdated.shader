@@ -176,7 +176,6 @@ Intersection triangleIntersection(Tri tri, Ray ray);
 Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere);
 
 Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed);
-Ray fireSecondaryRay(vec3 pos, vec3 direction, bool reflect, int seed);
 
 vec3 calculateLights(vec3 pos, vec3 normal, int triHit, int sphereHit);
 
@@ -246,14 +245,14 @@ float rand(float seed)
 
 float rand(int seed)
 {
-    float seedUsed = mod(float(seed), 2*PI);
+    float seedUsed = mod(float(seed), 2 * PI);
     return fract(sin(seedUsed) * 43758.5453);
 }
 
 float atan2(float x, float z)
 {
     bool s = (abs(x) > abs(z));
-    return mix(PI/2.0 - atan(x, z), atan(z, x), s);
+    return mix(PI / 2.0 - atan(x, z), atan(z, x), s);
 }
 
 
@@ -331,11 +330,11 @@ void main()
         {
             for (int x = 0; x < pixelRenderSize; x++)
             {
-                if (cx+x >= screenSize.x || cy+y >= screenSize.y)
+                if (cx + x >= screenSize.x || cy + y >= screenSize.y)
                 {
                     continue;
                 }
-                int localPixelIndex = int((cx+x) + screenWidth * (cy+y));
+                int localPixelIndex = int((cx + x) + screenWidth * (cy + y));
                 colors[localPixelIndex] = colors[pixelIndex];
             }
         }
@@ -410,7 +409,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
             // Calculating sky color
             vec3 up = vec3(0., 1., 0.);
             float t = dot(up, ray.dir) + 0.6;
-            vec3 skyColor = skyboxColorTop* (t)+skyboxColorHorizon * (1. - t);
+            vec3 skyColor = skyboxColorTop * (t)+skyboxColorHorizon * (1. - t);
 
             if (useHDRIAsBackground || i != 0)
             {
@@ -490,8 +489,8 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
                 ray.hit = false;
                 break;
             }*/
-
-            if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed*5 + i * 3) < closestIntersection.reflectiveness)
+            
+            if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed * 5 + i * 3) < closestIntersection.reflectiveness)
             {
                 // Calculating the new ray direction for a reflection
                 //ray.finalColor += closestIntersection.color;
@@ -501,7 +500,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
 
                 continue; // reflecting
             }
-            else if (closestIntersection.transparency > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed*13 + i * 47 + 5779) < closestIntersection.transparency)
+            else if (closestIntersection.transparency > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed * 13 + i * 47 + 5779) < closestIntersection.transparency)
             {
                 vec3 normal = sign(dot(closestIntersection.normal, ray.dir)) * closestIntersection.normal;
                 vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness +
@@ -547,91 +546,6 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
 
     return ray;
 }
-
-
-Ray fireSecondaryRay(vec3 pos, vec3 direction, bool reflect, int seed)
-{
-    Ray ray = Ray(pos, direction, false, 10000., vec3(0.), 0., 0, -1);
-
-    // Reflections loop
-    for (int i = 0; i < MAX_REFLECTIONS; i++)
-    {
-        Intersection closestIntersection = getAllIntersections(ray, -1, -1);
-
-        // Check for hit
-        if (!closestIntersection.intersected)
-        {
-            // Calculating sky color
-            vec3 up = vec3(0., 1., 0.);
-            float t = dot(up, ray.dir) + 0.6;
-            vec3 skyColor = skyboxColorTop * (t)+skyboxColorHorizon * (1. - t);
-
-            vec3 finalColor = skyColor;
-
-
-            // Rendering each directional light as a sort of sun, by doing the final color dot the -direction, 
-            // to calculate how much the ray is going into the sun
-            for (int i = 0; i < dirLightCount; i++)
-            {
-                t = dot(ray.dir, -dirLights[i].dir);
-                float threshold = 0.98f;
-                if (t > threshold)
-                {
-                    // Normalize (threshold, 1.0] to (0.0, 1.0]
-                    t = (t - threshold) / (1. - threshold);
-
-                    finalColor = dirLights[i].color * (t)+finalColor * (1. - t);
-                }
-            }
-
-            ray.finalColor += finalColor;
-            break;
-        }
-        else
-        {
-            // Do transparency first, as the ray otherwise could not escape from a transparent object (it would just reflect)
-            if (closestIntersection.transparency > 0.0 && reflect && i != MAX_REFLECTIONS - 1)
-            {
-                // Calculating the new ray direction for a reflection
-                ray.finalColor += (1.0 - closestIntersection.transparency) * closestIntersection.color;
-
-                // Making the normal always face the right way
-                vec3 normal = sign(dot(closestIntersection.normal, ray.dir)) * closestIntersection.normal;
-
-                // Refracting the light
-                ray.dir = normalize(normal * closestIntersection.refractiveness + (1.0 - closestIntersection.refractiveness) * ray.dir);
-                ray.pos = closestIntersection.pos + EPSILON * ray.dir;
-                continue; // reflecting
-            }
-            else if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed*3 + i * 97) < closestIntersection.reflectiveness)
-            {
-                // Calculating the new ray direction for a reflection
-                ray.finalColor += (1.0 - closestIntersection.reflectiveness) * closestIntersection.color;
-                ray.dir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
-                ray.pos = closestIntersection.pos + EPSILON * ray.dir;
-                continue; // reflecting
-            }
-            else
-            {
-                if (reflect)
-                {
-                    ray.finalColor = closestIntersection.color * calculateLights(closestIntersection.pos, closestIntersection.normal,
-                        closestIntersection.closestTriHit, closestIntersection.closestSphereHit);
-                }
-                else
-                {
-                    ray.finalColor = closestIntersection.color;
-                }
-                ray.hit = true;
-                break;
-            }
-        }
-    }
-
-    return ray;
-}
-
-
 
 
 

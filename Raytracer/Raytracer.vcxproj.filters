@@ -138,6 +138,9 @@
     <ClCompile Include="src\Render processes\RealtimeRenderProcess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ShaderWritable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -1361,6 +1364,9 @@
     <ClInclude Include="src\Render processes\RealtimeRenderProcess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\ShaderWritable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\assimp\color4.inl">
@@ -1818,6 +1824,7 @@
     <None Include="src\Shaders\screenTextureFragment.shader" />
     <None Include="src\Shaders\blurComputeShader.shader" />
     <None Include="src\Shaders\objectClickColoringShader.shader" />
+    <None Include="src\Shaders\raytraceComputeShaderSampledUpdated.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />

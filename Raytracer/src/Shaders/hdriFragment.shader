@@ -10,6 +10,7 @@ uniform sampler2D hdri;
 #define PI 3.14159265359
 float atan2(float x, float z)
 {
+    //return atan(x, z);
     bool s = (abs(x) > abs(z));
     return mix(PI / 2.0 - atan(x, z), atan(z, x), s);
 }

@@ -18,10 +18,17 @@ PointLight::~PointLight()
 
 void PointLight::drawInterface(Scene& scene)
 {
-	ImGui::InputText("##", &getName());
-	ImGui::ColorEdit3("Color", (float*)getColorPointer());
-	ImGui::DragFloat("Intensity", getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
-	ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
+	bool anyPropertiesChanged{ false };
+	anyPropertiesChanged |= ImGui::InputText("##", &getName());
+	anyPropertiesChanged |= ImGui::ColorEdit3("Color", (float*)getColorPointer());
+	anyPropertiesChanged |= ImGui::DragFloat("Intensity", getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
+	anyPropertiesChanged |= ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
+
+	// If anything changed, no shader will have the updated data
+	if (anyPropertiesChanged)
+	{
+		clearShaderWrittenTo();
+	}
 }
 
 void PointLight::writeDataToStream(std::ofstream& filestream)
@@ -33,15 +40,41 @@ void PointLight::writeDataToStream(std::ofstream& filestream)
 	filestream << position.x << " " << position.y << " " << position.z << "\n";
 }
 
-void PointLight::writeToShader(AbstractShader* shader, bool useGlslCoordinates)
+bool PointLight::writeToShader(AbstractShader* shader, bool useGlslCoordinates)
 {
+	if (hasWrittenToShader(shader))
+	{
+		// No data was updated
+		return false;
+	}
+
+	//Logger::log("wrote point light to shader");
+
 	writePositionToShader(shader, useGlslCoordinates);
 	shader->setVector3(("pointLights[" + std::to_string(this->index) + "].color").c_str(), color);
 	shader->setFloat(("pointLights[" + std::to_string(this->index) + "].intensity").c_str(), intensity);
+
+	// The given shader now has updated data
+	markShaderAsWrittenTo(shader);
+
+	// New data was written
+	return true;
 }
 
-void PointLight::writePositionToShader(AbstractShader* shader, bool useGlslCoordinates)
+bool PointLight::writePositionToShader(AbstractShader* shader, bool useGlslCoordinates)
 {
+	if (hasWrittenToShader(shader))
+	{
+		// No data was updated
+		return false;
+	}
+
 	shader->setVector3(("pointLights[" + std::to_string(this->index) + "].pos").c_str(),
 		useGlslCoordinates ? CoordinateUtility::vec3ToGLSLVec3(position) : position);
+
+	// The given shader now has updated data
+	markShaderAsWrittenTo(shader);
+
+	// New data was written
+	return true;
 }

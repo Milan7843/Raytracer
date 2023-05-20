@@ -1,24 +1,10 @@
 #include "Object.h"
 
-void Object::writeToShader(AbstractShader* shader, unsigned int ssbo)
+bool Object::writeToShader(AbstractShader* shader, unsigned int ssbo)
 {
-
+	return false;
 }
 
-bool Object::isUpdated()
-{
-	return this->updated;
-}
-
-void Object::setUpdated()
-{
-	this->updated = true;
-}
-
-void Object::setNotUpdated()
-{
-	this->updated = false;
-}
 void Object::writeDataToStream(std::ofstream& filestream)
 {
 	filestream << getName() << "\n";

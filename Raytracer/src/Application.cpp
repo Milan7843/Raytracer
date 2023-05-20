@@ -117,7 +117,7 @@ int Application::Start()
     Shader raytracedImageRendererShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracedImageRendererShader.glsl");
 
     // Raytraced renderer
-    Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampled.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y);
+    Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampledUpdated.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
     HDRIRenderer hdriRenderer("src/shaders/hdriVertex.shader", "src/shaders/hdriFragment.shader");
 
@@ -148,11 +148,11 @@ int Application::Start()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        bool shouldReRender{ false };
+
         // TODO: optimise the following lines by adding data changed checks for the lights and materials
-        sceneManager.getCurrentScene().writeLightsToShader(&rasterizedShader, false);
-        sceneManager.getCurrentScene().writeMaterialsToShader(&rasterizedShader);
-        //raytracingRenderer.updateMeshData(&scene);
-        //sceneManager.getCurrentScene().checkObjectUpdates(&rasterizedShader);
+        shouldReRender |= sceneManager.getCurrentScene().writeLightsToShader(&rasterizedShader, false);
+        shouldReRender |= sceneManager.getCurrentScene().writeMaterialsToShader(&rasterizedShader);
 
         if (frame % 10 == 0 && false)
             std::cout << "FPS: " << 1.0f / deltaTime << std::endl;
@@ -160,24 +160,16 @@ int Application::Start()
         // Input
         processInput(window);
 
-        bool cameraMoved{ false };
-
         // Check whether the UI is enabled
         if (!userInterface.isEnabled() && currentRenderMode != ApplicationRenderMode::RAYTRACED)
         {
             // Calling the mouse callback
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
-            if (sceneManager.getCurrentScene().getActiveCamera().mouseCallback(window, xpos, ypos))
-            {
-                cameraMoved = true;
-            }
+            shouldReRender |= sceneManager.getCurrentScene().getActiveCamera().mouseCallback(window, xpos, ypos);
 
             // Process camera movement input
-            if (sceneManager.getCurrentScene().getActiveCamera().processInput(window, deltaTime))
-            {
-                cameraMoved = true;
-            }
+            shouldReRender |= sceneManager.getCurrentScene().getActiveCamera().processInput(window, deltaTime);
         }
 
         //std::cout << camera.getInformation() << std::endl;
@@ -187,7 +179,7 @@ int Application::Start()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        raytracingRenderer.update(deltaTime, currentRenderMode == ApplicationRenderMode::REALTIME_RAYTRACED, cameraMoved);
+        raytracingRenderer.update(deltaTime, currentRenderMode == ApplicationRenderMode::REALTIME_RAYTRACED, shouldReRender, sceneManager.getCurrentScene());
 
         if (currentRenderMode == ApplicationRenderMode::RAYTRACED || currentRenderMode == ApplicationRenderMode::REALTIME_RAYTRACED)
         {

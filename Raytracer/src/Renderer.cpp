@@ -61,7 +61,7 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 {
 	computeShader.use();
 
-	scene.checkObjectUpdates(&computeShader);
+	scene.writeObjectsToShader(&computeShader);
 
 	scene.bindTriangleBuffer();
 	scene.writeLightsToShader(&computeShader, true);
@@ -91,11 +91,11 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	bindPixelBuffer();
 }
 
-void Renderer::update(float deltaTime, bool realtimeRaytracing, bool cameraMoved)
+void Renderer::update(float deltaTime, bool realtimeRaytracing, bool cameraMoved, Scene& currentScene)
 {
 	// If we should be realtime rendering, and the camera has actually moved,
 	// we start a new realtime render
-	if (realtimeRaytracing && cameraMoved)
+	if (realtimeRaytracing && (cameraMoved || currentScene.checkObjectUpdates(&computeShader)))
 	{
 		startRealtimeFrameRender();
 	}
@@ -124,7 +124,7 @@ void Renderer::update(float deltaTime, bool realtimeRaytracing, bool cameraMoved
 
 void Renderer::updateMeshData(Scene* scene)
 {
-	scene->checkObjectUpdates(&computeShader);
+	scene->writeObjectsToShader(&computeShader);
 }
 
 void Renderer::setResolution(unsigned int width, unsigned int height)

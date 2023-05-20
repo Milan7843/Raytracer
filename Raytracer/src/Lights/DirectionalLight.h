@@ -18,7 +18,7 @@ public:
 	virtual void writeDataToStream(std::ofstream& filestream);
 
 	// Write all the data of this directional light into the given shader
-	virtual void writeToShader(AbstractShader* shader, bool useGlslCoordinates);
+	virtual bool writeToShader(AbstractShader* shader, bool useGlslCoordinates);
 
 	// Get a pointer the the direction vector of this light
 	glm::vec3* getDirectionPointer();
