@@ -66,61 +66,35 @@ Wheel
 # Materials end
 
 # Spheres
-Cool sphere !!
-2 1000 1
-0 0 0
-1 1 1
-1
-0
 # Spheres end
 
 # Models
-glass
--1.47 0 -1.51
+indirect_lighting_test
+0 0 0
 0 0 0
 1 1 1
-src/models/glass.obj
+src/models/indirect_lighting_test.obj
 1
-3
-
-glass non-smooth
--1.44 0 0.48
-0 0 0
-1 1 1
-src/models/glass non-smooth.obj
 1
-3
 # Models end
 
 # Point lights
 this is the awesome sauce red light! :D
 1 0 0
 2
-0 1.8 1.8
-
-seems green
-0 1 0
-2
-2 1.8 0
+0 0.46 0.87
 # Point lights end
 
 # Directional lights
-basically the sun
-1 1 0.9
-0.59
-0.707 -0.707 0
 # Directional lights end
 
 # Ambient lights
-*ambience* ~
-0.8 0.8 1
-0.02
 # Ambient lights end
 
 # Cameras
-0.85017 0.702806 -0.128827
--1.09989
-945.059
+3.33124 1.35623 1.10979
+-25.2998
+1280.06
 1
 39.333
 1.844

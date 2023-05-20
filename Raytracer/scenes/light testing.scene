@@ -69,9 +69,9 @@ Wheel
 Cool sphere !!
 2 1 1
 0 0 0
-0.6 0.6 0.6
+1 1 1
 1
-0
+1
 # Spheres end
 
 # Models
@@ -81,38 +81,34 @@ awesome sauce ground yeah!
 1 1 1
 src/models/plane.obj
 1
-0
+1
+
+indirect_lighting_test
+0 1.67 0
+0 0 0
+1 1 1
+src/models/indirect_lighting_test.obj
+1
+1
 # Models end
 
 # Point lights
-this is the awesome sauce red light! :D
-1 0 0
-2
-0 1.8 1.8
-
-seems green
-0 1 0
-2
-2 1.8 0
+Point light
+1 1 1
+1
+0 2.05 0.52
 # Point lights end
 
 # Directional lights
-basically the sun
-1 1 0.9
-0.59
-0.707 -0.707 0
 # Directional lights end
 
 # Ambient lights
-*ambience* ~
-0.8 0.8 1
-0.02
 # Ambient lights end
 
 # Cameras
-0.0337927 12.0827 -0.152387
--89
-809.265
+-3.08521 2.34965 1.20901
+-17.8999
+1052.66
 1
 39.333
 1.844

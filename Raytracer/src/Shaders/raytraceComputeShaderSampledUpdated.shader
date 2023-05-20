@@ -397,6 +397,8 @@ vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex, int seed)
 Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
 {
     Ray ray = Ray(pos, direction, false, 10000., vec3(0.), 0., 0, -1);
+    bool inTransparentMaterial = false;
+    vec3 transparencyColorMultiplier = vec3(1.0);
 
     // Reflections loop
     for (int i = 0; i < MAX_REFLECTIONS; i++)
@@ -426,7 +428,7 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
             // to calculate how much the ray is going into the sun
             for (int lightIndex = 0; lightIndex < dirLightCount; lightIndex++)
             {
-                t = dot(ray.dir, -dirLights[lightIndex].dir);
+                t = dot(ray.dir, -normalize(dirLights[lightIndex].dir));
                 float threshold = 0.98f;
                 if (t > threshold)
                 {
@@ -502,12 +504,34 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
             }
             else if (closestIntersection.transparency > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed * 13 + i * 47 + 5779) < closestIntersection.transparency)
             {
-                vec3 normal = sign(dot(closestIntersection.normal, ray.dir)) * closestIntersection.normal;
+                float rayDirNormalDotProduct = dot(closestIntersection.normal, ray.dir);
+
+                // If the dot product is negative, the ray direction is opposing the normal,
+                // so we are entering glass, otherwise we are exiting
+                bool isEnteringTransparentMaterial = rayDirNormalDotProduct <= 0.0;
+                vec3 rayPositionBeforeUpdate = ray.pos;
+
+                vec3 normal = sign(rayDirNormalDotProduct) * closestIntersection.normal;
                 vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness +
                     (1.0 - closestIntersection.refractiveness) * ray.dir);
 
                 ray.dir = refractedRayDir;
                 ray.pos = closestIntersection.pos + EPSILON * ray.dir;
+
+                // Tell the next iterations that we are in glass right now
+                if (isEnteringTransparentMaterial)
+                    inTransparentMaterial = true;
+                else
+                {
+                    float distanceFromTransparentMaterialEntry = distance(ray.pos, rayPositionBeforeUpdate);
+                    transparencyColorMultiplier = vec3(1.0) - (transparencyColorMultiplier *
+                        (min(distanceFromTransparentMaterialEntry + 0.1, 1.0) * (vec3(1.0) - closestIntersection.color)));
+                    inTransparentMaterial = false;
+
+                    //ray.finalColor = vec3(distanceFromTransparentMaterialEntry);
+                    //ray.hit = true;
+                    //break;
+                }
 
                 continue; // refracting
 
@@ -543,6 +567,8 @@ Ray fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
             }
         }
     }
+
+    ray.finalColor *= transparencyColorMultiplier;
 
     return ray;
 }
