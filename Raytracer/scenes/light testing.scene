@@ -94,7 +94,7 @@ src/models/indirect_lighting_test.obj
 
 # Point lights
 Point light
-1 1 1
+0.847059 0.701961 0.760784
 1
 0 2.05 0.52
 # Point lights end
@@ -106,9 +106,9 @@ Point light
 # Ambient lights end
 
 # Cameras
--3.08521 2.34965 1.20901
--17.8999
-1052.66
+-2.48282 1.83273 -0.610322
+-9.69988
+1098.56
 1
 39.333
 1.844
