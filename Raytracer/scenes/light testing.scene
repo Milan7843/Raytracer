@@ -28,7 +28,7 @@ Rose matte
 0.8 0.2 0.3
 1e-08
 0
-1
+0
 0
 1 1 1
 
@@ -76,12 +76,12 @@ Cool sphere !!
 
 # Models
 awesome sauce ground yeah!
-0 0 0
+0 0.91 0
 0 0 0
 1 1 1
 src/models/plane.obj
 1
-1
+4
 
 indirect_lighting_test
 0 1.67 0
@@ -93,8 +93,8 @@ src/models/indirect_lighting_test.obj
 # Models end
 
 # Point lights
-Point light
-0.847059 0.701961 0.760784
+White point light
+1 1 1
 1
 0 2.05 0.52
 # Point lights end
@@ -106,9 +106,9 @@ Point light
 # Ambient lights end
 
 # Cameras
--2.48282 1.83273 -0.610322
--9.69988
-1098.56
+-2.56856 2.02689 -1.11332
+-17.0999
+1105.76
 1
 39.333
 1.844

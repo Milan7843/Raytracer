@@ -478,21 +478,7 @@ std::string ImGuiUserInterface::formatTime(float time)
 
 void ImGuiUserInterface::drawRenderSettings(SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode)
 {
-	ImGui::SliderInt("Block size", renderer.getBlockSizePointer(), 16, 160, "%d", ImGuiSliderFlags_AlwaysClamp);
-	renderer.verifyBlockSize();
-	ImGuiUtility::drawHelpMarker("The size of a render block in pixels. Must be a multiple of 16 and will be snapped to the nearest multiple of 16 if it is not.");
-
-	ImGui::SliderInt("Multisamples", renderer.getMultisamplePointer(), 1, 5, "%d", ImGuiSliderFlags_AlwaysClamp);
-	ImGuiUtility::drawHelpMarker("The number of different sample points per pixel, works as anti-aliasing.");
-	ImGui::Text(camera.getInformation().c_str());
-
-	// Samples per render pass
-	ImGui::SliderInt("Sample count", renderer.getSampleCountPointer(), 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
-	ImGuiUtility::drawHelpMarker("The number of samples per pixel per render pass.");
-
-	// Render passes per block
-	ImGui::SliderInt("Block passes", renderer.getRenderPassCountPointer(), 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
-	ImGuiUtility::drawHelpMarker("The number of passes per block. Each pass will take the full number of samples for each pixel.");
+	renderer.drawInterface();
 
 	ImGui::Checkbox("Use HDRI as background", sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer());
 	ImGuiUtility::drawHelpMarker("Only if enabled, the HDRI will be drawn as the background.\nThe HDRI will be shown in reflections either way");

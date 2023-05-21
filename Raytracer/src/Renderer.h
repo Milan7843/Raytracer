@@ -7,8 +7,9 @@
 #include "Render processes/RenderProcess.h"
 #include "Render processes/BlockRenderProcess.h"
 #include "Render processes/RealtimeRenderProcess.h"
+#include "ImGuiEditorInterface.h"
 
-class Renderer
+class Renderer : public ImGuiEditorInterface
 {
 public:
 	Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height);
@@ -50,10 +51,9 @@ public:
 	// Verify the block size: it must be a multiple of 16
 	void verifyBlockSize();
 
-	int* getBlockSizePointer();
-	int* getMultisamplePointer();
-	int* getSampleCountPointer();
-	int* getRenderPassCountPointer();
+	// Draw the interface for this renderer using ImGui
+	void drawInterface();
+
 	float getRenderProgress();
 	float getTimeLeft();
 
@@ -99,6 +99,9 @@ private:
 
 	// The size in pixels of each block
 	int blockSize{ 64 };
+
+	// The quality of the indirect lighting calculation
+	int indirectLightingQuality{ 1 };
 
 	RenderProcess* currentRenderProcess = nullptr;
 };

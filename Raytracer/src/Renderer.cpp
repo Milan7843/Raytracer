@@ -81,6 +81,7 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	computeShader.setInt("multisamples", multisamples);
 	computeShader.setInt("currentFrameSampleCount", currentFrameSampleCount);
 	computeShader.setInt("pixelRenderSize", 1);
+	computeShader.setInt("indirectLightingQuality", indirectLightingQuality);
 
 	// Binding the hdri
 	computeShader.setInt("hdri", 3);
@@ -177,24 +178,27 @@ void Renderer::verifyBlockSize()
 	blockSize = (blockSize / 16)*16;
 }
 
-int* Renderer::getBlockSizePointer()
+void Renderer::drawInterface()
 {
-	return &blockSize;
-}
+	ImGui::SliderInt("Block size", &blockSize, 16, 160, "%d", ImGuiSliderFlags_AlwaysClamp);
+	verifyBlockSize();
+	ImGuiUtility::drawHelpMarker("The size of a render block in pixels. Must be a multiple of 16 and will be snapped to the nearest multiple of 16 if it is not.");
 
-int* Renderer::getMultisamplePointer()
-{
-	return &multisamples;
-}
+	ImGui::SliderInt("Multisamples", &multisamples, 1, 5, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGuiUtility::drawHelpMarker("The number of different sample points per pixel, works as anti-aliasing.");
 
-int* Renderer::getSampleCountPointer()
-{
-	return &sampleCount;
-}
+	// Samples per render pass
+	ImGui::SliderInt("Sample count", &sampleCount, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGuiUtility::drawHelpMarker("The number of samples per pixel per render pass.");
 
-int* Renderer::getRenderPassCountPointer()
-{
-	return &renderPassCount;
+	// Render passes per block
+	ImGui::SliderInt("Block passes", &renderPassCount, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGuiUtility::drawHelpMarker("The number of passes per block. Each pass will take the full number of samples for each pixel.");
+
+	// Render passes per block
+	ImGui::SliderInt("Indirect lighting quality", &indirectLightingQuality, 0, 10, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGuiUtility::drawHelpMarker("The quality of the indirect lighting calculation. Higher quality increases the number of possible light bounces and reduces noise. Set to 0 for no indirect lighting.");
+
 }
 
 float Renderer::getRenderProgressPrecise()

@@ -12,6 +12,9 @@ uniform int multisamples;
 
 uniform bool renderUsingBlocks;
 uniform bool useHDRIAsBackground;
+
+uniform int indirectLightingQuality;
+
 uniform vec2 currentBlockOrigin;
 uniform int blockSize;
 uniform int renderPassCount;
@@ -757,14 +760,23 @@ vec3 calculateDirectLightingContribution(Intersection intersection)
 
 vec3 calculateIndirectLightingContribution(Intersection intersection, int seed)
 {
-    int iterations = 3;
+    // Do no indirect lighting calculation if the quality is set to 0
+    if (indirectLightingQuality == 0)
+    {
+        return vec3(0.0);
+    }
+
+    int iterations = indirectLightingQuality;
 
     Intersection currentIntersection = intersection;
 
     vec3 finalColor = vec3(0.0);
 
+    // How the color of the light is affected by surface colors
+    vec3 currentLightBounceAffectColor = vec3(1.0);
+
     // Calculating the indirection color at the first position
-    finalColor += calculateIndirectLightingContributionAtPosition(currentIntersection, 10, seed + 16);
+    finalColor += calculateIndirectLightingContributionAtPosition(currentIntersection, min(10, indirectLightingQuality * 5), seed + 16);
 
     float totalDistance = 0.0;
 
@@ -784,8 +796,16 @@ vec3 calculateIndirectLightingContribution(Intersection intersection, int seed)
             );
 
         totalDistance += currentIntersection.depth;
-
-        finalColor += calculateIndirectLightingContributionAtPosition(currentIntersection, 5, seed + 110 * i + 23) / (1.0 + totalDistance);
+        
+        currentLightBounceAffectColor *= currentIntersection.color;
+        
+        finalColor +=
+            currentLightBounceAffectColor *
+            calculateIndirectLightingContributionAtPosition(
+                currentIntersection,
+                min(5, indirectLightingQuality * 2),
+                seed + 110 * i + 23
+            ) / (1.0 + totalDistance);
     }
 
     return finalColor;
