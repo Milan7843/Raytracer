@@ -103,6 +103,7 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		float transparency;
 		float reflectionDiffusion;
 		glm::vec3 emission;
+		float emissionStrength;
 
 		// Then getting said data
 		color = readVec3(filestream);
@@ -110,10 +111,11 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		filestream >> transparency;
 		filestream >> refractiveness;
 		filestream >> reflectionDiffusion;
+		filestream >> emissionStrength;
 		emission = readVec3(filestream);
 
 		// Creating the material with the read properties
-		Material material(buffer, color, reflectiveness, transparency, refractiveness, reflectionDiffusion, emission);
+		Material material(buffer, color, reflectiveness, transparency, refractiveness, reflectionDiffusion, emission, emissionStrength);
 
 		// And adding the material to the scene
 		scene.addMaterial(material);

@@ -153,6 +153,7 @@ struct Material
     float transparency;
     float refractiveness;
     float reflectionDiffusion;
+    float emissionStrength;
 };
 uniform Material materials[NUM_MATERIALS];
 uniform int materialCount;
@@ -766,7 +767,7 @@ vec3 calculateIndirectLightingContribution(Intersection intersection, int seed)
         return vec3(0.0);
     }
 
-    int iterations = indirectLightingQuality;
+    int iterations = indirectLightingQuality-1;
 
     Intersection currentIntersection = intersection;
 
@@ -805,7 +806,7 @@ vec3 calculateIndirectLightingContribution(Intersection intersection, int seed)
                 currentIntersection,
                 min(5, indirectLightingQuality * 2),
                 seed + 110 * i + 23
-            ) / (1.0 + totalDistance);
+            ) / ((1.0 + totalDistance) * (1.0 + totalDistance));
     }
 
     return finalColor;
