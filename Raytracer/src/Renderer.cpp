@@ -73,6 +73,7 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	computeShader.setFloat("fov", camera->getFov());
 
 	computeShader.setBool("useHDRIAsBackground", *scene.getUseHDRIAsBackgroundPointer());
+	computeShader.setFloat("hdriLightStrength", hdriLightStrength);
 
 	// Writing rendering data to the compute shader
 	computeShader.setInt("screenWidth", width);
@@ -199,6 +200,10 @@ void Renderer::drawInterface()
 	ImGui::SliderInt("Indirect lighting quality", &indirectLightingQuality, 0, 10, "%d", ImGuiSliderFlags_AlwaysClamp);
 	ImGuiUtility::drawHelpMarker("The quality of the indirect lighting calculation. Higher quality increases the number of possible light bounces and reduces noise. Set to 0 for no indirect lighting.");
 
+	// The strength of the HDRI lighting calculation
+	ImGui::DragFloat("HDRI light strength", &hdriLightStrength, 0.01f, 0.0f, 1.0f, "%.2f");
+	ImGuiUtility::drawHelpMarker("How much the HDRI influences the lighting of the scene.");
+
 }
 
 float Renderer::getRenderProgressPrecise()
@@ -257,6 +262,8 @@ void Renderer::readRenderSettings()
 	filestream >> renderPassCount;
 	filestream >> multisamples;
 	filestream >> blockSize;
+	filestream >> indirectLightingQuality;
+	filestream >> hdriLightStrength;
 
 	// Finally closing the file
 	filestream.close();
@@ -273,6 +280,8 @@ void Renderer::writeRenderSettingsToFile()
 	filestream << renderPassCount << "\n";
 	filestream << multisamples << "\n";
 	filestream << blockSize << "\n";
+	filestream << indirectLightingQuality << "\n";
+	filestream << hdriLightStrength << "\n";
 
 	// Done writing so flush data and close filestream
 	filestream.close();

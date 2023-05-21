@@ -103,6 +103,9 @@ private:
 	// The quality of the indirect lighting calculation
 	int indirectLightingQuality{ 1 };
 
+	// How much the HDRI contributes to the lighting of the scene
+	float hdriLightStrength{ 0.2f };
+
 	RenderProcess* currentRenderProcess = nullptr;
 };
 
