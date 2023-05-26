@@ -129,7 +129,7 @@ std::vector<Mesh>& Model::getMeshes()
 void Model::loadModel(std::string path, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT)
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);
+	const aiScene* scene = importer.ReadFile(path, aiProcess_PreTransformVertices|aiProcess_Triangulate);
 
 	// Checking for errors
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
@@ -145,7 +145,7 @@ void Model::loadModel(std::string path, std::vector<unsigned int>& meshMaterialI
 void Model::loadModel(std::string path, unsigned int meshMaterialIndex, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT)
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);
+	const aiScene* scene = importer.ReadFile(path, aiProcess_PreTransformVertices|aiProcess_Triangulate);
 
 	// Checking for errors
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
@@ -291,7 +291,13 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 			{
 				indices.push_back(face.mIndices[j]);
 			}
+
+			// Another triangle has been added
+
+			// This variable is used to generate start indices for mesh's triangles
+			(*triangleCount)++;
 		}
+		/*
 		// Loading a quad: it is treated like two triangles
 		else if (face.mNumIndices == 4)
 		{
@@ -304,16 +310,16 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 			indices.push_back(face.mIndices[0]);
 			indices.push_back(face.mIndices[2]);
 			indices.push_back(face.mIndices[3]);
-		}
+
+			// Two triangles were added
+
+			// This variable is used to generate start indices for mesh's triangles
+			(*triangleCount) += 2;
+		}*/
 		// Too big; do not add
 		else {
 			Logger::logError("Found a face with more than 4 vertices. This is not supported. Please provide a model consisting of quads or triangles.");
 		}
-
-		// Another triangle has been added
-
-		// This variable is used to generate start indices for mesh's triangles
-		(*triangleCount)++;
 	}
 
 	std::string meshName{ mesh->mName.C_Str() };
