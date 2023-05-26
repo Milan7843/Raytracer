@@ -20,6 +20,7 @@ void RealtimeRenderProcess::update(float deltaTime, ComputeShader& computeShader
 
 	computeShader.setBool("renderUsingBlocks", false);
 	computeShader.setInt("pixelRenderSize", currentPixelSize);
+	computeShader.setInt("renderPassCount", 1);
 
 	// Running the compute shader once for each pixel
 	//glDispatchCompute(width / (16 * 4), height / (16 * 4), 1);

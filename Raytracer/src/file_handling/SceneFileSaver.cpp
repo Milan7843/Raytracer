@@ -103,6 +103,7 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		float transparency;
 		float reflectionDiffusion;
 		glm::vec3 emission;
+		float emissionStrength;
 
 		// Then getting said data
 		color = readVec3(filestream);
@@ -110,10 +111,11 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		filestream >> transparency;
 		filestream >> refractiveness;
 		filestream >> reflectionDiffusion;
+		filestream >> emissionStrength;
 		emission = readVec3(filestream);
 
 		// Creating the material with the read properties
-		Material material(buffer, color, reflectiveness, transparency, refractiveness, reflectionDiffusion, emission);
+		Material material(buffer, color, reflectiveness, transparency, refractiveness, reflectionDiffusion, emission, emissionStrength);
 
 		// And adding the material to the scene
 		scene.addMaterial(material);
@@ -145,6 +147,14 @@ void readSpheres(std::ifstream& filestream, Scene& scene)
 
 		// Getting the object's name
 		std::getline(filestream, buffer);
+
+		// Reached end of spheres
+		if (buffer == std::string{ "# Spheres end" })
+		{
+			// Skip a line and stop parsing spheres
+			std::getline(filestream, buffer);
+			return;
+		}
 
 		// Defining all other data
 		glm::vec3 position;
@@ -181,7 +191,7 @@ void readModels(std::ifstream& filestream, Scene& scene)
 		// Reading the next line to find out whether we reached the end of spheres
 		std::getline(filestream, buffer);
 
-		// Reached end of spheres
+		// Reached end of models
 		if (buffer == std::string{ "# Models end" })
 		{
 			// Skip a line and stop parsing models
@@ -191,6 +201,14 @@ void readModels(std::ifstream& filestream, Scene& scene)
 
 		std::string name;
 		std::getline(filestream, name);
+
+		// Reached end of models
+		if (name == std::string{ "# Models end" })
+		{
+			// Skip a line and stop parsing models
+			std::getline(filestream, buffer);
+			return;
+		}
 
 		// Defining all other data
 		glm::vec3 position;
@@ -244,7 +262,7 @@ void readPointLights(std::ifstream& filestream, Scene& scene)
 		// Reading the next line to find out whether we reached the end of spheres
 		std::getline(filestream, buffer);
 
-		// Reached end of spheres
+		// Reached end of point lights
 		if (buffer == std::string{ "# Point lights end" })
 		{
 			// Skip a line and stop parsing models
@@ -255,6 +273,14 @@ void readPointLights(std::ifstream& filestream, Scene& scene)
 		// Getting this light's name
 		std::string name;
 		std::getline(filestream, name);
+
+		// Reached end of point lights
+		if (name == std::string{ "# Point lights end" })
+		{
+			// Skip a line and stop parsing point lights
+			std::getline(filestream, buffer);
+			return;
+		}
 
 		// Defining all other data
 		glm::vec3 color;
@@ -298,6 +324,14 @@ void readDirectionalLights(std::ifstream& filestream, Scene& scene)
 		std::string name;
 		std::getline(filestream, name);
 
+		// Reached end of Directional lights
+		if (name == std::string{ "# Directional lights end" })
+		{
+			// Skip a line and stop parsing Directional lights
+			std::getline(filestream, buffer);
+			return;
+		}
+
 		// Defining all other data
 		glm::vec3 color;
 		float intensity;
@@ -339,6 +373,14 @@ void readAmbientLights(std::ifstream& filestream, Scene& scene)
 		// Getting this light's name
 		std::string name;
 		std::getline(filestream, name);
+
+		// Reached end of Ambient lights
+		if (name == std::string{ "# Ambient lights end" })
+		{
+			// Skip a line and stop parsing Ambient lights
+			std::getline(filestream, buffer);
+			return;
+		}
 
 		// Defining all other data
 		glm::vec3 color;

@@ -4,7 +4,7 @@ White
 1 1 1
 0
 0
-0
+1
 0
 0 0 0
 0
@@ -15,94 +15,79 @@ Reflective
 0
 1
 0
-1 1 1
-0
+1 1 0
+1
 
 Transparent
 1 1 1
 0.5
 1
-0.02
+1
 0
-1 1 1
-0
+1 1 0
+1
 
 Rose matte
 0.8 0.2 0.3
 1e-08
 0
-1
 0
+0
+0 0 0
+1
+
+Emissive
 1 1 1
 0
-
-Tire
-0.147059 0.143454 0.143454
 0
 0
-1
 0
-0 0 0
-0
-
-Car
-0.921569 0.225875 0.225875
-0.1
-0
-1
-0.65
-0 0 0
-0
-
-Window
-0 1 1
-1
-0
-1
-0.23
-0 0 0
-0
-
-Wheel
-0.607843 0.607843 0.607843
-0.1
-0
-1
-0
-0 0 0
-0
+1 1 0.537255
+0.615686
 # Materials end
 
 # Spheres
 # Spheres end
 
 # Models
-indirect_lighting_test
+plane
 0 0 0
 0 0 0
 1 1 1
-src/models/indirect_lighting_test.obj
+src/models/plane.obj
 1
 1
+
+couachie
+0 0 0
+0 0 0
+1 1 1
+src/models/couachie.obj
+5
+4
+4
+4
+4
+4
 # Models end
 
 # Point lights
-this is the awesome sauce red light! :D
-1 0 0
-2
-0 0.46 0.87
 # Point lights end
 
 # Directional lights
+Directional light
+1 1 1
+0.8
+-1 -1 0.2
 # Directional lights end
 
 # Ambient lights
 # Ambient lights end
 
 # Cameras
-3.33124 1.35623 1.10979
--25.2998
-1280.06
+0.567124 1.7846 -0.100054
+-25.8
+1591.06
 1
 39.333
 1.844

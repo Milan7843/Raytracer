@@ -283,14 +283,43 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 		aiFace face = mesh->mFaces[i];
 		// Pushing each index of the face
 		if (face.mNumIndices < 3) continue;
-		for (unsigned int j = 0; j < face.mNumIndices; j++)
-		{
-			indices.push_back(face.mIndices[j]);
-		}
-		// Another triangle has been added
 
-		// This variable is used to generate start indices for mesh's triangles
-		(*triangleCount)++;
+		// Loading a triangle
+		if (face.mNumIndices == 3)
+		{
+			for (unsigned int j = 0; j < face.mNumIndices; j++)
+			{
+				indices.push_back(face.mIndices[j]);
+			}
+
+			// Another triangle has been added
+
+			// This variable is used to generate start indices for mesh's triangles
+			(*triangleCount)++;
+		}
+		/*
+		// Loading a quad: it is treated like two triangles
+		else if (face.mNumIndices == 4)
+		{
+			// Pushing the first of the two triangles
+			indices.push_back(face.mIndices[0]);
+			indices.push_back(face.mIndices[1]);
+			indices.push_back(face.mIndices[2]);
+
+			// Pushing the second of the two triangles
+			indices.push_back(face.mIndices[0]);
+			indices.push_back(face.mIndices[2]);
+			indices.push_back(face.mIndices[3]);
+
+			// Two triangles were added
+
+			// This variable is used to generate start indices for mesh's triangles
+			(*triangleCount) += 2;
+		}*/
+		// Too big; do not add
+		else {
+			Logger::logError("Found a face with more than 4 vertices. This is not supported. Please provide a model consisting of quads or triangles.");
+		}
 	}
 
 	std::string meshName{ mesh->mName.C_Str() };

@@ -7,6 +7,7 @@ White
 1
 0
 0 0 0
+0
 
 Reflective
 1 1 1
@@ -14,7 +15,8 @@ Reflective
 0
 1
 0
-1 1 1
+1 1 0
+1
 
 Transparent
 1 1 1
@@ -22,97 +24,70 @@ Transparent
 1
 1
 0
-1 1 1
+1 1 0
+1
 
 Rose matte
 0.8 0.2 0.3
 1e-08
 0
-1
 0
+0
+1 1 0
+0
+
+Emissive
 1 1 1
-
-Tire
-0.147059 0.143454 0.143454
 0
 0
-1
-0
-0 0 0
-
-Car
-0.921569 0.225875 0.225875
 0
 0
-1
-0.65
-0 0 0
-
-Window
-0 1 1
-1
-0
-1
-0.23
-0 0 0
-
-Wheel
-0.607843 0.607843 0.607843
-0.1
-0
-1
-0
-0 0 0
+1 1 0.537255
+0.615686
 # Materials end
 
 # Spheres
-Cool sphere !!
-2 1 1
-0 0 0
-0.6 0.6 0.6
-1
-0
 # Spheres end
 
 # Models
-awesome sauce ground yeah!
+crate
+0 0 0
+0 0 0
+1 1 1
+src/models/crate.obj
+1
+4
+
+plane
 0 0 0
 0 0 0
 1 1 1
 src/models/plane.obj
 1
-0
+1
 # Models end
 
 # Point lights
-this is the awesome sauce red light! :D
-1 0 0
-2
-0 1.8 1.8
-
-seems green
-0 1 0
-2
-2 1.8 0
+White point light
+1 1 1
+0
+0 2.05 0.52
 # Point lights end
 
 # Directional lights
-basically the sun
-1 1 0.9
-0.59
-0.707 -0.707 0
+Directional light
+1 1 1
+1
+-1 -1 0.2
 # Directional lights end
 
 # Ambient lights
-*ambience* ~
-0.8 0.8 1
-0.02
 # Ambient lights end
 
 # Cameras
-0.0337927 12.0827 -0.152387
--89
-809.265
+-1.02458 0.822828 0.614315
+-28.6
+1769.36
 1
 39.333
 1.844

@@ -152,6 +152,9 @@ vec3 calculateDirLight(DirLight light, vec3 normal, vec3 viewDir)
 {
     vec3 lightDir = normalize(-light.dir);
 
+    // Single-sided light
+    if (dot(lightDir, normal) < 0.0) return vec3(0.0);
+
     float diff = max(dot(normal, lightDir), 0.0);
 
     vec3 reflectDir = reflect(-lightDir, normal);
@@ -167,6 +170,9 @@ vec3 calculateDirLight(DirLight light, vec3 normal, vec3 viewDir)
 vec3 calculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
     vec3 lightDir = normalize(light.pos - fragPos);
+
+    // Single-sided light
+    if (dot(lightDir, normal) < 0.0) return vec3(0.0);
 
     float diff = max(dot(normal, lightDir), 0.0);
 
