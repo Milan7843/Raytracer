@@ -10,7 +10,7 @@ HDRIRenderer::~HDRIRenderer()
 {
 }
 
-void HDRIRenderer::drawHDRI(unsigned int hdri, Camera& camera, unsigned int width, unsigned int height)
+void HDRIRenderer::drawHDRI(unsigned int hdri, Camera& camera)
 {
     glBindVertexArray(skyboxVAO);
 
@@ -22,7 +22,7 @@ void HDRIRenderer::drawHDRI(unsigned int hdri, Camera& camera, unsigned int widt
     view[3][1] = 0.0f;
     view[3][2] = 0.0f;
     hdriShader.setMat4("view", view);
-    hdriShader.setMat4("projection", camera.getProjectionMatrix(width, height));
+    hdriShader.setMat4("projection", camera.getProjectionMatrix());
 
     // Binding the hdri
     hdriShader.setInt("hdri", 0);

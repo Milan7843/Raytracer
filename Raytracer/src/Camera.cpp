@@ -56,7 +56,12 @@ glm::mat4 Camera::getViewMatrix()
 	glm::mat4 view = glm::lookAt(position, position + forward, up);
 	return view;
 }
-glm::mat4 Camera::getProjectionMatrix(int width, int height)
+glm::mat4 Camera::getProjectionMatrix()
+{   //                           cam pos,  target,            up vector
+	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 1000.0f);
+	return projection;
+}
+glm::mat4 Camera::getProjectionMatrix(unsigned int width, unsigned int height)
 {   //                           cam pos,  target,            up vector
 	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 1000.0f);
 	return projection;
@@ -118,6 +123,12 @@ bool Camera::mouseCallback(GLFWwindow* window, double xpos, double ypos)
 
 	// The camera moved
 	return true;
+}
+
+void Camera::setAspectRatio(int width, int height)
+{
+	this->width = width;
+	this->height = height;
 }
 
 void Camera::writeDataToStream(std::ofstream& filestream)

@@ -114,7 +114,7 @@ void ObjectScreenSelector::renderSceneToTexture(Scene& scene)
 
 	// Projection matrix
 	glm::mat4 projection;
-	projection = scene.getActiveCamera().getProjectionMatrix(width, height);
+	projection = scene.getActiveCamera().getProjectionMatrix();
 	objectColorShader.setMat4("projection", projection);
 
 	// Drawing the objects

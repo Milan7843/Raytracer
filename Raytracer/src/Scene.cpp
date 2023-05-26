@@ -362,9 +362,21 @@ void Scene::recalculateSphereIndices()
 	}
 }
 
+void Scene::setAspectRatio(int width, int height)
+{
+	// Updating the aspect ratio of all cameras to the new one
+	for (Camera& camera : cameras)
+	{
+		camera.setAspectRatio(width, height);
+	}
+}
+
 void Scene::addCamera(Camera& camera)
 {
 	this->cameras.push_back(camera);
+
+	// Setting the aspect ratio of the camera to the one currently being used
+	camera.setAspectRatio(width, height);
 }
 
 void Scene::activateCamera(unsigned int index)
@@ -379,9 +391,21 @@ Camera& Scene::getActiveCamera()
 
 void Scene::draw(AbstractShader* shader)
 {
+	shader->use();
+
 	// First writing all material data to the shader
 	writeMaterialsToShader(shader);
 	shader->setVector3("cameraPos", getActiveCamera().getPosition());
+
+	// View matrix
+	glm::mat4 view = glm::mat4(1.0f);
+	view = getActiveCamera().getViewMatrix();
+	shader->setMat4("view", view);
+
+	// Projection matrix
+	glm::mat4 projection;
+	projection = getActiveCamera().getProjectionMatrix();
+	shader->setMat4("projection", projection);
 
 	// Binding the hdri
 	shader->setInt("hdri", 0);

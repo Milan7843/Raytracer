@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\BVH\BVH.cpp" />
     <ClCompile Include="src\ShaderWritable.cpp" />
     <ClCompile Include="src\Render processes\BlockRenderProcess.cpp" />
     <ClCompile Include="src\Render processes\RealtimeRenderProcess.cpp" />
@@ -63,6 +64,7 @@
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\BVH\BVH.h" />
     <ClInclude Include="src\ShaderWritable.h" />
     <ClInclude Include="src\Render processes\BlockRenderProcess.h" />
     <ClInclude Include="src\Render processes\RealtimeRenderProcess.h" />
@@ -622,6 +624,9 @@
     <None Include="src\Shaders\blurComputeShader.shader" />
     <None Include="src\Shaders\bufferedIndirectLightingRaytracingFragmentShader.shader" />
     <None Include="src\Shaders\bufferedRaytracingFragmentShader.shader" />
+    <None Include="src\Shaders\BVH visualisation\bvhVisualisationFragment.shader" />
+    <None Include="src\Shaders\BVH visualisation\bvhVisualisationGeometry.shader" />
+    <None Include="src\Shaders\BVH visualisation\bvhVisualisationVertex.shader" />
     <None Include="src\Shaders\hdriFragment.shader" />
     <None Include="src\Shaders\hdriVertex.shader" />
     <None Include="src\Shaders\objectClickColoringShader.shader" />

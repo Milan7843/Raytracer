@@ -141,6 +141,9 @@
     <ClCompile Include="src\ShaderWritable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\BVH\BVH.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -1367,6 +1370,9 @@
     <ClInclude Include="src\ShaderWritable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\BVH\BVH.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\assimp\color4.inl">
@@ -1825,6 +1831,9 @@
     <None Include="src\Shaders\blurComputeShader.shader" />
     <None Include="src\Shaders\objectClickColoringShader.shader" />
     <None Include="src\Shaders\raytraceComputeShaderSampledUpdated.shader" />
+    <None Include="src\Shaders\BVH visualisation\bvhVisualisationFragment.shader" />
+    <None Include="src\Shaders\BVH visualisation\bvhVisualisationGeometry.shader" />
+    <None Include="src\Shaders\BVH visualisation\bvhVisualisationVertex.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />

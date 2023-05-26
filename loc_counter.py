@@ -4,7 +4,7 @@ def count_lines(filename):
     with open(filename, 'r') as file:
         lines = file.readlines()
         # Remove empty lines and lines containing only whitespace
-        lines = [line for line in lines if line.strip()]
+        #lines = [line for line in lines if line.strip()]
         return len(lines)
 
 def count_lines_in_directory(directory, excluded_files=None):

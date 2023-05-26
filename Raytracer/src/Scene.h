@@ -78,6 +78,8 @@ public:
 	void recalculateModelIndices();
 	void recalculateSphereIndices();
 
+	void setAspectRatio(int width, int height);
+
 
 	// Add a camera to the scene
 	void addCamera(Camera& camera);
@@ -183,6 +185,10 @@ private:
 	// Keeping track of the materials
 	std::vector<Material> materials;
 	unsigned int materialCount = 0;
+
+	// Rendering size: only used for aspect ratio
+	unsigned int width{ 0 };
+	unsigned int height{ 0 };
 
 	// Replace part of a string with another string.
 	bool replace(std::string& str, const std::string& from, const std::string& to);
