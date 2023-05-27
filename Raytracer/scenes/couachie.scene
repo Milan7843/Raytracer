@@ -1,0 +1,85 @@
+hdri_default.png
+# Materials
+White
+1 1 1
+0
+0
+1
+0
+0 0 0
+0
+
+Reflective
+1 1 1
+1
+0
+1
+0
+0 1 1
+1
+
+Transparent
+1 1 1
+0.5
+1
+1
+0
+0 1 1
+1
+
+Rose matte
+0.8 0.2 0.3
+1e-08
+0
+0
+0
+0 1 0
+0
+
+Emissive
+1 1 1
+0
+0
+0
+0
+0.537255 0.615686 1
+1
+# Materials end
+
+# Spheres
+# Spheres end
+
+# Models
+couachie_full
+0 0 0
+0 0 0
+1 1 1
+src/models/couachie_full.obj
+3
+0
+0
+0
+# Models end
+
+# Point lights
+# Point lights end
+
+# Directional lights
+Directional light
+1 1 1
+0.8
+-1 -1 0.2
+# Directional lights end
+
+# Ambient lights
+# Ambient lights end
+
+# Cameras
+0.567124 1.7846 -0.100054
+-25.8
+1591.06
+1
+39.333
+1.844
+# Cameras end
+

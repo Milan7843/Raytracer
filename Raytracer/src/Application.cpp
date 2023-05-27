@@ -145,6 +145,8 @@ int Application::Start()
         "src/shaders/BVH visualisation/bvhVisualisationFragment.shader"
     );
 
+    bvh.generateFromModel(sceneManager.getCurrentScene().getModels()[0]);
+
     // TODO change pointer passes to references
 
     while (!glfwWindowShouldClose(window))

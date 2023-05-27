@@ -13,14 +13,14 @@ void main()
 {
     // Calculating the eight vertices of the box
     vec4 vertices[8];
-    vertices[0] = projection * view * vec4((pos[0] + size[0] * vec3(-1.0, -1.0, -1.0)), 1.0);
-    vertices[1] = projection * view * vec4((pos[0] + size[0] * vec3(1.0, -1.0, -1.0)), 1.0);
-    vertices[2] = projection * view * vec4((pos[0] + size[0] * vec3(-1.0, 1.0, -1.0)), 1.0);
-    vertices[3] = projection * view * vec4((pos[0] + size[0] * vec3(1.0, 1.0, -1.0)), 1.0);
-    vertices[4] = projection * view * vec4((pos[0] + size[0] * vec3(-1.0, -1.0, 1.0)), 1.0);
-    vertices[5] = projection * view * vec4((pos[0] + size[0] * vec3(1.0, -1.0, 1.0)), 1.0);
-    vertices[6] = projection * view * vec4((pos[0] + size[0] * vec3(-1.0, 1.0, 1.0)), 1.0);
-    vertices[7] = projection * view * vec4((pos[0] + size[0] * vec3(1.0, 1.0, 1.0)), 1.0);
+    vertices[0] = projection * view * vec4((pos[0] + 0.5 * size[0] * vec3(-1.0, -1.0, -1.0)), 1.0);
+    vertices[1] = projection * view * vec4((pos[0] + 0.5 * size[0] * vec3(1.0, -1.0, -1.0)), 1.0);
+    vertices[2] = projection * view * vec4((pos[0] + 0.5 * size[0] * vec3(-1.0, 1.0, -1.0)), 1.0);
+    vertices[3] = projection * view * vec4((pos[0] + 0.5 * size[0] * vec3(1.0, 1.0, -1.0)), 1.0);
+    vertices[4] = projection * view * vec4((pos[0] + 0.5 * size[0] * vec3(-1.0, -1.0, 1.0)), 1.0);
+    vertices[5] = projection * view * vec4((pos[0] + 0.5 * size[0] * vec3(1.0, -1.0, 1.0)), 1.0);
+    vertices[6] = projection * view * vec4((pos[0] + 0.5 * size[0] * vec3(-1.0, 1.0, 1.0)), 1.0);
+    vertices[7] = projection * view * vec4((pos[0] + 0.5 * size[0] * vec3(1.0, 1.0, 1.0)), 1.0);
 
 
     // Emitting lines to form the box
