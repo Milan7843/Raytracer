@@ -48,31 +48,39 @@ enum class Axis
 	z
 };
 
-class BVH
+class BVHHandler
 {
 public:
-	BVH(const char* vertexShaderPath, const char* geometryShaderPath, const char* fragmentShaderPath);
-	~BVH();
+	BVHHandler(const char* vertexShaderPath, const char* geometryShaderPath, const char* fragmentShaderPath);
+	~BVHHandler();
 
 	// Draw this BVH for debug purposes
 	void draw(Scene& scene);
 
-	// Generate the BVH nodes from a given model
-	void generateFromModel(Model& model);
+	// Generate the root node to fill an entire scene
+	static BVHNode* updateByScene(Scene& scene, BVHNode* oldBVHRoot);
+
+	// Generate the BVH nodes from a given mesh
+	static BVHNode* generateFromMesh(Mesh& mesh, BVHNode* oldBVHRoot);
 
 private:
 	Shader bvhRenderShader;
-	BVHNode* root = nullptr;
 
-	void deleteCurrentBVH();
+	static void deleteBVH(BVHNode* node);
 
-	BVHData getBoundingBox(std::vector<Triangle>& triangles);
+	static BVHData getBoundingBox(std::vector<Triangle>& triangles);
 
-	void updateMinMax(glm::vec4& min, glm::vec4& max, glm::vec4& val);
+	static BVHNode* generateBVHRecursively(std::vector<Triangle> triangles, unsigned int depth);
 
-	BVHNode* generateBVHRecursively(std::vector<Triangle> triangles, unsigned int depth);
+	static void flattenBVHTreeData(BVHNode* rootNode, std::vector<BVHData>& data, bool onlyLeaves);
 
-	void flattenBVHTreeData(BVHNode* rootNode, std::vector<BVHData>& data, bool onlyLeaves);
+	static BVHNode* generateBVHRecursively(std::vector<BVHNode*> nodes);
+
+	static void updateMinMax(glm::vec4& min, glm::vec4& max, const glm::vec4& val);
+
+	static void updateMinMax(glm::vec3& min, glm::vec3& max, const glm::vec3& val);
+
+	static BVHData getBoundingBox(std::vector<BVHNode*>& nodes);
 
 	/*
 	static bool compareTrianglesX(const Triangle& a, const Triangle& b)

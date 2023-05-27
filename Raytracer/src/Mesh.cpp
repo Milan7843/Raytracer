@@ -1,6 +1,8 @@
 #include "Mesh.h"
 
 #include "Scene.h"
+#include "BVH/BVHHandler.h"
+
 
 Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices
     , unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex)
@@ -12,6 +14,9 @@ Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned
     this->vertices = vertices;
     this->indices = indices;
     setupMesh();
+
+    // Creating a BVH from the mesh
+    this->bvhRootNode = BVHHandler::generateFromMesh(*this, this->bvhRootNode);
 }
 
 Mesh::~Mesh()
@@ -186,4 +191,10 @@ std::string& Mesh::getName()
 unsigned int Mesh::getMaterialIndex() const
 {
     return materialIndex;
+}
+
+BVHNode* Mesh::getRootNode()
+{
+    // TODO update on mesh update
+    return bvhRootNode;
 }

@@ -24,7 +24,7 @@
 #include "ImGuiUserInterface.h"
 #include "OutlineRenderer.h"
 #include "ObjectScreenSelector.h"
-#include "BVH/BVH.h"
+#include "BVH/BVHHandler.h"
 
 #include "CoordinateUtility.h"
 #include "Logger.h"

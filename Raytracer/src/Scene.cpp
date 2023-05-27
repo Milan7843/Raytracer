@@ -5,6 +5,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "BVH/BVHHandler.h"
+
 Scene::Scene()
 {
 	Material material(Material::generateErrorMaterial());
@@ -541,6 +543,8 @@ void Scene::writeObjectsToShader(AbstractShader* shader)
 		sphere.writeToShader(shader, triangleBufferSSBO);
 	}
 
+	updateBVH();
+
 	// Must have written data to the new triangle buffer
 	changedTriangleBuffer = false;
 }
@@ -686,6 +690,16 @@ std::vector<Model>& Scene::getModels()
 std::vector<Sphere>& Scene::getSpheres()
 {
 	return spheres;
+}
+
+BVHNode* Scene::getBVHRoot()
+{
+	return bvhRoot;
+}
+
+void Scene::updateBVH()
+{
+	bvhRoot = BVHHandler::updateByScene(*this, bvhRoot);
 }
 
 bool Scene::replace(std::string& str, const std::string& from, const std::string& to)

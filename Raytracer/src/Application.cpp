@@ -139,13 +139,16 @@ int Application::Start()
 
     unsigned int frame = 0;
 
-    BVH bvh(
+    BVHHandler bvhHandler(
         "src/shaders/BVH visualisation/bvhVisualisationVertex.shader",
         "src/shaders/BVH visualisation/bvhVisualisationGeometry.shader",
         "src/shaders/BVH visualisation/bvhVisualisationFragment.shader"
     );
 
-    bvh.generateFromModel(sceneManager.getCurrentScene().getModels()[0]);
+    // Generating the initial BVH
+    sceneManager.getCurrentScene().updateBVH();
+
+    //bvh.generateFromModel(sceneManager.getCurrentScene().getModels()[0]);
 
     // TODO change pointer passes to references
 
@@ -244,7 +247,7 @@ int Application::Start()
             // Rendering the outlines for selected objects
             outlineRenderer.render(sceneManager.getCurrentScene());
 
-            bvh.draw(sceneManager.getCurrentScene());
+            bvhHandler.draw(sceneManager.getCurrentScene());
 
             // Rendering a preview of the colours used to select an object by clicking on it
             //objectScreenSelector.renderTexturePreview(sceneManager.getCurrentScene(), screenQuadVAO);

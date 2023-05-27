@@ -1,19 +1,19 @@
-#include "BVH.h"
+#include "BVHHandler.h"
 
-BVH::BVH(const char* vertexShaderPath, const char* geometryShaderPath, const char* fragmentShaderPath)
+BVHHandler::BVHHandler(const char* vertexShaderPath, const char* geometryShaderPath, const char* fragmentShaderPath)
 	: bvhRenderShader(vertexShaderPath, fragmentShaderPath, geometryShaderPath)
 {
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 }
 
-BVH::~BVH()
+BVHHandler::~BVHHandler()
 {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 }
 
-void BVH::draw(Scene& scene)
+void BVHHandler::draw(Scene& scene)
 {
 	bvhRenderShader.use();
 
@@ -31,7 +31,7 @@ void BVH::draw(Scene& scene)
 
 	std::vector<BVHData> data;
 
-	flattenBVHTreeData(root, data, true);
+	flattenBVHTreeData(scene.getBVHRoot(), data, false);
 
 	glBindVertexArray(VAO);
 
@@ -50,48 +50,43 @@ void BVH::draw(Scene& scene)
 	glBindVertexArray(0);
 }
 
-void BVH::generateFromModel(Model& model)
+BVHNode* BVHHandler::updateByScene(Scene& scene, BVHNode* oldBVHRoot)
 {
 	// Deleting any old data we have already
-	deleteCurrentBVH();
-
-	std::vector<Mesh*> meshes;
-
-	// Taking all meshes from the model and putting them together in one vector
-	for (Mesh& mesh : model.getMeshes())
-	{
-		meshes.push_back(&mesh);
-	}
+	deleteBVH(oldBVHRoot);
 
 	std::vector<BVHNode*> meshRootNodes;
 
-	// Going over all meshes and calculating a BVH for each
-	for (Mesh* mesh : meshes)
+	// Adding all meshes' BVH root nodes
+	for (Model& model : scene.getModels())
 	{
-		// Copying the triangles so that they aren't affected by the in-place sorting
-		//std::vector<Triangle> copy(mesh->triangles);
-		//BVHNode* meshRootNode = generateBVHRecursively(mesh->triangles, 0);
-		//root = meshRootNode;
+		for (Mesh& mesh : model.getMeshes())
+		{
+			meshRootNodes.push_back(mesh.getRootNode());
+		}
 	}
-	BVHNode* meshRootNode = generateBVHRecursively(meshes[1]->triangles, 0);
-	root = meshRootNode;
+
+	// Generating a new BVH using the root nodes
+	BVHNode* rootNode = generateBVHRecursively(meshRootNodes);
+	return rootNode;
 }
 
-BVHNode* BVH::generateBVHRecursively(std::vector<Triangle> triangles, unsigned int depth)
+BVHNode* BVHHandler::generateFromMesh(Mesh& mesh, BVHNode* oldBVHRoot)
+{
+	// Deleting any old data we have already
+	deleteBVH(oldBVHRoot);
+
+	// Generating a new BVH
+	BVHNode* meshRootNode = generateBVHRecursively(mesh.triangles, 0);
+	return meshRootNode;
+}
+
+BVHNode* BVHHandler::generateBVHRecursively(std::vector<Triangle> triangles, unsigned int depth)
 {
 	BVHNode* parent = new BVHNode;
 
 	// Calculating the bounding box of the parent
 	parent->data = getBoundingBox(triangles);
-
-	//std::cout << "pos " << parent->data.pos.x << ", " << parent->data.pos.y << ", " << parent->data.pos.z << std::endl;
-	//std::cout << "size " << parent->data.size.x << ", " << parent->data.size.y << ", " << parent->data.size.z << std::endl;
-
-	for (Triangle& a : triangles)
-	{
-		glm::vec3 avg = (a.v1 + a.v2 + a.v3) / 3.0f;
-		//std::cout << "input " << avg.x << ", " << avg.y << ", " << avg.z << std::endl;
-	}
 
 	// Base case: stop on too few triangles
 	if (triangles.size() <= 8)
@@ -137,46 +132,11 @@ BVHNode* BVH::generateBVHRecursively(std::vector<Triangle> triangles, unsigned i
 			break;
 	}
 
-	/*
-	// Sorting on the correct axis
-	switch (axis)
-	{
-		case Axis::x:
-			std::sort(triangles.begin(), triangles.end(), &BVH::compareTrianglesX);
-			break;
-		case Axis::y:
-			std::sort(triangles.begin(), triangles.end(), &BVH::compareTrianglesY);
-			break;
-		case Axis::z:
-			std::sort(triangles.begin(), triangles.end(), &BVH::compareTrianglesZ);
-			break;
-	}*/
-
 	unsigned int medianIndex = (unsigned int)(triangles.size() / 2);
 
 	// Dividing up the data
 	std::vector<Triangle> left(&triangles[0], &triangles[medianIndex]);
 	std::vector<Triangle> right(&triangles[medianIndex], &triangles[triangles.size()]);
-
-	//std::cout << "total size: " << triangles.size() << ", left size: " << left.size() << ", right size: " << right.size() << std::endl;
-
-	for (Triangle& a : left)
-	{
-		glm::vec3 avg = (a.v1 + a.v2 + a.v3) / 3.0f;
-		//std::cout << "left " << avg.x << ", " << avg.y << ", " << avg.z << std::endl;
-		//std::cout << "tri v1: " << a.v1.x << ", " << a.v1.y << ", " << a.v1.z << std::endl;
-		//std::cout << "tri v2: " << a.v2.x << ", " << a.v2.y << ", " << a.v2.z << std::endl;
-		//std::cout << "tri v3: " << a.v3.x << ", " << a.v3.y << ", " << a.v3.z << std::endl;
-	}
-
-	for (Triangle& a : right)
-	{
-		glm::vec3 avg = (a.v1 + a.v2 + a.v3) / 3.0f;
-		//std::cout << "right " << avg.x << ", " << avg.y << ", " << avg.z << std::endl;
-		//std::cout << "tri v1: " << a.v1.x << ", " << a.v1.y << ", " << a.v1.z << std::endl;
-		//std::cout << "tri v2: " << a.v2.x << ", " << a.v2.y << ", " << a.v2.z << std::endl;
-		//std::cout << "tri v3: " << a.v3.x << ", " << a.v3.y << ", " << a.v3.z << std::endl;
-	}
 
 	// Then recursively creating the children
 	parent->leftChild = generateBVHRecursively(left, depth + 1);
@@ -185,7 +145,7 @@ BVHNode* BVH::generateBVHRecursively(std::vector<Triangle> triangles, unsigned i
 	return parent;
 }
 
-void BVH::flattenBVHTreeData(BVHNode* rootNode, std::vector<BVHData>& data, bool onlyLeaves)
+void BVHHandler::flattenBVHTreeData(BVHNode* rootNode, std::vector<BVHData>& data, bool onlyLeaves)
 {
 	// Do not continue on no root
 	if (rootNode == nullptr) return;
@@ -197,22 +157,71 @@ void BVH::flattenBVHTreeData(BVHNode* rootNode, std::vector<BVHData>& data, bool
 	flattenBVHTreeData(rootNode->rightChild, data, onlyLeaves);
 }
 
-void BVH::deleteCurrentBVH()
+BVHNode* BVHHandler::generateBVHRecursively(std::vector<BVHNode*> nodes)
 {
-	// Deleting the root node
-	if (root != nullptr)
+	BVHNode* parent = new BVHNode;
+
+	// Calculating the bounding box of the parent
+	parent->data = getBoundingBox(nodes);
+
+	// Base case: stop on three nodes left, as we cannot recurse with 1 node (cannot fill 2 children)
+	if (nodes.size() == 3)
+	{
+		// Making a vector with only the first two
+		std::vector<BVHNode*> left{ nodes.begin(), nodes.begin() + 2 };
+
+		// Making one last recursion to split up the two
+		parent->leftChild = generateBVHRecursively(left);
+
+		// The right child will just be the left over one
+		parent->rightChild = nodes[nodes.size() - 1];
+
+		return parent;
+	}
+	// Base case: stop on 2 nodes left: exactly 2 children
+	if (nodes.size() == 2)
+	{
+		parent->leftChild = nodes[0];
+		parent->rightChild = nodes[1];
+		return parent;
+	}
+	// Base case: stop when less than 2 nodes: must not happen!
+	if (nodes.size() < 2)
+	{
+		Logger::logError("Ended up with fewer than 2 nodes!");
+		return parent;
+	}
+
+	// If we haven't hit a base case, split up the nodes and recurse
+	unsigned int medianIndex = (unsigned int)(nodes.size() / 2);
+
+	// Dividing up the data
+	std::vector<BVHNode*> left(&nodes[0], &nodes[medianIndex]);
+	std::vector<BVHNode*> right(&nodes[medianIndex], &nodes[nodes.size()]);
+
+	// Then recursively creating the children
+	parent->leftChild = generateBVHRecursively(left);
+	parent->rightChild = generateBVHRecursively(right);
+
+	return parent;
+}
+
+void BVHHandler::deleteBVH(BVHNode* node)
+{
+	// Deleting the node
+	if (node != nullptr)
 	{
 		// Making it delete its children
-		root->deleteNode();
+		node->deleteNode();
 		// Then deleting it
-		delete root;
+		delete node;
 		// And making sure we don't get an invalid pointer
-		root = nullptr;
+		node = nullptr;
 	}
 }
 
 
-BVHData BVH::getBoundingBox(std::vector<Triangle>& triangles)
+BVHData BVHHandler::getBoundingBox(std::vector<Triangle>& triangles)
 {
 	glm::vec4 min = glm::vec4(0.0f);
 	glm::vec4 max = glm::vec4(0.0f);
@@ -254,7 +263,7 @@ BVHData BVH::getBoundingBox(std::vector<Triangle>& triangles)
 	return BVHData{ center, size };
 }
 
-void BVH::updateMinMax(glm::vec4& min, glm::vec4& max, glm::vec4& val)
+void BVHHandler::updateMinMax(glm::vec4& min, glm::vec4& max, const glm::vec4& val)
 {
 	if (val.x < min.x)
 		min.x = val.x;
@@ -268,4 +277,53 @@ void BVH::updateMinMax(glm::vec4& min, glm::vec4& max, glm::vec4& val)
 		max.y = val.y;
 	if (val.z > max.z)
 		max.z = val.z;
+}
+
+void BVHHandler::updateMinMax(glm::vec3& min, glm::vec3& max, const glm::vec3& val)
+{
+	if (val.x < min.x)
+		min.x = val.x;
+	if (val.y < min.y)
+		min.y = val.y;
+	if (val.z < min.z)
+		min.z = val.z;
+	if (val.x > max.x)
+		max.x = val.x;
+	if (val.y > max.y)
+		max.y = val.y;
+	if (val.z > max.z)
+		max.z = val.z;
+}
+
+BVHData BVHHandler::getBoundingBox(std::vector<BVHNode*>& nodes)
+{
+	glm::vec3 min = glm::vec3(0.0f);
+	glm::vec3 max = glm::vec3(0.0f);
+
+	// Setting the minimum and maximum to an arbitrary vertex
+	if (nodes.size() >= 1)
+	{
+		min = nodes[0]->data.pos;
+		max = nodes[0]->data.pos;
+	}
+
+	// Updating the minimum and maximum for every vertex
+	for (BVHNode* node : nodes)
+	{
+		updateMinMax(min, max, glm::vec3(node->data.pos - node->data.size / 2.0f));
+		updateMinMax(min, max, glm::vec3(node->data.pos + node->data.size / 2.0f));
+	}
+
+	/*
+	std::cout << "min: " << min.x << ", " << min.y << ", " << min.z << std::endl;
+	std::cout << "max: " << max.x << ", " << max.y << ", " << max.z << std::endl;
+	*/
+
+	// Calculating the required values:
+	// center: avg. of min and max
+	glm::vec3 center = (glm::vec3(min) + glm::vec3(max)) / 2.0f;
+	// size: offset between min and max
+	glm::vec3 size = (glm::vec3(max) - glm::vec3(min)) * 0.96f;
+
+	return BVHData{ center, size };
 }
