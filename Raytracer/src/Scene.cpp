@@ -5,8 +5,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#include "BVH/BVHHandler.h"
-
 Scene::Scene()
 {
 	Material material(Material::generateErrorMaterial());
@@ -692,14 +690,14 @@ std::vector<Sphere>& Scene::getSpheres()
 	return spheres;
 }
 
-BVHNode* Scene::getBVHRoot()
-{
-	return bvhRoot;
-}
-
 void Scene::updateBVH()
 {
-	bvhRoot = BVHHandler::updateByScene(*this, bvhRoot);
+	bvh.updateByScene(*this);
+}
+
+BVH& Scene::getBVH()
+{
+	return bvh;
 }
 
 bool Scene::replace(std::string& str, const std::string& from, const std::string& to)

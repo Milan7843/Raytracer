@@ -12,6 +12,7 @@
 #include "Sphere.h"
 #include "Material.h"
 #include "Camera.h"
+#include "BVH/BVH.h"
 
 #include <iostream>
 
@@ -25,9 +26,6 @@ enum ObjectType
 	AMBIENT_LIGHT,
 	MATERIAL
 };
-
-struct BVHNode;
-class BVHHandler;
 
 class Scene
 {
@@ -137,18 +135,18 @@ public:
 	std::vector<Model>& getModels();
 	std::vector<Sphere>& getSpheres();
 
-	BVHNode* getBVHRoot();
-
 	// Update the BVH according to the scene
 	void updateBVH();
+
+	BVH& getBVH();
 
 	unsigned int triangleCount{ 0 };
 
 private:
 
-	std::string name{};
+	BVH bvh;
 
-	BVHNode* bvhRoot = nullptr;
+	std::string name{};
 
 	// Keeping track of the currently selected object
 	ImGuiEditorInterface* currentlySelectedObject;

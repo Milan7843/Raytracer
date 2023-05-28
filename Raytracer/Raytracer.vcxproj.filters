@@ -144,6 +144,9 @@
     <ClCompile Include="src\BVH\BVHHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\BVH\BVH.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -1371,6 +1374,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\BVH\BVHHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BVH\BVH.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

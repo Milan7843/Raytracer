@@ -1,7 +1,10 @@
 #pragma once
 #include "../Object.h"
 #include "../Shader.h"
-#include "../Scene.h"
+#include "../Mesh.h"
+#include <queue>
+
+class Scene;
 
 struct BVHData
 {
@@ -14,6 +17,7 @@ struct BVHNode
 	BVHNode* leftChild{ nullptr };
 	BVHNode* rightChild{ nullptr };
 	BVHData data;
+	std::vector<unsigned int> triangleIndices;
 
 	void deleteNode()
 	{
@@ -41,6 +45,13 @@ struct BVHNode
 	}
 };
 
+struct FlattenedBVHNode
+{
+	BVHData data;
+	int leftChild;
+	int rightChild;
+};
+
 enum class Axis
 {
 	x,
@@ -63,16 +74,22 @@ public:
 	// Generate the BVH nodes from a given mesh
 	static BVHNode* generateFromMesh(Mesh& mesh, BVHNode* oldBVHRoot);
 
+	// Write the given BVH into two SSBOs: one for position/size/structure data and one for index data
+	static void writeIntoSSBOs(BVHNode* root, unsigned int dataSSBO, unsigned int triangleSSBO);
+
+	// Flatten the given BVH into a vector
+	static void flattenBVHTreeData(BVHNode* rootNode, std::vector<BVHData>& data, bool onlyLeaves);
+
 private:
 	Shader bvhRenderShader;
 
 	static void deleteBVH(BVHNode* node);
 
-	static BVHData getBoundingBox(std::vector<Triangle>& triangles);
+	static BVHData getBoundingBox(std::vector<Triangle>& triangles, std::vector<unsigned int>& indices);
 
-	static BVHNode* generateBVHRecursively(std::vector<Triangle> triangles, unsigned int depth);
+	static BVHNode* generateBVHRecursively(std::vector<Triangle>& triangles, std::vector<unsigned int> indices, unsigned int depth, unsigned int shaderArrayBeginIndex);
 
-	static void flattenBVHTreeData(BVHNode* rootNode, std::vector<BVHData>& data, bool onlyLeaves);
+	static void flattenBVHTreeIndices(BVHNode* rootNode, std::vector<FlattenedBVHNode>& treeStructureData, std::vector<unsigned int>& indices);
 
 	static BVHNode* generateBVHRecursively(std::vector<BVHNode*> nodes);
 

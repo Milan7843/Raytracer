@@ -148,6 +148,8 @@ int Application::Start()
     // Generating the initial BVH
     sceneManager.getCurrentScene().updateBVH();
 
+    //BVHHandler::writeIntoSSBOs(0, 0, 0);
+
     //bvh.generateFromModel(sceneManager.getCurrentScene().getModels()[0]);
 
     // TODO change pointer passes to references

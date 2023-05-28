@@ -64,6 +64,27 @@ layout(std140, binding = 2) buffer Tris
     Tri triangles[];
 };
 
+
+struct BVHNode
+{
+    vec3 pos;
+    vec3 size;
+    int leftChild;
+    int rightChild;
+};
+
+// The BVH data
+layout(std140, binding = 4) buffer BVHData
+{
+    BVHNode bvhNodes[];
+};
+
+// The BVH leaf index data
+layout(std140, binding = 5) buffer BVHIndices
+{
+    unsigned int bvhIndices[];
+};
+
 uniform vec3 cameraPosition;
 uniform vec3 cameraRotation;
 uniform vec2 screenSize;

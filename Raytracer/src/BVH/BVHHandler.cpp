@@ -1,5 +1,7 @@
 #include "BVHHandler.h"
 
+#include "../Scene.h"
+
 BVHHandler::BVHHandler(const char* vertexShaderPath, const char* geometryShaderPath, const char* fragmentShaderPath)
 	: bvhRenderShader(vertexShaderPath, fragmentShaderPath, geometryShaderPath)
 {
@@ -31,7 +33,7 @@ void BVHHandler::draw(Scene& scene)
 
 	std::vector<BVHData> data;
 
-	flattenBVHTreeData(scene.getBVHRoot(), data, false);
+	scene.getBVH().flatten(data, true);
 
 	glBindVertexArray(VAO);
 
@@ -76,22 +78,175 @@ BVHNode* BVHHandler::generateFromMesh(Mesh& mesh, BVHNode* oldBVHRoot)
 	// Deleting any old data we have already
 	deleteBVH(oldBVHRoot);
 
+	std::vector<unsigned int> indices(mesh.triangles.size());
+
+	for (unsigned int i{ 0 }; i < mesh.triangles.size(); i++)
+	{
+		indices.push_back(i);
+	}
+
 	// Generating a new BVH
-	BVHNode* meshRootNode = generateBVHRecursively(mesh.triangles, 0);
+	BVHNode* meshRootNode = generateBVHRecursively(mesh.triangles, indices, 0, mesh.shaderArraybeginIndex);
 	return meshRootNode;
 }
 
-BVHNode* BVHHandler::generateBVHRecursively(std::vector<Triangle> triangles, unsigned int depth)
+void BVHHandler::writeIntoSSBOs(BVHNode* root, unsigned int dataSSBO, unsigned int triangleSSBO)
+{
+	std::vector<FlattenedBVHNode> structure;
+	std::vector<unsigned int> indices;
+	
+
+	/*
+	BVHNode* D = new BVHNode{
+		nullptr,
+		nullptr,
+		BVHData{},
+		std::vector<unsigned int> { 0, 1, 2 }
+	};
+	BVHNode* E = new BVHNode{
+		nullptr,
+		nullptr,
+		BVHData{},
+		std::vector<unsigned int> { 3, 4, 5 }
+	};
+
+	BVHNode* F = new BVHNode{
+		nullptr,
+		nullptr,
+		BVHData{},
+		std::vector<unsigned int> { 6, 7, 8 }
+	};
+	BVHNode* G = new BVHNode{
+		nullptr,
+		nullptr,
+		BVHData{},
+		std::vector<unsigned int> { 9, 10, 11 }
+	};
+
+	BVHNode* B = new BVHNode{
+		D,
+		E,
+		BVHData{},
+		std::vector<unsigned int> { }
+	};
+
+	BVHNode* C = new BVHNode{
+		F,
+		G,
+		BVHData{},
+		std::vector<unsigned int> { }
+	};
+
+
+	BVHNode root{
+		B,
+		C,
+		BVHData{},
+		std::vector<unsigned int> {}
+	};
+	// A
+	BVHNode root{
+		// B
+		new BVHNode {
+			// D
+			new BVHNode {
+				nullptr,
+				nullptr,
+				BVHData{},
+				std::vector<unsigned int> { 0, 1, 2 }
+			},
+			// E
+			new BVHNode {
+				nullptr,
+				nullptr,
+				BVHData{},
+				std::vector<unsigned int> { 3, 4, 5 }
+			},
+			BVHData{},
+			std::vector<unsigned int> {}
+		},
+		// C
+		new BVHNode {
+			// F
+			new BVHNode {
+				nullptr,
+				nullptr,
+				BVHData{},
+				std::vector<unsigned int> { 6, 7, 8 }
+			},
+			// G
+			new BVHNode {
+				nullptr,
+				nullptr,
+				BVHData{},
+				std::vector<unsigned int> { 9, 10, 11 }
+			},
+			BVHData{},
+			std::vector<unsigned int> {}
+		},
+		BVHData{},
+		std::vector<unsigned int> {}
+	};
+
+	*/
+	
+	// Creating the index data:
+	flattenBVHTreeIndices(root, structure, indices);
+
+	if (structure.size() == 0 || indices.size() == 0)
+	{
+		Logger::logError("No data in BVH");
+		return;
+	}
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, dataSSBO);
+
+	// Loading zero-data into the data buffer
+	glBufferData(GL_SHADER_STORAGE_BUFFER, structure.size() * sizeof(FlattenedBVHNode), &structure[0], GL_STATIC_DRAW);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, dataSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, dataSSBO);
+
+	// Loading zero-data into the triangle buffer
+	glBufferData(GL_SHADER_STORAGE_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, triangleSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	/*
+	std::cout << "Structure: \n";
+	unsigned int index{ 0 };
+	for (FlattenedBVHNode& flatNode : structure)
+	{
+		std::cout << index++ << " - l: " << flatNode.leftChild << ", r: " << flatNode.rightChild << "\n";
+	}
+	std::cout << std::endl;
+
+	std::cout << "Indices: \n";
+	for (unsigned int i : indices)
+	{
+		std::cout << i << " ";
+	}
+	std::cout << std::endl;
+	*/
+}
+
+BVHNode* BVHHandler::generateBVHRecursively(std::vector<Triangle>& triangles, std::vector<unsigned int> indices, unsigned int depth, unsigned int shaderArrayBeginIndex)
 {
 	BVHNode* parent = new BVHNode;
 
 	// Calculating the bounding box of the parent
-	parent->data = getBoundingBox(triangles);
+	parent->data = getBoundingBox(triangles, indices);
 
 	// Base case: stop on too few triangles
-	if (triangles.size() <= 8)
+	if (indices.size() <= 8)
 	{
 		//std::cout << "triangle count: " << triangles.size() << std::endl;
+		parent->triangleIndices = indices;
+		for (unsigned int i{ 0 }; i < indices.size(); i++)
+		{
+			parent->triangleIndices[i] += shaderArrayBeginIndex;
+		}
 		return parent;
 	}
 
@@ -110,37 +265,45 @@ BVHNode* BVHHandler::generateBVHRecursively(std::vector<Triangle> triangles, uns
 	switch (axis)
 	{
 		case Axis::x:
-			std::sort(triangles.begin(), triangles.end(), [](const Triangle& a, const Triangle& b) {
-				float middleA = (a.v1.x + a.v2.x + a.v3.x) / 3.0f;
-				float middleB = (b.v1.x + b.v2.x + b.v3.x) / 3.0f;
+			std::sort(indices.begin(), indices.end(), [&triangles](const unsigned int& a, const unsigned int& b) {
+				Triangle& tri1 = triangles[a];
+				Triangle& tri2 = triangles[b];
+				float middleA = (tri1.v1.x + tri1.v2.x + tri1.v3.x) / 3.0f;
+				float middleB = (tri2.v1.x + tri2.v2.x + tri2.v3.x) / 3.0f;
 				return middleA < middleB;
 				});
 			break;
 		case Axis::y:
-			std::sort(triangles.begin(), triangles.end(), [](const Triangle& a, const Triangle& b) {
-				float middleA = (a.v1.y + a.v2.y + a.v3.y) / 3.0f;
-				float middleB = (b.v1.y + b.v2.y + b.v3.y) / 3.0f;
+			std::sort(indices.begin(), indices.end(), [&triangles](const unsigned int& a, const unsigned int& b) {
+				Triangle& tri1 = triangles[a];
+				Triangle& tri2 = triangles[b];
+				float middleA = (tri1.v1.y + tri1.v2.y + tri1.v3.y) / 3.0f;
+				float middleB = (tri2.v1.y + tri2.v2.y + tri2.v3.y) / 3.0f;
 				return middleA < middleB;
 				});
 			break;
 		case Axis::z:
-			std::sort(triangles.begin(), triangles.end(), [](const Triangle& a, const Triangle& b) {
-				float middleA = (a.v1.z + a.v2.z + a.v3.z) / 3.0f;
-				float middleB = (b.v1.z + b.v2.z + b.v3.z) / 3.0f;
+			std::sort(indices.begin(), indices.end(), [&triangles](const unsigned int& a, const unsigned int& b) {
+				Triangle& tri1 = triangles[a];
+				Triangle& tri2 = triangles[b];
+				float middleA = (tri1.v1.z + tri1.v2.z + tri1.v3.z) / 3.0f;
+				float middleB = (tri2.v1.z + tri2.v2.z + tri2.v3.z) / 3.0f;
 				return middleA < middleB;
 				});
 			break;
 	}
 
-	unsigned int medianIndex = (unsigned int)(triangles.size() / 2);
+	unsigned int medianIndex = (unsigned int)(indices.size() / 2);
 
 	// Dividing up the data
-	std::vector<Triangle> left(&triangles[0], &triangles[medianIndex]);
-	std::vector<Triangle> right(&triangles[medianIndex], &triangles[triangles.size()]);
+	//std::vector<unsigned int> left(&indices[0], &indices[medianIndex]);
+	//std::vector<unsigned int> right(&indices[medianIndex], &indices.end());
+	std::vector<unsigned int> left(indices.begin(), indices.begin() + medianIndex);
+	std::vector<unsigned int> right(indices.begin() + medianIndex, indices.end());
 
 	// Then recursively creating the children
-	parent->leftChild = generateBVHRecursively(left, depth + 1);
-	parent->rightChild = generateBVHRecursively(right, depth + 1);
+	parent->leftChild = generateBVHRecursively(triangles, left, depth + 1, shaderArrayBeginIndex);
+	parent->rightChild = generateBVHRecursively(triangles, right, depth + 1, shaderArrayBeginIndex);
 	
 	return parent;
 }
@@ -155,6 +318,46 @@ void BVHHandler::flattenBVHTreeData(BVHNode* rootNode, std::vector<BVHData>& dat
 
 	flattenBVHTreeData(rootNode->leftChild, data, onlyLeaves);
 	flattenBVHTreeData(rootNode->rightChild, data, onlyLeaves);
+}
+
+void BVHHandler::flattenBVHTreeIndices(BVHNode* rootNode, std::vector<FlattenedBVHNode>& treeStructureData, std::vector<unsigned int>& indices)
+{
+	// There must be a root
+	if (rootNode == nullptr) return;
+	
+	FlattenedBVHNode flattenedNode;
+
+	flattenedNode.data = rootNode->data;
+
+	unsigned int currentIndex = treeStructureData.size();
+
+	treeStructureData.push_back(flattenedNode);
+
+	// Check for leaf node
+	if (rootNode->leftChild == nullptr && rootNode->rightChild == nullptr)
+	{
+		// Setting a leaf marker
+		treeStructureData[currentIndex].leftChild = -1;
+		treeStructureData[currentIndex].rightChild = indices.size();
+
+		// Pushing the number of following indices
+		indices.push_back(rootNode->triangleIndices.size());
+
+		// And pushing the indices
+		for (unsigned int index : rootNode->triangleIndices)
+		{
+			indices.push_back(index);
+		}
+	}
+	// Internal node
+	else
+	{
+		// Pushing the indices of the two children
+		treeStructureData[currentIndex].leftChild = treeStructureData.size();
+		flattenBVHTreeIndices(rootNode->leftChild, treeStructureData, indices);
+		treeStructureData[currentIndex].rightChild = treeStructureData.size();
+		flattenBVHTreeIndices(rootNode->rightChild, treeStructureData, indices);
+	}
 }
 
 BVHNode* BVHHandler::generateBVHRecursively(std::vector<BVHNode*> nodes)
@@ -196,8 +399,10 @@ BVHNode* BVHHandler::generateBVHRecursively(std::vector<BVHNode*> nodes)
 	unsigned int medianIndex = (unsigned int)(nodes.size() / 2);
 
 	// Dividing up the data
-	std::vector<BVHNode*> left(&nodes[0], &nodes[medianIndex]);
-	std::vector<BVHNode*> right(&nodes[medianIndex], &nodes[nodes.size()]);
+	//std::vector<BVHNode*> left(&nodes[0], &nodes[medianIndex]);
+	//std::vector<BVHNode*> right(&nodes[medianIndex], &nodes[nodes.size()-1]);
+	std::vector<BVHNode*> left(nodes.begin(), nodes.begin() + medianIndex);
+	std::vector<BVHNode*> right(nodes.begin() + medianIndex, nodes.end());
 
 	// Then recursively creating the children
 	parent->leftChild = generateBVHRecursively(left);
@@ -221,38 +426,26 @@ void BVHHandler::deleteBVH(BVHNode* node)
 }
 
 
-BVHData BVHHandler::getBoundingBox(std::vector<Triangle>& triangles)
+BVHData BVHHandler::getBoundingBox(std::vector<Triangle>& triangles, std::vector<unsigned int>& indices)
 {
 	glm::vec4 min = glm::vec4(0.0f);
 	glm::vec4 max = glm::vec4(0.0f);
 
 	// Setting the minimum and maximum to an arbitrary vertex
-	if (triangles.size() >= 1)
+	if (indices.size() >= 1)
 	{
-		min = triangles[0].v1;
-		max = triangles[0].v1;
+		min = triangles[indices[0]].v1;
+		max = triangles[indices[0]].v1;
 	}
 
 	// Updating the minimum and maximum for every vertex
-	for (Triangle& tri : triangles)
+	for (unsigned int& i : indices)
 	{
+		Triangle& tri = triangles[i];
 		updateMinMax(min, max, tri.v1);
 		updateMinMax(min, max, tri.v2);
 		updateMinMax(min, max, tri.v3);
-
-		/*
-		std::cout << "tri v1: " << tri.v1.x << ", " << tri.v1.y << ", " << tri.v1.z << std::endl;
-		std::cout << "tri v2: " << tri.v2.x << ", " << tri.v2.y << ", " << tri.v2.z << std::endl;
-		std::cout << "tri v3: " << tri.v3.x << ", " << tri.v3.y << ", " << tri.v3.z << std::endl;
-		std::cout << "new min: " << min.x << ", " << min.y << ", " << min.z << std::endl;
-		std::cout << "new max: " << max.x << ", " << max.y << ", " << max.z << std::endl;
-		*/
 	}
-
-	/*
-	std::cout << "min: " << min.x << ", " << min.y << ", " << min.z << std::endl;
-	std::cout << "max: " << max.x << ", " << max.y << ", " << max.z << std::endl;
-	*/
 
 	// Calculating the required values:
 	// center: avg. of min and max
@@ -313,11 +506,6 @@ BVHData BVHHandler::getBoundingBox(std::vector<BVHNode*>& nodes)
 		updateMinMax(min, max, glm::vec3(node->data.pos - node->data.size / 2.0f));
 		updateMinMax(min, max, glm::vec3(node->data.pos + node->data.size / 2.0f));
 	}
-
-	/*
-	std::cout << "min: " << min.x << ", " << min.y << ", " << min.z << std::endl;
-	std::cout << "max: " << max.x << ", " << max.y << ", " << max.z << std::endl;
-	*/
 
 	// Calculating the required values:
 	// center: avg. of min and max

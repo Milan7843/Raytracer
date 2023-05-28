@@ -15,7 +15,7 @@ Reflective
 0
 1
 0
-1 0 1
+0 1 1
 1
 
 Transparent
@@ -24,7 +24,7 @@ Transparent
 1
 1
 0
-1 0 1
+0 1 1
 1
 
 Rose matte
@@ -33,7 +33,7 @@ Rose matte
 0
 0
 0
-0 0 1
+0 1 0
 0
 
 Emissive
@@ -42,7 +42,7 @@ Emissive
 0
 0
 0
-1 0.537255 0.615686
+0.537255 0.615686 1
 1
 # Materials end
 
@@ -70,7 +70,7 @@ src/models/couachie.obj
 4
 
 icosphere
-2.1 1.16 0
+0 0 0
 0 0 0
 1 1 1
 src/models/icosphere.obj
@@ -92,9 +92,9 @@ Directional light
 # Ambient lights end
 
 # Cameras
-7.97918 4.67915 3.75559
--27.4
-1645.66
+4.21488 1.87913 3.48001
+-12.8
+1678.76
 1
 39.333
 1.844
