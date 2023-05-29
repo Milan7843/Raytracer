@@ -14,9 +14,6 @@ Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned
     this->vertices = vertices;
     this->indices = indices;
     setupMesh();
-
-    // Creating a BVH from the mesh
-    this->bvhRootNode = BVHHandler::generateFromMesh(*this, this->bvhRootNode);
 }
 
 Mesh::~Mesh()
@@ -196,5 +193,10 @@ unsigned int Mesh::getMaterialIndex() const
 BVHNode* Mesh::getRootNode()
 {
     // TODO update on mesh update
+    if (bvhRootNode == nullptr || true)
+    {
+        // Creating a BVH from the mesh
+        this->bvhRootNode = BVHHandler::generateFromMesh(*this, this->bvhRootNode);
+    }
     return bvhRootNode;
 }

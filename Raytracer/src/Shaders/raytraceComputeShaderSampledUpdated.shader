@@ -199,6 +199,73 @@ struct Intersection
     int materialIndex;
 };
 
+
+
+
+
+
+#define STACK_SIZE 100
+
+struct Stack
+{
+    int data[STACK_SIZE];
+    int top;
+};
+/*
+void initializeStack(out Stack stack)
+{
+    stack.top = -1;
+}
+
+bool isStackEmpty(Stack stack)
+{
+    return stack.top == -1;
+}
+
+bool isStackFull(Stack stack)
+{
+    return stack.top == STACK_SIZE - 1;
+}
+
+void pushStack(inout Stack stack, int value)
+{
+    if (isStackFull(stack))
+    {
+        // Stack overflow, handle error condition
+        return;
+    }
+
+    stack.top++;
+    stack.data[stack.top] = value;
+}
+
+int popStack(inout Stack stack)
+{
+    if (isStackEmpty(stack))
+    {
+        // Stack underflow, handle error condition
+        return 0;
+    }
+
+    int value = stack.data[stack.top];
+    stack.top--;
+    return value;
+}*/
+
+#define initializeStack(stack) (stack.top = -1)
+#define isStackEmpty(stack) (stack.top == -1)
+#define isStackFull(stack) (stack.top == STACK_SIZE - 1)
+#define pushStack(stack, value) {\
+    if (isStackFull(stack)) {\
+        /* Stack overflow, handle error condition */\
+    } else {\
+        stack.data[++stack.top] = value;\
+    }\
+}
+#define popStack(stack) stack.data[stack.top--]
+
+
+
 // Intersect a ray with a single triangle
 Intersection triangleIntersection(Tri tri, Ray ray);
 
@@ -894,7 +961,20 @@ vec3 calculateIndirectLightingContributionAtPosition(Intersection intersection, 
 
 
 
+bool intersectBoxRay(vec3 boxPos, vec3 boxSize, vec3 rayOrigin, vec3 rayDirection)
+{
+    vec3 invRayDir = 1.0 / rayDirection;
+    vec3 t1 = (boxPos - rayOrigin) * invRayDir;
+    vec3 t2 = (boxPos + boxSize - rayOrigin) * invRayDir;
 
+    vec3 tmin = min(t1, t2);
+    vec3 tmax = max(t1, t2);
+
+    float tNear = max(max(tmin.x, tmin.y), tmin.z);
+    float tFar = min(min(tmax.x, tmax.y), tmax.z);
+
+    return tNear <= tFar;
+}
 
 Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 {
@@ -904,7 +984,73 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
     closestIntersection.closestTriHit = -1;
     closestIntersection.closestSphereHit = -1;
 
-    // Checking triangle ray hits 
+
+    
+    
+    // Performing BVH traversal
+    Stack stack;
+    initializeStack(stack);
+
+    pushStack(stack, 0);
+    while (!isStackEmpty(stack))
+    {
+        int current = popStack(stack);
+        
+        BVHNode node = bvhNodes[current];
+
+        
+        if (!intersectBoxRay(node.pos, node.size, ray.pos, ray.dir))
+        {
+            continue;
+        }
+
+
+        
+        //Intersection isec = Intersection(true, 0, vec3(.0), -1, -1, vec3(0.), vec3(0.), .0, .0, .0, 0);
+        //closestIntersection = isec;
+
+        // Check for leaf
+        if (node.leftChild == -1)
+        {
+            // Is leaf
+
+            // TODO Optimisation: check leaf bounding box too
+
+            // Check all triangles inside it
+            uint triangleCount = bvhIndices[node.rightChild];
+            for (int i = 1; i <= triangleCount; i++)
+            {
+                uint j = bvhIndices[node.rightChild + i];
+
+                // Check triangle intersection
+
+                // Skip already hit tri
+                if (j == skipTri) continue;
+
+                Intersection isec = triangleIntersection(triangles[j], ray);
+                if (isec.intersected && isec.depth < closestIntersection.depth)
+                {
+                    closestIntersection = isec;
+                    closestIntersection.closestTriHit = int(j);
+                    // TODO optimise this to to as few getNormal calls as possible (not on underlying faces)
+                    closestIntersection.normal = getNormal(triangles[j], isec.pos);
+                }
+            }
+        }
+        else
+        {
+            // Is not leaf
+
+            // Check for intersection. If we intersect: add its children to the stack
+            
+            //pushStack(stack, node.leftChild);
+            //pushStack(stack, node.rightChild);
+        }
+    }
+
+
+    // Checking triangle ray hits
+    /*
     for (int j = 0; j < triangles.length(); j++)
     {
         // Skip already hit tri
@@ -918,7 +1064,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
             // TODO optimise this to to as few getNormal calls as possible (not on underlying faces)
             closestIntersection.normal = getNormal(triangles[j], isec.pos);
         }
-    }
+    }*/
 
     // Calculating ray-sphere intersections
     for (int j = 0; j < sphereCount; j++)

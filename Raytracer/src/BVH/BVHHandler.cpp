@@ -201,12 +201,16 @@ void BVHHandler::writeIntoSSBOs(BVHNode* root, unsigned int dataSSBO, unsigned i
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, dataSSBO);
 
+	std::cout << "Writing " << structure.size() << " nodes into ssbo " << dataSSBO << std::endl;
+
 	// Loading zero-data into the data buffer
 	glBufferData(GL_SHADER_STORAGE_BUFFER, structure.size() * sizeof(FlattenedBVHNode), &structure[0], GL_STATIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, dataSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, dataSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleSSBO);
+
+	std::cout << "Writing " << indices.size() << " indices into ssbo " << triangleSSBO << std::endl;
 
 	// Loading zero-data into the triangle buffer
 	glBufferData(GL_SHADER_STORAGE_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
@@ -451,7 +455,7 @@ BVHData BVHHandler::getBoundingBox(std::vector<Triangle>& triangles, std::vector
 	// center: avg. of min and max
 	glm::vec3 center = (glm::vec3(min) + glm::vec3(max)) / 2.0f;
 	// size: offset between min and max
-	glm::vec3 size = (glm::vec3(max) - glm::vec3(min)) * 0.96f;
+	glm::vec3 size = (glm::vec3(max) - glm::vec3(min));// *0.96f;
 
 	return BVHData{ center, size };
 }
