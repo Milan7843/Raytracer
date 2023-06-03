@@ -111,8 +111,8 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		filestream >> transparency;
 		filestream >> refractiveness;
 		filestream >> reflectionDiffusion;
-		filestream >> emissionStrength;
 		emission = readVec3(filestream);
+		filestream >> emissionStrength;
 
 		// Creating the material with the read properties
 		Material material(buffer, color, reflectiveness, transparency, refractiveness, reflectionDiffusion, emission, emissionStrength);

@@ -965,13 +965,16 @@ vec3 calculateIndirectLightingContributionAtPosition(Intersection intersection, 
 
 bool intersectBoxRay(vec3 boxPos, vec3 boxSize, vec3 rayOrigin, vec3 rayDirection)
 {
+    vec3 boxMin = boxPos - boxSize * 0.5;
+    vec3 boxMax = boxPos + boxSize * 0.5;
+
     vec3 invRayDir = 1.0 / rayDirection;
     //vec3 invRayDir;
     //invRayDir.x = (rayDirection.x != 0.0) ? (1.0 / rayDirection.x) : 0.0;
     //invRayDir.y = (rayDirection.y != 0.0) ? (1.0 / rayDirection.y) : 0.0;
     //invRayDir.z = (rayDirection.z != 0.0) ? (1.0 / rayDirection.z) : 0.0;
-    vec3 t1 = (boxPos - boxSize * 0.5 - rayOrigin) * invRayDir;
-    vec3 t2 = (boxPos + boxSize * 0.5 - rayOrigin) * invRayDir;
+    vec3 t1 = (boxMin - rayOrigin) * invRayDir;
+    vec3 t2 = (boxMax - rayOrigin) * invRayDir;
 
     vec3 tmin = min(t1, t2);
     vec3 tmax = max(t1, t2);
@@ -979,7 +982,15 @@ bool intersectBoxRay(vec3 boxPos, vec3 boxSize, vec3 rayOrigin, vec3 rayDirectio
     float tNear = max(max(tmin.x, tmin.y), tmin.z);
     float tFar = min(min(tmax.x, tmax.y), tmax.z);
 
-    return tNear <= tFar && tNear >= 0;
+    //bool insideBox = (tmin.x > tmin.y) && (tmin.x > tmin.z);
+
+    bool insideBox =
+        (rayOrigin.x >= boxMin.x && rayOrigin.x <= boxMax.x) &&
+        (rayOrigin.y >= boxMin.y && rayOrigin.y <= boxMax.y) &&
+        (rayOrigin.z >= boxMin.z && rayOrigin.z <= boxMax.z);
+
+    //return (tNear <= tFar && tNear >= 0) || insideBox;
+    return (tNear <= tFar && tNear >= 0) || insideBox;
 }
 
 Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)

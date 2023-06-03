@@ -182,7 +182,7 @@ void Model::processNode(aiNode* node, const aiScene* scene, std::vector<unsigned
 		}
 
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene, meshMaterialIndices[i], *meshCount, triangleCount));
+		meshes.push_back(processMesh(mesh, scene, meshMaterialIndices[*meshCount], *meshCount, triangleCount));
 
 		(*meshCount)++;
 	}
