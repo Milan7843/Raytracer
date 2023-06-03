@@ -28,7 +28,7 @@ uniform int pixelRenderSize;
 #define NUM_POINT_LIGHTS 10
 #define NUM_DIR_LIGHTS 10
 #define NUM_AMBIENT_LIGHTS 10
-#define NUM_MESHES 10
+#define NUM_MESHES 20
 #define NUM_MATERIALS 10
 
 //#define NUM_TRIANGLES 1
@@ -204,7 +204,7 @@ struct Intersection
 
 
 
-#define STACK_SIZE 100
+#define STACK_SIZE 200
 
 struct Stack
 {
@@ -932,9 +932,9 @@ vec3 calculateIndirectLightingContributionAtPosition(Intersection intersection, 
         if (isec.intersected)
         {
             // Calculating the light contribution at this position
-            vec3 light = 
+            vec3 light =
                 calculateDirectLightingContribution(isec)
-                
+
                 // Multiplying by the surface color, because that's what it's bouncing off of
                 * isec.color;
 

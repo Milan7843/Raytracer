@@ -3,13 +3,13 @@
 #include "AbstractShader.h"
 
 Material::Material()
-	: name("Material 1"),
+	: name("New material"),
 	color(glm::vec3(0.8f)),
 	reflectiveness(0.0f),
 	transparency(0.0f),
 	refractiveness(0.0f),
 	reflectionDiffusion(0.0f),
-	emission(glm::vec3(0.0f)),
+	emission(glm::vec3(1.0f)),
 	emissionStrength(0.0f)
 {
 }
