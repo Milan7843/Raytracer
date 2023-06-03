@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\BVH\BVHNode.cpp" />
     <ClCompile Include="src\BVH\BVH.cpp" />
     <ClCompile Include="src\BVH\BVHHandler.cpp" />
     <ClCompile Include="src\ShaderWritable.cpp" />
@@ -65,6 +66,7 @@
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\BVH\BVHNode.h" />
     <ClInclude Include="src\BVH\BVH.h" />
     <ClInclude Include="src\BVH\BVHHandler.h" />
     <ClInclude Include="src\ShaderWritable.h" />

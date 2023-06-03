@@ -126,6 +126,16 @@ std::vector<Mesh>& Model::getMeshes()
 	return meshes;
 }
 
+bool Model::isVertexDataChanged()
+{
+	return vertexDataChanged;
+}
+
+void Model::setVertexDataChanged(bool newValue)
+{
+	vertexDataChanged = newValue;
+}
+
 void Model::loadModel(std::string path, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT)
 {
 	Assimp::Importer importer;
@@ -351,4 +361,16 @@ std::ostream& operator<<(std::ostream& stream, const Model& model)
 	stream << std::endl;
 
 	return stream;
+}
+
+BVHNode* Model::getRootNode()
+{
+	// TODO update on mesh update
+	if (isVertexDataChanged())// || true)
+	{
+		// Creating a BVH from the model
+		this->bvhRootNode = BVHHandler::generateFromModel(*this, this->bvhRootNode);
+		setVertexDataChanged(false);
+	}
+	return bvhRootNode;
 }

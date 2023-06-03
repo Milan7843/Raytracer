@@ -2,53 +2,19 @@
 #include "../Object.h"
 #include "../Shader.h"
 #include "../Mesh.h"
+#include "BVHNode.h"
+
+#include "../CoordinateUtility.h"
+
 #include <queue>
 
 class Scene;
 
-struct BVHData
-{
-	glm::vec3 pos{ glm::vec3(0.0f) };
-	glm::vec3 size{ glm::vec3(1.0f) };
-};
-
-struct BVHNode
-{
-	BVHNode* leftChild{ nullptr };
-	BVHNode* rightChild{ nullptr };
-	BVHData data;
-	std::vector<unsigned int> triangleIndices;
-
-	void deleteNode()
-	{
-		// Deleting the left child
-		if (leftChild != nullptr)
-		{
-			// Making it delete its children
-			leftChild->deleteNode();
-			// Then deleting it
-			delete leftChild;
-			// And making sure we don't get an invalid pointer
-			leftChild = nullptr;
-		}
-
-		// Deleting the right child
-		if (rightChild != nullptr)
-		{
-			// Making it delete its children
-			rightChild->deleteNode();
-			// Then deleting it
-			delete rightChild;
-			// And making sure we don't get an invalid pointer
-			rightChild = nullptr;
-		}
-	}
-};
-
 struct FlattenedBVHNode
 {
-	BVHData data;
+	glm::vec3 pos;
 	int leftChild;
+	glm::vec3 size;
 	int rightChild;
 };
 
@@ -70,6 +36,9 @@ public:
 
 	// Generate the root node to fill an entire scene
 	static BVHNode* updateByScene(Scene& scene, BVHNode* oldBVHRoot);
+
+	// Generate the BVH nodes from a given model
+	static BVHNode* generateFromModel(Model& model, BVHNode* oldBVHRoot);
 
 	// Generate the BVH nodes from a given mesh
 	static BVHNode* generateFromMesh(Mesh& mesh, BVHNode* oldBVHRoot);

@@ -50,9 +50,18 @@ public:
 
 	std::vector<Mesh> meshes;
 
+	bool isVertexDataChanged();
+	void setVertexDataChanged(bool newValue);
+
+	BVHNode* getRootNode();
+
 private:
 	std::string directory;
 	std::string path;
+
+	bool vertexDataChanged{ true };
+
+	BVHNode* bvhRootNode{ nullptr };
 
 	void loadModel(std::string path, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
 	void loadModel(std::string path, unsigned int meshMaterialIndex, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);

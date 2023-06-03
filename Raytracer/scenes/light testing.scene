@@ -15,7 +15,7 @@ Reflective
 0
 1
 0
-1 1 0
+0 1 1
 1
 
 Transparent
@@ -24,7 +24,7 @@ Transparent
 1
 1
 0
-1 1 0
+0 1 1
 1
 
 Rose matte
@@ -33,8 +33,8 @@ Rose matte
 0
 0
 0
-1 1 0
-0
+0 0 1
+1
 
 Emissive
 1 1 1
@@ -42,8 +42,8 @@ Emissive
 0
 0
 0
-1 1 0.537255
-0.615686
+0.537255 0.615686 1
+1
 # Materials end
 
 # Spheres
@@ -85,9 +85,9 @@ Directional light
 # Ambient lights end
 
 # Cameras
--1.02458 0.822828 0.614315
--28.6
-1769.36
+-0.521937 0.758348 -0.875381
+-31.5
+1857.66
 1
 39.333
 1.844

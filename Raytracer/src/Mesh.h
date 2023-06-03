@@ -39,8 +39,10 @@ struct Triangle
 	int mesh;
 };
 
-struct BVHNode;
+class BVHNode;
 class BVH;
+
+class Model;
 
 class Mesh
 {
@@ -88,8 +90,6 @@ public:
 	// Get the index of the material this mesh uses
 	unsigned int getMaterialIndex() const;
 
-	BVHNode* getRootNode();
-
 private:
 	void setupMesh();
 
@@ -97,6 +97,4 @@ private:
 	unsigned int materialIndex;
 
 	std::string name;
-
-	BVHNode* bvhRootNode{ nullptr };
 };

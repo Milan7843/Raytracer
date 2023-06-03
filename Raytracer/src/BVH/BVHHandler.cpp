@@ -62,14 +62,32 @@ BVHNode* BVHHandler::updateByScene(Scene& scene, BVHNode* oldBVHRoot)
 	// Adding all meshes' BVH root nodes
 	for (Model& model : scene.getModels())
 	{
-		for (Mesh& mesh : model.getMeshes())
-		{
-			meshRootNodes.push_back(mesh.getRootNode());
-		}
+		meshRootNodes.push_back(model.getRootNode());
 	}
 
 	// Generating a new BVH using the root nodes
 	BVHNode* rootNode = generateBVHRecursively(meshRootNodes);
+	return rootNode;
+}
+
+BVHNode* BVHHandler::generateFromModel(Model& model, BVHNode* oldBVHRoot)
+{
+	// Deleting any old data we have already
+	deleteBVH(oldBVHRoot);
+
+	std::vector<BVHNode*> meshRootNodes;
+
+	// Adding all meshes' BVH root nodes
+	for (Mesh& mesh : model.getMeshes())
+	{
+		// Generating a new tree from the mesh
+		meshRootNodes.push_back(generateFromMesh(mesh, nullptr));
+	}
+
+	// Generating a new BVH using the root nodes
+	BVHNode* rootNode = generateBVHRecursively(meshRootNodes);
+	// Mark the root as a model root node
+	rootNode->isModelRoot = true;
 	return rootNode;
 }
 
@@ -78,11 +96,13 @@ BVHNode* BVHHandler::generateFromMesh(Mesh& mesh, BVHNode* oldBVHRoot)
 	// Deleting any old data we have already
 	deleteBVH(oldBVHRoot);
 
+	std::cout << "generating from mesh " << mesh.triangles.size() << std::endl;
+
 	std::vector<unsigned int> indices(mesh.triangles.size());
 
 	for (unsigned int i{ 0 }; i < mesh.triangles.size(); i++)
 	{
-		indices.push_back(i);
+		indices[i] = i;
 	}
 
 	// Generating a new BVH
@@ -237,13 +257,18 @@ void BVHHandler::writeIntoSSBOs(BVHNode* root, unsigned int dataSSBO, unsigned i
 
 BVHNode* BVHHandler::generateBVHRecursively(std::vector<Triangle>& triangles, std::vector<unsigned int> indices, unsigned int depth, unsigned int shaderArrayBeginIndex)
 {
+	//std::cout << indices.size() << " triangles" << std::endl;
 	BVHNode* parent = new BVHNode;
 
 	// Calculating the bounding box of the parent
 	parent->data = getBoundingBox(triangles, indices);
 
+	//std::cout << "bounding box: pos (" << parent->data.pos.x << ", " << parent->data.pos.y << ", " << parent->data.pos.z
+	//	<< "), size ("
+	//	<< parent->data.size.x << ", " << parent->data.size.y << ", " << parent->data.size.z << ")" << std::endl;
+
 	// Base case: stop on too few triangles
-	if (indices.size() <= 8)
+	if (indices.size() <= 8 || depth >= 40)
 	{
 		//std::cout << "triangle count: " << triangles.size() << std::endl;
 		parent->triangleIndices = indices;
@@ -264,6 +289,7 @@ BVHNode* BVHHandler::generateBVHRecursively(std::vector<Triangle>& triangles, st
 	// Checking if z is bigger
 	if (parent->data.size.z > parent->data.size.x && parent->data.size.z > parent->data.size.y)
 		axis = Axis::z;
+	//axis = Axis::z;
 	
 	// Sorting on the correct axis
 	switch (axis)
@@ -317,8 +343,16 @@ void BVHHandler::flattenBVHTreeData(BVHNode* rootNode, std::vector<BVHData>& dat
 	// Do not continue on no root
 	if (rootNode == nullptr) return;
 
+	// Leaf only / is leaf check
 	if (!onlyLeaves || (rootNode->leftChild == nullptr && rootNode->rightChild == nullptr))
+	{
 		data.push_back(rootNode->data);
+		/*
+		std::cout << "flattened node: pos (" << rootNode->data.pos.x << ", " << rootNode->data.pos.y << ", " << rootNode->data.pos.z
+			<< "), size ("
+			<< rootNode->data.size.x << ", " << rootNode->data.size.y << ", " << rootNode->data.size.z << ")" << std::endl;
+		*/
+	}
 
 	flattenBVHTreeData(rootNode->leftChild, data, onlyLeaves);
 	flattenBVHTreeData(rootNode->rightChild, data, onlyLeaves);
@@ -331,7 +365,9 @@ void BVHHandler::flattenBVHTreeIndices(BVHNode* rootNode, std::vector<FlattenedB
 	
 	FlattenedBVHNode flattenedNode;
 
-	flattenedNode.data = rootNode->data;
+	//flattenedNode.data = rootNode->data;
+	flattenedNode.pos = CoordinateUtility::vec3ToGLSLVec3(rootNode->data.pos);
+	flattenedNode.size = CoordinateUtility::vec3ToGLSLVec3(rootNode->data.size);
 
 	unsigned int currentIndex = treeStructureData.size();
 
@@ -392,10 +428,18 @@ BVHNode* BVHHandler::generateBVHRecursively(std::vector<BVHNode*> nodes)
 		parent->rightChild = nodes[1];
 		return parent;
 	}
-	// Base case: stop when less than 2 nodes: must not happen!
-	if (nodes.size() < 2)
+	// Base case: stop on a single node left: should only occur when the input size is just one, not during recursion
+	if (nodes.size() == 1)
 	{
-		Logger::logError("Ended up with fewer than 2 nodes!");
+		//Logger::logError("Ended up with fewer than 2 nodes!");
+		parent->leftChild = nodes[0];
+		parent->rightChild = nullptr;
+		return parent;
+	}
+	// Base case: stop when less than 1 nodes: must not happen!
+	if (nodes.size() < 1)
+	{
+		Logger::logError("Ended up with no nodes!");
 		return parent;
 	}
 
@@ -455,7 +499,7 @@ BVHData BVHHandler::getBoundingBox(std::vector<Triangle>& triangles, std::vector
 	// center: avg. of min and max
 	glm::vec3 center = (glm::vec3(min) + glm::vec3(max)) / 2.0f;
 	// size: offset between min and max
-	glm::vec3 size = (glm::vec3(max) - glm::vec3(min));// *0.96f;
+	glm::vec3 size = (glm::vec3(max) - glm::vec3(min));// *1.05f;
 
 	return BVHData{ center, size };
 }
@@ -515,7 +559,7 @@ BVHData BVHHandler::getBoundingBox(std::vector<BVHNode*>& nodes)
 	// center: avg. of min and max
 	glm::vec3 center = (glm::vec3(min) + glm::vec3(max)) / 2.0f;
 	// size: offset between min and max
-	glm::vec3 size = (glm::vec3(max) - glm::vec3(min)) * 0.96f;
+	glm::vec3 size = (glm::vec3(max) - glm::vec3(min));// *0.96f;
 
 	return BVHData{ center, size };
 }

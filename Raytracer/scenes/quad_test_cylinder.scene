@@ -15,7 +15,7 @@ Reflective
 0
 1
 0
-1 0 1
+1 1 0
 1
 
 Transparent
@@ -24,7 +24,7 @@ Transparent
 1
 1
 0
-1 0 1
+1 1 0
 1
 
 Rose matte
@@ -33,8 +33,8 @@ Rose matte
 0
 0
 0
-0 0 1
-0
+0 0 0
+1
 
 Emissive
 1 1 1
@@ -42,19 +42,19 @@ Emissive
 0
 0
 0
-1 0.537255 0.615686
-1
+1 1 0.537255
+0.615686
 # Materials end
 
 # Spheres
 # Spheres end
 
 # Models
-quad_test_cylinder
+uncapped_cylinder
 0 0 0
 0 0 0
 1 1 1
-src/models/quad_test_cylinder.obj
+src/models/uncapped_cylinder.obj
 1
 1
 # Models end

@@ -2,6 +2,7 @@
 
 #include "Scene.h"
 #include "BVH/BVHHandler.h"
+#include "Model.h"
 
 
 Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices
@@ -188,15 +189,4 @@ std::string& Mesh::getName()
 unsigned int Mesh::getMaterialIndex() const
 {
     return materialIndex;
-}
-
-BVHNode* Mesh::getRootNode()
-{
-    // TODO update on mesh update
-    if (bvhRootNode == nullptr || true)
-    {
-        // Creating a BVH from the mesh
-        this->bvhRootNode = BVHHandler::generateFromMesh(*this, this->bvhRootNode);
-    }
-    return bvhRootNode;
 }

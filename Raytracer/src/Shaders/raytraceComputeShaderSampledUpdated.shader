@@ -68,19 +68,19 @@ layout(std140, binding = 2) buffer Tris
 struct BVHNode
 {
     vec3 pos;
-    vec3 size;
     int leftChild;
+    vec3 size;
     int rightChild;
 };
 
 // The BVH data
-layout(std140, binding = 4) buffer BVHData
+layout(std430, binding = 4) buffer BVHData
 {
     BVHNode bvhNodes[];
 };
 
 // The BVH leaf index data
-layout(std140, binding = 5) buffer BVHIndices
+layout(std430, binding = 5) buffer BVHIndices
 {
     unsigned int bvhIndices[];
 };
@@ -470,6 +470,8 @@ void main()
     5: 0.83 - 0.17 t= 0.17
     */
     colors[pixelIndex] = colors[pixelIndex] * (1.0 - t) + vec4(finalColor, 1.0) * t;
+
+    // Writing the same pixel several times if we are rendering to multiple pixels
     if (pixelRenderSize != 1)
     {
         for (int y = 0; y < pixelRenderSize; y++)
@@ -964,8 +966,12 @@ vec3 calculateIndirectLightingContributionAtPosition(Intersection intersection, 
 bool intersectBoxRay(vec3 boxPos, vec3 boxSize, vec3 rayOrigin, vec3 rayDirection)
 {
     vec3 invRayDir = 1.0 / rayDirection;
-    vec3 t1 = (boxPos - rayOrigin) * invRayDir;
-    vec3 t2 = (boxPos + boxSize - rayOrigin) * invRayDir;
+    //vec3 invRayDir;
+    //invRayDir.x = (rayDirection.x != 0.0) ? (1.0 / rayDirection.x) : 0.0;
+    //invRayDir.y = (rayDirection.y != 0.0) ? (1.0 / rayDirection.y) : 0.0;
+    //invRayDir.z = (rayDirection.z != 0.0) ? (1.0 / rayDirection.z) : 0.0;
+    vec3 t1 = (boxPos - boxSize * 0.5 - rayOrigin) * invRayDir;
+    vec3 t2 = (boxPos + boxSize * 0.5 - rayOrigin) * invRayDir;
 
     vec3 tmin = min(t1, t2);
     vec3 tmax = max(t1, t2);
@@ -973,7 +979,7 @@ bool intersectBoxRay(vec3 boxPos, vec3 boxSize, vec3 rayOrigin, vec3 rayDirectio
     float tNear = max(max(tmin.x, tmin.y), tmin.z);
     float tFar = min(min(tmax.x, tmax.y), tmax.z);
 
-    return tNear <= tFar;
+    return tNear <= tFar && tNear >= 0;
 }
 
 Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
@@ -984,7 +990,17 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
     closestIntersection.closestTriHit = -1;
     closestIntersection.closestSphereHit = -1;
 
-
+    /*
+    if (intersectBoxRay(bvhNodes[0].pos, bvhNodes[0].size, ray.pos, ray.dir))
+    //if (intersectBoxRay(vec3(0.0), vec3(1.0), ray.pos, ray.dir))
+    {
+        closestIntersection.intersected = true;
+        closestIntersection.color = vec3(0.0);
+        closestIntersection.reflectiveness = 0.0;
+        closestIntersection.transparency = 0.0;
+        closestIntersection.refractiveness = 0.0;
+        return closestIntersection;
+    }*/
     
     
     // Performing BVH traversal
@@ -997,14 +1013,6 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         int current = popStack(stack);
         
         BVHNode node = bvhNodes[current];
-
-        
-        if (!intersectBoxRay(node.pos, node.size, ray.pos, ray.dir))
-        {
-            continue;
-        }
-
-
         
         //Intersection isec = Intersection(true, 0, vec3(.0), -1, -1, vec3(0.), vec3(0.), .0, .0, .0, 0);
         //closestIntersection = isec;
@@ -1014,7 +1022,16 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         {
             // Is leaf
 
-            // TODO Optimisation: check leaf bounding box too
+            /*
+            if (intersectBoxRay(node.pos, node.size, ray.pos, ray.dir))
+            {
+                closestIntersection.intersected = true;
+                closestIntersection.color = vec3(0.0);
+                closestIntersection.reflectiveness = 0.0;
+                closestIntersection.transparency = 0.0;
+                closestIntersection.refractiveness = 0.0;
+                return closestIntersection;
+            }*/
 
             // Check all triangles inside it
             uint triangleCount = bvhIndices[node.rightChild];
@@ -1042,9 +1059,18 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
             // Is not leaf
 
             // Check for intersection. If we intersect: add its children to the stack
-            
-            //pushStack(stack, node.leftChild);
-            //pushStack(stack, node.rightChild);
+
+            BVHNode leftChildNode = bvhNodes[node.leftChild];
+            BVHNode rightChildNode = bvhNodes[node.rightChild];
+
+            if (intersectBoxRay(leftChildNode.pos, leftChildNode.size, ray.pos, ray.dir))
+            {
+                pushStack(stack, node.leftChild);
+            }
+            if (intersectBoxRay(rightChildNode.pos, rightChildNode.size, ray.pos, ray.dir))
+            {
+                pushStack(stack, node.rightChild);
+            }
         }
     }
 
