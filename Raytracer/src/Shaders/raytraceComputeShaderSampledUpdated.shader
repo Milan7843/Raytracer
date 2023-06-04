@@ -204,7 +204,7 @@ struct Intersection
 
 
 
-#define STACK_SIZE 200
+#define STACK_SIZE 40
 
 struct Stack
 {

@@ -21,6 +21,10 @@ void SceneManager::saveChanges()
 void SceneManager::saveChangesAs(std::string& sceneName)
 {
 	SceneFileSaver::writeSceneToFile(currentScene, sceneName);
+
+	// Moving over to the new scene immediately
+	currentScene.setName(sceneName);
+	hasSceneLoaded = true;
 }
 
 void SceneManager::changeScene(const std::string& sceneName)
