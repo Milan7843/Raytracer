@@ -503,7 +503,7 @@ bool Scene::checkObjectUpdates(AbstractShader* shader)
 	{
 		if (!model.hasWrittenToShader(shader) || changedTriangleBuffer)
 		{
-			Logger::log(std::to_string(changedTriangleBuffer) + " model updated");
+			//Logger::log(std::to_string(changedTriangleBuffer) + " model updated");
 			return true;
 		}
 	}

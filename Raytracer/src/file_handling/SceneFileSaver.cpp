@@ -229,14 +229,11 @@ void readModels(std::ifstream& filestream, Scene& scene)
 		// Will hold all the indices
 		std::vector<unsigned int> meshMaterialIndices;
 
-		std::cout << "submeshes# " << numberOfSubmeshes << std::endl;
-
 		// Reading each mesh material index
 		for (unsigned int i = 0; i < numberOfSubmeshes; i++)
 		{
 			unsigned int meshMaterialIndex;
 			filestream >> meshMaterialIndex;
-			std::cout << "mat index " << meshMaterialIndex << std::endl;
 
 			meshMaterialIndices.push_back(meshMaterialIndex);
 		}

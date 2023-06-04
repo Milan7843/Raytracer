@@ -249,7 +249,7 @@ int Application::Start()
             // Rendering the outlines for selected objects
             outlineRenderer.render(sceneManager.getCurrentScene());
 
-            bvhHandler.draw(sceneManager.getCurrentScene());
+            bvhHandler.draw(sceneManager.getCurrentScene(), raytracingRenderer.getBVHRenderMode());
 
             // Rendering a preview of the colours used to select an object by clicking on it
             //objectScreenSelector.renderTexturePreview(sceneManager.getCurrentScene(), screenQuadVAO);

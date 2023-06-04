@@ -25,6 +25,8 @@ enum class Axis
 	z
 };
 
+enum class BVHRenderMode;
+
 class BVHHandler
 {
 public:
@@ -32,7 +34,7 @@ public:
 	~BVHHandler();
 
 	// Draw this BVH for debug purposes
-	void draw(Scene& scene);
+	void draw(Scene& scene, BVHRenderMode bvhRenderMode);
 
 	// Generate the root node to fill an entire scene
 	static BVHNode* updateByScene(Scene& scene, BVHNode* oldBVHRoot);

@@ -380,7 +380,6 @@ BVHNode* Model::getRootNode()
 		// Creating a BVH from the model
 		this->bvhRootNode = BVHHandler::generateFromModel(*this, this->bvhRootNode);
 		setVertexDataChanged(false);
-		std::cout << "regenerating" << std::endl;
 	}
 	return bvhRootNode;
 }

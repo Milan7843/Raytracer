@@ -1,6 +1,7 @@
 #include "BVHHandler.h"
 
 #include "../Scene.h"
+#include "../Renderer.h"
 
 BVHHandler::BVHHandler(const char* vertexShaderPath, const char* geometryShaderPath, const char* fragmentShaderPath)
 	: bvhRenderShader(vertexShaderPath, fragmentShaderPath, geometryShaderPath)
@@ -15,8 +16,14 @@ BVHHandler::~BVHHandler()
 	glDeleteBuffers(1, &VBO);
 }
 
-void BVHHandler::draw(Scene& scene)
+void BVHHandler::draw(Scene& scene, BVHRenderMode bvhRenderMode)
 {
+	// Do not draw if the rendering mode is DISABLED
+	if (bvhRenderMode == BVHRenderMode::DISABLED)
+	{
+		return;
+	}
+
 	bvhRenderShader.use();
 
 	scene.getBVH().setRoot(updateByScene(scene, scene.getBVH().getRoot()));
@@ -35,7 +42,7 @@ void BVHHandler::draw(Scene& scene)
 
 	std::vector<BVHData> data;
 
-	scene.getBVH().flatten(data, true);
+	scene.getBVH().flatten(data, bvhRenderMode == BVHRenderMode::LEAVES);
 
 	glBindVertexArray(VAO);
 
