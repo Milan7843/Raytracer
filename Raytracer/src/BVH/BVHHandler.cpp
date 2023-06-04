@@ -19,6 +19,8 @@ void BVHHandler::draw(Scene& scene)
 {
 	bvhRenderShader.use();
 
+	scene.getBVH().setRoot(updateByScene(scene, scene.getBVH().getRoot()));
+
 	// View matrix
 	glm::mat4 view = glm::mat4(1.0f);
 	view = scene.getActiveCamera().getViewMatrix();
@@ -81,7 +83,7 @@ BVHNode* BVHHandler::generateFromModel(Model& model, BVHNode* oldBVHRoot)
 	for (Mesh& mesh : model.getMeshes())
 	{
 		// Generating a new tree from the mesh
-		meshRootNodes.push_back(generateFromMesh(mesh, nullptr));
+		meshRootNodes.push_back(generateFromMesh(model, mesh, nullptr));
 	}
 
 	// Generating a new BVH using the root nodes
@@ -91,12 +93,10 @@ BVHNode* BVHHandler::generateFromModel(Model& model, BVHNode* oldBVHRoot)
 	return rootNode;
 }
 
-BVHNode* BVHHandler::generateFromMesh(Mesh& mesh, BVHNode* oldBVHRoot)
+BVHNode* BVHHandler::generateFromMesh(Model& model, Mesh& mesh, BVHNode* oldBVHRoot)
 {
 	// Deleting any old data we have already
 	deleteBVH(oldBVHRoot);
-
-	std::cout << "generating from mesh " << mesh.triangles.size() << std::endl;
 
 	std::vector<unsigned int> indices(mesh.triangles.size());
 
@@ -105,8 +105,18 @@ BVHNode* BVHHandler::generateFromMesh(Mesh& mesh, BVHNode* oldBVHRoot)
 		indices[i] = i;
 	}
 
+	std::vector<Triangle> translatedTriangles(mesh.triangles.begin(), mesh.triangles.end());
+
+	// Applying the translation onto each of the triangles
+	for (Triangle& triangle : translatedTriangles)
+	{
+		triangle.v1 = model.getTransformationMatrix() * triangle.v1;
+		triangle.v2 = model.getTransformationMatrix() * triangle.v2;
+		triangle.v3 = model.getTransformationMatrix() * triangle.v3;
+	}
+
 	// Generating a new BVH
-	BVHNode* meshRootNode = generateBVHRecursively(mesh.triangles, indices, 0, mesh.shaderArraybeginIndex);
+	BVHNode* meshRootNode = generateBVHRecursively(translatedTriangles, indices, 0, mesh.shaderArraybeginIndex);
 	return meshRootNode;
 }
 
@@ -221,7 +231,7 @@ void BVHHandler::writeIntoSSBOs(BVHNode* root, unsigned int dataSSBO, unsigned i
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, dataSSBO);
 
-	std::cout << "Writing " << structure.size() << " nodes into ssbo " << dataSSBO << std::endl;
+	//std::cout << "Writing " << structure.size() << " nodes into ssbo " << dataSSBO << std::endl;
 
 	// Loading zero-data into the data buffer
 	glBufferData(GL_SHADER_STORAGE_BUFFER, structure.size() * sizeof(FlattenedBVHNode), &structure[0], GL_STATIC_DRAW);
@@ -230,7 +240,7 @@ void BVHHandler::writeIntoSSBOs(BVHNode* root, unsigned int dataSSBO, unsigned i
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleSSBO);
 
-	std::cout << "Writing " << indices.size() << " indices into ssbo " << triangleSSBO << std::endl;
+	//std::cout << "Writing " << indices.size() << " indices into ssbo " << triangleSSBO << std::endl;
 
 	// Loading zero-data into the triangle buffer
 	glBufferData(GL_SHADER_STORAGE_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
@@ -472,7 +482,6 @@ void BVHHandler::deleteBVH(BVHNode* node)
 		node = nullptr;
 	}
 }
-
 
 BVHData BVHHandler::getBoundingBox(std::vector<Triangle>& triangles, std::vector<unsigned int>& indices)
 {

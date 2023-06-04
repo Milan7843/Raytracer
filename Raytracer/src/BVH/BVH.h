@@ -14,6 +14,12 @@ public:
 	// Flatten this BVH into the given data array
 	void flatten(std::vector<BVHData>& data, bool onlyLeaves);
 
+	// Get the root of this BVH
+	BVHNode* getRoot();
+
+	// Set the root of this BVH
+	void setRoot(BVHNode* newRoot);
+
 private:
 
 	BVHNode* bvhRoot = nullptr;

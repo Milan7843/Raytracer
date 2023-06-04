@@ -60,11 +60,17 @@ void Model::drawInterface(Scene& scene)
 {
 	bool anyPropertiesChanged{ false };
 
-	anyPropertiesChanged |= ImGui::InputText("Name", &getName());
+	//anyPropertiesChanged |= ImGui::InputText("Name", &getName());
+	ImGui::InputText("Name", &getName());
 	// Showing transformations
 	anyPropertiesChanged |= ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
 	anyPropertiesChanged |= ImGui::DragFloat3("Rotation", (float*)getRotationPointer(), 0.01f);
 	anyPropertiesChanged |= ImGui::DragFloat3("Scale", (float*)getScalePointer(), 0.01f);
+
+	if (anyPropertiesChanged)
+	{
+		setVertexDataChanged(true);
+	}
 
 	int meshIndex = 0;
 	// Drawing all the meshes of this model
@@ -374,6 +380,7 @@ BVHNode* Model::getRootNode()
 		// Creating a BVH from the model
 		this->bvhRootNode = BVHHandler::generateFromModel(*this, this->bvhRootNode);
 		setVertexDataChanged(false);
+		std::cout << "regenerating" << std::endl;
 	}
 	return bvhRootNode;
 }

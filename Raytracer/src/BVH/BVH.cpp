@@ -21,6 +21,16 @@ void BVH::flatten(std::vector<BVHData>& data, bool onlyLeaves)
 	BVHHandler::flattenBVHTreeData(this->bvhRoot, data, onlyLeaves);
 }
 
+BVHNode* BVH::getRoot()
+{
+	return bvhRoot;
+}
+
+void BVH::setRoot(BVHNode* newRoot)
+{
+	bvhRoot = newRoot;
+}
+
 void BVH::generateBuffers()
 {
 	glDeleteBuffers(1, &dataSSBO);
