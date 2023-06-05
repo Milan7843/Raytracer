@@ -675,7 +675,7 @@ Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
                 break;
             }*/
             
-            if (closestIntersection.reflectiveness > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed * 5 + i * 3) < closestIntersection.reflectiveness)
+            if (closestIntersection.reflectiveness > EPSILON && reflect && i != MAX_REFLECTIONS - 1 && rand(seed * 5 + i * 3) < closestIntersection.reflectiveness)
             {
                 // Calculating the new ray direction for a reflection
                 //ray.finalColor += closestIntersection.color;
@@ -685,7 +685,7 @@ Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
 
                 continue; // reflecting
             }
-            else if (closestIntersection.transparency > 0.0 && reflect && i != MAX_REFLECTIONS - 1 && rand(seed * 13 + i * 47 + 5779) < closestIntersection.transparency)
+            else if (closestIntersection.transparency > EPSILON && reflect && i != MAX_REFLECTIONS - 1 && rand(seed * 13 + i * 47 + 5779) < closestIntersection.transparency)
             {
                 float rayDirNormalDotProduct = dot(closestIntersection.normal, ray.dir);
 
@@ -880,7 +880,7 @@ vec3 calculateIndirectLightingContribution(Intersection intersection, int seed)
     vec3 currentLightBounceAffectColor = vec3(1.0);
 
     // Calculating the indirection color at the first position
-    finalColor += calculateIndirectLightingContributionAtPosition(currentIntersection, min(10, indirectLightingQuality * 5), seed + 16);
+    finalColor += calculateIndirectLightingContributionAtPosition(currentIntersection, max(10, indirectLightingQuality * 5), seed + 16);
 
     float totalDistance = 0.0;
 
@@ -907,7 +907,7 @@ vec3 calculateIndirectLightingContribution(Intersection intersection, int seed)
             currentLightBounceAffectColor *
             calculateIndirectLightingContributionAtPosition(
                 currentIntersection,
-                min(5, indirectLightingQuality * 2),
+                max(5, indirectLightingQuality * 2),
                 seed + 110 * i + 23
             ) / ((1.0 + totalDistance) * (1.0 + totalDistance));
     }
