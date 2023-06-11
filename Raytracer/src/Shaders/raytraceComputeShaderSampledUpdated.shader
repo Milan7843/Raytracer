@@ -204,7 +204,7 @@ struct Intersection
 
 
 
-#define STACK_SIZE 40
+#define STACK_SIZE 50
 
 struct Stack
 {
@@ -872,21 +872,55 @@ vec3 calculateIndirectLightingContribution(Intersection intersection, int seed)
 
     int iterations = indirectLightingQuality-1;
 
-    Intersection currentIntersection = intersection;
-
     vec3 finalColor = vec3(0.0);
 
     // How the color of the light is affected by surface colors
     vec3 currentLightBounceAffectColor = vec3(1.0);
 
     // Calculating the indirection color at the first position
-    finalColor += calculateIndirectLightingContributionAtPosition(currentIntersection, max(10, indirectLightingQuality * 5), seed + 16);
+    finalColor += calculateIndirectLightingContributionAtPosition(intersection, max(6, indirectLightingQuality * 3), seed + 16);
 
-    float totalDistance = 0.0;
+    // Then doing it again for a single bounce
+    vec3 dir = getRandomDirectionFollowingNormal(intersection.normal, seed + 9);// +i * 31 + 10);
 
-    for (int i = 0; i < iterations; i++)
+    Ray ray;
+    ray.pos = intersection.pos;
+    ray.dir = dir;
+
+    intersection =
+        getAllIntersections(
+            ray,
+            intersection.closestTriHit,
+            intersection.closestSphereHit
+        );
+    finalColor += calculateIndirectLightingContributionAtPosition(intersection, max(4, indirectLightingQuality * 2), seed + 27);
+
+    /*
+    vec3 dir = getRandomDirectionFollowingNormal(intersection.normal, seed + 10);// +i * 31 + 10);
+
+    Ray ray;
+    ray.pos = intersection.pos;
+    ray.dir = dir;
+
+    Intersection secondIntersection =
+        getAllIntersections(
+            ray,
+            intersection.closestTriHit,
+            intersection.closestSphereHit
+        );
+
+    finalColor +=
+        currentLightBounceAffectColor *
+        calculateIndirectLightingContributionAtPosition(
+            secondIntersection,
+            max(5, indirectLightingQuality * 2),
+            seed + 110
+        );*/
+
+    //for (int i = 0; i < iterations; i++)
+    /*
     {
-        vec3 dir = getRandomDirectionFollowingNormal(currentIntersection.normal, seed + i * 31 + 10);
+        vec3 dir = getRandomDirectionFollowingNormal(currentIntersection.normal, seed + 10);// +i * 31 + 10);
 
         Ray ray;
         ray.pos = currentIntersection.pos;
@@ -898,8 +932,6 @@ vec3 calculateIndirectLightingContribution(Intersection intersection, int seed)
                 currentIntersection.closestTriHit,
                 currentIntersection.closestSphereHit
             );
-
-        totalDistance += currentIntersection.depth;
         
         currentLightBounceAffectColor *= currentIntersection.color;
         
@@ -908,9 +940,9 @@ vec3 calculateIndirectLightingContribution(Intersection intersection, int seed)
             calculateIndirectLightingContributionAtPosition(
                 currentIntersection,
                 max(5, indirectLightingQuality * 2),
-                seed + 110 * i + 23
-            ) / ((1.0 + totalDistance) * (1.0 + totalDistance));
-    }
+                seed + 110// * i + 23
+            );
+    }*/
 
     return finalColor;
 }
