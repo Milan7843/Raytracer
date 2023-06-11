@@ -15,7 +15,7 @@ Reflective
 0
 1
 0
-1 1 0
+1 0 1
 1
 
 Transparent
@@ -24,7 +24,7 @@ Transparent
 1
 1
 0
-1 1 0
+1 0 1
 1
 
 Rose matte
@@ -34,7 +34,7 @@ Rose matte
 0
 0
 0 0 0
-1
+0
 
 Emissive
 1 1 1
@@ -42,8 +42,8 @@ Emissive
 0
 0
 0
-1 1 0.537255
-0.615686
+1 0.537255 0.615686
+1
 # Materials end
 
 # Spheres
@@ -58,16 +58,12 @@ src/models/plane.obj
 1
 1
 
-couachie
+crate
 0 0 0
 0 0 0
 1 1 1
-src/models/couachie.obj
-5
-4
-4
-4
-4
+src/models/crate.obj
+1
 4
 # Models end
 
@@ -85,9 +81,9 @@ Directional light
 # Ambient lights end
 
 # Cameras
-0.567124 1.7846 -0.100054
--25.8
-1591.06
+-0.591299 0.756781 -0.789343
+-33.6
+1852.96
 1
 39.333
 1.844

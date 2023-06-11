@@ -1,6 +1,9 @@
 #include "Mesh.h"
 
 #include "Scene.h"
+#include "BVH/BVHHandler.h"
+#include "Model.h"
+
 
 Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices
     , unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex)
@@ -103,20 +106,24 @@ void Mesh::setupMesh()
     glBindVertexArray(0);
 
     // Setting up the triangles in the UBO
-    for (unsigned int i = 0; i < vertices.size(); i += 3)
+    for (unsigned int i = 0; i < indices.size(); i += 3)
     {
+        Vertex& v1 = vertices[indices[i]];
+        Vertex& v2 = vertices[indices[i + 1]];
+        Vertex& v3 = vertices[indices[i + 2]];
+        // static_cast<unsigned __int64>(i)
         Triangle tri{};
-        tri.v1 = vertices[i].position;
-        tri.v2 = vertices[i + 1].position;
-        tri.v3 = vertices[i + 2].position;
+        tri.v1 = v1.position;
+        tri.v2 = v2.position;
+        tri.v3 = v3.position;
 
-        tri.n1 = -CoordinateUtility::vec4ToGLSLVec4(vertices[i].normal);
-        tri.n2 = -CoordinateUtility::vec4ToGLSLVec4(vertices[i + 1].normal);
-        tri.n3 = -CoordinateUtility::vec4ToGLSLVec4(vertices[i + 2].normal);
+        tri.n1 = -CoordinateUtility::vec4ToGLSLVec4(v1.normal);
+        tri.n2 = -CoordinateUtility::vec4ToGLSLVec4(v2.normal);
+        tri.n3 = -CoordinateUtility::vec4ToGLSLVec4(v3.normal);
 
         tri.color = glm::vec3(1.0f);
-        glm::vec3 ab = vertices[indices[static_cast<unsigned __int64>(i) + 1]].position - vertices[indices[i + 0]].position;
-        glm::vec3 ac = vertices[indices[static_cast<unsigned __int64>(i) + 2]].position - vertices[indices[i + 0]].position;
+        glm::vec3 ab = v2.position - v1.position;
+        glm::vec3 ac = v3.position - v1.position;
         glm::vec3 normal = -glm::normalize(glm::cross(ab, ac));
         tri.normal = CoordinateUtility::vec3ToGLSLVec3(normal);
         tri.mesh = shaderMeshIndex;

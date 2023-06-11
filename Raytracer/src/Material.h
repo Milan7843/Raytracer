@@ -15,7 +15,7 @@ class AbstractShader;
 class Material : public ShaderWritable
 {
 public:
-	// Default constructor
+	// Default constructor for new material
 	Material();
 
 	// Actual constructors

@@ -9,6 +9,13 @@
 #include "Render processes/RealtimeRenderProcess.h"
 #include "ImGuiEditorInterface.h"
 
+enum class BVHRenderMode
+{
+	DISABLED,
+	LEAVES,
+	ALL
+};
+
 class Renderer : public ImGuiEditorInterface
 {
 public:
@@ -57,6 +64,8 @@ public:
 	float getRenderProgress();
 	float getTimeLeft();
 
+	BVHRenderMode getBVHRenderMode();
+	void setBVHRenderMode(BVHRenderMode newBVHRenderMode);
 
 private:
 
@@ -105,6 +114,9 @@ private:
 
 	// How much the HDRI contributes to the lighting of the scene
 	float hdriLightStrength{ 0.2f };
+
+	// How the BVH's are rendered
+	BVHRenderMode bvhRenderMode{ BVHRenderMode::DISABLED };
 
 	RenderProcess* currentRenderProcess = nullptr;
 };

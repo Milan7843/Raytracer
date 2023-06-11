@@ -1,70 +1,117 @@
 hdri_default.png
 # Materials
-White
+Couch
+0.877451 0.467189 0.270978
+0
+0
+0
+0
 1 1 1
 0
-0
-1
-0
-0 0 0
-0
 
-Reflective
-1 1 1
-1
-0
-1
-0
-1 1 0
-1
-
-Transparent
-1 1 1
-0.5
-1
-1
-0
-1 1 0
-1
-
-Rose matte
-0.8 0.2 0.3
-1e-08
-0
-0
-0
-1 1 0
-0
-
-Emissive
+idk
 1 1 1
 0
 0
 0
 0
-1 1 0.537255
-0.615686
+1 1 1
+0
+
+Rug
+1 1 1
+0
+0
+0
+0
+1 1 1
+0
+
+Pillows
+0.387255 0.229472 0.0892205
+0
+0
+0
+0
+1 1 1
+0
+
+Curtains
+1 1 1
+0
+0
+0
+0
+1 1 1
+0
+
+Curtain rod
+1 1 1
+0
+0
+0
+0
+1 1 1
+0
+
+Walls
+1 1 1
+0
+0
+0
+0
+1 1 1
+0
+
+Floor
+1 1 1
+0
+0
+0
+0
+1 1 1
+0
+
+Window
+1 1 1
+0
+0
+0
+0
+1 1 1
+0
 # Materials end
 
 # Spheres
 # Spheres end
 
 # Models
-crate
+living room
 0 0 0
 0 0 0
 1 1 1
-src/models/crate.obj
+src/models/living room.obj
+20
+7
+8
+3
+1
 1
 4
-
-plane
-0 0 0
-0 0 0
-1 1 1
-src/models/plane.obj
+4
+4
+4
 1
 1
+4
+7
+7
+7
+9
+7
+7
+7
+7
 # Models end
 
 # Point lights
@@ -85,9 +132,9 @@ Directional light
 # Ambient lights end
 
 # Cameras
--1.02458 0.822828 0.614315
--28.6
-1769.36
+1.82614 0.648975 -0.0749029
+-10.4001
+2012.36
 1
 39.333
 1.844

@@ -99,6 +99,8 @@ int Application::Start()
     Callbacks& callbacks = Callbacks::getInstance();
     callbacks.bindSceneManager(&sceneManager);
 
+    sceneManager.getCurrentScene().setAspectRatio(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
     // Unused shaders... (should remove)
     //Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
     //Shader textureShader("src/Shaders/textureVertexShader.shader", "src/Shaders/textureFragmentShader.shader");
@@ -136,6 +138,19 @@ int Application::Start()
     generateAxesVAO();
 
     unsigned int frame = 0;
+
+    BVHHandler bvhHandler(
+        "src/shaders/BVH visualisation/bvhVisualisationVertex.shader",
+        "src/shaders/BVH visualisation/bvhVisualisationGeometry.shader",
+        "src/shaders/BVH visualisation/bvhVisualisationFragment.shader"
+    );
+
+    // Generating the initial BVH
+    sceneManager.getCurrentScene().updateBVH();
+
+    //BVHHandler::writeIntoSSBOs(0, 0, 0);
+
+    //bvh.generateFromModel(sceneManager.getCurrentScene().getModels()[0]);
 
     // TODO change pointer passes to references
 
@@ -218,7 +233,7 @@ int Application::Start()
             glDisable(GL_DEPTH_TEST);
             // Drawing the HDRI (skybox) if using it as a background is enabled
             if (*sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer())
-                hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI(), sceneManager.getCurrentScene().getActiveCamera(), WINDOW_SIZE_X, WINDOW_SIZE_Y);
+                hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI(), sceneManager.getCurrentScene().getActiveCamera());
 
             glEnable(GL_DEPTH_TEST);
 
@@ -229,25 +244,12 @@ int Application::Start()
             drawAxes(axesVAO, &solidColorShader, &sceneManager.getCurrentScene().getActiveCamera());
 
             /* Rasterized scene rendering */
-            rasterizedShader.use();
-
-            // Uniforms
-            float time = glfwGetTime();
-
-            // View matrix
-            glm::mat4 view = glm::mat4(1.0f);
-            view = sceneManager.getCurrentScene().getActiveCamera().getViewMatrix();
-            rasterizedShader.setMat4("view", view);
-
-            // Projection matrix
-            glm::mat4 projection;
-            projection = sceneManager.getCurrentScene().getActiveCamera().getProjectionMatrix(WINDOW_SIZE_X, WINDOW_SIZE_Y);
-            rasterizedShader.setMat4("projection", projection);
-
             sceneManager.getCurrentScene().draw(&rasterizedShader);
 
             // Rendering the outlines for selected objects
             outlineRenderer.render(sceneManager.getCurrentScene());
+
+            bvhHandler.draw(sceneManager.getCurrentScene(), raytracingRenderer.getBVHRenderMode());
 
             // Rendering a preview of the colours used to select an object by clicking on it
             //objectScreenSelector.renderTexturePreview(sceneManager.getCurrentScene(), screenQuadVAO);
@@ -400,7 +402,7 @@ void Application::drawAxes(unsigned int VAO, Shader* shader, Camera* camera)
 
     // Projection matrix
     glm::mat4 projection;
-    projection = camera->getProjectionMatrix(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+    projection = camera->getProjectionMatrix();
     shader->setMat4("projection", projection);
 
     // Binding the VAO

@@ -60,11 +60,17 @@ void Model::drawInterface(Scene& scene)
 {
 	bool anyPropertiesChanged{ false };
 
-	anyPropertiesChanged |= ImGui::InputText("Name", &getName());
+	//anyPropertiesChanged |= ImGui::InputText("Name", &getName());
+	ImGui::InputText("Name", &getName());
 	// Showing transformations
 	anyPropertiesChanged |= ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
 	anyPropertiesChanged |= ImGui::DragFloat3("Rotation", (float*)getRotationPointer(), 0.01f);
 	anyPropertiesChanged |= ImGui::DragFloat3("Scale", (float*)getScalePointer(), 0.01f);
+
+	if (anyPropertiesChanged)
+	{
+		setVertexDataChanged(true);
+	}
 
 	int meshIndex = 0;
 	// Drawing all the meshes of this model
@@ -126,6 +132,16 @@ std::vector<Mesh>& Model::getMeshes()
 	return meshes;
 }
 
+bool Model::isVertexDataChanged()
+{
+	return vertexDataChanged;
+}
+
+void Model::setVertexDataChanged(bool newValue)
+{
+	vertexDataChanged = newValue;
+}
+
 void Model::loadModel(std::string path, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT)
 {
 	Assimp::Importer importer;
@@ -139,7 +155,9 @@ void Model::loadModel(std::string path, std::vector<unsigned int>& meshMaterialI
 	}
 	directory = path.substr(0, path.find_last_of('/'));
 
-	processNode(scene->mRootNode, scene, meshMaterialIndices, meshCount, triangleCount, MAX_MESH_COUNT);
+	unsigned int* meshIndex = new unsigned int(0);
+
+	processNode(scene->mRootNode, scene, meshMaterialIndices, meshCount, meshIndex, triangleCount, MAX_MESH_COUNT);
 }
 
 void Model::loadModel(std::string path, unsigned int meshMaterialIndex, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT)
@@ -158,7 +176,7 @@ void Model::loadModel(std::string path, unsigned int meshMaterialIndex, unsigned
 	processNode(scene->mRootNode, scene, meshMaterialIndex, meshCount, triangleCount, MAX_MESH_COUNT);
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* triangleCount,
+void Model::processNode(aiNode* node, const aiScene* scene, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* meshIndex, unsigned int* triangleCount,
 	unsigned int MAX_MESH_COUNT)
 {
 	// Reading mesh data for each mesh
@@ -172,15 +190,16 @@ void Model::processNode(aiNode* node, const aiScene* scene, std::vector<unsigned
 		}
 
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene, meshMaterialIndices[i], *meshCount, triangleCount));
+		meshes.push_back(processMesh(mesh, scene, meshMaterialIndices[*meshIndex], *meshCount, triangleCount));
 
 		(*meshCount)++;
+		(*meshIndex)++;
 	}
 
 	// Reading all the data from all children
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
-		processNode(node->mChildren[i], scene, meshMaterialIndices, meshCount, triangleCount, MAX_MESH_COUNT);
+		processNode(node->mChildren[i], scene, meshMaterialIndices, meshCount, meshIndex, triangleCount, MAX_MESH_COUNT);
 	}
 }
 
@@ -351,4 +370,16 @@ std::ostream& operator<<(std::ostream& stream, const Model& model)
 	stream << std::endl;
 
 	return stream;
+}
+
+BVHNode* Model::getRootNode()
+{
+	// TODO update on mesh update
+	if (isVertexDataChanged())// || true)
+	{
+		// Creating a BVH from the model
+		this->bvhRootNode = BVHHandler::generateFromModel(*this, this->bvhRootNode);
+		setVertexDataChanged(false);
+	}
+	return bvhRootNode;
 }

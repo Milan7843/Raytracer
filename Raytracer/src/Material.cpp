@@ -3,13 +3,13 @@
 #include "AbstractShader.h"
 
 Material::Material()
-	: name("Material 1"),
+	: name("New material"),
 	color(glm::vec3(0.8f)),
 	reflectiveness(0.0f),
 	transparency(0.0f),
 	refractiveness(0.0f),
 	reflectionDiffusion(0.0f),
-	emission(glm::vec3(0.0f)),
+	emission(glm::vec3(1.0f)),
 	emissionStrength(0.0f)
 {
 }
@@ -116,7 +116,6 @@ bool Material::writeToShader(AbstractShader* shader, unsigned int index)
 	shader->setFloat(("materials[" + std::to_string(index) + "].refractiveness").c_str(), refractiveness);
 	shader->setFloat(("materials[" + std::to_string(index) + "].reflectionDiffusion").c_str(), reflectionDiffusion);
 	shader->setVector3(("materials[" + std::to_string(index) + "].emission").c_str(), emission);
-	Logger::log(std::to_string(emissionStrength));
 	shader->setFloat(("materials[" + std::to_string(index) + "].emissionStrength").c_str(), emissionStrength);
 
 	// The given shader now has updated data

@@ -12,6 +12,7 @@
 #include "Sphere.h"
 #include "Material.h"
 #include "Camera.h"
+#include "BVH/BVH.h"
 
 #include <iostream>
 
@@ -78,6 +79,8 @@ public:
 	void recalculateModelIndices();
 	void recalculateSphereIndices();
 
+	void setAspectRatio(int width, int height);
+
 
 	// Add a camera to the scene
 	void addCamera(Camera& camera);
@@ -132,10 +135,16 @@ public:
 	std::vector<Model>& getModels();
 	std::vector<Sphere>& getSpheres();
 
+	// Update the BVH according to the scene
+	void updateBVH();
+
+	BVH& getBVH();
 
 	unsigned int triangleCount{ 0 };
 
 private:
+
+	BVH bvh;
 
 	std::string name{};
 
@@ -161,7 +170,7 @@ private:
 	unsigned int MAX_AMBIENT_LIGHT_COUNT = 10;
 	unsigned int MAX_MATERIAL_COUNT = 10;
 	unsigned int MAX_SPHERE_COUNT = 10;
-	unsigned int MAX_MESH_COUNT = 10;
+	unsigned int MAX_MESH_COUNT = 20;
 
 	std::vector<Model> models;
 	std::vector<Sphere> spheres;
@@ -183,6 +192,10 @@ private:
 	// Keeping track of the materials
 	std::vector<Material> materials;
 	unsigned int materialCount = 0;
+
+	// Rendering size: only used for aspect ratio
+	unsigned int width{ 0 };
+	unsigned int height{ 0 };
 
 	// Replace part of a string with another string.
 	bool replace(std::string& str, const std::string& from, const std::string& to);

@@ -28,7 +28,8 @@ public:
 	~Camera();
 
 	glm::mat4 getViewMatrix();
-	glm::mat4 getProjectionMatrix(int width, int height);
+	glm::mat4 getProjectionMatrix();
+	glm::mat4 getProjectionMatrix(unsigned int width, unsigned int height);
 
 	glm::vec3 getPosition();
 	glm::vec3 getRotation();
@@ -44,6 +45,8 @@ public:
 	// Callback for when the mouse is moved.
 	// Returns whether the camera moved.
 	bool mouseCallback(GLFWwindow* window, double xpos, double ypos);
+
+	void setAspectRatio(int width, int height);
 
 	// Write this light to the given filestream
 	virtual void writeDataToStream(std::ofstream& filestream);
@@ -65,6 +68,10 @@ private:
 	float yaw{ 200.0f }, pitch{ -40.0f };
 	bool firstMouse = true;
 	unsigned int ssbo;
+
+	// Rendering size: only used for aspect ratio
+	unsigned int width{ 0 };
+	unsigned int height{ 0 };
 
 	float sensitivity = 1.0f;
 	float fov = 40.0f;

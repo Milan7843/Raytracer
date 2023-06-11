@@ -39,6 +39,11 @@ struct Triangle
 	int mesh;
 };
 
+class BVHNode;
+class BVH;
+
+class Model;
+
 class Mesh
 {
 public:

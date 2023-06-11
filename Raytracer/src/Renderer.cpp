@@ -204,6 +204,19 @@ void Renderer::drawInterface()
 	ImGui::DragFloat("HDRI light strength", &hdriLightStrength, 0.01f, 0.0f, 1.0f, "%.2f");
 	ImGuiUtility::drawHelpMarker("How much the HDRI influences the lighting of the scene.");
 
+	ImGui::Text("BVH render mode");
+	ImGui::SameLine();
+	int bvhRenderModeInt = (int)bvhRenderMode;
+	ImGui::RadioButton("Disabled", &bvhRenderModeInt, 0); ImGui::SameLine();
+	ImGui::RadioButton("Only leaves", &bvhRenderModeInt, 1); ImGui::SameLine();
+	ImGui::RadioButton("All", &bvhRenderModeInt, 2);
+	bvhRenderMode = (BVHRenderMode)bvhRenderModeInt;
+	ImGuiUtility::drawHelpMarker((std::string("How the BVH (Bounding Volume Hierarchy) is drawn. ") +
+		"BVH is a way of structuring a model's triangle data in such a way that " +
+		"not all triangles have to be checked in order to know if a ray collision has occured." +
+		"\n'Disabled' will not draw anything." +
+		"\n'Only leaves' will draw onyl the nodes that contain vertices." +
+		"\n'All will' draw all nodes.").c_str());
 }
 
 float Renderer::getRenderProgressPrecise()
@@ -236,6 +249,16 @@ float Renderer::getTimeLeft()
 	return totalTime - getRenderProgress() * totalTime;
 }
 
+BVHRenderMode Renderer::getBVHRenderMode()
+{
+	return bvhRenderMode;
+}
+
+void Renderer::setBVHRenderMode(BVHRenderMode newBVHRenderMode)
+{
+	bvhRenderMode = newBVHRenderMode;
+}
+
 std::string Renderer::formatTime(float time)
 {
 	int secondsTotal = (int)time;
@@ -265,6 +288,10 @@ void Renderer::readRenderSettings()
 	filestream >> indirectLightingQuality;
 	filestream >> hdriLightStrength;
 
+	int readBVHRenderMode;
+	filestream >> readBVHRenderMode;
+	bvhRenderMode = (BVHRenderMode)readBVHRenderMode;
+
 	// Finally closing the file
 	filestream.close();
 }
@@ -282,6 +309,7 @@ void Renderer::writeRenderSettingsToFile()
 	filestream << blockSize << "\n";
 	filestream << indirectLightingQuality << "\n";
 	filestream << hdriLightStrength << "\n";
+	filestream << (int)bvhRenderMode << "\n";
 
 	// Done writing so flush data and close filestream
 	filestream.close();

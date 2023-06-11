@@ -10,6 +10,10 @@ class Shader : public AbstractShader
 {
 public:
 	Shader(const char* vertexPath, const char* fragmentPath);
+
+	// Instantiate a shader including a geometry shader
+	Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
+
 	~Shader();
 };
 

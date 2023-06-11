@@ -9,7 +9,7 @@ public:
 	HDRIRenderer(const char* vertexShaderPath, const char* fragmentShaderPath);
 	~HDRIRenderer();
 
-	void drawHDRI(unsigned int hdri, Camera& camera, unsigned int width, unsigned int height);
+	void drawHDRI(unsigned int hdri, Camera& camera);
 
 private:
 
