@@ -61,6 +61,7 @@ unsigned int AbstractShader::compileShader(GLenum type, const char* code)
 	id = glCreateShader(type);
 	glShaderSource(id, 1, &code, NULL);
 	glCompileShader(id);
+
 	// Printing errors:
 	glGetShaderiv(id, GL_COMPILE_STATUS, &success);
 	if (!success)
@@ -115,22 +116,24 @@ std::string AbstractShader::readFile(const char* shaderPath)
 
 void AbstractShader::linkProgram()
 {
-	int success;
-	char infoLog[512];
-
 	glLinkProgram(ID);
 
 	/* Printing linking errors if any */
+	if (true) {
+		int success;
+		char infoLog[512];
 
-	glGetProgramiv(ID, GL_LINK_STATUS, &success);
-	if (!success)
-	{
-		// Getting the error log
-		glGetProgramInfoLog(ID, 512, NULL, infoLog);
+		glGetProgramiv(ID, GL_LINK_STATUS, &success);
 
-		// Printing the error log
-		Logger::logError("Error: shader program linking failed.");
-		Logger::logError(infoLog);
-		return;
+		if (!success)
+		{
+			// Getting the error log
+			glGetProgramInfoLog(ID, 512, NULL, infoLog);
+
+			// Printing the error log
+			Logger::logError("Error: shader program linking failed.");
+			Logger::logError(infoLog);
+			return;
+		}
 	}
 }

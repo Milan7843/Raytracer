@@ -5,6 +5,7 @@ Renderer::Renderer(const char* raytraceComputeShaderPath, unsigned int width, un
 {
 	// Immediately creating the pixel buffer with the given width and height
 	setResolution(width, height);
+
 	// Retrieving the render settings from the save file
 	readRenderSettings();
 }
@@ -139,6 +140,8 @@ void Renderer::setResolution(unsigned int width, unsigned int height)
 
 	// Creating the pixel array buffer
 	pixelBuffer = 0;
+
+	// Problematic statement: very slow
 	glGenBuffers(1, &pixelBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelBuffer);
 

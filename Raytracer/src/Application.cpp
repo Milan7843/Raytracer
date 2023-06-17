@@ -16,6 +16,8 @@ Application::~Application()
 
 int Application::Start()
 {
+    Logger::log("Initializing GLFW");
+
     initialiseGLFW();
 
     // Making a GLFW window
@@ -30,8 +32,11 @@ int Application::Start()
 
     ImGuiUserInterface userInterface;
 
+    Logger::log("Initializing ImGui");
+
     userInterface.initialiseImGui(window);
 
+    Logger::log("Initializing GLAD");
     // GLAD manages function pointers for OpenGL, so we cannot run without it
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -86,11 +91,13 @@ int Application::Start()
     SceneFileSaver::writeSceneToFile(scene, std::string("Scene 1 - testing"));
     */
 
+    Logger::log("Initializing scene");
     SceneManager sceneManager{};
 
     std::string lastLoadedSceneName{};
     FileUtility::readSavedSettings(lastLoadedSceneName);
 
+    Logger::log("Loading scene");
     sceneManager.changeScene(lastLoadedSceneName);
     //sceneManager.getCurrentScene().addCamera(camera);
     //Scene scene{ SceneFileSaver::readSceneFromFile(std::string("Scene 1 - testing")) };
@@ -111,21 +118,31 @@ int Application::Start()
         "src/Shaders/raymarchFragmentShader.shader", triangleCount, meshCount);
     */
 
+    Logger::log("Loading shaders");
+
+    Logger::log("Loading axes shader");
     // Shader for drawing axes
     Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader");
+    Logger::log("Loading rasterized view shader");
     // Shader for viewing rasterized view
     Shader rasterizedShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/rasterizedView.shader");
+    Logger::log("Loading rendered image shader");
     // Shader for rendering the quad which shows the rendered image
     Shader raytracedImageRendererShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracedImageRendererShader.glsl");
 
     // Raytraced renderer
+    Logger::log("Loading raytracing shader");
     Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampledUpdated.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
+    Logger::log("Loading HDRI renderer");
     HDRIRenderer hdriRenderer("src/shaders/hdriVertex.shader", "src/shaders/hdriFragment.shader");
 
     ObjectScreenSelector objectScreenSelector(WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
     raytracingRenderer.bindSceneManager(&sceneManager);
+
+
+    Logger::log("Generating triangle buffer");
 
     sceneManager.getCurrentScene().generateTriangleBuffer();
     
@@ -139,12 +156,14 @@ int Application::Start()
 
     unsigned int frame = 0;
 
+    Logger::log("Creating BVH handler");
     BVHHandler bvhHandler(
         "src/shaders/BVH visualisation/bvhVisualisationVertex.shader",
         "src/shaders/BVH visualisation/bvhVisualisationGeometry.shader",
         "src/shaders/BVH visualisation/bvhVisualisationFragment.shader"
     );
 
+    Logger::log("Generating initial BVH");
     // Generating the initial BVH
     sceneManager.getCurrentScene().updateBVH();
 

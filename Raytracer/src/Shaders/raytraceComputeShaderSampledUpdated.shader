@@ -197,6 +197,7 @@ struct Intersection
     float transparency;
     float refractiveness;
     int materialIndex;
+    vec3 finalDirection;
 };
 
 
@@ -550,6 +551,8 @@ vec3 fireRayAndGetFinalColor(vec3 pos, vec3 direction, int seed)
     Ray ray = Ray(pos, direction, false, 10000., vec3(0.), 0., 0, -1);
     Intersection closestIntersection = fireRay(pos, direction, true, seed);
 
+    ray.dir = closestIntersection.finalDirection;
+
     vec3 finalColor = vec3(0.0);
 
     // Check for hit
@@ -622,6 +625,7 @@ Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
         // Check for hit
         if (!closestIntersection.intersected)
         {
+            closestIntersection.finalDirection = ray.dir;
             totalClosestIntersection = closestIntersection;
             break;
         }
@@ -702,6 +706,7 @@ Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
                 ray.pos = closestIntersection.pos + EPSILON * ray.dir;
 
                 // Tell the next iterations that we are in glass right now
+                
                 if (isEnteringTransparentMaterial)
                     inTransparentMaterial = true;
                 else
@@ -716,8 +721,15 @@ Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
                     //break;
                 }
 
-                continue; // refracting
+                //ray.pos = vec3(5.0);
 
+
+
+
+                totalClosestIntersection = closestIntersection;
+                //return totalClosestIntersection;
+
+                continue; // refracting
                 /*
                 Ray refractedRay =
                     fireSecondaryRay(
@@ -879,6 +891,12 @@ vec3 calculateIndirectLightingContribution(Intersection intersection, int seed)
 
     // Calculating the indirection color at the first position
     finalColor += calculateIndirectLightingContributionAtPosition(intersection, max(6, indirectLightingQuality * 3), seed + 16);
+
+    // Do no indirect lighting calculation if the quality is set to 0
+    if (indirectLightingQuality == 1)
+    {
+        return finalColor;
+    }
 
     // Then doing it again for a single bounce
     vec3 dir = getRandomDirectionFollowingNormal(intersection.normal, seed + 9);// +i * 31 + 10);
@@ -1149,7 +1167,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 
         float det = b * b - 4 * c;
 
-        Intersection isec = Intersection(false, 0, vec3(.0), -1, -1, vec3(0.), vec3(0.), .0, .0, .0, 0);
+        Intersection isec = Intersection(false, 0, vec3(.0), -1, -1, vec3(0.), vec3(0.), .0, .0, .0, 0, vec3(0.0));
 
         if (b > 0.0 || det < 0.0
             // Allows for single-sided spheres, necessary for sphere transparency and refraction
