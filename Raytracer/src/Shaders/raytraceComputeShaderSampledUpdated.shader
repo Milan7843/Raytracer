@@ -630,7 +630,8 @@ Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
             break;
         }
         else
-        {/*
+        {
+            /*
             Tri tri = triangles[closestIntersection.closestTriHit];
             vec3 pos = closestIntersection.pos;
             vec3 v1 = (meshes[tri.mesh].transformation * vec4(tri.v1.xyz, 1.0)).zyx;
@@ -678,8 +679,19 @@ Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
                 ray.hit = false;
                 break;
             }*/
-            
-            if (closestIntersection.reflectiveness > EPSILON && reflect && i != MAX_REFLECTIONS - 1 && rand(seed * 5 + i * 3) < closestIntersection.reflectiveness)
+
+
+            float rayDirNormalDotProduct = dot(closestIntersection.normal, ray.dir);
+
+            // Fresnel effect approximation reflection value
+            float fresnelReflectiveness = closestIntersection.reflectiveness + (1.0 - closestIntersection.reflectiveness) * pow(1.0 - max(0.0, rayDirNormalDotProduct), 5.0);
+
+            if (rayDirNormalDotProduct < 0)
+            {
+                fresnelReflectiveness = 0;
+            }
+
+            if (fresnelReflectiveness > EPSILON && reflect && i != MAX_REFLECTIONS - 1 && rand(seed * 5 + i * 3) < fresnelReflectiveness)
             {
                 // Calculating the new ray direction for a reflection
                 //ray.finalColor += closestIntersection.color;
@@ -691,8 +703,6 @@ Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
             }
             else if (closestIntersection.transparency > EPSILON && reflect && i != MAX_REFLECTIONS - 1 && rand(seed * 13 + i * 47 + 5779) < closestIntersection.transparency)
             {
-                float rayDirNormalDotProduct = dot(closestIntersection.normal, ray.dir);
-
                 // If the dot product is negative, the ray direction is opposing the normal,
                 // so we are entering glass, otherwise we are exiting
                 bool isEnteringTransparentMaterial = rayDirNormalDotProduct <= 0.0;

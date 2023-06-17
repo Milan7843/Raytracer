@@ -20,7 +20,7 @@ Reflective
 
 Transparent
 1 0 1
-0
+0.01
 1
 0.04
 0
@@ -133,9 +133,9 @@ basically the sun
 # Ambient lights end
 
 # Cameras
-2.01591 1.34631 0.255206
--16.7999
-924.158
+2.9922 2.34653 2.4354
+-4.7999
+917.558
 1
 39.333
 1.844
