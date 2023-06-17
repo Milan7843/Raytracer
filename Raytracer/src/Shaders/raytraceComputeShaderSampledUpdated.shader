@@ -593,6 +593,7 @@ vec3 fireRayAndGetFinalColor(vec3 pos, vec3 direction, int seed)
         }
 
         ray.finalColor = finalColor;
+        finalColor *= closestIntersection.color;
     }
     else
     {
@@ -722,8 +723,8 @@ Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
                 else
                 {
                     float distanceFromTransparentMaterialEntry = distance(ray.pos, rayPositionBeforeUpdate);
-                    transparencyColorMultiplier = vec3(1.0) - (transparencyColorMultiplier *
-                        (min(distanceFromTransparentMaterialEntry + 0.1, 1.0) * (vec3(1.0) - closestIntersection.color)));
+                    transparencyColorMultiplier = transparencyColorMultiplier *
+                        (vec3(1.0) - min(distanceFromTransparentMaterialEntry + 0.1, 1.0) * (vec3(1.0) - closestIntersection.color));
                     inTransparentMaterial = false;
 
                     //ray.finalColor = vec3(distanceFromTransparentMaterialEntry);
@@ -762,7 +763,7 @@ Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
         }
     }
 
-    ray.finalColor *= transparencyColorMultiplier;
+    totalClosestIntersection.color *= transparencyColorMultiplier;
 
     return totalClosestIntersection;
 }
@@ -1060,6 +1061,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
     closestIntersection.intersected = false;
     closestIntersection.closestTriHit = -1;
     closestIntersection.closestSphereHit = -1;
+    closestIntersection.color = vec3(1.0);
 
     /*
     if (intersectBoxRay(bvhNodes[0].pos, bvhNodes[0].size, ray.pos, ray.dir))
