@@ -280,13 +280,13 @@ vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex, int seed);
 vec3 fireRayAndGetFinalColor(vec3 pos, vec3 direction, int seed);
 
 // Fire a ray, get the last intersection it makes
-Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed);
+Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed, bool ignoreRefraction, int skipTri, int skipSphere);
 
 // Calculate the total lighting contribution at a position
 vec3 calculateLights(Intersection intersection, int seed);
 
 // Calculate the lighting contribution directly from light sources
-vec3 calculateDirectLightingContribution(Intersection intersection);
+vec3 calculateDirectLightingContribution(Intersection intersection, int seed);
 
 // Calculate the lighting contribution from light bounces
 vec3 calculateIndirectLightingContribution(Intersection intersection, int seed);
@@ -549,7 +549,7 @@ vec3 fireRayAtPixelPositionIndex(vec2 pixelPosIndex, int seed)
 vec3 fireRayAndGetFinalColor(vec3 pos, vec3 direction, int seed)
 {
     Ray ray = Ray(pos, direction, false, 10000., vec3(0.), 0., 0, -1);
-    Intersection closestIntersection = fireRay(pos, direction, true, seed);
+    Intersection closestIntersection = fireRay(pos, direction, true, seed, false, -1, -1);
 
     ray.dir = closestIntersection.finalDirection;
 
@@ -610,7 +610,7 @@ vec3 fireRayAndGetFinalColor(vec3 pos, vec3 direction, int seed)
 
 
 
-Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
+Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed, bool ignoreRefraction, int skipTri, int skipSphere)
 {
     Ray ray = Ray(pos, direction, false, 10000., vec3(0.), 0., 0, -1);
     bool inTransparentMaterial = false;
@@ -618,10 +618,18 @@ Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
 
     Intersection totalClosestIntersection;
 
+    // Start by skipping the given values
+    int skipTriThisIteration = skipTri;
+    int skipSphereThisIteration = skipSphere;
+
     // Reflections loop
     for (int i = 0; i < MAX_REFLECTIONS; i++)
     {
-        Intersection closestIntersection = getAllIntersections(ray, -1, -1);
+        Intersection closestIntersection = getAllIntersections(ray, skipTriThisIteration, skipSphereThisIteration);
+
+        // After this point no more skipping
+        skipTriThisIteration = -1;
+        skipSphereThisIteration = -1;
 
         // Check for hit
         if (!closestIntersection.intersected)
@@ -702,18 +710,22 @@ Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed)
 
                 continue; // reflecting
             }
-            else if (closestIntersection.transparency > EPSILON && reflect && i != MAX_REFLECTIONS - 1 && rand(seed * 13 + i * 47 + 5779) < closestIntersection.transparency)
+            else if (closestIntersection.transparency > EPSILON && i != MAX_REFLECTIONS - 1 && rand(seed * 13 + i * 47 + 5779) < closestIntersection.transparency)
             {
                 // If the dot product is negative, the ray direction is opposing the normal,
                 // so we are entering glass, otherwise we are exiting
                 bool isEnteringTransparentMaterial = rayDirNormalDotProduct <= 0.0;
                 vec3 rayPositionBeforeUpdate = ray.pos;
 
-                vec3 normal = sign(rayDirNormalDotProduct) * closestIntersection.normal;
-                vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness +
-                    (1.0 - closestIntersection.refractiveness) * ray.dir);
+                if (!ignoreRefraction)
+                {
+                    vec3 normal = sign(rayDirNormalDotProduct) * closestIntersection.normal;
+                    vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness +
+                        (1.0 - closestIntersection.refractiveness) * ray.dir);
 
-                ray.dir = refractedRayDir;
+                    ray.dir = refractedRayDir;
+                }
+
                 ray.pos = closestIntersection.pos + EPSILON * ray.dir;
 
                 // Tell the next iterations that we are in glass right now
@@ -776,7 +788,7 @@ vec3 calculateLights(Intersection intersection, int seed)
 {
     // Calculating the color from the lighting itself
     vec3 finalLightColor =
-        calculateDirectLightingContribution(intersection)
+        calculateDirectLightingContribution(intersection, seed + 304)
         +
         calculateIndirectLightingContribution(intersection, seed);
 
@@ -796,7 +808,7 @@ vec3 calculateLights(Intersection intersection, int seed)
 
 
 
-vec3 calculateDirectLightingContribution(Intersection intersection)
+vec3 calculateDirectLightingContribution(Intersection intersection, int seed)
 {
     vec3 finalLight = vec3(0.);
 
@@ -812,8 +824,12 @@ vec3 calculateDirectLightingContribution(Intersection intersection)
         ray.dir = dir;
 
         Intersection closestIntersection = 
-            getAllIntersections(
-                ray,
+            fireRay(
+                intersection.pos,
+                dir,
+                false,
+                seed + i * 7,
+                false,
                 intersection.closestTriHit,
                 intersection.closestSphereHit
             );
@@ -830,7 +846,7 @@ vec3 calculateDirectLightingContribution(Intersection intersection)
 
             float falloff = 1.0 / (dist.x * dist.x + dist.y * dist.y + dist.z * dist.z);
 
-            finalLight += intensity * pointLights[i].color * pointLights[i].intensity * falloff;
+            finalLight += intensity * pointLights[i].color * pointLights[i].intensity * falloff * closestIntersection.color;
         }
         else
         {
@@ -850,8 +866,12 @@ vec3 calculateDirectLightingContribution(Intersection intersection)
         ray.dir = dir;
 
         Intersection closestIntersection =
-            getAllIntersections(
-                ray,
+            fireRay(
+                intersection.pos,
+                dir,
+                false,
+                seed + i * 7,
+                false,
                 intersection.closestTriHit,
                 intersection.closestSphereHit
             );
@@ -864,7 +884,7 @@ vec3 calculateDirectLightingContribution(Intersection intersection)
                 dot(-dir, intersection.normal),
                 1.);
 
-            finalLight += intensity * dirLights[i].color * dirLights[i].intensity;
+            finalLight += intensity * dirLights[i].color * dirLights[i].intensity * closestIntersection.color;
         }
         else
         {
@@ -994,7 +1014,7 @@ vec3 calculateIndirectLightingContributionAtPosition(Intersection intersection, 
         {
             // Calculating the light contribution at this position
             vec3 light =
-                calculateDirectLightingContribution(isec)
+                calculateDirectLightingContribution(isec, seed + i * 13 + 37)
 
                 // Multiplying by the surface color, because that's what it's bouncing off of
                 * isec.color;
