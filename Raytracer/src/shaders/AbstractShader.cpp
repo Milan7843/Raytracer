@@ -119,9 +119,12 @@ void AbstractShader::linkProgram()
 	glLinkProgram(ID);
 
 	/* Printing linking errors if any */
-	if (true) {
+	if (true)
+	{
 		int success;
 		char infoLog[512];
+
+		std::cout << "glGetProgramiv" << std::endl;
 
 		glGetProgramiv(ID, GL_LINK_STATUS, &success);
 

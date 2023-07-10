@@ -31,9 +31,7 @@ void Renderer::render()
 	computeShader.setInt("pixelRenderSize", 4);
 
 	// Running the compute shader once for each pixel
-	glDispatchCompute(width / 16 * 4, height / 16 * 4, 1);
-	//glDispatchCompute(std::ceil(float(size / 8.0f)), std::ceil(float(size / 8.0f)), 1);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	computeShader.run(width / 16 * 4, height / 16 * 4, 1);
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }

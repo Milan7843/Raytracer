@@ -14,9 +14,16 @@ ComputeShader::ComputeShader(const char* shaderPath)
 
 	/* Creating the shader program */
 
+	std::cout << "creating program" << std::endl;
+
 	ID = glCreateProgram();
 
+	std::cout << "attaching program" << std::endl;
+
 	glAttachShader(ID, shader);
+
+	std::cout << "linking program" << std::endl;
+
 	linkProgram();
 
 	// delete the shaders as they're linked into our program now and no longer necessary
@@ -26,4 +33,8 @@ ComputeShader::ComputeShader(const char* shaderPath)
 ComputeShader::~ComputeShader()
 {
 	Logger::log("Compute shader destroyed.");
+}
+
+ComputeShader::ComputeShader()
+{
 }

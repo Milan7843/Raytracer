@@ -4,7 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "AbstractShader.h"
+#include "shaders/AbstractShader.h"
 #include "ShaderWritable.h"
 
 #include "Logger.h"

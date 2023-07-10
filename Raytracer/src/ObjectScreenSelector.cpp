@@ -3,8 +3,8 @@
 ObjectScreenSelector::ObjectScreenSelector(unsigned int width, unsigned int height)
 	: width(width)
 	, height(height)
-	, objectColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/objectClickColoringShader.shader")
-	, textureRenderShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/screenTextureFragment.shader")
+	, objectColorShader("src/shader_src/solidColorVertexShader.shader", "src/shader_src/objectClickColoringShader.shader")
+	, textureRenderShader("src/shader_src/raymarchVertexShader.shader", "src/shader_src/screenTextureFragment.shader")
 {
 	setup();
 }

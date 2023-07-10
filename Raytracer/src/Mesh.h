@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AbstractShader.h"
+#include "shaders/AbstractShader.h"
 
 #include "CoordinateUtility.h"
 #include "Logger.h"

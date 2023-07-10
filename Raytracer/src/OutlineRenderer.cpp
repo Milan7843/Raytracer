@@ -4,9 +4,9 @@ OutlineRenderer::OutlineRenderer(unsigned int width, unsigned int height, unsign
 	: width(width)
 	, height(height)
 	, screenQuadVAO(screenQuadVAO)
-	, blurRenderShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/screenTextureFragment.shader")
-	, objectRenderShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/outlineRenderToTextureFragment.shader")
-	, textureBlurrerShader("src/Shaders/blurComputeShader.shader")
+	, blurRenderShader("src/shader_src/raymarchVertexShader.shader", "src/shader_src/screenTextureFragment.shader")
+	, objectRenderShader("src/shader_src/solidColorVertexShader.shader", "src/shader_src/outlineRenderToTextureFragment.shader")
+	, textureBlurrerShader("src/shader_src/blurComputeShader.shader")
 {
 	setup();
 }

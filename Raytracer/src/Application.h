@@ -11,8 +11,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Shader.h"
-#include "ComputeShader.h"
+#include "shaders/Shader.h"
+#include "shaders/ComputeShader.h"
 #include "Scene.h"
 #include "SceneManager.h"
 #include "Camera.h"

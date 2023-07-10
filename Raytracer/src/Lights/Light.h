@@ -10,7 +10,7 @@
 #include <vector>
 #include <iostream>
 
-#include "../AbstractShader.h"
+#include "../shaders/AbstractShader.h"
 #include "../ShaderWritable.h"
 
 #include "../CoordinateUtility.h"

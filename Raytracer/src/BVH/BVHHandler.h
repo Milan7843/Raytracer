@@ -1,6 +1,6 @@
 #pragma once
 #include "../Object.h"
-#include "../Shader.h"
+#include "../shaders/Shader.h"
 #include "../Mesh.h"
 #include "BVHNode.h"
 

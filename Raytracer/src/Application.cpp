@@ -122,20 +122,20 @@ int Application::Start()
 
     Logger::log("Loading axes shader");
     // Shader for drawing axes
-    Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader");
+    Shader solidColorShader("src/shader_src/solidColorVertexShader.shader", "src/shader_src/solidColorFragmentShader.shader");
     Logger::log("Loading rasterized view shader");
     // Shader for viewing rasterized view
-    Shader rasterizedShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/rasterizedView.shader");
+    Shader rasterizedShader("src/shader_src/solidColorVertexShader.shader", "src/shader_src/rasterizedView.shader");
     Logger::log("Loading rendered image shader");
     // Shader for rendering the quad which shows the rendered image
-    Shader raytracedImageRendererShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracedImageRendererShader.glsl");
+    Shader raytracedImageRendererShader("src/shader_src/raymarchVertexShader.shader", "src/shader_src/raytracedImageRendererShader.glsl");
 
     // Raytraced renderer
     Logger::log("Loading raytracing shader");
-    Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampledUpdated.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y);
+    Renderer raytracingRenderer("src/shader_src/raytraceComputeShaderSampledUpdated.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
     Logger::log("Loading HDRI renderer");
-    HDRIRenderer hdriRenderer("src/shaders/hdriVertex.shader", "src/shaders/hdriFragment.shader");
+    HDRIRenderer hdriRenderer("src/shader_src/hdriVertex.shader", "src/shader_src/hdriFragment.shader");
 
     ObjectScreenSelector objectScreenSelector(WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
@@ -158,9 +158,9 @@ int Application::Start()
 
     Logger::log("Creating BVH handler");
     BVHHandler bvhHandler(
-        "src/shaders/BVH visualisation/bvhVisualisationVertex.shader",
-        "src/shaders/BVH visualisation/bvhVisualisationGeometry.shader",
-        "src/shaders/BVH visualisation/bvhVisualisationFragment.shader"
+        "src/shader_src/BVH visualisation/bvhVisualisationVertex.shader",
+        "src/shader_src/BVH visualisation/bvhVisualisationGeometry.shader",
+        "src/shader_src/BVH visualisation/bvhVisualisationFragment.shader"
     );
 
     Logger::log("Generating initial BVH");

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Scene.h"
-#include "Shader.h"
+#include "shaders/Shader.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

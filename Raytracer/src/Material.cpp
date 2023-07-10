@@ -1,6 +1,6 @@
 #include "Material.h"
 
-#include "AbstractShader.h"
+#include "shaders/AbstractShader.h"
 
 Material::Material()
 	: name("New material"),

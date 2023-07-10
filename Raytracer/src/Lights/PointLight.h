@@ -4,7 +4,7 @@
 
 #include "Light.h"
 
-#include "../AbstractShader.h"
+#include "../shaders/AbstractShader.h"
 
 class PointLight : public Light
 {

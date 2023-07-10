@@ -9,17 +9,8 @@ White
 0 0 0
 0
 
-Reflective
-1 1 1
-1
-0
-1
-0
-1 1 1
-0
-
-Transparent
-0.490196 0.364706 1
+Transparent blue
+0 0 1
 0
 1
 0
@@ -27,55 +18,10 @@ Transparent
 1 1 1
 0
 
-Rose matte
-0.8 0.2 0.3
-1e-08
-0
-1
-0
+Transparent yellow
 1 1 0
-1
-
-Tire
-0.147059 0.143454 0.143454
 0
 0
-1
-0
-0 0 0
-0
-
-Car
-0.921569 0.225875 0.225875
-0.1
-0
-1
-0.65
-0 0 0
-0
-
-Window
-0 1 1
-1
-0
-1
-0.23
-0 0 0
-0
-
-Wheel
-0.607843 0.607843 0.607843
-0.1
-0
-1
-0
-0 0 0
-0
-
-Blue glass
-0.192762 0.673859 0.936275
-0
-0.5
 0
 0
 1 1 1
@@ -95,7 +41,15 @@ src/models/plane.obj
 1
 
 glass_pane
--0.83 0.51 0
+-0.53 0.5 0.23
+0 0 0
+1 1 1
+src/models/glass_pane.obj
+1
+2
+
+glass_pane
+-0.71 0.5 -0.39
 0 0 0
 1 1 1
 src/models/glass_pane.obj
@@ -107,7 +61,7 @@ src/models/glass_pane.obj
 Point light
 1 1 1
 1
-0 1 0
+0 0.5 0
 # Point lights end
 
 # Directional lights
@@ -117,9 +71,9 @@ Point light
 # Ambient lights end
 
 # Cameras
--0.0346088 0.994414 -1.75593
--21.5999
-1197.26
+-1.14404 2.60171 -1.35452
+-60.3001
+1153.46
 1
 39.333
 1.844

@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "../AbstractShader.h"
+#include "../shaders/AbstractShader.h"
 #include "ImGuiEditorInterface.h"
 
 class ShaderWritable : public ImGuiEditorInterface

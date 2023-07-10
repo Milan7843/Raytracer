@@ -3,7 +3,7 @@
 #include "Scene.h"
 #include "SceneManager.h"
 #include "Camera.h"
-#include "ComputeShader.h"
+#include "shaders/ComputeShader.h"
 #include "Render processes/RenderProcess.h"
 #include "Render processes/BlockRenderProcess.h"
 #include "Render processes/RealtimeRenderProcess.h"

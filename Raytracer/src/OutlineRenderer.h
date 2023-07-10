@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Shader.h"
-#include "ComputeShader.h"
+#include "shaders/Shader.h"
+#include "shaders/ComputeShader.h"
 #include "Scene.h"
 
 #include <glad/glad.h>
