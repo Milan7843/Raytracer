@@ -5,6 +5,6 @@
 class ComputeShaderInterface
 {
 public:
-	void run(unsigned int numGroupsX, unsigned int numGroupsY, unsigned int numGroupsZ);
+	virtual void run(unsigned int numGroupsX, unsigned int numGroupsY, unsigned int numGroupsZ);
 };
 

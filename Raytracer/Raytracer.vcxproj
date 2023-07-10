@@ -639,6 +639,7 @@
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationVertex.shader" />
     <None Include="src\shader_src\hdriFragment.shader" />
     <None Include="src\shader_src\hdriVertex.shader" />
+    <None Include="src\shader_src\indirectLightingCalculation.shader" />
     <None Include="src\shader_src\objectClickColoringShader.shader" />
     <None Include="src\shader_src\outlineRenderToTextureFragment.shader" />
     <None Include="src\shader_src\rasterizedView.shader" />

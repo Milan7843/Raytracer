@@ -13,6 +13,7 @@
 
 #include "shaders/Shader.h"
 #include "shaders/ComputeShader.h"
+#include "shaders/MultiComputeShader.h"
 #include "Scene.h"
 #include "SceneManager.h"
 #include "Camera.h"

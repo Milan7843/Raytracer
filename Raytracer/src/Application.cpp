@@ -132,7 +132,9 @@ int Application::Start()
 
     // Raytraced renderer
     Logger::log("Loading raytracing shader");
-    Renderer raytracingRenderer("src/shader_src/raytraceComputeShaderSampledUpdated.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y);
+    MultiComputeShader raytracingComputeShader(2, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
+    //ComputeShader raytracingComputeShader("src/shader_src/raytraceComputeShaderSampledUpdated.shader");
+    Renderer raytracingRenderer(raytracingComputeShader, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
     Logger::log("Loading HDRI renderer");
     HDRIRenderer hdriRenderer("src/shader_src/hdriVertex.shader", "src/shader_src/hdriFragment.shader");

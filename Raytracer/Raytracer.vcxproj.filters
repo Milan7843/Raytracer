@@ -1864,6 +1864,7 @@
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationFragment.shader" />
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationGeometry.shader" />
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationVertex.shader" />
+    <None Include="src\shader_src\indirectLightingCalculation.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />

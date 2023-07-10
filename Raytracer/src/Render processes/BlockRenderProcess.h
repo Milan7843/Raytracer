@@ -2,6 +2,15 @@
 
 #include "RenderProcess.h"
 
+struct IndirectLightingPixelData
+{
+	glm::vec3 position;
+	glm::vec3 color;
+	glm::vec3 normal;
+	unsigned int closestTriHit;
+	unsigned int closestSphereHit;
+};
+
 class BlockRenderProcess: public RenderProcess
 {
 public:
@@ -20,6 +29,8 @@ public:
 
 private:
 
+	void generateIndirectLightingDataBuffer();
+
 	void blockRenderStep(ComputeShader& computeShader);
 
 	// Get the top-left coordinate of the currently rendering block
@@ -33,5 +44,7 @@ private:
 	unsigned int blockIndexX{ 0 }, blockIndexY{ 0 };
 
 	int currentBlockRenderPassIndex{ 0 };
+
+	unsigned int indirectLightingDataBuffer{ 0 };
 };
 

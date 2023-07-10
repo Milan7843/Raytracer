@@ -34,6 +34,15 @@ void MultiComputeShader::use()
 	// The multi compute shader cannot be used
 }
 
+void MultiComputeShader::run(unsigned int numGroupsX, unsigned int numGroupsY, unsigned int numGroupsZ)
+{
+	for (ComputeShader* shader : shaders)
+	{
+		shader->use();
+		shader->run(numGroupsX, numGroupsY, numGroupsZ);
+	}
+}
+
 void MultiComputeShader::setBool(const std::string& name, bool value) const
 {
 	for (ComputeShader* shader : shaders)
