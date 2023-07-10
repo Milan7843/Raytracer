@@ -1,0 +1,107 @@
+hdri_default.png
+# Materials
+White
+1 1 1
+0
+0
+1
+0
+0 0 0
+0
+0
+
+Reflective
+1 1 1
+1
+0
+1
+0
+1 0 1
+1
+0
+
+Transparent
+1 1 1
+0.5
+1
+1
+0
+1 0 1
+1
+0
+
+Rose matte
+0.8 0.2 0.3
+1e-08
+0
+0
+0
+0 0 1
+0
+0
+
+Emissive
+1 1 1
+0
+0
+0
+0
+1 0.537255 0.615686
+1
+0
+# Materials end
+
+# Spheres
+# Spheres end
+
+# Models
+living room
+0 0 0
+0 0 0
+1 1 1
+src/models/living room.obj
+20
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+# Models end
+
+# Point lights
+# Point lights end
+
+# Directional lights
+Directional light
+1 1 1
+0.8
+-1 -1 0.2
+# Directional lights end
+
+# Ambient lights
+# Ambient lights end
+
+# Cameras
+2.39503 3.45708 2.17973
+-28.3
+1662.56
+1
+39.333
+1.844
+# Cameras end
+

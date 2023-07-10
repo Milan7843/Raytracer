@@ -10,11 +10,12 @@ Material::Material()
 	refractiveness(0.0f),
 	reflectionDiffusion(0.0f),
 	emission(glm::vec3(1.0f)),
-	emissionStrength(0.0f)
+	emissionStrength(0.0f),
+	fresnelReflectionStrength(0.0f)
 {
 }
 
-Material::Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness, float reflectionDiffusion, glm::vec3 emission, float emissionStrength)
+Material::Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness, float reflectionDiffusion, glm::vec3 emission, float emissionStrength, float fresnelReflectionStrength)
 	: name(name),
 	color(color),
 	reflectiveness(reflectiveness),
@@ -22,7 +23,8 @@ Material::Material(std::string name, glm::vec3 color, float reflectiveness, floa
 	refractiveness(refractiveness),
 	reflectionDiffusion(reflectionDiffusion),
 	emission(emission),
-	emissionStrength(emissionStrength)
+	emissionStrength(emissionStrength),
+	fresnelReflectionStrength(fresnelReflectionStrength)
 {
 }
 Material::Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness)
@@ -33,7 +35,8 @@ Material::Material(std::string name, glm::vec3 color, float reflectiveness, floa
 	refractiveness(refractiveness),
 	reflectionDiffusion(0.0f),
 	emission(glm::vec3(1.0f)),
-	emissionStrength(0.0f)
+	emissionStrength(0.0f),
+	fresnelReflectionStrength(0.0f)
 {
 }
 
@@ -45,7 +48,8 @@ Material::Material(std::string name, glm::vec3 color, float reflectiveness, floa
 	refractiveness(0.0f),
 	reflectionDiffusion(0.0f),
 	emission(emission),
-	emissionStrength(emissionStrength)
+	emissionStrength(emissionStrength),
+	fresnelReflectionStrength(0.0f)
 {
 }
 
@@ -64,6 +68,7 @@ void Material::writeDataToStream(std::ofstream& filestream)
 	filestream << reflectionDiffusion << "\n";
 	filestream << emission.r << " " << emission.g << " " << emission.b << "\n";
 	filestream << emissionStrength << "\n";
+	filestream << fresnelReflectionStrength << "\n";
 }
 
 void Material::drawInterface(Scene& scene)
@@ -78,6 +83,7 @@ void Material::drawInterface(Scene& scene)
 	anyPropertiesChanged |= ImGui::DragFloat("Transparency", getTransparencyPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat("Refractiveness", getRefractivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat("Reflective diffusion", getReflectionDiffusionPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
+	anyPropertiesChanged |= ImGui::DragFloat("Reflective diffusion", &fresnelReflectionStrength, 0.01f, 0.0f, 1.0f, "%.2f");
 	ImGuiUtility::drawHelpMarker("How much the reflection can be diffused. Basically acts as a blur.");
 
 	// If anything changed, no shader will have the updated data
@@ -97,6 +103,7 @@ Material Material::generateErrorMaterial()
 		0.0f,
 		0.0f,
 		glm::vec3(0.0f),
+		0.0f,
 		0.0f);
 }
 
@@ -117,6 +124,7 @@ bool Material::writeToShader(AbstractShader* shader, unsigned int index)
 	shader->setFloat(("materials[" + std::to_string(index) + "].reflectionDiffusion").c_str(), reflectionDiffusion);
 	shader->setVector3(("materials[" + std::to_string(index) + "].emission").c_str(), emission);
 	shader->setFloat(("materials[" + std::to_string(index) + "].emissionStrength").c_str(), emissionStrength);
+	shader->setFloat(("materials[" + std::to_string(index) + "].fresnelReflectionStrength").c_str(), fresnelReflectionStrength);
 
 	// The given shader now has updated data
 	markShaderAsWrittenTo(shader);
@@ -170,8 +178,9 @@ std::ostream& operator<<(std::ostream& stream, const Material& material)
 		<< "\ntransparency: " << material.transparency
 		<< "\nemission: (" << material.emission.x << ", " << material.emission.y << ", " << material.emission.z << ")"
 		<< "\nemission strength: (" << material.emissionStrength << ")"
+		<< "\n fresnel reflection strength: (" << material.fresnelReflectionStrength << ")"
 		<< std::endl;
-
+	
 	return stream;
 }
 

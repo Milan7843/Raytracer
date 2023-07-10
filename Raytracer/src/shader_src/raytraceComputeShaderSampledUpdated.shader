@@ -195,6 +195,7 @@ struct Material
     float refractiveness;
     float reflectionDiffusion;
     float emissionStrength;
+    float fresnelReflectionStrength;
 };
 uniform Material materials[NUM_MATERIALS];
 uniform int materialCount;
@@ -646,8 +647,8 @@ vec3 fireRayAndGetFinalColor(int blockLocalX, int blockLocalY, vec3 pos, vec3 di
         indirectLightingData[index] = data;
     }
 
-    //return finalColor;
-    return vec3(0.0);
+    return finalColor;
+    //return vec3(0.0);
 }
 
 
@@ -737,7 +738,9 @@ Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed, bool igno
             float rayDirNormalDotProduct = dot(closestIntersection.normal, ray.dir);
 
             // Fresnel effect approximation reflection value
-            float fresnelReflectiveness = closestIntersection.reflectiveness +(1.0 - closestIntersection.reflectiveness) * pow(1.0 - max(0.0, rayDirNormalDotProduct), 5.0);
+            // TODO turn fresnel back on at some point but i dont like it right now, it works too much on non-reflective objects like a couch
+            float fresnelReflectionStrength = 0.;
+            float fresnelReflectiveness = closestIntersection.reflectiveness + fresnelReflectionStrength * (1.0 - closestIntersection.reflectiveness) * pow(1.0 - max(0.0, rayDirNormalDotProduct), 5.0);
 
             if (rayDirNormalDotProduct < 0)
             {
@@ -1017,16 +1020,16 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         {
             // Is leaf
 
-            /*
-            if (intersectBoxRay(node.pos, node.size, ray.pos, ray.dir))
-            {
-                closestIntersection.intersected = true;
-                closestIntersection.color = vec3(0.0);
-                closestIntersection.reflectiveness = 0.0;
-                closestIntersection.transparency = 0.0;
-                closestIntersection.refractiveness = 0.0;
-                return closestIntersection;
-            }*/
+            
+            //if (intersectBoxRay(node.pos, node.size, ray.pos, ray.dir))
+            //{
+            //    closestIntersection.intersected = true;
+            //    closestIntersection.color = vec3(0.0);
+            //    closestIntersection.reflectiveness = 0.0;
+            //    closestIntersection.transparency = 0.0;
+            //    closestIntersection.refractiveness = 0.0;
+            //    return closestIntersection;
+            //}
 
             // Check all triangles inside it
             uint triangleCount = bvhIndices[node.rightChild];

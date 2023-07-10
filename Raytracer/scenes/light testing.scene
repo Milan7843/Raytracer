@@ -8,6 +8,7 @@ Couch
 0
 1 1 1
 0
+0
 
 idk
 1 1 1
@@ -16,6 +17,7 @@ idk
 0
 0
 1 1 1
+0
 0
 
 Rug
@@ -26,6 +28,7 @@ Rug
 0
 1 1 1
 0
+0
 
 Pillows
 0.387255 0.229472 0.0892205
@@ -34,6 +37,7 @@ Pillows
 0
 0
 1 1 1
+0
 0
 
 Curtains
@@ -44,6 +48,7 @@ Curtains
 0
 1 1 1
 0
+0
 
 Curtain rod
 1 1 1
@@ -52,6 +57,7 @@ Curtain rod
 0
 0
 1 1 1
+0
 0
 
 Walls
@@ -62,6 +68,7 @@ Walls
 0
 1 1 1
 0
+0
 
 Floor
 1 1 1
@@ -71,6 +78,7 @@ Floor
 0
 1 1 1
 0
+0
 
 Window
 1 1 1
@@ -79,6 +87,7 @@ Window
 0
 0
 1 1 1
+0
 0
 # Materials end
 
@@ -132,9 +141,9 @@ Directional light
 # Ambient lights end
 
 # Cameras
-1.82614 0.648975 -0.0749029
--10.4001
-2012.36
+2.44237 3.56174 2.42806
+-28.1001
+2024.56
 1
 39.333
 1.844

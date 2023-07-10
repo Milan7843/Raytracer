@@ -196,6 +196,7 @@ struct Material
     float refractiveness;
     float reflectionDiffusion;
     float emissionStrength;
+    float fresnelReflectionStrength;
 };
 uniform Material materials[NUM_MATERIALS];
 uniform int materialCount;
@@ -450,11 +451,11 @@ void main()
             continue;
         }
 
-        finalColor += calculateIndirectLightingContribution(data, i * 67 * i + seed * 17);
+        finalColor += calculateIndirectLightingContribution(data, i * 67 * i + seed * 17) / float(sampleCount);
         //finalColor += data.position;
     }
 
-    colors[pixelIndex] += vec4(finalColor, 1.0);
+    colors[pixelIndex] += vec4(finalColor / float(renderPassCount), 1.0);
 }
 
 
@@ -554,7 +555,7 @@ vec3 calculateIndirectLightingContribution(IndirectLightingPixelData data, int s
     //        );
     //}
 
-    return finalColor;
+    return finalColor * data.color;
 }
 
 vec3 calculateIndirectLightingContributionAtPosition(IndirectLightingPixelData data, int iterations, int seed)
@@ -571,7 +572,7 @@ vec3 calculateIndirectLightingContributionAtPosition(IndirectLightingPixelData d
         ray.dir = dir;
         
         Intersection isec = getAllIntersections(ray, data.closestTriHit, data.closestSphereHit);
-        /*
+        
         if (isec.intersected)
         {
             // Calculating the light contribution at this position
@@ -598,7 +599,7 @@ vec3 calculateIndirectLightingContributionAtPosition(IndirectLightingPixelData d
             vec3 skyColor = texture(hdri, vec2(yaw / (2 * PI), -pitch)).rgb;
 
             finalColor += skyColor * hdriLightStrength;
-        }*/
+        }
     }
 
     return finalColor / float(iterations);
@@ -855,7 +856,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         return closestIntersection;
     }*/
 
-
+    
     // Performing BVH traversal
     Stack stack;
     initializeStack(stack);
@@ -875,16 +876,16 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         {
             // Is leaf
 
-            /*
-            if (intersectBoxRay(node.pos, node.size, ray.pos, ray.dir))
-            {
-                closestIntersection.intersected = true;
-                closestIntersection.color = vec3(0.0);
-                closestIntersection.reflectiveness = 0.0;
-                closestIntersection.transparency = 0.0;
-                closestIntersection.refractiveness = 0.0;
-                return closestIntersection;
-            }*/
+            
+            //if (intersectBoxRay(node.pos, node.size, ray.pos, ray.dir))
+            //{
+            //    closestIntersection.intersected = true;
+            //    closestIntersection.color = vec3(0.0);
+            //    closestIntersection.reflectiveness = 0.0;
+            //    closestIntersection.transparency = 0.0;
+            //    closestIntersection.refractiveness = 0.0;
+            //    return closestIntersection;
+            //}
 
             // Check all triangles inside it
             uint triangleCount = bvhIndices[node.rightChild];
@@ -895,7 +896,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
                 // Check triangle intersection
 
                 // Skip already hit tri
-                if (j == skipTri) continue;
+                //if (j == skipTri) continue;
 
                 Intersection isec = triangleIntersection(triangles[j], ray);
                 if (isec.intersected && isec.depth < closestIntersection.depth)
