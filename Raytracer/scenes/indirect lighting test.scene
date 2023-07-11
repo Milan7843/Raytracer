@@ -43,11 +43,11 @@ src/models/plane.obj
 1
 1
 
-cube
+crate
 0 0 0
 0 0 0
 1 1 1
-src/models/cube.obj
+src/models/crate.obj
 1
 2
 # Models end
@@ -59,16 +59,16 @@ src/models/cube.obj
 Directional light
 1 1 1
 1
--1 -1 0.2
+1 -1 0
 # Directional lights end
 
 # Ambient lights
 # Ambient lights end
 
 # Cameras
-4.09996 2.9911 -4.76764
--29.9001
-1208.26
+0.977093 0.903998 0.739928
+-36.1001
+941.861
 1
 39.333
 1.844

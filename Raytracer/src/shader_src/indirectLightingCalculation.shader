@@ -388,7 +388,7 @@ float atan2(float x, float z)
 
 vec3 getRandomDirection(int seed)
 {
-    vec3 dir = vec3(rand(seed), rand(seed + 7), rand(seed + 13));
+    vec3 dir = vec3(rand(seed)*2.0-1.0, rand(seed + 7) * 2.0 - 1.0, rand(seed + 13) * 2.0 - 1.0);
     return normalize(dir);
 }
 
@@ -441,7 +441,7 @@ void main()
     // Calculating the total index, used to map the 2D indices to a 1D array
     int pixelIndex = int(cx + screenWidth * cy);
 
-    int seed = pixelIndex*7 + pixelIndex + currentBlockRenderPassIndex * 17;
+    int seed = pixelIndex*7 + currentBlockRenderPassIndex * 17;
 
     for (int i = 0; i < sampleCount; i++)
     {
@@ -455,7 +455,12 @@ void main()
         }
 
         finalColor += calculateIndirectLightingContribution(data, i * 13 + seed);
-        //finalColor += data.normal;
+
+        //vec3 dataShowing = getRandomDirectionFollowingNormal(data.normal, i * 13 + seed);
+        //dataShowing = data.normal;
+        //dataShowing = data.position;
+        
+        //finalColor += dataShowing
         
         //Intersection intersection;
         //intersection.pos = data.position;
