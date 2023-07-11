@@ -359,7 +359,7 @@ vec3 getNormal(Tri tri, vec3 p)
         float y = (dbb * dca - dab * dcb) / denom;
         float z = (daa * dcb - dab * dca) / denom;
         float x = 1.0f - y - z;
-        return normalize(tri.n1.xyz * x + tri.n2.xyz * y + tri.n3.xyz * z).xyz;
+        return -normalize(tri.n1.xyz * x + tri.n2.xyz * y + tri.n3.xyz * z).xyz;
     }
     // Default harsh normals
     return tri.normal;
@@ -633,6 +633,9 @@ vec3 fireRayAndGetFinalColor(int blockLocalX, int blockLocalY, vec3 pos, vec3 di
             * 
             calculateLights(closestIntersection, seed);
 
+        //finalColor =
+        //    closestIntersection.normal;
+
         // Writing the data required for calculating the indirect lighting at this position later
         int index = blockLocalX + blockLocalY * blockSize + (blockSize * blockSize) * sampleIndex;
 
@@ -647,8 +650,8 @@ vec3 fireRayAndGetFinalColor(int blockLocalX, int blockLocalY, vec3 pos, vec3 di
         indirectLightingData[index] = data;
     }
 
-    return finalColor;
-    //return vec3(0.0);
+    //return finalColor;
+    return vec3(0.0);
 }
 
 
@@ -885,7 +888,7 @@ vec3 calculateDirectLightingContribution(Intersection intersection, int seed)
         {
             float intensity = min(
                 (1. / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z))
-                * dot(-dir, intersection.normal),
+                * dot(dir, intersection.normal),
                 1.);
 
 
@@ -926,7 +929,7 @@ vec3 calculateDirectLightingContribution(Intersection intersection, int seed)
         {
             // Works somehow??
             float intensity = min(
-                dot(-dir, intersection.normal),
+                dot(dir, intersection.normal),
                 1.);
 
             finalLight += intensity * dirLights[i].color * dirLights[i].intensity * closestIntersection.color;
@@ -981,12 +984,21 @@ bool intersectBoxRay(vec3 boxPos, vec3 boxSize, vec3 rayOrigin, vec3 rayDirectio
 
 Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 {
-    Intersection closestIntersection;
-    closestIntersection.depth = 1000.;
-    closestIntersection.intersected = false;
-    closestIntersection.closestTriHit = -1;
-    closestIntersection.closestSphereHit = -1;
-    closestIntersection.color = vec3(1.0);
+    /*
+    bool intersected;
+    float depth;
+    vec3 pos;
+    int closestTriHit;
+    int closestSphereHit;
+    vec3 normal;
+    vec3 color;
+    float reflectiveness;
+    float transparency;
+    float refractiveness;
+    int materialIndex;
+    vec3 finalDirection;
+    */
+    Intersection closestIntersection = Intersection(false, 1000., vec3(.0), -1, -1, vec3(0.), vec3(1.0), .0, .0, .0, 0, vec3(0.0));
 
     /*
     if (intersectBoxRay(bvhNodes[0].pos, bvhNodes[0].size, ray.pos, ray.dir))
@@ -1020,7 +1032,6 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         {
             // Is leaf
 
-            
             //if (intersectBoxRay(node.pos, node.size, ray.pos, ray.dir))
             //{
             //    closestIntersection.intersected = true;
@@ -1049,6 +1060,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
                     closestIntersection.closestTriHit = int(j);
                     // TODO optimise this to to as few getNormal calls as possible (not on underlying faces)
                     closestIntersection.normal = getNormal(triangles[j], isec.pos);
+                    //closestIntersection.normal = vec3(0.0, 0.0, 1.0);
                 }
             }
         }
@@ -1125,14 +1137,14 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
             isec.refractiveness = materials[spheres[j].material].refractiveness;
             isec.materialIndex = spheres[j].material;
             isec.color = materials[spheres[j].material].color;
-            isec.normal = normalize(spheres[j].pos - isec.pos);
-        }
+            isec.normal = normalize(isec.pos - spheres[j].pos);
 
-        if (isec.intersected && isec.depth < closestIntersection.depth)
-        {
-            closestIntersection = isec;
-            closestIntersection.closestTriHit = -1;
-            closestIntersection.closestSphereHit = j;
+            if (isec.depth < closestIntersection.depth)
+            {
+                closestIntersection = isec;
+                closestIntersection.closestTriHit = -1;
+                closestIntersection.closestSphereHit = j;
+            }
         }
     }
     return closestIntersection;
@@ -1144,7 +1156,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 
 Intersection triangleIntersection(Tri tri, Ray ray)
 {
-    Intersection i;
+    Intersection i = Intersection(false, 0, vec3(.0), -1, -1, vec3(0.), vec3(0.), .0, .0, .0, 0, vec3(0.0));
     i.intersected = false;
 
     const float epsilon = 0.0000001;

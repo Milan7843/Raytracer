@@ -355,7 +355,7 @@ vec3 getNormal(Tri tri, vec3 p)
         float y = (dbb * dca - dab * dcb) / denom;
         float z = (daa * dcb - dab * dca) / denom;
         float x = 1.0f - y - z;
-        return normalize(tri.n1.xyz * x + tri.n2.xyz * y + tri.n3.xyz * z).xyz;
+        return -normalize(tri.n1.xyz * x + tri.n2.xyz * y + tri.n3.xyz * z).xyz;
     }
     // Default harsh normals
     return tri.normal;
@@ -388,15 +388,18 @@ float atan2(float x, float z)
 
 vec3 getRandomDirection(int seed)
 {
-    vec3 dir = vec3(rand(seed), rand(seed + 1), rand(seed + 2));
+    vec3 dir = vec3(rand(seed), rand(seed + 7), rand(seed + 13));
     return normalize(dir);
 }
 
 vec3 getRandomDirectionFollowingNormal(vec3 normal, int seed)
 {
-    vec3 dir = vec3(rand(seed), rand(seed * 2 + 1), rand(seed * 3 + 2));
-    dir = normalize(dir);
-    return -dir * sign(dot(normal, dir));
+    vec3 dir = getRandomDirection(seed);
+    if (dot(normal, dir) >= 0)
+    {
+        return dir;
+    }
+    return -dir;
 }
 
 
@@ -438,7 +441,7 @@ void main()
     // Calculating the total index, used to map the 2D indices to a 1D array
     int pixelIndex = int(cx + screenWidth * cy);
 
-    int seed = pixelIndex * 1319 * pixelIndex + pixelIndex + currentBlockRenderPassIndex * 7;
+    int seed = pixelIndex*7 + pixelIndex + currentBlockRenderPassIndex * 17;
 
     for (int i = 0; i < sampleCount; i++)
     {
@@ -451,11 +454,19 @@ void main()
             continue;
         }
 
-        finalColor += calculateIndirectLightingContribution(data, i * 67 * i + seed * 17) / float(sampleCount);
-        //finalColor += data.position;
+        finalColor += calculateIndirectLightingContribution(data, i * 13 + seed);
+        //finalColor += data.normal;
+        
+        //Intersection intersection;
+        //intersection.pos = data.position;
+        //intersection.normal = data.normal;
+        //intersection.closestTriHit = data.closestTriHit;
+        //intersection.closestSphereHit = data.closestSphereHit;
+        //finalColor += calculateDirectLightingContribution(intersection, i * 13 + seed);
+        //finalColor += calculateDirectLightingContribution(intersection, i * 13 + seed);
     }
 
-    colors[pixelIndex] += vec4(finalColor / float(renderPassCount), 1.0);
+    colors[pixelIndex] += vec4(finalColor / float(renderPassCount * sampleCount), 1.0);
 }
 
 
@@ -481,7 +492,7 @@ vec3 calculateIndirectLightingContribution(IndirectLightingPixelData data, int s
     // Do no further indirect lighting calculation if the quality is set to 1
     if (indirectLightingQuality == 1)
     {
-        return finalColor;
+        return finalColor * data.color;
     }
 
     // Then doing it again for a single bounce
@@ -501,13 +512,12 @@ vec3 calculateIndirectLightingContribution(IndirectLightingPixelData data, int s
     IndirectLightingPixelData newData = IndirectLightingPixelData(
         intersection.pos,
         intersection.color,
-        intersection.normal,
         intersection.closestTriHit,
+        intersection.normal,
         intersection.closestSphereHit
     );
     finalColor += calculateIndirectLightingContributionAtPosition(newData, max(4, indirectLightingQuality * 2), seed + 27);
     */
-
     //vec3 dir = getRandomDirectionFollowingNormal(intersection.normal, seed + 10);// +i * 31 + 10);
     //
     //Ray ray;
@@ -562,10 +572,10 @@ vec3 calculateIndirectLightingContributionAtPosition(IndirectLightingPixelData d
 {
     vec3 finalColor = vec3(0.0);
     
-    //for (int i = 0; i < iterations; i++)
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < iterations; i++)
     {
-        vec3 dir = getRandomDirectionFollowingNormal(data.normal, seed + i * 31 + 4);
+        vec3 dir = getRandomDirectionFollowingNormal(data.normal, seed + i * 13 + 4);
+        //vec3 dir = vec3(1.0);
 
         Ray ray;
         ray.pos = data.position + dir * 0.0001;
@@ -577,7 +587,7 @@ vec3 calculateIndirectLightingContributionAtPosition(IndirectLightingPixelData d
         {
             // Calculating the light contribution at this position
             vec3 light =
-                calculateDirectLightingContribution(isec, seed + i * 13 + 37)
+                calculateDirectLightingContribution(isec, seed + i * 3 + 37)
 
                 // Multiplying by the surface color, because that's what it's bouncing off of
                 * isec.color;
@@ -714,16 +724,6 @@ vec3 calculateDirectLightingContribution(Intersection intersection, int seed)
                 intersection.closestTriHit,
                 intersection.closestSphereHit
             );
-            /*
-            fireRay(
-                intersection.pos,
-                dir,
-                false,
-                seed + i * 7,
-                false,
-                intersection.closestTriHit,
-                intersection.closestSphereHit
-            );*/
 
         // Check for shadow ray hits
         if (!closestIntersection.intersected
@@ -731,7 +731,7 @@ vec3 calculateDirectLightingContribution(Intersection intersection, int seed)
         {
             float intensity = min(
                 (1. / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z))
-                * dot(-dir, intersection.normal),
+                * dot(dir, intersection.normal),
                 1.);
 
 
@@ -749,7 +749,7 @@ vec3 calculateDirectLightingContribution(Intersection intersection, int seed)
     for (int i = 0; i < dirLightCount; i++)
     {
         vec3 dir = -dirLights[i].dir;
-        dir = normalize(dir);
+        //dir = normalize(dir);
 
         // Doing ray trace light (actually for shadows)
         Ray ray;
@@ -762,23 +762,13 @@ vec3 calculateDirectLightingContribution(Intersection intersection, int seed)
                 intersection.closestTriHit,
                 intersection.closestSphereHit
             );
-            /*
-            fireRay(
-                intersection.pos,
-                dir,
-                false,
-                seed + i * 7,
-                false,
-                intersection.closestTriHit,
-                intersection.closestSphereHit
-            );*/
 
         // Check for hit
         if (!closestIntersection.intersected)
         {
             // Works somehow??
             float intensity = min(
-                dot(-dir, intersection.normal),
+                dot(dir, intersection.normal),
                 1.);
 
             finalLight += intensity * dirLights[i].color * dirLights[i].intensity * closestIntersection.color;
@@ -837,12 +827,21 @@ bool intersectBoxRay(vec3 boxPos, vec3 boxSize, vec3 rayOrigin, vec3 rayDirectio
 
 Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 {
-    Intersection closestIntersection;
-    closestIntersection.depth = 1000.;
-    closestIntersection.intersected = false;
-    closestIntersection.closestTriHit = -1;
-    closestIntersection.closestSphereHit = -1;
-    closestIntersection.color = vec3(1.0);
+    /*
+    bool intersected;
+    float depth;
+    vec3 pos;
+    int closestTriHit;
+    int closestSphereHit;
+    vec3 normal;
+    vec3 color;
+    float reflectiveness;
+    float transparency;
+    float refractiveness;
+    int materialIndex;
+    vec3 finalDirection;
+    */
+    Intersection closestIntersection = Intersection(false, 1000., vec3(.0), -1, -1, vec3(0.), vec3(1.0), .0, .0, .0, 0, vec3(0.0));
 
     /*
     if (intersectBoxRay(bvhNodes[0].pos, bvhNodes[0].size, ray.pos, ray.dir))
@@ -856,7 +855,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         return closestIntersection;
     }*/
 
-    
+
     // Performing BVH traversal
     Stack stack;
     initializeStack(stack);
@@ -876,7 +875,6 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         {
             // Is leaf
 
-            
             //if (intersectBoxRay(node.pos, node.size, ray.pos, ray.dir))
             //{
             //    closestIntersection.intersected = true;
@@ -896,8 +894,8 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
                 // Check triangle intersection
 
                 // Skip already hit tri
-                //if (j == skipTri) continue;
-
+                if (j == skipTri) continue;
+                
                 Intersection isec = triangleIntersection(triangles[j], ray);
                 if (isec.intersected && isec.depth < closestIntersection.depth)
                 {
@@ -981,14 +979,14 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
             isec.refractiveness = materials[spheres[j].material].refractiveness;
             isec.materialIndex = spheres[j].material;
             isec.color = materials[spheres[j].material].color;
-            isec.normal = normalize(spheres[j].pos - isec.pos);
-        }
+            isec.normal = normalize(isec.pos - spheres[j].pos);
 
-        if (isec.intersected && isec.depth < closestIntersection.depth)
-        {
-            closestIntersection = isec;
-            closestIntersection.closestTriHit = -1;
-            closestIntersection.closestSphereHit = j;
+            if (isec.depth < closestIntersection.depth)
+            {
+                closestIntersection = isec;
+                closestIntersection.closestTriHit = -1;
+                closestIntersection.closestSphereHit = j;
+            }
         }
     }
     return closestIntersection;
@@ -1000,7 +998,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 
 Intersection triangleIntersection(Tri tri, Ray ray)
 {
-    Intersection i;
+    Intersection i = Intersection(false, 0, vec3(.0), -1, -1, vec3(0.), vec3(0.), .0, .0, .0, 0, vec3(0.0));
     i.intersected = false;
 
     const float epsilon = 0.0000001;

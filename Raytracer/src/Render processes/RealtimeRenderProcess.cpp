@@ -24,10 +24,7 @@ void RealtimeRenderProcess::update(float deltaTime, ComputeShader& computeShader
 	computeShader.setInt("currentBlockRenderPassIndex", 0);
 
 	// Running the compute shader once for each pixel
-	//glDispatchCompute(width / (16 * 4), height / (16 * 4), 1);
-	glDispatchCompute(std::ceil(width / (16.0f * currentPixelSize)), std::ceil(height / (16.0f * currentPixelSize)), 1);
-	//glDispatchCompute(std::ceil(float(size / 8.0f)), std::ceil(float(size / 8.0f)), 1);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	computeShader.run(std::ceil(width / (16.0f * currentPixelSize)), std::ceil(height / (16.0f * currentPixelSize)), 1);
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 

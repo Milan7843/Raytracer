@@ -1,62 +1,55 @@
 hdri_default.png
 # Materials
 White
+0.8 0.8 0.8
+0
+0
+0
+0
 1 1 1
 0
 0
-1
-0
-0 0 0
-0
 
-Reflective
-1 1 1
-1
-0
-1
-0
-1 1 0
-1
-
-Transparent
-1 1 1
-0.5
-1
-1
-0
-1 1 0
-1
-
-Rose matte
-0.8 0.2 0.3
-1e-08
+Red
+1 0.0745098 0.337255
 0
 0
 0
-0 0 0
-1
-
-Emissive
+0
 1 1 1
 0
 0
+
+reflective
+0.8 0.8 0.8
+1
 0
 0
-1 1 0.537255
-0.615686
+0
+1 1 1
+0
+0
 # Materials end
 
 # Spheres
 # Spheres end
 
 # Models
-uncapped_cylinder
+plane
 0 0 0
 0 0 0
 1 1 1
-src/models/uncapped_cylinder.obj
+src/models/plane.obj
 1
 1
+
+cube
+0 0 0
+0 0 0
+1 1 1
+src/models/cube.obj
+1
+2
 # Models end
 
 # Point lights
@@ -65,7 +58,7 @@ src/models/uncapped_cylinder.obj
 # Directional lights
 Directional light
 1 1 1
-0.8
+1
 -1 -1 0.2
 # Directional lights end
 
@@ -73,9 +66,9 @@ Directional light
 # Ambient lights end
 
 # Cameras
-4.10807 1.71055 -2.05799
--20.6
-1591.76
+4.09996 2.9911 -4.76764
+-29.9001
+1208.26
 1
 39.333
 1.844

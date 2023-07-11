@@ -285,7 +285,7 @@ BVHNode* BVHHandler::generateBVHRecursively(std::vector<Triangle>& triangles, st
 	//	<< parent->data.size.x << ", " << parent->data.size.y << ", " << parent->data.size.z << ")" << std::endl;
 
 	// Base case: stop on too few triangles
-	if (indices.size() <= 128 || depth >= 40)
+	if (indices.size() <= 16 || depth >= 40)
 	{
 		//std::cout << "triangle count: " << triangles.size() << std::endl;
 		parent->triangleIndices = indices;
