@@ -650,8 +650,10 @@ vec3 fireRayAndGetFinalColor(int blockLocalX, int blockLocalY, vec3 pos, vec3 di
         indirectLightingData[index] = data;
     }
 
-    //return finalColor;
-    return vec3(0.0);
+    indirectLightingData[0].closestTriHit = 0;
+
+    return finalColor;
+    //return vec3(0.0);
 }
 
 

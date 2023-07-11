@@ -59,16 +59,16 @@ src/models/crate.obj
 Directional light
 1 1 1
 1
-1 -1 0
+1 -1 -0.2
 # Directional lights end
 
 # Ambient lights
 # Ambient lights end
 
 # Cameras
-0.977093 0.903998 0.739928
--36.1001
-941.861
+0.583965 0.608671 0.656612
+-29.7001
+1314.86
 1
 39.333
 1.844

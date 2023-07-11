@@ -60,7 +60,7 @@ private:
 
 	static BVHNode* generateBVHRecursively(std::vector<Triangle>& triangles, std::vector<unsigned int> indices, unsigned int depth, unsigned int shaderArrayBeginIndex);
 
-	static void flattenBVHTreeIndices(BVHNode* rootNode, std::vector<FlattenedBVHNode>& treeStructureData, std::vector<unsigned int>& indices);
+	static void flattenBVHTreeIndices(BVHNode* rootNode, std::vector<FlattenedBVHNode>& treeStructureData, std::vector<int>& indices);
 
 	static BVHNode* generateBVHRecursively(std::vector<BVHNode*> nodes);
 

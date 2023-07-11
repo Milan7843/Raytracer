@@ -130,7 +130,7 @@ BVHNode* BVHHandler::generateFromMesh(Model& model, Mesh& mesh, BVHNode* oldBVHR
 void BVHHandler::writeIntoSSBOs(BVHNode* root, unsigned int dataSSBO, unsigned int triangleSSBO)
 {
 	std::vector<FlattenedBVHNode> structure;
-	std::vector<unsigned int> indices;
+	std::vector<int> indices;
 	
 
 	/*
@@ -250,7 +250,7 @@ void BVHHandler::writeIntoSSBOs(BVHNode* root, unsigned int dataSSBO, unsigned i
 	//std::cout << "Writing " << indices.size() << " indices into ssbo " << triangleSSBO << std::endl;
 
 	// Loading zero-data into the triangle buffer
-	glBufferData(GL_SHADER_STORAGE_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, indices.size() * sizeof(int), &indices[0], GL_STATIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, triangleSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -375,7 +375,7 @@ void BVHHandler::flattenBVHTreeData(BVHNode* rootNode, std::vector<BVHData>& dat
 	flattenBVHTreeData(rootNode->rightChild, data, onlyLeaves);
 }
 
-void BVHHandler::flattenBVHTreeIndices(BVHNode* rootNode, std::vector<FlattenedBVHNode>& treeStructureData, std::vector<unsigned int>& indices)
+void BVHHandler::flattenBVHTreeIndices(BVHNode* rootNode, std::vector<FlattenedBVHNode>& treeStructureData, std::vector<int>& indices)
 {
 	// There must be a root
 	if (rootNode == nullptr) return;
