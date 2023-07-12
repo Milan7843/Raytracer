@@ -27,6 +27,13 @@ enum ObjectType
 	MATERIAL
 };
 
+struct ShaderMesh
+{
+	glm::vec3 position;
+	int material;
+	glm::mat4 transformation;
+};
+
 class Scene
 {
 public:
@@ -144,6 +151,8 @@ public:
 
 private:
 
+	void generateMeshBuffer(std::vector<ShaderMesh>& shaderMeshes);
+
 	BVH bvh;
 
 	std::string name{};
@@ -168,9 +177,9 @@ private:
 	unsigned int MAX_POINT_LIGHT_COUNT = 10;
 	unsigned int MAX_DIR_LIGHT_COUNT = 10;
 	unsigned int MAX_AMBIENT_LIGHT_COUNT = 10;
-	unsigned int MAX_MATERIAL_COUNT = 10;
+	unsigned int MAX_MATERIAL_COUNT = 40;
 	unsigned int MAX_SPHERE_COUNT = 10;
-	unsigned int MAX_MESH_COUNT = 20;
+	unsigned int MAX_MESH_COUNT = 100;
 
 	std::vector<Model> models;
 	std::vector<Sphere> spheres;
@@ -188,6 +197,8 @@ private:
 
 	// The buffer for storing mesh triangles
 	unsigned int triangleBufferSSBO = 0;
+
+	unsigned int meshBufferSSBO{ 0 };
 
 	// Keeping track of the materials
 	std::vector<Material> materials;

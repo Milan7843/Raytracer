@@ -78,7 +78,7 @@ void Material::drawInterface(Scene& scene)
 	anyPropertiesChanged |= ImGui::InputText("Name", getNamePointer());
 	anyPropertiesChanged |= ImGui::ColorEdit3("Color", (float*)getColorPointer());
 	anyPropertiesChanged |= ImGui::ColorEdit3("Emission", (float*)getEmissionPointer());
-	anyPropertiesChanged |= ImGui::DragFloat("Emission strength", &emissionStrength, 0.01f, 0.0f, 1.0f, "%.2f");
+	anyPropertiesChanged |= ImGui::DragFloat("Emission strength", &emissionStrength, 0.01f, 0.0f, 10.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat("Reflectiveness", getReflectivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat("Transparency", getTransparencyPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat("Refractiveness", getRefractivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");

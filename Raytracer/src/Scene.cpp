@@ -523,6 +523,8 @@ bool Scene::checkObjectUpdates(AbstractShader* shader)
 
 void Scene::writeObjectsToShader(AbstractShader* shader)
 {
+	std::vector<ShaderMesh> shaderMeshes{};
+
 	// Activate the shader program so that uniforms can be set
 	shader->use();
 
@@ -533,6 +535,20 @@ void Scene::writeObjectsToShader(AbstractShader* shader)
 	for (Model& model : models)
 	{
 		model.writeToShader(shader, triangleBufferSSBO);
+
+		glm::mat4 transformation = model.getTransformationMatrix();
+
+		// Writing all meshes to the vector
+		for (Mesh& mesh : model.getMeshes())
+		{
+			ShaderMesh shaderMesh{
+				mesh.position,
+				mesh.getMaterialIndex(),
+				transformation
+			};
+
+			shaderMeshes.push_back(shaderMesh);
+		}
 	}
 
 	// Updating each sphere as needed
@@ -545,6 +561,8 @@ void Scene::writeObjectsToShader(AbstractShader* shader)
 
 	// Must have written data to the new triangle buffer
 	changedTriangleBuffer = false;
+
+	generateMeshBuffer(shaderMeshes);
 }
 
 void Scene::generateTriangleBuffer()
@@ -569,6 +587,23 @@ void Scene::bindTriangleBuffer()
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
+}
+
+void Scene::generateMeshBuffer(std::vector<ShaderMesh>& shaderMeshes)
+{
+	// Generate the buffer if it didn't exist yet
+	if (meshBufferSSBO == 0)
+	{
+		glGenBuffers(1, &meshBufferSSBO);
+	}
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, meshBufferSSBO);
+
+	// Loading zero-data into the new buffer
+	glBufferData(GL_SHADER_STORAGE_BUFFER, shaderMeshes.size() * sizeof(ShaderMesh), &shaderMeshes[0], GL_STATIC_DRAW);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, meshBufferSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	Logger::log("Making " + std::to_string(shaderMeshes.size() * sizeof(ShaderMesh)) + " bytes in SSBO " + std::to_string(meshBufferSSBO));
 }
 
 std::string* Scene::getNamePointer()

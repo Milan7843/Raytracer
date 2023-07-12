@@ -8,7 +8,7 @@ in vec3 Normal;
 #define NUM_POINT_LIGHTS 10
 #define NUM_DIR_LIGHTS 10
 #define NUM_AMBIENT_LIGHTS 10
-#define NUM_MATERIALS 10
+#define NUM_MATERIALS 40
 
 uniform vec3 cameraPos;
 
@@ -162,7 +162,7 @@ vec3 calculateDirLight(DirLight light, vec3 normal, vec3 viewDir)
 
     vec3 diffuse = light.color * diff * (1.0 - materials[materialIndex].reflectiveness);
     float specReflectivenessMultiplier = NON_REFLECTIVE_SPECULARITY + materials[materialIndex].reflectiveness * NON_REFLECTIVE_SPECULARITY;
-    vec3 specular = light.color * spec * specReflectivenessMultiplier;
+    vec3 specular = light.color * spec* specReflectivenessMultiplier;
 
     return (diffuse + specular) * light.intensity;
 }

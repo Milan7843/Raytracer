@@ -27,8 +27,8 @@ uniform int pixelRenderSize;
 #define NUM_POINT_LIGHTS 10
 #define NUM_DIR_LIGHTS 10
 #define NUM_AMBIENT_LIGHTS 10
-#define NUM_MESHES 20
-#define NUM_MATERIALS 10
+#define NUM_MESHES 100
+#define NUM_MATERIALS 40
 
 //#define NUM_TRIANGLES 1
 //#define NUM_SPHERES 1
@@ -183,7 +183,10 @@ struct Mesh
     int material;
     mat4 transformation;
 };
-uniform Mesh meshes[NUM_MESHES];
+layout(std430, binding = 8) buffer Meshes
+{
+    Mesh meshes[];
+};
 
 
 

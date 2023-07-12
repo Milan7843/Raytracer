@@ -1,4 +1,4 @@
-# Blender MTL File: 'living room.blend'
+# Blender MTL File: 'living room (2).blend'
 # Material Count: 27
 
 newmtl Material
@@ -54,7 +54,7 @@ illum 3
 newmtl Material.007
 Ns 0.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.350553 0.118520 0.008300
+Kd 0.361307 0.122139 0.008568
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
@@ -64,7 +64,7 @@ illum 2
 newmtl Material.008
 Ns 0.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.162640 0.041616 0.013915
+Kd 0.162029 0.040915 0.013702
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
