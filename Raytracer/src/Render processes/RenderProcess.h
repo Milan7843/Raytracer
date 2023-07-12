@@ -28,6 +28,8 @@ protected:
 		, height(height)
 	{}
 
+	virtual void generateStackBuffer() = 0;
+
 	// The resolution used to render
 	unsigned int width, height;
 
@@ -39,5 +41,8 @@ protected:
 
 	// Whether the process is finished
 	bool finished{ false };
+
+	int stackSize{ 32 };
+	unsigned int stackBuffer{ 0 };
 };
 

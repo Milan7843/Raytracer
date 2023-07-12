@@ -124,11 +124,6 @@ src/models/living room.obj
 # Models end
 
 # Point lights
-White point light
-1 1 1
-0
-0 2.05 0.52
-0
 # Point lights end
 
 # Directional lights
@@ -143,9 +138,9 @@ Directional light
 # Ambient lights end
 
 # Cameras
-2.44237 3.56174 2.42806
--28.1001
-2024.56
+2.59325 3.15151 2.62026
+-23.0001
+2026.66
 1
 39.333
 1.844

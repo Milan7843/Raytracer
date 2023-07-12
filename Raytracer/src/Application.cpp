@@ -132,7 +132,7 @@ int Application::Start()
 
     // Raytraced renderer
     Logger::log("Loading raytracing shader");
-    MultiComputeShader raytracingComputeShader(2, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
+    MultiComputeShader raytracingComputeShader(1, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
     //ComputeShader raytracingComputeShader("src/shader_src/raytraceComputeShaderSampledUpdated.shader");
     Renderer raytracingRenderer(raytracingComputeShader, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 

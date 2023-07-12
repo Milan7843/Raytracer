@@ -576,17 +576,20 @@ vec3 fireRayAndGetFinalColor(int blockLocalX, int blockLocalY, vec3 pos, vec3 di
         finalColor *= closestIntersection.color;
 
         // Writing the data saying that no indirect lighting calculation should be performed at all
-        int index = blockLocalX + blockLocalY * blockSize + (blockSize * blockSize) * sampleIndex;
+        if (renderUsingBlocks)
+        {
+            int index = blockLocalX + blockLocalY * blockSize + (blockSize * blockSize) * sampleIndex;
 
-        IndirectLightingPixelData data = IndirectLightingPixelData(
-            vec3(0.0),
-            vec3(0.0),
-            -2,
-            vec3(0.0),
-            -2
-        );
+            IndirectLightingPixelData data = IndirectLightingPixelData(
+                vec3(0.0),
+                vec3(0.0),
+                -2,
+                vec3(0.0),
+                -2
+            );
 
-        indirectLightingData[index] = data;
+            indirectLightingData[index] = data;
+        }
     }
     else
     {
@@ -599,17 +602,20 @@ vec3 fireRayAndGetFinalColor(int blockLocalX, int blockLocalY, vec3 pos, vec3 di
         //    closestIntersection.normal;
 
         // Writing the data required for calculating the indirect lighting at this position later
-        int index = blockLocalX + blockLocalY * blockSize + (blockSize * blockSize) * sampleIndex;
+        if (renderUsingBlocks)
+        {
+            int index = blockLocalX + blockLocalY * blockSize + (blockSize * blockSize) * sampleIndex;
 
-        IndirectLightingPixelData data = IndirectLightingPixelData(
-            closestIntersection.pos,
-            closestIntersection.color,
-            closestIntersection.closestTriHit,
-            closestIntersection.normal,
-            closestIntersection.closestSphereHit
-        );
+            IndirectLightingPixelData data = IndirectLightingPixelData(
+                closestIntersection.pos,
+                closestIntersection.color,
+                closestIntersection.closestTriHit,
+                closestIntersection.normal,
+                closestIntersection.closestSphereHit
+            );
 
-        indirectLightingData[index] = data;
+            indirectLightingData[index] = data;
+        }
     }
 
     indirectLightingData[0].closestTriHit = 0;
@@ -988,7 +994,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         return closestIntersection;
     }*/
     
-
+    /**/
     // Performing BVH traversal
     int top = -1;
     initializeStack(top);

@@ -17,6 +17,7 @@ public:
 	float getRenderProgressPrecise() override;
 
 private:
+	void generateStackBuffer() override;
 	unsigned int currentPixelSize{ 8 };
 };
 

@@ -30,7 +30,7 @@ public:
 private:
 
 	void generateIndirectLightingDataBuffer();
-	void generateStackBuffer();
+	void generateStackBuffer() override;
 
 	void blockRenderStep(ComputeShader& computeShader);
 
@@ -47,8 +47,5 @@ private:
 	int currentBlockRenderPassIndex{ 0 };
 
 	unsigned int indirectLightingDataBuffer{ 0 };
-	unsigned int stackBuffer{ 0 };
-
-	int stackSize{ 32 };
 };
 
