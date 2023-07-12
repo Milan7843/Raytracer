@@ -710,12 +710,12 @@ void ImGuiUserInterface::drawLights(Scene& scene)
 		ImGui::Separator();
 		if (ImGui::Selectable("Point light"))
 		{
-			PointLight light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+			PointLight light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f);
 			scene.addLight(light);
 		}
 		if (ImGui::Selectable("Directional light"))
 		{
-			DirectionalLight light(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+			DirectionalLight light(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f);
 			scene.addLight(light);
 		}
 		if (ImGui::Selectable("Ambient light"))

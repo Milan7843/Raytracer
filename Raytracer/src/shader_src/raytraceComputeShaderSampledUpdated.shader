@@ -150,6 +150,7 @@ struct PointLight
     vec3 pos;
     vec3 color;
     float intensity;
+    float shadowSoftness;
 };
 uniform PointLight pointLights[NUM_POINT_LIGHTS];
 uniform int pointLightCount;
@@ -159,6 +160,7 @@ struct DirLight
     vec3 dir;
     vec3 color;
     float intensity;
+    float shadowSoftness;
 };
 uniform DirLight dirLights[NUM_DIR_LIGHTS];
 uniform int dirLightCount;
@@ -348,21 +350,22 @@ float atan2(float x, float z)
 
 
 
+
 vec3 getRandomDirection(int seed)
 {
-    vec3 dir = vec3(rand(seed), rand(seed + 1), rand(seed + 2));
+    vec3 dir = vec3(rand(seed) * 2.0 - 1.0, rand(seed + 7) * 2.0 - 1.0, rand(seed + 13) * 2.0 - 1.0);
     return normalize(dir);
 }
 
 vec3 getRandomDirectionFollowingNormal(vec3 normal, int seed)
 {
-    vec3 dir = vec3(rand(seed), rand(seed*2 + 1), rand(seed*3 + 2));
-    dir = normalize(dir);
-    return -dir * sign(dot(normal, dir));
+    vec3 dir = getRandomDirection(seed);
+    if (dot(normal, dir) >= 0)
+    {
+        return dir;
+    }
+    return -dir;
 }
-
-
-
 
 
 
@@ -427,7 +430,7 @@ void main()
 
     vec3 finalColor = vec3(0.);
     finalColor += fireRayAtPixelPositionIndex(blockLocalX, blockLocalY, vec2(raydir_cx + 0.5, raydir_cy + 0.5),
-        pixelIndex * 1319 * pixelIndex + pixelIndex + currentBlockRenderPassIndex * 7);
+        pixelIndex * 7 + currentBlockRenderPassIndex * 7);
 
     // TODO make buffer empty on begin of render!
     if (currentBlockRenderPassIndex == 0)
@@ -512,7 +515,7 @@ vec3 fireRayAtPixelPositionIndex(int blockLocalX, int blockLocalY, vec2 pixelPos
         //Ray ray = fireRay(cameraPosition, dir, true, i + seed * 53);
         //Ray ray = fireRay(cameraPosition, dir, true, i * 67 * i + seed * 1471 * seed);
         //Ray ray = fireRay(cameraPosition, dir, true, i * 67 * i + seed * 17 * seed);
-        finalColor += fireRayAndGetFinalColor(blockLocalX, blockLocalY, cameraPosition, dir, i, i * 67 * i + seed * 17 * seed);
+        finalColor += fireRayAndGetFinalColor(blockLocalX, blockLocalY, cameraPosition, dir, i, seed + i * 867);
     }
     finalColor = finalColor / float(sampleCount);
     return finalColor;
@@ -799,7 +802,7 @@ vec3 calculateLights(Intersection intersection, int seed)
 {
     // Calculating the color from the lighting itself
     vec3 finalLightColor =
-        calculateDirectLightingContribution(intersection, seed + 304);
+        calculateDirectLightingContribution(intersection, seed);
 
     // Factoring in emission
     finalLightColor +=
@@ -821,85 +824,97 @@ vec3 calculateDirectLightingContribution(Intersection intersection, int seed)
 {
     vec3 finalLight = vec3(0.);
 
-    /* POINT LIGHTS */
-    for (int i = 0; i < pointLightCount; i++)
+    int samplesPerLight = 10;
+
+    for (int sampleIndex = 0; sampleIndex < samplesPerLight; sampleIndex++)
     {
-        vec3 dist = pointLights[i].pos - intersection.pos;
-        vec3 dir = normalize(dist);
-
-        // Doing ray trace light
-        Ray ray;
-        ray.pos = intersection.pos;
-        ray.dir = dir;
-
-        Intersection closestIntersection = 
-            fireRay(
-                intersection.pos,
-                dir,
-                false,
-                seed + i * 7,
-                false,
-                intersection.closestTriHit,
-                intersection.closestSphereHit
-            );
-
-        // Check for shadow ray hits
-        if (!closestIntersection.intersected
-            || distance(closestIntersection.pos, intersection.pos) > distance(pointLights[i].pos, intersection.pos))
+        /* POINT LIGHTS */
+        for (int i = 0; i < pointLightCount; i++)
         {
-            float intensity = min(
-                (1. / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z))
-                * dot(dir, intersection.normal),
-                1.);
+            vec3 posUsing = pointLights[i].pos;
+
+            posUsing += pointLights[i].shadowSoftness * getRandomDirection(seed + i * 3 + sampleIndex * 17) * 0.1;
+
+            vec3 dist = posUsing - intersection.pos;
+            vec3 dir = normalize(dist);
+
+            // Doing ray trace light
+            Ray ray;
+            ray.pos = intersection.pos;
+            ray.dir = dir;
+
+            Intersection closestIntersection =
+                fireRay(
+                    intersection.pos,
+                    dir,
+                    false,
+                    seed + i * 7,
+                    false,
+                    intersection.closestTriHit,
+                    intersection.closestSphereHit
+                );
+
+            // Check for shadow ray hits
+            if (!closestIntersection.intersected
+                || distance(closestIntersection.pos, intersection.pos) > distance(pointLights[i].pos, intersection.pos))
+            {
+                float intensity = min(
+                    (1. / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z))
+                    * dot(dir, intersection.normal),
+                    1.);
 
 
-            float falloff = 1.0 / (dist.x * dist.x + dist.y * dist.y + dist.z * dist.z);
+                float falloff = 1.0 / (dist.x * dist.x + dist.y * dist.y + dist.z * dist.z);
 
-            finalLight += intensity * pointLights[i].color * pointLights[i].intensity * falloff * closestIntersection.color;
+                finalLight += intensity * pointLights[i].color * pointLights[i].intensity * falloff * closestIntersection.color;
+            }
+            else
+            {
+                // In shadow for this light
+            }
         }
-        else
+
+        /* DIRECTIONAL LIGHTS */
+        for (int i = 0; i < dirLightCount; i++)
         {
-            // In shadow for this light
+            vec3 dir = -dirLights[i].dir;
+            dir = normalize(dir);
+
+            dir += dirLights[i].shadowSoftness * getRandomDirection(seed + i * 3 + 179 + sampleIndex * 17) * 0.1;
+            dir = normalize(dir);
+
+            // Doing ray trace light (actually for shadows)
+            Ray ray;
+            ray.pos = intersection.pos;
+            ray.dir = dir;
+
+            Intersection closestIntersection =
+                fireRay(
+                    intersection.pos,
+                    dir,
+                    false,
+                    seed + i * 7,
+                    false,
+                    intersection.closestTriHit,
+                    intersection.closestSphereHit
+                );
+
+            // Check for hit
+            if (!closestIntersection.intersected)
+            {
+                float intensity = min(
+                    dot(dir, intersection.normal),
+                    1.);
+
+                finalLight += (intensity * dirLights[i].color * dirLights[i].intensity * closestIntersection.color);
+            }
+            else
+            {
+                // In shadow for this light
+            }
         }
     }
-
-    /* DIRECTIONAL LIGHTS */
-    for (int i = 0; i < dirLightCount; i++)
-    {
-        vec3 dir = -dirLights[i].dir;
-        dir = normalize(dir);
-
-        // Doing ray trace light (actually for shadows)
-        Ray ray;
-        ray.pos = intersection.pos;
-        ray.dir = dir;
-
-        Intersection closestIntersection =
-            fireRay(
-                intersection.pos,
-                dir,
-                false,
-                seed + i * 7,
-                false,
-                intersection.closestTriHit,
-                intersection.closestSphereHit
-            );
-
-        // Check for hit
-        if (!closestIntersection.intersected)
-        {
-            // Works somehow??
-            float intensity = min(
-                dot(dir, intersection.normal),
-                1.);
-
-            finalLight += intensity * dirLights[i].color * dirLights[i].intensity * closestIntersection.color;
-        }
-        else
-        {
-            // In shadow for this light
-        }
-    }
+    finalLight = finalLight / float(samplesPerLight);
 
     /* AMBIENT LIGHTS */
     for (int i = 0; i < ambientLightCount; i++)

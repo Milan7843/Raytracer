@@ -128,6 +128,7 @@ White point light
 1 1 1
 0
 0 2.05 0.52
+0
 # Point lights end
 
 # Directional lights
@@ -135,6 +136,7 @@ Directional light
 1 1 1
 1
 -1 -1 0.2
+0
 # Directional lights end
 
 # Ambient lights

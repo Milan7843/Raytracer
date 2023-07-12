@@ -2,13 +2,13 @@
 
 AmbientLight::AmbientLight(std::string& name, glm::vec3 color, float intensity)
 	// Initialising the base class
-	: Light(name, glm::vec3(0.0f), color, intensity)
+	: Light(name, glm::vec3(0.0f), color, intensity, 0.0f)
 {
 }
 
 AmbientLight::AmbientLight(glm::vec3 color, float intensity)
 	// Initialising the base class
-	: Light(std::string("Ambient light"), glm::vec3(0.0f), color, intensity)
+	: Light(std::string("Ambient light"), glm::vec3(0.0f), color, intensity, 0.0f)
 {
 }
 

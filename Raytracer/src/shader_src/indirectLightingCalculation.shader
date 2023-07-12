@@ -151,6 +151,7 @@ struct PointLight
     vec3 pos;
     vec3 color;
     float intensity;
+    float shadowSoftness;
 };
 uniform PointLight pointLights[NUM_POINT_LIGHTS];
 uniform int pointLightCount;
@@ -160,6 +161,7 @@ struct DirLight
     vec3 dir;
     vec3 color;
     float intensity;
+    float shadowSoftness;
 };
 uniform DirLight dirLights[NUM_DIR_LIGHTS];
 uniform int dirLightCount;
@@ -710,77 +712,90 @@ vec3 calculateDirectLightingContribution(Intersection intersection, int seed)
 {
     vec3 finalLight = vec3(0.);
 
-    /* POINT LIGHTS */
-    for (int i = 0; i < pointLightCount; i++)
+    int samplesPerLight = 10;
+
+    for (int sampleIndex = 0; sampleIndex < samplesPerLight; sampleIndex++)
     {
-        vec3 dist = pointLights[i].pos - intersection.pos;
-        vec3 dir = normalize(dist);
 
-        // Doing ray trace light
-        Ray ray;
-        ray.pos = intersection.pos;
-        ray.dir = dir;
-
-        Intersection closestIntersection =
-            getAllIntersections(
-                ray,
-                intersection.closestTriHit,
-                intersection.closestSphereHit
-            );
-
-        // Check for shadow ray hits
-        if (!closestIntersection.intersected
-            || distance(closestIntersection.pos, intersection.pos) > distance(pointLights[i].pos, intersection.pos))
+        /* POINT LIGHTS */
+        for (int i = 0; i < pointLightCount; i++)
         {
-            float intensity = min(
-                (1. / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z))
-                * dot(dir, intersection.normal),
-                1.);
+            vec3 posUsing = pointLights[i].pos;
+
+            posUsing += pointLights[i].shadowSoftness * getRandomDirection(seed + i * 3 + sampleIndex * 17) * 0.1;
+
+            vec3 dist = posUsing - intersection.pos;
+            vec3 dir = normalize(dist);
+
+            // Doing ray trace light
+            Ray ray;
+            ray.pos = intersection.pos;
+            ray.dir = dir;
+
+            Intersection closestIntersection =
+                getAllIntersections(
+                    ray,
+                    intersection.closestTriHit,
+                    intersection.closestSphereHit
+                );
+
+            // Check for shadow ray hits
+            if (!closestIntersection.intersected
+                || distance(closestIntersection.pos, intersection.pos) > distance(pointLights[i].pos, intersection.pos))
+            {
+                float intensity = min(
+                    (1. / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z))
+                    * dot(dir, intersection.normal),
+                    1.);
 
 
-            float falloff = 1.0 / (dist.x * dist.x + dist.y * dist.y + dist.z * dist.z);
+                float falloff = 1.0 / (dist.x * dist.x + dist.y * dist.y + dist.z * dist.z);
 
-            finalLight += intensity * pointLights[i].color * pointLights[i].intensity * falloff * closestIntersection.color;
+                finalLight += intensity * pointLights[i].color * pointLights[i].intensity * falloff * closestIntersection.color;
+            }
+            else
+            {
+                // In shadow for this light
+            }
         }
-        else
+
+        /* DIRECTIONAL LIGHTS */
+        for (int i = 0; i < dirLightCount; i++)
         {
-            // In shadow for this light
+            vec3 dir = -dirLights[i].dir;
+            dir = normalize(dir);
+
+            dir += dirLights[i].shadowSoftness * getRandomDirection(seed + i * 3 + 179 + sampleIndex * 17) * 0.1;
+            dir = normalize(dir);
+
+            // Doing ray trace light (actually for shadows)
+            Ray ray;
+            ray.pos = intersection.pos;
+            ray.dir = dir;
+
+            Intersection closestIntersection =
+                getAllIntersections(
+                    ray,
+                    intersection.closestTriHit,
+                    intersection.closestSphereHit
+                );
+
+            // Check for hit
+            if (!closestIntersection.intersected)
+            {
+                float intensity = min(
+                    dot(dir, intersection.normal),
+                    1.);
+
+                finalLight += (intensity * dirLights[i].color * dirLights[i].intensity * closestIntersection.color);
+            }
+            else
+            {
+                // In shadow for this light
+            }
         }
     }
-
-    /* DIRECTIONAL LIGHTS */
-    for (int i = 0; i < dirLightCount; i++)
-    {
-        vec3 dir = -dirLights[i].dir;
-        //dir = normalize(dir);
-
-        // Doing ray trace light (actually for shadows)
-        Ray ray;
-        ray.pos = intersection.pos;
-        ray.dir = dir;
-
-        Intersection closestIntersection =
-            getAllIntersections(
-                ray,
-                intersection.closestTriHit,
-                intersection.closestSphereHit
-            );
-
-        // Check for hit
-        if (!closestIntersection.intersected)
-        {
-            // Works somehow??
-            float intensity = min(
-                dot(dir, intersection.normal),
-                1.);
-
-            finalLight += intensity * dirLights[i].color * dirLights[i].intensity * closestIntersection.color;
-        }
-        else
-        {
-            // In shadow for this light
-        }
-    }
+    finalLight = finalLight / float(samplesPerLight);
 
     /* AMBIENT LIGHTS */
     for (int i = 0; i < ambientLightCount; i++)

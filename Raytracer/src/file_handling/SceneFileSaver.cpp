@@ -288,14 +288,16 @@ void readPointLights(std::ifstream& filestream, Scene& scene)
 		glm::vec3 color;
 		float intensity;
 		glm::vec3 position;
+		float shadowSoftness;
 
 		// Then getting said data
 		color = readVec3(filestream);
 		filestream >> intensity;
 		position = readVec3(filestream);
+		filestream >> shadowSoftness;
 
 		// Creating the light with the read properties
-		PointLight light(name, position, color, intensity);
+		PointLight light(name, position, color, intensity, shadowSoftness);
 		scene.addLight(light);
 
 		// Skipping a line
@@ -338,14 +340,16 @@ void readDirectionalLights(std::ifstream& filestream, Scene& scene)
 		glm::vec3 color;
 		float intensity;
 		glm::vec3 direction;
+		float shadowSoftness;
 
 		// Then getting said data
 		color = readVec3(filestream);
 		filestream >> intensity;
 		direction = readVec3(filestream);
+		filestream >> shadowSoftness;
 
 		// Creating the light with the read properties
-		DirectionalLight light(name, direction, color, intensity);
+		DirectionalLight light(name, direction, color, intensity, shadowSoftness);
 		scene.addLight(light);
 
 		// Skipping a line

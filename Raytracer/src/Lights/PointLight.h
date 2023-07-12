@@ -9,8 +9,8 @@
 class PointLight : public Light
 {
 public:
-	PointLight(std::string& name, glm::vec3 position, glm::vec3 color, float intensity);
-	PointLight(glm::vec3 position, glm::vec3 color, float intensity);
+	PointLight(std::string& name, glm::vec3 position, glm::vec3 color, float intensity, float shadowSoftness);
+	PointLight(glm::vec3 position, glm::vec3 color, float intensity, float shadowSoftness);
 	~PointLight();
 
 	virtual void drawInterface(Scene& scene);
