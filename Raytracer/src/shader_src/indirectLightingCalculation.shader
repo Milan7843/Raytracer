@@ -223,68 +223,23 @@ struct Intersection
 
 
 
-
-
-#define STACK_SIZE 50
-
-struct Stack
+uniform int stackSize;
+layout(std430, binding = 7) buffer StackBuffer
 {
-    int data[STACK_SIZE];
-    int top;
+    int stack[];
 };
 
-/*
-void initializeStack(out Stack stack)
-{
-    stack.top = -1;
-}
-
-bool isStackEmpty(Stack stack)
-{
-    return stack.top == -1;
-}
-
-bool isStackFull(Stack stack)
-{
-    return stack.top == STACK_SIZE - 1;
-}
-
-void pushStack(inout Stack stack, int value)
-{
-    if (isStackFull(stack))
-    {
-        // Stack overflow, handle error condition
-        return;
-    }
-
-    stack.top++;
-    stack.data[stack.top] = value;
-}
-
-int popStack(inout Stack stack)
-{
-    if (isStackEmpty(stack))
-    {
-        // Stack underflow, handle error condition
-        return 0;
-    }
-
-    int value = stack.data[stack.top];
-    stack.top--;
-    return value;
-}*/
-
-#define initializeStack(stack) (stack.top = -1)
-#define isStackEmpty(stack) (stack.top == -1)
-#define isStackFull(stack) (stack.top == STACK_SIZE - 1)
-#define pushStack(stack, value) {\
-    if (isStackFull(stack)) {\
+#define initializeStack(top) (top = -1)
+#define isStackEmpty(top) (top == -1)
+#define isStackFull(top) (top == stackSize - 1)
+#define pushStack(value, top) {\
+    if (isStackFull(top)) {\
         /* Stack overflow, handle error condition */\
     } else {\
-        stack.data[++stack.top] = value;\
+        stack[(int(gl_GlobalInvocationID.x) + int(gl_GlobalInvocationID.y) * blockSize)*32 + (++top)] = value;\
     }\
 }
-#define popStack(stack) stack.data[stack.top--]
+#define popStack(top) stack[(int(gl_GlobalInvocationID.x) + int(gl_GlobalInvocationID.y) * blockSize)*32 + (top--)]
 
 
 
@@ -302,6 +257,8 @@ vec3 calculateIndirectLightingContributionAtPosition(IndirectLightingPixelData d
 Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed, bool ignoreRefraction, int skipTri, int skipSphere);
 
 vec3 calculateDirectLightingContribution(Intersection intersection, int seed);
+
+vec3 calculateHDRILightingContribution(Intersection intersection, int iterations, int seed);
 
 // Get a random 3D unit vector
 vec3 getRandomDirection(int seed);
@@ -594,9 +551,16 @@ vec3 calculateIndirectLightingContributionAtPosition(IndirectLightingPixelData d
         if (isec.intersected)
         {
             // Calculating the light contribution at this position
-            vec3 light =
+            vec3 light = 
                 calculateDirectLightingContribution(isec, seed + i * 3 + 59)
 
+                // Multiplying by the surface color, because that's what it's bouncing off of
+                * isec.color;
+
+            // Also calculating the HDRI light contribution at this position
+            light +=
+                calculateHDRILightingContribution(isec, indirectLightingQuality * 2, seed + i * 3 + 791)
+            
                 // Multiplying by the surface color, because that's what it's bouncing off of
                 * isec.color;
 
@@ -711,6 +675,36 @@ Intersection fireRay(vec3 pos, vec3 direction, bool reflect, int seed, bool igno
 */
 
 
+vec3 calculateHDRILightingContribution(Intersection intersection, int iterations, int seed)
+{
+    vec3 finalColor = vec3(0.0);
+
+    for (int i = 0; i < iterations; i++)
+    {
+        vec3 dir = getRandomDirectionFollowingNormal(intersection.normal, seed + i * 13 + 3);
+
+        Ray ray;
+        ray.pos = intersection.pos + dir * 0.0001;
+        ray.dir = dir;
+
+        Intersection isec = getAllIntersections(ray, intersection.closestTriHit, intersection.closestSphereHit);
+
+        // In view of the HDRI for this ray
+        if (!isec.intersected)
+        {
+            // Calculating HDRI position
+            float yaw = atan2(ray.dir.z, ray.dir.x);
+            float pitch = (ray.dir.y / 2 + 0.5);
+
+            vec3 skyColor = texture(hdri, vec2(yaw / (2 * PI), -pitch)).rgb;
+
+            finalColor += skyColor * hdriLightStrength;
+        }
+    }
+
+    //return vec3(1.0);
+    return finalColor / float(iterations);
+}
 
 vec3 calculateDirectLightingContribution(Intersection intersection, int seed)
 {
@@ -851,7 +845,6 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
     vec3 finalDirection;
     */
     Intersection closestIntersection = Intersection(false, 1000., vec3(.0), -1, -1, vec3(0.), vec3(1.0), .0, .0, .0, 0, vec3(0.0));
-
     /*
     if (intersectBoxRay(bvhNodes[0].pos, bvhNodes[0].size, ray.pos, ray.dir))
     //if (intersectBoxRay(vec3(0.0), vec3(1.0), ray.pos, ray.dir))
@@ -866,14 +859,14 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 
 
     // Performing BVH traversal
-    Stack stack;
-    initializeStack(stack);
+    int top = -1;
+    initializeStack(top);
 
-    pushStack(stack, 0);
+    pushStack(0, top);
 
-    while (!isStackEmpty(stack))
+    while (!isStackEmpty(top))
     {
-        int current = popStack(stack);
+        int current = popStack(top);
 
         BVHNode node = bvhNodes[current];
 
@@ -893,11 +886,11 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 
             if (intersectBoxRay(leftChildNode.pos, leftChildNode.size, ray.pos, ray.dir))
             {
-                pushStack(stack, node.leftChild);
+                pushStack(node.leftChild, top);
             }
             if (intersectBoxRay(rightChildNode.pos, rightChildNode.size, ray.pos, ray.dir))
             {
-                pushStack(stack, node.rightChild);
+                pushStack(node.rightChild, top);
             }
         }
         else

@@ -224,65 +224,23 @@ struct Intersection
 
 
 
-#define STACK_SIZE 50
-
-struct Stack
+uniform int stackSize;
+layout(std430, binding = 7) buffer StackBuffer
 {
-    int data[STACK_SIZE];
-    int top;
+    int stack[];
 };
-/*
-void initializeStack(out Stack stack)
-{
-    stack.top = -1;
-}
 
-bool isStackEmpty(Stack stack)
-{
-    return stack.top == -1;
-}
-
-bool isStackFull(Stack stack)
-{
-    return stack.top == STACK_SIZE - 1;
-}
-
-void pushStack(inout Stack stack, int value)
-{
-    if (isStackFull(stack))
-    {
-        // Stack overflow, handle error condition
-        return;
-    }
-
-    stack.top++;
-    stack.data[stack.top] = value;
-}
-
-int popStack(inout Stack stack)
-{
-    if (isStackEmpty(stack))
-    {
-        // Stack underflow, handle error condition
-        return 0;
-    }
-
-    int value = stack.data[stack.top];
-    stack.top--;
-    return value;
-}*/
-
-#define initializeStack(stack) (stack.top = -1)
-#define isStackEmpty(stack) (stack.top == -1)
-#define isStackFull(stack) (stack.top == STACK_SIZE - 1)
-#define pushStack(stack, value) {\
-    if (isStackFull(stack)) {\
+#define initializeStack(top) (top = -1)
+#define isStackEmpty(top) (top == -1)
+#define isStackFull(top) (top == stackSize - 1)
+#define pushStack(value, top) {\
+    if (isStackFull(top)) {\
         /* Stack overflow, handle error condition */\
     } else {\
-        stack.data[++stack.top] = value;\
+        stack[(int(gl_GlobalInvocationID.x) + int(gl_GlobalInvocationID.y) * blockSize)*32 + (++top)] = value;\
     }\
 }
-#define popStack(stack) stack.data[stack.top--]
+#define popStack(top) stack[(int(gl_GlobalInvocationID.x) + int(gl_GlobalInvocationID.y) * blockSize)*32 + (top--)]
 
 
 
@@ -558,6 +516,7 @@ vec3 fireRayAtPixelPositionIndex(int blockLocalX, int blockLocalY, vec2 pixelPos
     }
     finalColor = finalColor / float(sampleCount);
     return finalColor;
+    //return vec3(0.0);
 }
 
 
@@ -1014,15 +973,16 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         return closestIntersection;
     }*/
     
-    
-    // Performing BVH traversal
-    Stack stack;
-    initializeStack(stack);
 
-    pushStack(stack, 0);
-    while (!isStackEmpty(stack))
+    // Performing BVH traversal
+    int top = -1;
+    initializeStack(top);
+
+    pushStack(0, top);
+
+    while (!isStackEmpty(top))
     {
-        int current = popStack(stack);
+        int current = popStack(top);
         
         BVHNode node = bvhNodes[current];
         
@@ -1077,11 +1037,11 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 
             if (intersectBoxRay(leftChildNode.pos, leftChildNode.size, ray.pos, ray.dir))
             {
-                pushStack(stack, node.leftChild);
+                pushStack(node.leftChild, top);
             }
             if (intersectBoxRay(rightChildNode.pos, rightChildNode.size, ray.pos, ray.dir))
             {
-                pushStack(stack, node.rightChild);
+                pushStack(node.rightChild, top);
             }
         }
     }

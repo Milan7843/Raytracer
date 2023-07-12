@@ -14,8 +14,10 @@ BlockRenderProcess::BlockRenderProcess(
 	computeShader.setBool("renderUsingBlocks", true);
 	computeShader.setInt("blockSize", blockSize);
 	computeShader.setInt("renderPassCount", renderPassCount);
+	computeShader.setInt("stackSize", stackSize);
 
 	generateIndirectLightingDataBuffer();
+	generateStackBuffer();
 }
 
 BlockRenderProcess::~BlockRenderProcess()
@@ -74,7 +76,6 @@ void BlockRenderProcess::generateIndirectLightingDataBuffer()
 	// Creating the pixel array buffer
 	indirectLightingDataBuffer = 0;
 
-	// Problematic statement: very slow
 	glGenBuffers(1, &indirectLightingDataBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, indirectLightingDataBuffer);
 
@@ -87,6 +88,22 @@ void BlockRenderProcess::generateIndirectLightingDataBuffer()
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 	std::cout << "Indirect lighting buffer " << indirectLightingDataBuffer << " with " << this->blockSize * this->blockSize * sizeof(IndirectLightingPixelData) << "bytes" << std::endl;
+}
+
+void BlockRenderProcess::generateStackBuffer()
+{
+	// Deleting the previous stack buffer
+	glDeleteBuffers(1, &stackBuffer);
+
+	// Creating the stack array buffer
+	stackBuffer = 0;
+
+	glGenBuffers(1, &stackBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, stackBuffer);
+
+	glBufferData(GL_SHADER_STORAGE_BUFFER, this->blockSize * this->blockSize * sizeof(int) * stackSize, 0, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, stackBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
 void BlockRenderProcess::blockRenderStep(ComputeShader& computeShader)
