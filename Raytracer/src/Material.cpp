@@ -13,6 +13,7 @@ Material::Material()
 	emissionStrength(0.0f),
 	fresnelReflectionStrength(0.0f)
 {
+	setType(MATERIAL);
 }
 
 Material::Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness, float reflectionDiffusion, glm::vec3 emission, float emissionStrength, float fresnelReflectionStrength)
@@ -26,6 +27,7 @@ Material::Material(std::string name, glm::vec3 color, float reflectiveness, floa
 	emissionStrength(emissionStrength),
 	fresnelReflectionStrength(fresnelReflectionStrength)
 {
+	setType(MATERIAL);
 }
 Material::Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness)
 	: name(name),
@@ -38,6 +40,7 @@ Material::Material(std::string name, glm::vec3 color, float reflectiveness, floa
 	emissionStrength(0.0f),
 	fresnelReflectionStrength(0.0f)
 {
+	setType(MATERIAL);
 }
 
 Material::Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, glm::vec3 emission, float emissionStrength)
@@ -51,6 +54,7 @@ Material::Material(std::string name, glm::vec3 color, float reflectiveness, floa
 	emissionStrength(emissionStrength),
 	fresnelReflectionStrength(0.0f)
 {
+	setType(MATERIAL);
 }
 
 Material::~Material()
@@ -71,7 +75,7 @@ void Material::writeDataToStream(std::ofstream& filestream)
 	filestream << fresnelReflectionStrength << "\n";
 }
 
-void Material::drawInterface(Scene& scene)
+bool Material::drawInterface(Scene& scene)
 {
 	bool anyPropertiesChanged{ false };
 
@@ -83,7 +87,7 @@ void Material::drawInterface(Scene& scene)
 	anyPropertiesChanged |= ImGui::DragFloat("Transparency", getTransparencyPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat("Refractiveness", getRefractivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat("Reflective diffusion", getReflectionDiffusionPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
-	anyPropertiesChanged |= ImGui::DragFloat("Reflective diffusion", &fresnelReflectionStrength, 0.01f, 0.0f, 1.0f, "%.2f");
+	anyPropertiesChanged |= ImGui::DragFloat("Fresnel reflection strength", &fresnelReflectionStrength, 0.01f, 0.0f, 1.0f, "%.2f");
 	ImGuiUtility::drawHelpMarker("How much the reflection can be diffused. Basically acts as a blur.");
 
 	// If anything changed, no shader will have the updated data
@@ -91,6 +95,8 @@ void Material::drawInterface(Scene& scene)
 	{
 		clearShaderWrittenTo();
 	}
+
+	return anyPropertiesChanged;
 }
 
 Material Material::generateErrorMaterial()

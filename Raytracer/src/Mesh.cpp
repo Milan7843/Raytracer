@@ -6,15 +6,18 @@
 
 
 Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices
-    , unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex)
+    , unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex, unsigned int modelID)
     : name(name)
     , shaderArraybeginIndex(startIndex)
     , shaderMeshIndex(meshIndex)
     , materialIndex(materialIndex)
+    , modelID(modelID)
+    , ImGuiEditorInterface()
 {
     this->vertices = vertices;
     this->indices = indices;
     setupMesh();
+    setType(MESH);
 }
 
 Mesh::~Mesh()
@@ -189,4 +192,9 @@ std::string& Mesh::getName()
 unsigned int Mesh::getMaterialIndex() const
 {
     return materialIndex;
+}
+
+unsigned int Mesh::getModelID()
+{
+    return modelID;
 }

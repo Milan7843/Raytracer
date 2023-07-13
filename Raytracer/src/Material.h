@@ -28,7 +28,7 @@ public:
 	void writeDataToStream(std::ofstream& filestream);
 
 	// Draw an interface for this model using ImGui
-	virtual void drawInterface(Scene& scene);
+	virtual bool drawInterface(Scene& scene);
 
 	// Generate a material with easily distinguishable error properties
 	static Material generateErrorMaterial();

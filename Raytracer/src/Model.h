@@ -35,7 +35,7 @@ public:
 	virtual void draw(AbstractShader* shader, Scene* scene);
 
 	// Draw an interface for this model using ImGui
-	virtual void drawInterface(Scene& scene);
+	virtual bool drawInterface(Scene& scene);
 
 	// Write this object's data to the given shader
 	virtual bool writeToShader(AbstractShader* shader, unsigned int ssbo);

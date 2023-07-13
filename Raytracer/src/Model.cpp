@@ -6,10 +6,12 @@ Model::Model(std::string& name, std::vector<unsigned int>& meshMaterialIndices,
 	const std::string& path, unsigned int* meshCount, unsigned int* triangleCount,
 	unsigned int MAX_MESH_COUNT)
 	: path(path)
+	, Object()
 {
 	this->name = name;
 
 	loadModel(path, meshMaterialIndices, meshCount, triangleCount, MAX_MESH_COUNT);
+	setType(MODEL);
 }
 
 Model::Model(unsigned int meshMaterialIndex,
@@ -21,6 +23,7 @@ Model::Model(unsigned int meshMaterialIndex,
 	this->name = path.substr(path.find_last_of('/') + 1, path.find_last_of('.') - (path.find_last_of('/') + 1));
 
 	loadModel(path, meshMaterialIndex, meshCount, triangleCount, MAX_MESH_COUNT);
+	setType(MODEL);
 }
 
 Model::~Model()
@@ -52,11 +55,13 @@ void Model::draw(AbstractShader* shader, Scene* scene)
 	// Drawing each mesh
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
+		shader->setInt("objectID", meshes[i].getID());
+
 		meshes[i].draw(shader, scene);
 	}
 }
 
-void Model::drawInterface(Scene& scene)
+bool Model::drawInterface(Scene& scene)
 {
 	bool anyPropertiesChanged{ false };
 
@@ -85,6 +90,8 @@ void Model::drawInterface(Scene& scene)
 	{
 		clearShaderWrittenTo();
 	}
+
+	return anyPropertiesChanged;
 }
 
 bool Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
@@ -270,7 +277,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCou
 
 	std::string meshName{ mesh->mName.C_Str() };
 
-	return Mesh(meshName, vertices, indices, beginTriangleCount, meshCount, mesh->mMaterialIndex);
+	return Mesh(meshName, vertices, indices, beginTriangleCount, meshCount, mesh->mMaterialIndex, this->getID());
 }
 
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materialIndex, unsigned int meshCount, unsigned int* triangleCount)
@@ -343,7 +350,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 
 	std::string meshName{ mesh->mName.C_Str() };
 
-	return Mesh(meshName, vertices, indices, beginTriangleCount, meshCount, materialIndex);
+	return Mesh(meshName, vertices, indices, beginTriangleCount, meshCount, materialIndex, this->getID());
 }
 
 

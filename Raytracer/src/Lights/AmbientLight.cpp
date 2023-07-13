@@ -4,19 +4,22 @@ AmbientLight::AmbientLight(std::string& name, glm::vec3 color, float intensity)
 	// Initialising the base class
 	: Light(name, glm::vec3(0.0f), color, intensity, 0.0f)
 {
+	setType(AMBIENT_LIGHT);
 }
 
 AmbientLight::AmbientLight(glm::vec3 color, float intensity)
 	// Initialising the base class
 	: Light(std::string("Ambient light"), glm::vec3(0.0f), color, intensity, 0.0f)
 {
+	setType(AMBIENT_LIGHT);
 }
 
 AmbientLight::~AmbientLight()
 {
+	setType(AMBIENT_LIGHT);
 }
 
-void AmbientLight::drawInterface(Scene& scene)
+bool AmbientLight::drawInterface(Scene& scene)
 {
 	bool anyPropertiesChanged{ false };
 	anyPropertiesChanged |= ImGui::InputText("##", &getName());
@@ -28,6 +31,8 @@ void AmbientLight::drawInterface(Scene& scene)
 	{
 		clearShaderWrittenTo();
 	}
+
+	return anyPropertiesChanged;
 }
 
 bool AmbientLight::writeToShader(AbstractShader* shader)

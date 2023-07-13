@@ -81,10 +81,6 @@ std::string& Object::getName()
 	return name;
 }
 
-Object::Object()
-{
-}
-
 glm::mat4 Object::getRotationMatrix()
 {
 	// Creating an identity matrix

@@ -63,6 +63,11 @@ void OutlineRenderer::setup()
 
 void OutlineRenderer::render(Scene& scene)
 {
+	if (scene.hasObjectSelected() == 0)
+	{
+		return;
+	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
 	GLenum drawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };

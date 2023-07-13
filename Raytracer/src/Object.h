@@ -44,7 +44,7 @@ public:
 
 protected:
 	// Abstract class, no need to instantiate this class
-	Object();
+	Object() : ShaderWritable() {}
 	virtual ~Object() {}
 
 	// Generate and get the rotation matrix

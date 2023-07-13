@@ -26,17 +26,16 @@ bool ObjectScreenSelector::checkObjectClicked(Scene& scene, double x, double y)
 	glReadPixels((unsigned int)x, height-(unsigned int)y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, colorData.data());
 
 	// Getting data
-	unsigned int objectType{ (unsigned int)colorData[0] };
-	unsigned int objectIndex{ (unsigned int)colorData[1] };
+	unsigned int objectID{ (unsigned int)colorData[0] };
 
 	// Using the data to select/deselect an object
-	scene.markSelected((ObjectType)objectType, objectIndex);
+	scene.markSelected(objectID);
 
 	// Unbinding the frame buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	// Only found an object if objectType is not 0
-	return objectType != ObjectType::NONE;
+	// Only found an object if objectID is not 0
+	return objectID != 0;
 }
 
 void ObjectScreenSelector::renderTexturePreview(Scene& scene, unsigned int screenQuadVAO)
@@ -80,6 +79,16 @@ void ObjectScreenSelector::setup()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
+	// Generate and bind the depth buffer
+	unsigned int depthBuffer;
+	glGenRenderbuffers(1, &depthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+
+	// Set the storage for the depth buffer
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+
+	// Attach the depth buffer to the framebuffer
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
 	// Binding the texture to be drawn to
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, objectClickTexture, 0);

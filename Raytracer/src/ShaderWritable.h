@@ -31,7 +31,7 @@ public:
 
 protected:
 	// Abstract class, no need to instantiate this class
-	ShaderWritable() {}
+	ShaderWritable() : ImGuiEditorInterface() {}
 	virtual ~ShaderWritable() {}
 
 private:

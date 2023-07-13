@@ -4,6 +4,7 @@
 
 #include "CoordinateUtility.h"
 #include "Logger.h"
+#include "ImGuiEditorInterface.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -44,11 +45,11 @@ class BVH;
 
 class Model;
 
-class Mesh
+class Mesh : public ImGuiEditorInterface
 {
 public:
 	Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices,
-		unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex);
+		unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex, unsigned int modelID);
 	~Mesh();
 
 	void writeToShader(AbstractShader* shader, unsigned int ssbo, const glm::mat4& transformation);
@@ -90,6 +91,8 @@ public:
 	// Get the index of the material this mesh uses
 	unsigned int getMaterialIndex() const;
 
+	unsigned int getModelID();
+
 private:
 	void setupMesh();
 
@@ -97,4 +100,5 @@ private:
 	unsigned int materialIndex;
 
 	std::string name;
+	unsigned int modelID{ 0 };
 };

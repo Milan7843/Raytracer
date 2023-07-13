@@ -16,7 +16,7 @@ enum class BVHRenderMode
 	ALL
 };
 
-class Renderer : public ImGuiEditorInterface
+class Renderer
 {
 public:
 	Renderer(ComputeShader& raytraceComputeShader, unsigned int width, unsigned int height);

@@ -6,8 +6,7 @@ layout(location = 0) out vec4 colors;
 in vec3 FragPos;
 in vec3 Normal;
 
-uniform int objectIndex;
-uniform int objectType;
+uniform int objectID;
 
 /* Object encoding into color scheme:
 * The red channel holds the type of object:
@@ -19,6 +18,6 @@ uniform int objectType;
 
 void main()
 {
-    colors = vec4(objectType/255.0, objectIndex/255.0, 0.0, 1.0);
+    colors = vec4(objectID /255.0, 0.0, 0.0, 1.0);
     //colors = vec4(1.0, 1.0, 0.0, 1.0);
 }

@@ -5,18 +5,20 @@
 PointLight::PointLight(std::string& name, glm::vec3 position, glm::vec3 color, float intensity, float shadowSoftness)
 	: Light(name, position, color, intensity, shadowSoftness)
 {
+	setType(POINT_LIGHT);
 }
 
 PointLight::PointLight(glm::vec3 position, glm::vec3 color, float intensity, float shadowSoftness)
 	: Light("Point light", position, color, intensity, shadowSoftness)
 {
+	setType(POINT_LIGHT);
 }
 
 PointLight::~PointLight()
 {
 }
 
-void PointLight::drawInterface(Scene& scene)
+bool PointLight::drawInterface(Scene& scene)
 {
 	bool anyPropertiesChanged{ false };
 	anyPropertiesChanged |= ImGui::InputText("##", &getName());
@@ -30,6 +32,8 @@ void PointLight::drawInterface(Scene& scene)
 	{
 		clearShaderWrittenTo();
 	}
+
+	return anyPropertiesChanged;
 }
 
 void PointLight::writeDataToStream(std::ofstream& filestream)

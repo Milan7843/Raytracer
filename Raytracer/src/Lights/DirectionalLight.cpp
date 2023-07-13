@@ -4,7 +4,7 @@ DirectionalLight::DirectionalLight()
 	: Light("Directional light", glm::vec3(0.0f), glm::vec3(1.0f), 1.0f, 0.0f),
 	direction(-1.0f, -1.0f, 1.0f)
 {
-
+	setType(DIRECTIONAL_LIGHT);
 }
 
 DirectionalLight::DirectionalLight(std::string& name, glm::vec3 direction, glm::vec3 color, float intensity, float shadowSoftness)
@@ -12,6 +12,7 @@ DirectionalLight::DirectionalLight(std::string& name, glm::vec3 direction, glm::
 	: Light(name, glm::vec3(0.0f), color, intensity, shadowSoftness)
 	, direction(direction)
 {
+	setType(DIRECTIONAL_LIGHT);
 }
 
 DirectionalLight::DirectionalLight(glm::vec3 direction, glm::vec3 color, float intensity, float shadowSoftness)
@@ -19,13 +20,14 @@ DirectionalLight::DirectionalLight(glm::vec3 direction, glm::vec3 color, float i
 	: Light("Directional light", glm::vec3(0.0f), color, intensity, shadowSoftness)
 	, direction(direction)
 {
+	setType(DIRECTIONAL_LIGHT);
 }
 
 DirectionalLight::~DirectionalLight()
 {
 }
 
-void DirectionalLight::drawInterface(Scene& scene)
+bool DirectionalLight::drawInterface(Scene& scene)
 {
 	bool anyPropertiesChanged{ false };
 	anyPropertiesChanged |= ImGui::InputText("##", &getName());
@@ -39,6 +41,8 @@ void DirectionalLight::drawInterface(Scene& scene)
 	{
 		clearShaderWrittenTo();
 	}
+
+	return anyPropertiesChanged;
 }
 
 void DirectionalLight::writeDataToStream(std::ofstream& filestream)

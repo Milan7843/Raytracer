@@ -18,15 +18,60 @@
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+#include "Logger.h"
+
 class Scene;
+
+enum ObjectType
+{
+	NONE,
+	MESH,
+	MODEL,
+	SPHERE,
+	POINT_LIGHT,
+	DIRECTIONAL_LIGHT,
+	AMBIENT_LIGHT,
+	MATERIAL
+};
 
 class ImGuiEditorInterface
 {
 public:
-	virtual void drawInterface(Scene& scene) {}
+	virtual bool drawInterface(Scene& scene) = 0;
+
+	unsigned int getID()
+	{
+		return id;
+	}
+
+	ObjectType getType()
+	{
+		return this->type;
+	}
 
 protected:
-	// Abstract class, no need to instantiate this class
-	ImGuiEditorInterface() {}
+	ImGuiEditorInterface()
+	{
+		// The instance count must start at 1, since 0 indicates nothing
+		if (instanceCount == 0)
+		{
+			instanceCount++;
+		}
+
+		Logger::log("Instantiating ImGuiUserInterface");
+		id = instanceCount++; // Assign the current instance count and increment it
+	}
 	virtual ~ImGuiEditorInterface() {}
+
+	unsigned int id{ 0 };
+
+	void setType(ObjectType type)
+	{
+		this->type = type;
+	}
+
+private:
+	// Static variable to keep track of the instance count to give each instance a unique ID
+	static unsigned int instanceCount;
+	ObjectType type{ NONE };
 };

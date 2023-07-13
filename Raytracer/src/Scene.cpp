@@ -248,6 +248,7 @@ void Scene::recalculateAmbientLightIndices()
 Model* Scene::addModel(std::string& name, std::vector<unsigned int>& meshMaterialIndices, const std::string& path)
 {
 	Model model(name, meshMaterialIndices, path, &meshCount, &triangleCount, MAX_MESH_COUNT);
+	
 	models.push_back(model);
 	return &(models[models.size() - 1]);
 }
@@ -391,6 +392,8 @@ Camera& Scene::getActiveCamera()
 
 void Scene::draw(AbstractShader* shader)
 {
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_DEPTH_BUFFER_BIT);
 	shader->use();
 
 	// First writing all material data to the shader
@@ -413,26 +416,17 @@ void Scene::draw(AbstractShader* shader)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, getHDRI());
 
-	// Drawing each model with the given shader
-	unsigned int objectIndex{ 0 };
-	// Setting the object type to model
-	shader->setInt("objectType", MODEL);
 	for (Model& model : models)
 	{
-		shader->setInt("objectIndex", objectIndex);
+		shader->setInt("objectID", model.getID());
+
 		model.draw(shader, (Scene*)this);
-		objectIndex++;
 	}
 
-	// Drawing each sphere with the given shader
-	objectIndex = 0;
-	// Setting the object type to sphere
-	shader->setInt("objectType", SPHERE);
 	for (Sphere& sphere : spheres)
 	{
-		shader->setInt("objectIndex", objectIndex);
+		shader->setInt("objectID", sphere.getID());
 		sphere.draw(shader, (Scene*)this);
-		objectIndex++;
 	}
 }
 
@@ -441,16 +435,27 @@ void Scene::drawSelected(AbstractShader* shader)
 	// Drawing each model with the given shader if it is selected
 	for (Model& model : models)
 	{
-		if (&model == getSelectedObject())
+		if (model.getID() == currentlySelectedObject)
 			model.draw(shader, (Scene*)this);
+
+		for (Mesh& mesh : model.getMeshes())
+		{
+			if (mesh.getID() == currentlySelectedObject)
+				mesh.draw(shader, (Scene*)this);
+		}
 	}
 
 	// Drawing each sphere with the given shader if it is selected
 	for (Sphere& sphere : spheres)
 	{
-		if (&sphere == getSelectedObject())
+		if (sphere.getID() == currentlySelectedObject)
 			sphere.draw(shader, (Scene*)this);
 	}
+}
+
+bool Scene::hasObjectSelected()
+{
+	return currentlySelectedObject != 0;
 }
 
 bool Scene::writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates)
@@ -636,83 +641,89 @@ std::vector<AmbientLight>& Scene::getAmbientLights()
 	return ambientLights;
 }
 
-void Scene::markSelected(ObjectType objectType, unsigned int objectIndex)
+void Scene::markSelected(unsigned int objectID)
 {
-	switch (objectType)
+	// If the newly selected object was the same mesh again, now we select the object instead
+	if (objectID == currentlySelectedObject && getSelectedObject().getType() == MESH)
 	{
-		case NONE:
-			// No object was selected: unselect all and stop
-			currentlySelectedObject = nullptr;
-			return;
-
-		case MODEL:
-			// Model was selected
-			currentlySelectedObject = &models[objectIndex];
-			return;
-		case SPHERE:
-			// Sphere was selected
-			currentlySelectedObject = &spheres[objectIndex];
-			return;
-
-		case POINT_LIGHT:
-			// Point light was selected
-			currentlySelectedObject = &pointLights[objectIndex];
-			return;
-		case DIRECTIONAL_LIGHT:
-			// Directional light was selected
-			currentlySelectedObject = &directionalLights[objectIndex];
-			return;
-		case AMBIENT_LIGHT:
-			// Ambient light was selected
-			currentlySelectedObject = &ambientLights[objectIndex];
-			return;
-
-		case MATERIAL:
-			// Material was selected
-			currentlySelectedObject = &materials[objectIndex];
-			return;
+		objectID = dynamic_cast<Mesh*>(&getSelectedObject())->getModelID();
 	}
+	currentlySelectedObject = objectID;
 }
 
 void Scene::drawCurrentlySelectedObjectInterface()
 {
-	// Can't draw selected object if there isn't one
-	if (getSelectedObject() == nullptr)
+	if (currentlySelectedObject == 0)
 	{
+		// No object selected
 		return;
 	}
 
-	getSelectedObject()->drawInterface(*this);
+	getSelectedObject().drawInterface(*this);
 }
 
-ImGuiEditorInterface* Scene::getSelectedObject()
+ImGuiEditorInterface& Scene::getSelectedObject()
 {
-	return currentlySelectedObject;
-}
+	// TODO optimize not having to iterate over all objects every time this function is called by
+	// storing the pointer and only updating on a `markSelected` call
 
-void Scene::getSelectedObjectData(unsigned int* objectType, unsigned int* objectIndex)
-{
-	unsigned int currentObjectIndex{ 0 };
 	for (Model& model : models)
 	{
-		if (&model == getSelectedObject())
+		if (model.getID() == currentlySelectedObject)
 		{
-			*objectType = 1;
-			*objectIndex = currentObjectIndex;
+			return model;
 		}
-		currentObjectIndex++;
+		for (Mesh& mesh : model.getMeshes())
+		{
+			if (mesh.getID() == currentlySelectedObject)
+			{
+				return mesh;
+			}
+		}
 	}
 
-	currentObjectIndex = 0;
 	for (Sphere& sphere : spheres)
 	{
-		if (&sphere == getSelectedObject())
+		if (sphere.getID() == currentlySelectedObject)
 		{
-			*objectType = 2;
-			*objectIndex = currentObjectIndex;
+			return sphere;
 		}
-		currentObjectIndex++;
 	}
+
+	// Checking all lights
+	for (PointLight& light : pointLights)
+	{
+		if (light.getID() == currentlySelectedObject)
+		{
+			return light;
+		}
+	}
+	for (DirectionalLight& light : directionalLights)
+	{
+		if (light.getID() == currentlySelectedObject)
+		{
+			return light;
+		}
+	}
+	for (AmbientLight& light : ambientLights)
+	{
+		if (light.getID() == currentlySelectedObject)
+		{
+			return light;
+		}
+	}
+
+	// Checking all materials
+	for (Material& material : materials)
+	{
+		if (material.getID() == currentlySelectedObject)
+		{
+			return material;
+		}
+	}
+
+	// Shouldn't happen
+	throw std::runtime_error("Selected object ID not found.");
 }
 
 std::vector<Model>& Scene::getModels()

@@ -16,17 +16,6 @@
 
 #include <iostream>
 
-enum ObjectType
-{
-	NONE,
-	MODEL,
-	SPHERE,
-	POINT_LIGHT,
-	DIRECTIONAL_LIGHT,
-	AMBIENT_LIGHT,
-	MATERIAL
-};
-
 struct ShaderMesh
 {
 	glm::vec3 position;
@@ -102,6 +91,9 @@ public:
 	// Draw only the selected objects in this scene with the given shader
 	void drawSelected(AbstractShader* shader);
 
+	// Get whether an object is selected or not
+	bool hasObjectSelected();
+
 	// Write the data in the lights vector into the shader
 	// Returns whether any new data was written to the shader
 	bool writeLightsToShader(AbstractShader* shader, bool useGlslCoordinates);
@@ -121,14 +113,11 @@ public:
 	// Bind the buffer holding all triangles
 	void bindTriangleBuffer();
 
-	// Mark an object of the given type and the index as selected
-	void markSelected(ObjectType objectType, unsigned int objectIndex);
+	// Mark an object with the given ID as selected
+	void markSelected(unsigned int objectID);
 
 	// Draw the currently selected object using ImGui
 	void drawCurrentlySelectedObjectInterface();
-
-	// Get the data of the selected object into the integers
-	void getSelectedObjectData(unsigned int* objectType, unsigned int* objectIndex);
 
 	// Get a pointer to the name of this scene
 	std::string* getNamePointer();
@@ -158,10 +147,10 @@ private:
 	std::string name{};
 
 	// Keeping track of the currently selected object
-	ImGuiEditorInterface* currentlySelectedObject;
+	unsigned int currentlySelectedObject;
 
-	// Get a pointer to the currently selected objects
-	ImGuiEditorInterface* getSelectedObject();
+	// Get a pointer to the currently selected object
+	ImGuiEditorInterface& getSelectedObject();
 
 	// The hdri currently loaded
 	unsigned int hdri = 0;

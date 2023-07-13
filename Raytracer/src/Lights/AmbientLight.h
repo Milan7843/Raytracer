@@ -11,7 +11,7 @@ public:
 	AmbientLight(glm::vec3 color, float intensity);
 	~AmbientLight();
 
-	virtual void drawInterface(Scene& scene);
+	virtual bool drawInterface(Scene& scene);
 
 	// Write all the data of this directional light into the given shader
 	virtual bool writeToShader(AbstractShader* shader);

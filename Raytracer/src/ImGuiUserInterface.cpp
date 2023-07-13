@@ -655,7 +655,7 @@ void ImGuiUserInterface::drawMaterial(Material& material, Scene& scene, unsigned
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		scene.markSelected(ObjectType::MATERIAL, index);
+		scene.markSelected(material.getID());
 
 	// Drawing the 'delete' button
 	if (ImGui::BeginPopupContextItem())
@@ -740,7 +740,7 @@ void ImGuiUserInterface::drawLight(PointLight& light, Scene& scene, unsigned int
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		scene.markSelected(ObjectType::POINT_LIGHT, index);
+		scene.markSelected(light.getID());
 
 	if (ImGui::BeginPopupContextItem())
 	{
@@ -763,7 +763,7 @@ void ImGuiUserInterface::drawLight(DirectionalLight& light, Scene& scene, unsign
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		scene.markSelected(ObjectType::DIRECTIONAL_LIGHT, index);
+		scene.markSelected(light.getID());
 
 	if (ImGui::BeginPopupContextItem())
 	{
@@ -786,7 +786,7 @@ void ImGuiUserInterface::drawLight(AmbientLight& light, Scene& scene, unsigned i
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		scene.markSelected(ObjectType::AMBIENT_LIGHT, index);
+		scene.markSelected(light.getID());
 
 	if (ImGui::BeginPopupContextItem())
 	{
@@ -896,7 +896,7 @@ void ImGuiUserInterface::drawObject(Model& object, Scene& scene, unsigned int in
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		scene.markSelected(ObjectType::MODEL, index);
+		scene.markSelected(object.getID());
 
 	if (ImGui::BeginPopupContextItem())
 	{
@@ -954,7 +954,7 @@ void ImGuiUserInterface::drawObject(Sphere& object, Scene& scene, unsigned int i
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		scene.markSelected(ObjectType::SPHERE, index);
+		scene.markSelected(object.getID());
 
 	if (ImGui::BeginPopupContextItem())
 	{

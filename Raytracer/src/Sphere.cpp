@@ -7,6 +7,7 @@ Sphere::Sphere(std::string& name, glm::vec3 position, float radius, unsigned int
 	this->move(position);
 	this->scale(radius);
 	this->name = name;
+	setType(SPHERE);
 }
 
 Sphere::Sphere(glm::vec3 position, float radius, unsigned int materialIndex, unsigned int shaderSphereIndex)
@@ -16,6 +17,7 @@ Sphere::Sphere(glm::vec3 position, float radius, unsigned int materialIndex, uns
 	this->move(position);
 	this->scale(radius);
 	this->name = "New sphere";
+	setType(SPHERE);
 }
 
 Sphere::~Sphere()

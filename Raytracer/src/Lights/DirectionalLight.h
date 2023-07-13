@@ -12,7 +12,7 @@ public:
 	DirectionalLight(glm::vec3 direction, glm::vec3 color, float intensity, float shadowSoftness);
 	~DirectionalLight();
 
-	virtual void drawInterface(Scene& scene);
+	virtual bool drawInterface(Scene& scene);
 
 	// Write this light to the given filestream
 	virtual void writeDataToStream(std::ofstream& filestream);

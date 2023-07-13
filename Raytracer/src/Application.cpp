@@ -174,6 +174,7 @@ int Application::Start()
     //bvh.generateFromModel(sceneManager.getCurrentScene().getModels()[0]);
 
     // TODO change pointer passes to references
+    bool mouseDown{ false };
 
     while (!glfwWindowShouldClose(window))
     {
@@ -237,17 +238,25 @@ int Application::Start()
         else
         {
             // Checking for a click on an object on mouse click and mouse not on GUI
-            if (userInterface.isEnabled()
-                && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS
-                && !userInterface.isMouseOnGUI()
-                )
+            if (userInterface.isEnabled() && !userInterface.isMouseOnGUI())
             {
-                double xpos, ypos;
-                glfwGetCursorPos(window, &xpos, &ypos);
-
-                if (objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), xpos, ypos))
+                if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
                 {
-                    // An object was clicked
+                    if (!mouseDown)
+                    {
+                        mouseDown = true;
+                        double xpos, ypos;
+                        glfwGetCursorPos(window, &xpos, &ypos);
+
+                        if (objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), xpos, ypos))
+                        {
+                            // An object was clicked
+                        }
+                    }
+                }
+                else
+                {
+                    mouseDown = false;
                 }
             }
 
