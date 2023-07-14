@@ -191,25 +191,77 @@ void Scene::addLight(AmbientLight& ambientLight)
 	this->ambientLightCount++;
 }
 
-void Scene::deletePointLight(unsigned int index)
+void Scene::deleteObject(unsigned int id)
 {
-	pointLights.erase(pointLights.begin() + index);
-	this->pointLightCount--;
-	recalculatePointLightIndices();
+	deletePointLight(id);
+	deleteDirectionalLight(id);
+	deleteAmbientLight(id);
+	deleteModel(id);
+	deleteSphere(id);
+	deleteMaterial(id);
 }
 
-void Scene::deleteDirectionalLight(unsigned int index)
+bool Scene::deletePointLight(unsigned int id)
 {
-	directionalLights.erase(directionalLights.begin() + index);
-	this->directionalLightCount--;
-	recalculateDirectionalLightIndices();
+	for (unsigned int i = 0; i < pointLights.size(); i++)
+	{
+		if (pointLights[i].getID() == id)
+		{
+			// A light with the given ID was found:
+			// Now erase it from the list and recalculate the shader indices
+			pointLights.erase(pointLights.begin() + i);
+			this->pointLightCount--;
+			recalculatePointLightIndices();
+
+			onObjectDeleted(id);
+			return true;
+		}
+	}
+
+	// No light with the given ID was found
+	return false;
 }
 
-void Scene::deleteAmbientLight(unsigned int index)
+bool Scene::deleteDirectionalLight(unsigned int id)
 {
-	ambientLights.erase(ambientLights.begin() + index);
-	this->ambientLightCount--;
-	recalculateAmbientLightIndices();
+	for (unsigned int i = 0; i < directionalLights.size(); i++)
+	{
+		if (directionalLights[i].getID() == id)
+		{
+			// A light with the given ID was found:
+			// Now erase it from the list and recalculate the shader indices
+			directionalLights.erase(directionalLights.begin() + i);
+			this->directionalLightCount--;
+			recalculateDirectionalLightIndices();
+
+			onObjectDeleted(id);
+			return true;
+		}
+	}
+
+	// No light with the given ID was found
+	return false;
+}
+
+bool Scene::deleteAmbientLight(unsigned int id)
+{
+	for (unsigned int i = 0; i < ambientLights.size(); i++)
+	{
+		if (ambientLights[i].getID() == id)
+		{
+			// A light with the given ID was found:
+			// Now erase it from the list and recalculate the shader indices
+			ambientLights.erase(ambientLights.begin() + i);
+			this->ambientLightCount--;
+			recalculateAmbientLightIndices();
+
+			onObjectDeleted(id);
+			return true;
+		}
+	}
+
+	// No light with the given ID was found
+	return false;
 }
 
 void Scene::recalculatePointLightIndices()
@@ -260,10 +312,24 @@ Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
 	return &(models[models.size() - 1]);
 }
 
-void Scene::deleteModel(unsigned int modelIndex)
+bool Scene::deleteModel(unsigned int id)
 {
-	models.erase(models.begin() + modelIndex);
-	recalculateModelIndices();
+	for (unsigned int i = 0; i < models.size(); i++)
+	{
+		if (models[i].getID() == id)
+		{
+			// A model with the given ID was found:
+			// Now erase it from the list and recalculate the shader indices
+			models.erase(models.begin() + i);
+			recalculateModelIndices();
+
+			onObjectDeleted(id);
+			return true;
+		}
+	}
+
+	// No model with the given ID was found
+	return false;
 }
 
 bool Scene::addSphere(Sphere& sphere)
@@ -291,12 +357,25 @@ Sphere* Scene::addSphere(glm::vec3 position, float radius, unsigned int material
 	return &(spheres[spheres.size() - 1]);
 }
 
-void Scene::deleteSphere(unsigned int sphereIndex)
+bool Scene::deleteSphere(unsigned int id)
 {
-	// Removing it
-	spheres.erase(spheres.begin() + sphereIndex);
-	// Then making sure the sphere indices are still contiguous
-	recalculateSphereIndices();
+	for (unsigned int i = 0; i < spheres.size(); i++)
+	{
+		if (spheres[i].getID() == id)
+		{
+			// A model with the given ID was found:
+			// Now erase it from the list and recalculate the shader indices
+			spheres.erase(spheres.begin() + i);
+			// Then making sure the sphere indices are still contiguous
+			recalculateSphereIndices();
+
+			onObjectDeleted(id);
+			return true;
+		}
+	}
+
+	// No sphere with the given ID was found
+	return false;
 }
 
 void Scene::addMaterial(Material& material)
@@ -310,29 +389,35 @@ void Scene::addMaterial(Material& material)
 	this->materialCount++;
 }
 
-void Scene::deleteMaterial(unsigned int index)
+bool Scene::deleteMaterial(unsigned int id)
 {
-	// Must have at least one material: the NONE material
-	if (this->materials.size() <= 1)
-		return;
-
-	// Cannot delete the NONE material at index 0
-	if (index <= 0)
-		return;
-
-	// If there were more materials: delete the one at the index
-	this->materials.erase(materials.begin() + index);
-
-	// Then verifying each model's material indices
-	for (Sphere& sphere : getSpheres())
+	for (unsigned int i = 1; i < materials.size(); i++)
 	{
-		sphere.onDeleteMaterial(index);
+		if (materials[i].getID() == id)
+		{
+			// A material with the given ID was found
+
+			// If there were more materials: delete the one at the index
+			this->materials.erase(materials.begin() + i);
+
+			// Then verifying each model's material indices
+			for (Sphere& sphere : getSpheres())
+			{
+				sphere.onDeleteMaterial(i);
+			}
+
+			for (Model& model : getModels())
+			{
+				model.onDeleteMaterial(i);
+			}
+
+			onObjectDeleted(id);
+			return true;
+		}
 	}
 
-	for (Model& model : getModels())
-	{
-		model.onDeleteMaterial(index);
-	}
+	// No material with the given ID was found
+	return false;
 }
 
 void Scene::recalculateModelIndices()
@@ -594,6 +679,15 @@ void Scene::bindTriangleBuffer()
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, triangleBufferSSBO);
 }
 
+void Scene::onObjectDeleted(unsigned int id)
+{
+	// If the selected object was deleted, unselect the object.
+	if (currentlySelectedObject == id)
+	{
+		currentlySelectedObject = 0;
+	}
+}
+
 void Scene::generateMeshBuffer(std::vector<ShaderMesh>& shaderMeshes)
 {
 	// Generate the buffer if it didn't exist yet
@@ -643,6 +737,12 @@ std::vector<AmbientLight>& Scene::getAmbientLights()
 
 void Scene::markSelected(unsigned int objectID)
 {
+	if (!hasObjectSelected())
+	{
+		currentlySelectedObject = objectID;
+		return;
+	}
+
 	// If the newly selected object was the same mesh again, now we select the object instead
 	if (objectID == currentlySelectedObject && getSelectedObject().getType() == MESH)
 	{
@@ -724,6 +824,34 @@ ImGuiEditorInterface& Scene::getSelectedObject()
 
 	// Shouldn't happen
 	throw std::runtime_error("Selected object ID not found.");
+}
+
+ContextMenuSource* Scene::getContextMenuSourceFromSelected()
+{
+	if (!hasObjectSelected())
+	{
+		return nullptr;
+	}
+
+	ImGuiEditorInterface& selectedObject{ getSelectedObject() };
+	ObjectType type{ selectedObject.getType() };
+
+	// If the newly selected object was the same mesh again, now we select the object instead
+	// TODO add supported context menus here
+	if (type != MODEL)
+	{
+		return nullptr;
+	}
+
+	return dynamic_cast<ContextMenuSource*>(&selectedObject);
+}
+
+void Scene::renderContextMenus()
+{
+	for (Model& model : models)
+	{
+		model.renderContextMenu(*this);
+	}
 }
 
 std::vector<Model>& Scene::getModels()

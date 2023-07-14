@@ -27,7 +27,12 @@ void ImGuiUserInterface::initialiseImGui(GLFWwindow* window)
     ImGui_ImplOpenGL3_Init("#version 130");
 }
 
-void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode)
+void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
+	SceneManager& sceneManager,
+	Camera& camera,
+	Renderer& renderer,
+	ApplicationRenderMode& applicationRenderMode,
+	ContextMenuSource* contextMenuSource)
 {
 	if (!imGuiEnabled)
 	{
@@ -422,6 +427,9 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 
 	ImGui::End();
 
+	// If the context menu source exists
+	sceneManager.getCurrentScene().renderContextMenus();
+
 	// Rendering
 	ImGui::Render();
 	//int display_w, display_h;
@@ -662,7 +670,7 @@ void ImGuiUserInterface::drawMaterial(Material& material, Scene& scene, unsigned
 	{
 		if (ImGui::Button("Delete"))
 		{
-			scene.deleteMaterial(index);
+			scene.deleteMaterial(material.getID());
 		}
 		ImGui::EndPopup();
 	}
@@ -746,7 +754,7 @@ void ImGuiUserInterface::drawLight(PointLight& light, Scene& scene, unsigned int
 	{
 		if (ImGui::Button("Delete"))
 		{
-			scene.deletePointLight(index);
+			scene.deletePointLight(light.getID());
 		}
 		ImGui::EndPopup();
 	}
@@ -769,7 +777,7 @@ void ImGuiUserInterface::drawLight(DirectionalLight& light, Scene& scene, unsign
 	{
 		if (ImGui::Button("Delete"))
 		{
-			scene.deleteDirectionalLight(index);
+			scene.deleteDirectionalLight(light.getID());
 		}
 		ImGui::EndPopup();
 	}
@@ -792,7 +800,7 @@ void ImGuiUserInterface::drawLight(AmbientLight& light, Scene& scene, unsigned i
 	{
 		if (ImGui::Button("Delete"))
 		{
-			scene.deleteAmbientLight(index);
+			scene.deleteAmbientLight(light.getID());
 		}
 		ImGui::EndPopup();
 	}
@@ -902,7 +910,7 @@ void ImGuiUserInterface::drawObject(Model& object, Scene& scene, unsigned int in
 	{
 		if (ImGui::Button("Delete"))
 		{
-			scene.deleteModel(index);
+			scene.deleteModel(object.getID());
 		}
 		ImGui::EndPopup();
 	}
@@ -960,7 +968,7 @@ void ImGuiUserInterface::drawObject(Sphere& object, Scene& scene, unsigned int i
 	{
 		if (ImGui::Button("Delete"))
 		{
-			scene.deleteSphere(index);
+			scene.deleteSphere(object.getID());
 		}
 		ImGui::EndPopup();
 	}

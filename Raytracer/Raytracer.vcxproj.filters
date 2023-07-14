@@ -162,6 +162,9 @@
     <ClCompile Include="src\Shaders\ComputeShaderInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\ContextMenuSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -1401,6 +1404,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\shaders\ShaderInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\ContextMenuSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,6 +3,7 @@
 #include "Object.h"
 #include "Material.h"
 #include "Mesh.h"
+#include "gui/ContextMenuSource.h"
 
 #include <iostream>
 
@@ -14,7 +15,7 @@
 
 class Scene;
 
-class Model : public Object
+class Model : public Object, public ContextMenuSource
 {
 public:
 	Model(std::string& name, std::vector<unsigned int>& meshMaterialIndices,
@@ -42,6 +43,8 @@ public:
 
 	// Should be called when a material was deleted
 	void onDeleteMaterial(unsigned int index);
+
+	void renderContextMenuItems(Scene& scene) override;
 
 
 	void resetShaderIndices(unsigned int* triangleCount, unsigned int* meshCount);

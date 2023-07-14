@@ -7,6 +7,7 @@ Model::Model(std::string& name, std::vector<unsigned int>& meshMaterialIndices,
 	unsigned int MAX_MESH_COUNT)
 	: path(path)
 	, Object()
+	, ContextMenuSource()
 {
 	this->name = name;
 
@@ -18,6 +19,8 @@ Model::Model(unsigned int meshMaterialIndex,
 	const std::string& path, unsigned int* meshCount, unsigned int* triangleCount,
 	unsigned int MAX_MESH_COUNT)
 	: path(path)
+	, Object()
+	, ContextMenuSource()
 {
 	// Automatically setting name based on model name
 	this->name = path.substr(path.find_last_of('/') + 1, path.find_last_of('.') - (path.find_last_of('/') + 1));
@@ -117,6 +120,18 @@ void Model::onDeleteMaterial(unsigned int index)
 	for (Mesh& mesh : meshes)
 	{
 		mesh.onDeleteMaterial(index);
+	}
+}
+
+void Model::renderContextMenuItems(Scene& scene)
+{
+	if (ImGui::MenuItem("Delete"))
+	{
+		scene.deleteModel(this->getID());
+	}
+	if (ImGui::MenuItem("Option 2"))
+	{
+		// Handle option 2 selection
 	}
 }
 

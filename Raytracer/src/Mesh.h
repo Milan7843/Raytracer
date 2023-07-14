@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shaders/AbstractShader.h"
+#include "gui/ContextMenuSource.h"
 
 #include "CoordinateUtility.h"
 #include "Logger.h"
@@ -45,7 +46,7 @@ class BVH;
 
 class Model;
 
-class Mesh : public ImGuiEditorInterface
+class Mesh : public ImGuiEditorInterface, public ContextMenuSource
 {
 public:
 	Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices,
@@ -92,6 +93,8 @@ public:
 	unsigned int getMaterialIndex() const;
 
 	unsigned int getModelID();
+
+	void renderContextMenuItems(Scene& scene) override;
 
 private:
 	void setupMesh();

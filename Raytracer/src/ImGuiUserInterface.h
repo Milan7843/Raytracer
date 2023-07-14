@@ -29,6 +29,7 @@
 #include "Renderer.h"
 #include "FileUtility.h"
 #include "ApplicationRenderMode.h"
+#include "gui/ContextMenuSource.h"
 
 class ImGuiUserInterface
 {
@@ -41,7 +42,12 @@ public:
 	void initialiseImGui(GLFWwindow * window);
 
 	// Draw the user interface
-	void drawUserInterface(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode);
+	void drawUserInterface(GLFWwindow* window,
+		SceneManager& sceneManager,
+		Camera& camera,
+		Renderer& renderer,
+		ApplicationRenderMode& applicationRenderMode,
+		ContextMenuSource* contextMenuSource);
 
 	void handleInput(GLFWwindow* window, Camera& camera);
 

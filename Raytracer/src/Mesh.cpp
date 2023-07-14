@@ -198,3 +198,7 @@ unsigned int Mesh::getModelID()
 {
     return modelID;
 }
+
+void Mesh::renderContextMenuItems(Scene& scene)
+{
+}

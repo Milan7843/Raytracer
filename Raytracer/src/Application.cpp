@@ -174,7 +174,11 @@ int Application::Start()
     //bvh.generateFromModel(sceneManager.getCurrentScene().getModels()[0]);
 
     // TODO change pointer passes to references
-    bool mouseDown{ false };
+
+    int leftMouseButtonState{ GLFW_RELEASE };
+    int rightMouseButtonState{ GLFW_RELEASE };
+
+    ContextMenuSource* contextMenuSource{ nullptr };
 
     while (!glfwWindowShouldClose(window))
     {
@@ -240,23 +244,30 @@ int Application::Start()
             // Checking for a click on an object on mouse click and mouse not on GUI
             if (userInterface.isEnabled() && !userInterface.isMouseOnGUI())
             {
-                if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-                {
-                    if (!mouseDown)
-                    {
-                        mouseDown = true;
-                        double xpos, ypos;
-                        glfwGetCursorPos(window, &xpos, &ypos);
+                bool leftMouse = leftMouseButtonState == GLFW_PRESS &&
+                    glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE;
 
-                        if (objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), xpos, ypos))
+                bool rightMouse = rightMouseButtonState == GLFW_PRESS && 
+                    glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE;
+
+                leftMouseButtonState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+                rightMouseButtonState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
+
+                if (leftMouse || rightMouse)
+                {
+                    double xpos, ypos;
+                    glfwGetCursorPos(window, &xpos, &ypos);
+
+                    if (objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), xpos, ypos))
+                    {
+                        // An object was clicked
+                        if (rightMouse)
                         {
-                            // An object was clicked
+                            ContextMenuSource* source{ sceneManager.getCurrentScene().getContextMenuSourceFromSelected() };
+                            if (source != nullptr)
+                                source->openContextMenu();
                         }
                     }
-                }
-                else
-                {
-                    mouseDown = false;
                 }
             }
 
@@ -285,7 +296,15 @@ int Application::Start()
             //objectScreenSelector.renderTexturePreview(sceneManager.getCurrentScene(), screenQuadVAO);
         }
 
-        userInterface.drawUserInterface(window, sceneManager, sceneManager.getCurrentScene().getActiveCamera(), raytracingRenderer, currentRenderMode);
+
+
+        userInterface.drawUserInterface(window,
+            sceneManager,
+            sceneManager.getCurrentScene().getActiveCamera(),
+            raytracingRenderer,
+            currentRenderMode,
+            contextMenuSource
+        );
 
         // Output
         glfwSwapBuffers(window);

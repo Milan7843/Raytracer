@@ -13,6 +13,7 @@
 #include "Material.h"
 #include "Camera.h"
 #include "BVH/BVH.h"
+#include "gui/ContextMenuSource.h"
 
 #include <iostream>
 
@@ -47,12 +48,14 @@ public:
 	// Add an ambient light to the scene
 	void addLight(AmbientLight& ambientLight);
 
+	void deleteObject(unsigned int id);
+
 	// Remove a point light from the scene
-	void deletePointLight(unsigned int index);
+	bool deletePointLight(unsigned int id);
 	// Remove a directional light from the scene
-	void deleteDirectionalLight(unsigned int index);
+	bool deleteDirectionalLight(unsigned int id);
 	// Remove an ambient light from the scene
-	void deleteAmbientLight(unsigned int index);
+	bool deleteAmbientLight(unsigned int id);
 
 	// Recalculate the indices in the respective light type vector
 	void recalculatePointLightIndices();
@@ -62,15 +65,15 @@ public:
 
 	Model* addModel(std::string& name, std::vector<unsigned int>& meshMaterialIndices, const std::string& path);
 	Model* addModel(const std::string& path, unsigned int materialIndex);
-	void deleteModel(unsigned int modelIndex);
+	bool deleteModel(unsigned int id);
 	// Add a sphere to the scene, returns whether the addition was succesfull
 	bool addSphere(Sphere& sphere);
 	Sphere* addSphere(glm::vec3 position, float radius, unsigned int materialIndex);
-	void deleteSphere(unsigned int sphereIndex);
+	bool deleteSphere(unsigned int id);
 	void addMaterial(Material& material);
 
 	// Remove a material from the scene
-	void deleteMaterial(unsigned int index);
+	bool deleteMaterial(unsigned int id);
 
 	void recalculateModelIndices();
 	void recalculateSphereIndices();
@@ -93,6 +96,10 @@ public:
 
 	// Get whether an object is selected or not
 	bool hasObjectSelected();
+
+	ContextMenuSource* getContextMenuSourceFromSelected();
+
+	void renderContextMenus();
 
 	// Write the data in the lights vector into the shader
 	// Returns whether any new data was written to the shader
@@ -141,6 +148,8 @@ public:
 private:
 
 	void generateMeshBuffer(std::vector<ShaderMesh>& shaderMeshes);
+
+	void onObjectDeleted(unsigned int id);
 
 	BVH bvh;
 

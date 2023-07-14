@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\gui\ContextMenuSource.cpp" />
     <ClCompile Include="src\Shaders\ComputeShaderInterface.cpp" />
     <ClCompile Include="src\Shaders\ComputeShaderInterface.h" />
     <ClCompile Include="src\shaders\MultiComputeShader.cpp" />
@@ -70,6 +71,7 @@
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\gui\ContextMenuSource.h" />
     <ClInclude Include="src\shaders\ShaderInterface.h" />
     <ClInclude Include="src\shaders\MultiComputeShader.h" />
     <ClInclude Include="src\BVH\BVHNode.h" />
