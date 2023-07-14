@@ -253,21 +253,22 @@ int Application::Start()
                 leftMouseButtonState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
                 rightMouseButtonState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
 
-                if (leftMouse || rightMouse)
+                if (leftMouse)
                 {
                     double xpos, ypos;
                     glfwGetCursorPos(window, &xpos, &ypos);
 
-                    if (objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), xpos, ypos))
-                    {
-                        // An object was clicked
-                        if (rightMouse)
-                        {
-                            ContextMenuSource* source{ sceneManager.getCurrentScene().getContextMenuSourceFromSelected() };
-                            if (source != nullptr)
-                                source->openContextMenu();
-                        }
-                    }
+                    unsigned int objectClickedID = objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), xpos, ypos);
+
+                    // An object was clicked
+                    // Using the data to select/deselect an object
+                    sceneManager.getCurrentScene().markSelected(objectClickedID);
+                }
+                // Attempting to open the context menu of the selected object
+                if (rightMouse) {
+                    ContextMenuSource* source{ sceneManager.getCurrentScene().getContextMenuSourceFromSelected() };
+                    if (source != nullptr)
+                        source->openContextMenu();
                 }
             }
 

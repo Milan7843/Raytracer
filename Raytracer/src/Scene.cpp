@@ -743,87 +743,32 @@ void Scene::markSelected(unsigned int objectID)
 		return;
 	}
 
+	// Getting a pointer to the selected object
+	ImGuiEditorInterface* selectedObject{ getSelectedObject() };
+
 	// If the newly selected object was the same mesh again, now we select the object instead
-	if (objectID == currentlySelectedObject && getSelectedObject().getType() == MESH)
+	if (objectID == currentlySelectedObject && selectedObject->getType() == MESH)
 	{
-		objectID = dynamic_cast<Mesh*>(&getSelectedObject())->getModelID();
+		objectID = dynamic_cast<Mesh*>(selectedObject)->getModelID();
 	}
 	currentlySelectedObject = objectID;
 }
 
 void Scene::drawCurrentlySelectedObjectInterface()
 {
-	if (currentlySelectedObject == 0)
+	ImGuiEditorInterface* selectedObject{ getSelectedObject() };
+	if (selectedObject == nullptr)
 	{
 		// No object selected
 		return;
 	}
 
-	getSelectedObject().drawInterface(*this);
+	selectedObject->drawInterface(*this);
 }
 
-ImGuiEditorInterface& Scene::getSelectedObject()
+ImGuiEditorInterface* Scene::getSelectedObject()
 {
-	// TODO optimize not having to iterate over all objects every time this function is called by
-	// storing the pointer and only updating on a `markSelected` call
-
-	for (Model& model : models)
-	{
-		if (model.getID() == currentlySelectedObject)
-		{
-			return model;
-		}
-		for (Mesh& mesh : model.getMeshes())
-		{
-			if (mesh.getID() == currentlySelectedObject)
-			{
-				return mesh;
-			}
-		}
-	}
-
-	for (Sphere& sphere : spheres)
-	{
-		if (sphere.getID() == currentlySelectedObject)
-		{
-			return sphere;
-		}
-	}
-
-	// Checking all lights
-	for (PointLight& light : pointLights)
-	{
-		if (light.getID() == currentlySelectedObject)
-		{
-			return light;
-		}
-	}
-	for (DirectionalLight& light : directionalLights)
-	{
-		if (light.getID() == currentlySelectedObject)
-		{
-			return light;
-		}
-	}
-	for (AmbientLight& light : ambientLights)
-	{
-		if (light.getID() == currentlySelectedObject)
-		{
-			return light;
-		}
-	}
-
-	// Checking all materials
-	for (Material& material : materials)
-	{
-		if (material.getID() == currentlySelectedObject)
-		{
-			return material;
-		}
-	}
-
-	// Shouldn't happen
-	throw std::runtime_error("Selected object ID not found.");
+	return getObjectById(currentlySelectedObject);
 }
 
 ContextMenuSource* Scene::getContextMenuSourceFromSelected()
@@ -833,8 +778,8 @@ ContextMenuSource* Scene::getContextMenuSourceFromSelected()
 		return nullptr;
 	}
 
-	ImGuiEditorInterface& selectedObject{ getSelectedObject() };
-	ObjectType type{ selectedObject.getType() };
+	ImGuiEditorInterface* selectedObject{ getSelectedObject() };
+	ObjectType type{ selectedObject->getType() };
 
 	// If the newly selected object was the same mesh again, now we select the object instead
 	// TODO add supported context menus here
@@ -843,7 +788,132 @@ ContextMenuSource* Scene::getContextMenuSourceFromSelected()
 		return nullptr;
 	}
 
-	return dynamic_cast<ContextMenuSource*>(&selectedObject);
+	return dynamic_cast<ContextMenuSource*>(selectedObject);
+}
+
+ContextMenuSource* Scene::getContextMenuSourceByID(unsigned int objectID)
+{
+	for (Model& model : models)
+	{
+		if (model.getID() == objectID)
+		{
+			return &model;
+		}
+		for (Mesh& mesh : model.getMeshes())
+		{
+			if (mesh.getID() == objectID)
+			{
+				return &mesh;
+			}
+		}
+	}
+
+	for (Sphere& sphere : spheres)
+	{
+		if (sphere.getID() == objectID)
+		{
+			return &sphere;
+		}
+	}
+
+	// Checking all lights
+	/*
+	for (PointLight& light : pointLights)
+	{
+		if (light.getID() == objectID)
+		{
+			return &light;
+		}
+	}
+	for (DirectionalLight& light : directionalLights)
+	{
+		if (light.getID() == objectID)
+		{
+			return &light;
+		}
+	}
+	for (AmbientLight& light : ambientLights)
+	{
+		if (light.getID() == objectID)
+		{
+			return &light;
+		}
+	}
+
+	// Checking all materials
+	for (Material& material : materials)
+	{
+		if (material.getID() == objectID)
+		{
+			return &material;
+		}
+	}*/
+
+	// No matching object was found
+	return nullptr;
+}
+
+ImGuiEditorInterface* Scene::getObjectById(unsigned int objectID)
+{
+	// TODO optimize not having to iterate over all objects every time this function is called by
+	// storing the pointer and only updating on a `markSelected` call
+
+	for (Model& model : models)
+	{
+		if (model.getID() == objectID)
+		{
+			return &model;
+		}
+		for (Mesh& mesh : model.getMeshes())
+		{
+			if (mesh.getID() == objectID)
+			{
+				return &mesh;
+			}
+		}
+	}
+
+	for (Sphere& sphere : spheres)
+	{
+		if (sphere.getID() == objectID)
+		{
+			return &sphere;
+		}
+	}
+
+	// Checking all lights
+	for (PointLight& light : pointLights)
+	{
+		if (light.getID() == objectID)
+		{
+			return &light;
+		}
+	}
+	for (DirectionalLight& light : directionalLights)
+	{
+		if (light.getID() == objectID)
+		{
+			return &light;
+		}
+	}
+	for (AmbientLight& light : ambientLights)
+	{
+		if (light.getID() == objectID)
+		{
+			return &light;
+		}
+	}
+
+	// Checking all materials
+	for (Material& material : materials)
+	{
+		if (material.getID() == objectID)
+		{
+			return &material;
+		}
+	}
+
+	return nullptr;
 }
 
 void Scene::renderContextMenus()

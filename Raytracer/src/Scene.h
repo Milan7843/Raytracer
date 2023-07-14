@@ -99,6 +99,10 @@ public:
 
 	ContextMenuSource* getContextMenuSourceFromSelected();
 
+	ContextMenuSource* getContextMenuSourceByID(unsigned int objectID);
+
+	ImGuiEditorInterface* getObjectById(unsigned int objectID);
+
 	void renderContextMenus();
 
 	// Write the data in the lights vector into the shader
@@ -159,7 +163,7 @@ private:
 	unsigned int currentlySelectedObject;
 
 	// Get a pointer to the currently selected object
-	ImGuiEditorInterface& getSelectedObject();
+	ImGuiEditorInterface* getSelectedObject();
 
 	// The hdri currently loaded
 	unsigned int hdri = 0;

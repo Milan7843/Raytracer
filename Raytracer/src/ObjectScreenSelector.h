@@ -13,8 +13,8 @@ public:
 	~ObjectScreenSelector();
 
 	// Set the clicked object in the given scene at the coordinates to be selected
-	// Returns whether an object was clicked
-	bool checkObjectClicked(Scene& scene, double x, double y);
+	// Returns the id of the object that was clicked, or 0 for no object hit
+	unsigned int checkObjectClicked(Scene& scene, double x, double y);
 
 	// Render the texture used to decide what object was clicked
 	void renderTexturePreview(Scene& scene, unsigned int screenQuadVAO);
