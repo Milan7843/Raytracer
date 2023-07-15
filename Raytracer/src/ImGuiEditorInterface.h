@@ -58,7 +58,6 @@ protected:
 			instanceCount++;
 		}
 
-		Logger::log("Instantiating ImGuiUserInterface");
 		id = instanceCount++; // Assign the current instance count and increment it
 	}
 	virtual ~ImGuiEditorInterface() {}

@@ -63,7 +63,7 @@ void OutlineRenderer::setup()
 
 void OutlineRenderer::render(Scene& scene)
 {
-	if (scene.hasObjectSelected() == 0)
+	if (!scene.hasObjectSelected())
 	{
 		return;
 	}
@@ -87,6 +87,13 @@ void OutlineRenderer::render(Scene& scene)
 	glViewport(0, 0, textureWidth, textureHeight);
 
 	objectRenderShader.use();
+
+	// Setting none for the model and rotation 
+	glm::mat4 model = glm::mat4(1.0f);
+	objectRenderShader.setMat4("model", model);
+
+	glm::mat4 rotation = glm::mat4(1.0f);
+	objectRenderShader.setMat4("rotation", rotation);
 
 	// View matrix
 	glm::mat4 view = glm::mat4(1.0f);

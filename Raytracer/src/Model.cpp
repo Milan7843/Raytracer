@@ -49,11 +49,16 @@ void Model::writeDataToStream(std::ofstream& filestream)
 	}
 }
 
-void Model::draw(AbstractShader* shader, Scene* scene)
+void Model::prepareForDraw(AbstractShader* shader)
 {
 	// Setting transformations
 	shader->setMat4("model", getTransformationMatrix());
 	shader->setMat4("rotation", getRotationMatrix());
+}
+
+void Model::draw(AbstractShader* shader, Scene* scene)
+{
+	prepareForDraw(shader);
 
 	// Drawing each mesh
 	for (unsigned int i = 0; i < meshes.size(); i++)

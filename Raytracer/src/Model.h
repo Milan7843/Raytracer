@@ -32,6 +32,9 @@ public:
 	// Write this material to the stream (human readable format)
 	friend std::ostream& operator<< (std::ostream& stream, const Model& model);
 
+	// Prepare for drawing with the given shader by setting the model and rotation matrices
+	void prepareForDraw(AbstractShader* shader);
+
 	// Draw this object given the shader
 	virtual void draw(AbstractShader* shader, Scene* scene);
 

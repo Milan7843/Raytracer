@@ -113,6 +113,12 @@ void ObjectScreenSelector::renderSceneToTexture(Scene& scene)
 
 	objectColorShader.use();
 
+	glm::mat4 model = glm::mat4(1.0f);
+	objectColorShader.setMat4("model", model);
+
+	glm::mat4 rotation = glm::mat4(1.0f);
+	objectColorShader.setMat4("rotation", rotation);
+
 	// View matrix
 	glm::mat4 view = glm::mat4(1.0f);
 	view = scene.getActiveCamera().getViewMatrix();

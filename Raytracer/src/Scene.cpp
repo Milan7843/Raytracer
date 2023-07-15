@@ -526,7 +526,10 @@ void Scene::drawSelected(AbstractShader* shader)
 		for (Mesh& mesh : model.getMeshes())
 		{
 			if (mesh.getID() == currentlySelectedObject)
+			{
+				model.prepareForDraw(shader);
 				mesh.draw(shader, (Scene*)this);
+			}
 		}
 	}
 
@@ -740,6 +743,7 @@ void Scene::markSelected(unsigned int objectID)
 	if (!hasObjectSelected())
 	{
 		currentlySelectedObject = objectID;
+		std::cout << "selected " << currentlySelectedObject << std::endl;
 		return;
 	}
 
@@ -752,6 +756,7 @@ void Scene::markSelected(unsigned int objectID)
 		objectID = dynamic_cast<Mesh*>(selectedObject)->getModelID();
 	}
 	currentlySelectedObject = objectID;
+	std::cout << "selected " << currentlySelectedObject << std::endl;
 }
 
 void Scene::drawCurrentlySelectedObjectInterface()
