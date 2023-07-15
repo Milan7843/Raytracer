@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Scene.h"
 
 Camera::Camera()
 {
@@ -81,50 +82,6 @@ float Camera::getFov()
 	return fov;
 }
 
-
-bool Camera::mouseCallback(GLFWwindow* window, double xpos, double ypos)
-{
-	// Sets the mouse offset by frame appropriately for the first frame
-	if (firstMouse)
-	{
-		lastx = xpos;
-		lasty = ypos;
-		firstMouse = false;
-	}
-
-	float xoffset = xpos - lastx;
-	float yoffset = lasty - ypos; // reversed since y-coordinates range from bottom to top
-	lastx = xpos;
-	lasty = ypos;
-
-	if (xoffset == 0.0f && yoffset == 0.0f)
-	{
-		// No change in camera direction
-		return false;
-	}
-
-	xoffset *= sensitivity * 0.1f;
-	yoffset *= sensitivity * 0.1f;
-
-	// Applying rotation
-	yaw += xoffset;
-	pitch += yoffset;
-	if (pitch > 89.0f)
-		pitch = 89.0f;
-	if (pitch < -89.0f)
-		pitch = -89.0f;
-
-	// Setting the new vectors
-	glm::vec3 direction;
-	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	direction.y = sin(glm::radians(pitch));
-	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	forward = glm::normalize(direction);
-
-	// The camera moved
-	return true;
-}
-
 void Camera::setAspectRatio(int width, int height)
 {
 	this->width = width;
@@ -166,13 +123,7 @@ float* Camera::getSensitivityPointer()
 	return &sensitivity;
 }
 
-void Camera::resetMouseOffset()
-{
-	firstMouse = true;
-}
-
-// Processes the input
-bool Camera::processInput(GLFWwindow* window, float deltaTime)
+bool Camera::processInputFirstPerson(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, float deltaTime)
 {
 	// Saving the previous camera position to compare to the new to determine if the camera moved
 	glm::vec3 prevPosition = position;
@@ -202,6 +153,135 @@ bool Camera::processInput(GLFWwindow* window, float deltaTime)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
+	// Handling mouse movement
+
+	if (xoffset == 0.0f && yoffset == 0.0f)
+	{
+		// No change in camera direction
+		return false;
+	}
+
+	xoffset *= sensitivity * 0.1f;
+	yoffset *= sensitivity * 0.1f;
+
+	// Applying rotation
+	yaw += xoffset;
+	pitch += yoffset;
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+
+	// Setting the new vectors
+	glm::vec3 direction;
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	forward = glm::normalize(direction);
+
+	// The camera moved
+	return true;
+
+	// Return that the camera moved if its position is not the same anymore
+	//return prevPosition != position;
+}
+
+bool Camera::processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, float deltaTime)
+{
+	// Saving the previous camera position to compare to the new to determine if the camera moved
+	glm::vec3 prevPosition = position;
+
+	bool shiftHeld{ glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS };
+
+	bool middleMouseHeld{ glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS };
+
+
+	glm::vec3 right{ glm::cross(forward, up) };
+	glm::vec3 localUp{ glm::cross(forward, right) };
+
+	xoffset *= sensitivity * 0.1f;
+	yoffset *= sensitivity * 0.1f;
+
+	if (middleMouseHeld)
+	{
+		// Movement
+		if (shiftHeld)
+		{
+			position -= right * (float)xoffset;
+			position += localUp * (float)yoffset;
+		}
+		// Rotate around object
+		else
+		{
+			// Applying rotation
+			yaw += xoffset;
+			pitch += yoffset;
+
+			if (pitch > 89.0f)
+				pitch = 89.0f;
+			if (pitch < -89.0f)
+				pitch = -89.0f;
+
+			// Distance to rotation point
+			float distToRotationPoint = glm::distance(this->getPosition(), scene.getRotationPoint());
+
+			// Direction to rotation point
+			glm::vec3 dirToRotationPoint{ calculateDirectionVector(yaw, pitch) };
+
+			position = scene.getRotationPoint() - dirToRotationPoint * distToRotationPoint;
+
+			// Setting the new vectors
+			glm::vec3 direction;
+			direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+			direction.y = sin(glm::radians(pitch));
+			direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+			forward = glm::normalize(direction);
+		}
+	}
+
 	// Return that the camera moved if its position is not the same anymore
 	return prevPosition != position;
+}
+
+void Camera::resetMouseOffset()
+{
+	firstMouse = true;
+}
+
+// Processes the input
+bool Camera::processInput(GLFWwindow* window, Scene& scene, double xpos, double ypos, float deltaTime)
+{
+	// Sets the mouse offset by frame appropriately for the first frame
+	if (firstMouse)
+	{
+		lastx = xpos;
+		lasty = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastx;
+	float yoffset = lasty - ypos; // reversed since y-coordinates range from bottom to top
+	lastx = xpos;
+	lasty = ypos;
+
+	if (currentMode == MovementMode::GLOBAL)
+	{
+		return processInputGlobal(window, scene, xpos, ypos, xoffset, yoffset, deltaTime);
+	}
+	return processInputFirstPerson(window, scene, xpos, ypos, xoffset, yoffset, deltaTime);
+}
+
+glm::vec3 Camera::calculateDirectionVector(float yaw, float pitch)
+{
+	glm::vec3 direction;
+
+	// Calculate the direction vector using spherical coordinates
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+	// Normalize the direction vector
+	direction = glm::normalize(direction);
+
+	return direction;
 }

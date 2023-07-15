@@ -132,7 +132,7 @@ int Application::Start()
 
     // Raytraced renderer
     Logger::log("Loading raytracing shader");
-    MultiComputeShader raytracingComputeShader(2, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
+    MultiComputeShader raytracingComputeShader(0, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
     //ComputeShader raytracingComputeShader("src/shader_src/raytraceComputeShaderSampledUpdated.shader");
     Renderer raytracingRenderer(raytracingComputeShader, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
@@ -207,10 +207,9 @@ int Application::Start()
             // Calling the mouse callback
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
-            shouldReRender |= sceneManager.getCurrentScene().getActiveCamera().mouseCallback(window, xpos, ypos);
 
             // Process camera movement input
-            shouldReRender |= sceneManager.getCurrentScene().getActiveCamera().processInput(window, deltaTime);
+            shouldReRender |= sceneManager.getCurrentScene().getActiveCamera().processInput(window, sceneManager.getCurrentScene(), xpos, ypos, deltaTime);
         }
 
         //std::cout << camera.getInformation() << std::endl;
@@ -387,8 +386,10 @@ void Application::generateScreenQuad()
 
 void Application::processInput(GLFWwindow* window)
 {
+    /*
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    */
 }
 
 void Application::generateAxesVAO()

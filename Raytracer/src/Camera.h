@@ -17,6 +17,14 @@
 
 #include "Logger.h"
 
+enum class MovementMode
+{
+	FIRST_PERSON,
+	GLOBAL
+};
+
+class Scene;
+
 class Camera
 {
 	/* Public members */
@@ -40,11 +48,7 @@ public:
 
 	// Process the input to the camera.
 	// Returns whether the camera moved.
-	bool processInput(GLFWwindow* window, float deltaTime);
-
-	// Callback for when the mouse is moved.
-	// Returns whether the camera moved.
-	bool mouseCallback(GLFWwindow* window, double xpos, double ypos);
+	bool processInput(GLFWwindow* window, Scene& scene, double xpos, double ypos, float deltaTime);
 
 	void setAspectRatio(int width, int height);
 
@@ -60,6 +64,12 @@ public:
 
 	/* Private members */
 private:
+	// Different movement modes
+	bool processInputFirstPerson(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, float deltaTime);
+	bool processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, float deltaTime);
+
+	glm::vec3 calculateDirectionVector(float yaw, float pitch);
+
 	// Camera postion data
 	glm::vec3 position = glm::vec3(4.0f, 3.5f, 1.5f);
 	glm::vec3 up;
@@ -76,4 +86,6 @@ private:
 	float sensitivity = 1.0f;
 	float fov = 40.0f;
 	float cameraSpeed = 1.0f;
+
+	MovementMode currentMode{ MovementMode::GLOBAL };
 };

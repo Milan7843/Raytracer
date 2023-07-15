@@ -743,7 +743,7 @@ void Scene::markSelected(unsigned int objectID)
 	if (!hasObjectSelected())
 	{
 		currentlySelectedObject = objectID;
-		std::cout << "selected " << currentlySelectedObject << std::endl;
+
 		return;
 	}
 
@@ -756,7 +756,6 @@ void Scene::markSelected(unsigned int objectID)
 		objectID = dynamic_cast<Mesh*>(selectedObject)->getModelID();
 	}
 	currentlySelectedObject = objectID;
-	std::cout << "selected " << currentlySelectedObject << std::endl;
 }
 
 void Scene::drawCurrentlySelectedObjectInterface()
@@ -773,7 +772,7 @@ void Scene::drawCurrentlySelectedObjectInterface()
 
 ImGuiEditorInterface* Scene::getSelectedObject()
 {
-	return getObjectById(currentlySelectedObject);
+	return getImGuiEditorInterfaceByID(currentlySelectedObject);
 }
 
 ContextMenuSource* Scene::getContextMenuSourceFromSelected()
@@ -788,12 +787,37 @@ ContextMenuSource* Scene::getContextMenuSourceFromSelected()
 
 	// If the newly selected object was the same mesh again, now we select the object instead
 	// TODO add supported context menus here
-	if (type != MODEL)
+	if (type != MODEL && type != MESH)
 	{
 		return nullptr;
 	}
 
 	return dynamic_cast<ContextMenuSource*>(selectedObject);
+}
+
+Object* Scene::getObjectFromSelected()
+{
+	return getObjectByIDtemp(currentlySelectedObject);
+}
+
+Object* Scene::getObjectByIDtemp(unsigned int objectID)
+{
+	if (!hasObjectSelected())
+	{
+		return nullptr;
+	}
+
+	ImGuiEditorInterface* selectedObject{ getSelectedObject() };
+	ObjectType type{ selectedObject->getType() };
+
+	// If the newly selected object was the same mesh again, now we select the object instead
+	// TODO add supported context menus here
+	if (type != MODEL && type != MESH)
+	{
+		return nullptr;
+	}
+
+	return dynamic_cast<Object*>(selectedObject);
 }
 
 ContextMenuSource* Scene::getContextMenuSourceByID(unsigned int objectID)
@@ -858,7 +882,7 @@ ContextMenuSource* Scene::getContextMenuSourceByID(unsigned int objectID)
 	return nullptr;
 }
 
-ImGuiEditorInterface* Scene::getObjectById(unsigned int objectID)
+ImGuiEditorInterface* Scene::getImGuiEditorInterfaceByID(unsigned int objectID)
 {
 	// TODO optimize not having to iterate over all objects every time this function is called by
 	// storing the pointer and only updating on a `markSelected` call
@@ -947,6 +971,11 @@ void Scene::updateBVH()
 BVH& Scene::getBVH()
 {
 	return bvh;
+}
+
+glm::vec3 Scene::getRotationPoint()
+{
+	return rotationPoint;
 }
 
 bool Scene::replace(std::string& str, const std::string& from, const std::string& to)

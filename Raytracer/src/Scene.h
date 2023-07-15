@@ -101,7 +101,10 @@ public:
 
 	ContextMenuSource* getContextMenuSourceByID(unsigned int objectID);
 
-	ImGuiEditorInterface* getObjectById(unsigned int objectID);
+	ImGuiEditorInterface* getImGuiEditorInterfaceByID(unsigned int objectID);
+
+	Object* getObjectFromSelected();
+	Object* getObjectByIDtemp(unsigned int objectID);
 
 	void renderContextMenus();
 
@@ -148,6 +151,8 @@ public:
 	BVH& getBVH();
 
 	unsigned int triangleCount{ 0 };
+
+	glm::vec3 getRotationPoint();
 
 private:
 
@@ -212,6 +217,8 @@ private:
 
 	// Replace part of a string with another string.
 	bool replace(std::string& str, const std::string& from, const std::string& to);
+
+	glm::vec3 rotationPoint{ glm::vec3(0.0f) };
 };
 
 #endif
