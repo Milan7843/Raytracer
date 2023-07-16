@@ -94,6 +94,8 @@ int Application::Start()
     Logger::log("Initializing scene");
     SceneManager sceneManager{};
 
+    sceneManager.setAspectRatio(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
     std::string lastLoadedSceneName{};
     FileUtility::readSavedSettings(lastLoadedSceneName);
 
@@ -106,8 +108,6 @@ int Application::Start()
     Callbacks& callbacks = Callbacks::getInstance();
     callbacks.bindSceneManager(&sceneManager);
     glfwSetScrollCallback(window, Callbacks::scrollCallback);
-
-    sceneManager.getCurrentScene().setAspectRatio(WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
     // Unused shaders... (should remove)
     //Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");

@@ -443,7 +443,7 @@ void ImGuiUserInterface::handleInput(GLFWwindow* window, Camera& camera)
 	// Enable/disable the ImGui GUI on key switch
 	if (glfwGetKey(window, interfaceToggleKey) == GLFW_PRESS && guiSwitchKeyPreviousState == GLFW_RELEASE)
 	{
-		imGuiEnabled = !imGuiEnabled;
+		//imGuiEnabled = !imGuiEnabled;
 
 		// If the GUI is enabled, 
 		if (imGuiEnabled)

@@ -52,6 +52,7 @@ void SceneManager::changeScene(const std::string& sceneName)
 	// and set the scene name to the new one
 	currentScene = loadedScene;
 	hasSceneLoaded = true;
+	getCurrentScene().setAspectRatio(width, height);
 }
 
 void SceneManager::revertChanges()
@@ -77,6 +78,8 @@ void SceneManager::newScene()
 	currentScene.addLight(directionalLight);
 
 	hasSceneLoaded = true;
+
+	getCurrentScene().setAspectRatio(width, height);
 }
 
 void SceneManager::loadAvailableScenesNames()
@@ -165,6 +168,13 @@ std::string SceneManager::scenePathToSceneName(std::string scenePath)
 void SceneManager::loadHDRI(const std::string& imageName)
 {
 	getCurrentScene().loadHDRI(imageName);
+}
+
+void SceneManager::setAspectRatio(unsigned int width, unsigned int height)
+{
+	this->width = width;
+	this->height = height;
+	getCurrentScene().setAspectRatio(width, height);
 }
 
 std::vector<std::string> SceneManager::split(const std::string& input, char delim)

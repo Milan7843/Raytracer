@@ -63,6 +63,8 @@ public:
 	// Set the HDRI in the currently active scene
 	void loadHDRI(const std::string& imageName);
 
+	void setAspectRatio(unsigned int width, unsigned int height);
+
 private:
 	// Keeps the current scene loaded in memory
 	Scene currentScene;
@@ -81,6 +83,10 @@ private:
 
 	// Split a string by the delimiter
 	std::vector<std::string> split(const std::string& input, char delim);
+
+	// Rendering size: only used for aspect ratio
+	unsigned int width{ 0 };
+	unsigned int height{ 0 };
 
 	// PATHS
 	const char* scenePath{ "scenes" };
