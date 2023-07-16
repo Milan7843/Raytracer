@@ -191,6 +191,8 @@ bool Camera::processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, d
 
 	bool middleMouseHeld{ glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS };
 
+	glm::vec3 toRotationPoint{ scene.getRotationPoint() - getPosition() };
+	float distanceToRotationPoint{ glm::dot(toRotationPoint, forward) };
 
 	glm::vec3 right{ glm::cross(forward, up) };
 	glm::vec3 localUp{ glm::cross(forward, right) };
@@ -203,8 +205,8 @@ bool Camera::processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, d
 		// Movement
 		if (shiftHeld)
 		{
-			position -= right * (float)xoffset * 0.1f;
-			position += localUp * (float)yoffset * 0.1f;
+			position -= right * (float)xoffset * 0.02f * glm::max(distanceToRotationPoint, 0.1f);
+			position += localUp * (float)yoffset * 0.02f * glm::max(distanceToRotationPoint, 0.1f);
 		}
 		// Rotate around object
 		else
@@ -234,7 +236,6 @@ bool Camera::processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, d
 			forward = calculateDirectionVector(yaw, pitch);
 
 			// Rotate around with offset
-			glm::vec3 toRotationPoint{ scene.getRotationPoint() - getPosition() };
 			toRotationPoint = glm::rotate(toRotationPoint, glm::radians(deltaPitch), right);
 			toRotationPoint = glm::rotate(toRotationPoint, -glm::radians(deltaYaw), glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -251,9 +252,8 @@ bool Camera::processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, d
 	}
 	else
 	{
-		position += forward * (float)yscroll * sensitivity * 0.3f;
+		position += forward * (float)yscroll * sensitivity * 0.2f * glm::max(distanceToRotationPoint, 0.1f);
 	}
-
 
 	// Return that the camera moved if its position is not the same anymore
 	return prevPosition != position;

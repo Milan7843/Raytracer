@@ -136,6 +136,9 @@ void OutlineRenderer::render(Scene& scene)
 
 	/* DRAWING BLUR */
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	glBindVertexArray(screenQuadVAO);
 
 	// Binding the shader which simply renders a texture over the entire screen
@@ -153,4 +156,6 @@ void OutlineRenderer::render(Scene& scene)
 
 	// Setting viewport size back to normal
 	glViewport(0, 0, width, height);
+
+	glDisable(GL_BLEND);
 }

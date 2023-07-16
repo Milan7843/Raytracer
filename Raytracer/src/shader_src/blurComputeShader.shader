@@ -25,9 +25,7 @@ void main()
 
     vec4 cummulativeSample = vec4(0.0);
 
-    float foundOutline = 0.0;
-
-    if (gl_GlobalInvocationID.x < 0 || gl_GlobalInvocationID.y < 0 || gl_GlobalInvocationID.x >= width || gl_GlobalInvocationID.y >= height)
+    if (gl_GlobalInvocationID.x < 1 || gl_GlobalInvocationID.y < 1 || gl_GlobalInvocationID.x >= width+1 || gl_GlobalInvocationID.y >= height+1)
         return;
 
     if (sampleOriginalTexture(gl_GlobalInvocationID.xy) == vec4(1.0, 1.0, 1.0, 1.0))
@@ -39,6 +37,9 @@ void main()
         return;
     }
 
+    float outlinesFound = 0;
+    float foundOutline = 0.0;
+
     for (int y = -blurSize * 2; y <= blurSize * 2; y++)
     {
         for (int x = -blurSize * 2; x <= blurSize * 2; x++)
@@ -48,12 +49,17 @@ void main()
             if (x*x + y*y < cutoff && 
                 sampleOriginalTexture(samplePosition) != vec4(0.0))
             {
+                outlinesFound++;
                 foundOutline = 1.0;
-                break;
             }
         }
     }
 
+    float outlineAlpha = 12.0;
+
+    float outlineStrength = min(outlinesFound, outlineAlpha) / outlineAlpha;
+    
+
     // Writing outline color
-    imageStore(blurredTexture, ivec2(gl_GlobalInvocationID.xy), foundOutline * vec4(outlineColor, 1.0));
+    imageStore(blurredTexture, ivec2(gl_GlobalInvocationID.xy)-ivec2(1,1), foundOutline * vec4(outlineColor, outlineStrength));
 }
