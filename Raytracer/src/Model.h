@@ -3,6 +3,7 @@
 #include "Object.h"
 #include "Material.h"
 #include "Mesh.h"
+#include "ShaderWritable.h"
 #include "gui/ContextMenuSource.h"
 
 #include <iostream>
@@ -15,7 +16,7 @@
 
 class Scene;
 
-class Model : public Object, public ContextMenuSource
+class Model : public Object, public ContextMenuSource, public ShaderWritable
 {
 public:
 	Model(std::string& name, std::vector<unsigned int>& meshMaterialIndices,

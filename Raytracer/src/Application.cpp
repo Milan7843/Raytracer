@@ -105,6 +105,7 @@ int Application::Start()
     // Setting the callback for window resizing and camera input
     Callbacks& callbacks = Callbacks::getInstance();
     callbacks.bindSceneManager(&sceneManager);
+    glfwSetScrollCallback(window, Callbacks::scrollCallback);
 
     sceneManager.getCurrentScene().setAspectRatio(WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
@@ -202,7 +203,7 @@ int Application::Start()
         processInput(window);
 
         // Check whether the UI is enabled
-        if (!userInterface.isEnabled() && currentRenderMode != ApplicationRenderMode::RAYTRACED)
+        if (!userInterface.isMouseOnGUI() && currentRenderMode != ApplicationRenderMode::RAYTRACED)
         {
             // Calling the mouse callback
             double xpos, ypos;

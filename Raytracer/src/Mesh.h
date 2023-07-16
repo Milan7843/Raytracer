@@ -5,7 +5,7 @@
 
 #include "CoordinateUtility.h"
 #include "Logger.h"
-#include "ImGuiEditorInterface.h"
+#include "Object.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -46,10 +46,10 @@ class BVH;
 
 class Model;
 
-class Mesh : public ImGuiEditorInterface, public ContextMenuSource
+class Mesh : public Object, public ContextMenuSource
 {
 public:
-	Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices,
+	Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices, glm::vec3 position,
 		unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex, unsigned int modelID);
 	~Mesh();
 
@@ -80,8 +80,6 @@ public:
 
 	// Draws this mesh using the active shader
 	void draw(AbstractShader* shader, Scene* scene);
-
-	glm::vec3 position{ glm::vec3(0.0f) };
 
 	unsigned int VAO, VBO, EBO;
 

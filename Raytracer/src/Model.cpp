@@ -261,6 +261,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCou
 	int beginTriangleCount = *triangleCount;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
+	glm::vec4 meshPositionVec4{ glm::vec4(0.0f) };
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
@@ -277,7 +278,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCou
 
 		// Putting the new vertex into the vertices vector
 		vertices.push_back(vertex);
+
+		// Calculating the average vertex position
+		meshPositionVec4 += vertex.position;
 	}
+
+	glm::vec3 meshPosition{ glm::vec3(meshPositionVec4.x, meshPositionVec4.y, meshPositionVec4.z) / (float)mesh->mNumVertices };
 
 	// Getting indices
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -297,7 +303,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCou
 
 	std::string meshName{ mesh->mName.C_Str() };
 
-	return Mesh(meshName, vertices, indices, beginTriangleCount, meshCount, mesh->mMaterialIndex, this->getID());
+	return Mesh(meshName, vertices, indices, meshPosition, beginTriangleCount, meshCount, mesh->mMaterialIndex, this->getID());
 }
 
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materialIndex, unsigned int meshCount, unsigned int* triangleCount)
@@ -305,6 +311,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 	int beginTriangleCount = *triangleCount;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
+	glm::vec4 meshPositionVec4{ glm::vec4(0.0f) };
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
@@ -321,7 +328,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 
 		// Putting the new vertex into the vertices vector
 		vertices.push_back(vertex);
+
+		// Calculating the average vertex position
+		meshPositionVec4 += vertex.position;
 	}
+
+	glm::vec3 meshPosition{ glm::vec3(meshPositionVec4.x, meshPositionVec4.y, meshPositionVec4.z) / (float)mesh->mNumVertices };
 
 	// Getting indices
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -370,7 +382,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 
 	std::string meshName{ mesh->mName.C_Str() };
 
-	return Mesh(meshName, vertices, indices, beginTriangleCount, meshCount, materialIndex, this->getID());
+	return Mesh(meshName, vertices, indices, meshPosition, beginTriangleCount, meshCount, materialIndex, this->getID());
 }
 
 

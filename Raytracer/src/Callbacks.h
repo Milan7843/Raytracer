@@ -20,6 +20,8 @@ public:
     void framebuffer_size_callbackImpl(GLFWwindow* window, int width, int height);
     static void mouseCallback(GLFWwindow* window, double xpos, double ypos);
     void mouseCallbackImpl(GLFWwindow* window, double xpos, double ypos);
+    static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+    void scrollCallbackImpl(GLFWwindow* window, double xoffset, double yoffset);
 
 private:
     static SceneManager* sceneManager;

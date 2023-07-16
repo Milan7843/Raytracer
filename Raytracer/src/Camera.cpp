@@ -123,7 +123,7 @@ float* Camera::getSensitivityPointer()
 	return &sensitivity;
 }
 
-bool Camera::processInputFirstPerson(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, float deltaTime)
+bool Camera::processInputFirstPerson(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, double xscroll, double yscroll, float deltaTime)
 {
 	// Saving the previous camera position to compare to the new to determine if the camera moved
 	glm::vec3 prevPosition = position;
@@ -173,11 +173,7 @@ bool Camera::processInputFirstPerson(GLFWwindow* window, Scene& scene, double xp
 		pitch = -89.0f;
 
 	// Setting the new vectors
-	glm::vec3 direction;
-	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	direction.y = sin(glm::radians(pitch));
-	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	forward = glm::normalize(direction);
+	forward = calculateDirectionVector(yaw, pitch);
 
 	// The camera moved
 	return true;
@@ -186,7 +182,7 @@ bool Camera::processInputFirstPerson(GLFWwindow* window, Scene& scene, double xp
 	//return prevPosition != position;
 }
 
-bool Camera::processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, float deltaTime)
+bool Camera::processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, double xscroll, double yscroll, float deltaTime)
 {
 	// Saving the previous camera position to compare to the new to determine if the camera moved
 	glm::vec3 prevPosition = position;
@@ -207,13 +203,22 @@ bool Camera::processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, d
 		// Movement
 		if (shiftHeld)
 		{
-			position -= right * (float)xoffset;
-			position += localUp * (float)yoffset;
+			position -= right * (float)xoffset * 0.1f;
+			position += localUp * (float)yoffset * 0.1f;
 		}
 		// Rotate around object
 		else
 		{
+			/*
+			glm::vec3 projection{ glm::dot(toRotationPoint, forward) * forward };
+			glm::vec3 offset{ toRotationPoint - projection };
+
+			std::cout << "offset: " << offset.x << ", " << offset.y << ", " << offset.z << std::endl;
+			*/
+
 			// Applying rotation
+			float yawBefore{ yaw };
+			float pitchBefore{ pitch };
 			yaw += xoffset;
 			pitch += yoffset;
 
@@ -222,22 +227,33 @@ bool Camera::processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, d
 			if (pitch < -89.0f)
 				pitch = -89.0f;
 
-			// Distance to rotation point
-			float distToRotationPoint = glm::distance(this->getPosition(), scene.getRotationPoint());
+			float deltaYaw{ yaw - yawBefore };
+			float deltaPitch{ pitch - pitchBefore };
 
-			// Direction to rotation point
-			glm::vec3 dirToRotationPoint{ calculateDirectionVector(yaw, pitch) };
+			// Recalculating the forward vector
+			forward = calculateDirectionVector(yaw, pitch);
 
-			position = scene.getRotationPoint() - dirToRotationPoint * distToRotationPoint;
+			// Rotate around with offset
+			glm::vec3 toRotationPoint{ scene.getRotationPoint() - getPosition() };
+			toRotationPoint = glm::rotate(toRotationPoint, glm::radians(deltaPitch), right);
+			toRotationPoint = glm::rotate(toRotationPoint, -glm::radians(deltaYaw), glm::vec3(0.0f, 1.0f, 0.0f));
 
-			// Setting the new vectors
-			glm::vec3 direction;
-			direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-			direction.y = sin(glm::radians(pitch));
-			direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-			forward = glm::normalize(direction);
+			position = scene.getRotationPoint() - toRotationPoint;
 		}
 	}
+
+	// Movement by scrolling
+	if (shiftHeld)
+	{
+		fov -= (float)yscroll * sensitivity;
+
+		fov = glm::clamp(fov, 10.0f, 120.0f);
+	}
+	else
+	{
+		position += forward * (float)yscroll * sensitivity * 0.3f;
+	}
+
 
 	// Return that the camera moved if its position is not the same anymore
 	return prevPosition != position;
@@ -264,11 +280,19 @@ bool Camera::processInput(GLFWwindow* window, Scene& scene, double xpos, double 
 	lastx = xpos;
 	lasty = ypos;
 
+	// Capturing the scroll deltas
+	double xscroll{ scrollDeltaX };
+	double yscroll{ scrollDeltaY };
+
+	// Resetting the scroll deltas
+	scrollDeltaX = 0.0;
+	scrollDeltaY = 0.0;
+
 	if (currentMode == MovementMode::GLOBAL)
 	{
-		return processInputGlobal(window, scene, xpos, ypos, xoffset, yoffset, deltaTime);
+		return processInputGlobal(window, scene, xpos, ypos, xoffset, yoffset, xscroll, yscroll, deltaTime);
 	}
-	return processInputFirstPerson(window, scene, xpos, ypos, xoffset, yoffset, deltaTime);
+	return processInputFirstPerson(window, scene, xpos, ypos, xoffset, yoffset, xscroll, yscroll, deltaTime);
 }
 
 glm::vec3 Camera::calculateDirectionVector(float yaw, float pitch)
@@ -284,4 +308,10 @@ glm::vec3 Camera::calculateDirectionVector(float yaw, float pitch)
 	direction = glm::normalize(direction);
 
 	return direction;
+}
+
+void Camera::scrollCallback(double xoffset, double yoffset)
+{
+	scrollDeltaX += xoffset;
+	scrollDeltaY += yoffset;
 }

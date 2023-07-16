@@ -364,7 +364,7 @@ src/models/plane.obj
 # Directional lights
 Directional light
 1 1 1
-0
+1
 -0.59 -1 -0.57
 0
 # Directional lights end

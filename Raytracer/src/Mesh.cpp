@@ -5,17 +5,19 @@
 #include "Model.h"
 
 
-Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices
+Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices, glm::vec3 position
     , unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex, unsigned int modelID)
     : name(name)
     , shaderArraybeginIndex(startIndex)
     , shaderMeshIndex(meshIndex)
     , materialIndex(materialIndex)
     , modelID(modelID)
-    , ImGuiEditorInterface()
+    , Object()
+    , ContextMenuSource()
 {
     this->vertices = vertices;
     this->indices = indices;
+    this->position = position;
     setupMesh();
     setType(MESH);
 }

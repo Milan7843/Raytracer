@@ -2,6 +2,7 @@
 
 #include "ShaderWritable.h"
 #include "ImGuiUtility.h"
+#include "ImGuiEditorInterface.h"
 
 #include <glm/glm.hpp>
 #include <string>
@@ -12,7 +13,9 @@
 // Forward declaration of the Shader class
 class AbstractShader;
 
-class Material : public ShaderWritable
+class Scene;
+
+class Material : public ShaderWritable, public ImGuiEditorInterface
 {
 public:
 	// Default constructor for new material

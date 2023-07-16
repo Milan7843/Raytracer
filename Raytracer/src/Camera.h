@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -62,11 +63,14 @@ public:
 	float* getFovPointer();
 	float* getSensitivityPointer();
 
+	void scrollCallback(double xoffset, double yoffset);
+
 	/* Private members */
 private:
+
 	// Different movement modes
-	bool processInputFirstPerson(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, float deltaTime);
-	bool processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, float deltaTime);
+	bool processInputFirstPerson(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, double xscroll, double yscroll, float deltaTime);
+	bool processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, double xscroll, double yscroll, float deltaTime);
 
 	glm::vec3 calculateDirectionVector(float yaw, float pitch);
 
@@ -86,6 +90,9 @@ private:
 	float sensitivity = 1.0f;
 	float fov = 40.0f;
 	float cameraSpeed = 1.0f;
+
+	double scrollDeltaX{ 0.0 };
+	double scrollDeltaY{ 0.0 };
 
 	MovementMode currentMode{ MovementMode::GLOBAL };
 };

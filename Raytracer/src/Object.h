@@ -5,11 +5,11 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "shaders/AbstractShader.h"
-#include "ShaderWritable.h"
+#include "ImGuiEditorInterface.h"
 
 #include "Logger.h"
 
-class Object : public ShaderWritable
+class Object : public ImGuiEditorInterface
 {
 public:
 
@@ -33,18 +33,19 @@ public:
 	// Draw this object given the shader
 	virtual void draw(AbstractShader* shader);
 
-	// Write this object's data to the given shader
-	virtual bool writeToShader(AbstractShader* shader, unsigned int ssbo);
-
 	glm::vec3* getPositionPointer();
 	glm::vec3* getRotationPointer();
 	glm::vec3* getScalePointer();
+
+	glm::vec3 getPosition();
+	glm::vec3 getRotation();
+	glm::vec3 getScale();
 
 	std::string& getName();
 
 protected:
 	// Abstract class, no need to instantiate this class
-	Object() : ShaderWritable() {}
+	Object() : ImGuiEditorInterface() {}
 	virtual ~Object() {}
 
 	// Generate and get the rotation matrix

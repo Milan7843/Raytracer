@@ -3,9 +3,8 @@
 #include <vector>
 
 #include "../shaders/AbstractShader.h"
-#include "ImGuiEditorInterface.h"
 
-class ShaderWritable : public ImGuiEditorInterface
+class ShaderWritable
 {
 public:
 	bool hasWrittenToShader(AbstractShader* shader)
@@ -31,7 +30,7 @@ public:
 
 protected:
 	// Abstract class, no need to instantiate this class
-	ShaderWritable() : ImGuiEditorInterface() {}
+	ShaderWritable() {}
 	virtual ~ShaderWritable() {}
 
 private:

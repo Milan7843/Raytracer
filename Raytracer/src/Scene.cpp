@@ -635,7 +635,7 @@ void Scene::writeObjectsToShader(AbstractShader* shader)
 		for (Mesh& mesh : model.getMeshes())
 		{
 			ShaderMesh shaderMesh{
-				mesh.position,
+				mesh.getPosition(),
 				mesh.getMaterialIndex(),
 				transformation
 			};
@@ -743,19 +743,25 @@ void Scene::markSelected(unsigned int objectID)
 	if (!hasObjectSelected())
 	{
 		currentlySelectedObject = objectID;
-
-		return;
 	}
-
-	// Getting a pointer to the selected object
-	ImGuiEditorInterface* selectedObject{ getSelectedObject() };
-
-	// If the newly selected object was the same mesh again, now we select the object instead
-	if (objectID == currentlySelectedObject && selectedObject->getType() == MESH)
+	else
 	{
-		objectID = dynamic_cast<Mesh*>(selectedObject)->getModelID();
+		// Getting a pointer to the selected object
+		ImGuiEditorInterface* selectedObject{ getSelectedObject() };
+
+		// If the newly selected object was the same mesh again, now we select the object instead
+		if (objectID == currentlySelectedObject && selectedObject->getType() == MESH)
+		{
+			objectID = (dynamic_cast<Mesh*>(selectedObject))->getModelID();
+		}
+		currentlySelectedObject = objectID;
 	}
-	currentlySelectedObject = objectID;
+
+	Object* object{ getObjectFromSelected() };
+	if (object != nullptr)
+	{
+		rotationPoint = *object->getPositionPointer();
+	}
 }
 
 void Scene::drawCurrentlySelectedObjectInterface()
@@ -797,10 +803,10 @@ ContextMenuSource* Scene::getContextMenuSourceFromSelected()
 
 Object* Scene::getObjectFromSelected()
 {
-	return getObjectByIDtemp(currentlySelectedObject);
+	return getObjectByID(currentlySelectedObject);
 }
 
-Object* Scene::getObjectByIDtemp(unsigned int objectID)
+Object* Scene::getObjectByID(unsigned int objectID)
 {
 	if (!hasObjectSelected())
 	{

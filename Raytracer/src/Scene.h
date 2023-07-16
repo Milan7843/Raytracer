@@ -104,7 +104,7 @@ public:
 	ImGuiEditorInterface* getImGuiEditorInterfaceByID(unsigned int objectID);
 
 	Object* getObjectFromSelected();
-	Object* getObjectByIDtemp(unsigned int objectID);
+	Object* getObjectByID(unsigned int objectID);
 
 	void renderContextMenus();
 

@@ -12,17 +12,18 @@
 
 #include "../shaders/AbstractShader.h"
 #include "../ShaderWritable.h"
+#include "../Object.h"
 
 #include "../CoordinateUtility.h"
 
-class Light : public ShaderWritable
+class Light : public Object, public ShaderWritable
 {
 public:
-	bool writeToShader(AbstractShader* shader);
+	virtual bool writeToShader(AbstractShader* shader);
 	bool writePositionToShader(AbstractShader* shader);
 
 	// Write this light to the given filestream
-	virtual void writeDataToStream(std::ofstream& filestream);
+	void writeDataToStream(std::ofstream& filestream) override;
 
 	void setIndex(unsigned int index);
 
@@ -31,16 +32,11 @@ public:
 	float* getIntensityPointer();
 	float* getShadowSoftnessPointer();
 
-	std::string& getName();
-
 	~Light();
 protected:
 	Light(const std::string& name, glm::vec3 position, glm::vec3 color, float intensity, float shadowSoftness);
 	unsigned int index{ 0 };
-	glm::vec3 position{ glm::vec3(0.0f) };
 	glm::vec3 color{ glm::vec3(0.0f) };
 	float intensity{ 1.0f };
 	float shadowSoftness{ 0.0f };
-
-	std::string name;
 };

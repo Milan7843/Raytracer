@@ -1,10 +1,5 @@
 #include "Object.h"
 
-bool Object::writeToShader(AbstractShader* shader, unsigned int ssbo)
-{
-	return false;
-}
-
 void Object::writeDataToStream(std::ofstream& filestream)
 {
 	filestream << getName() << "\n";
@@ -74,6 +69,21 @@ glm::vec3* Object::getRotationPointer()
 glm::vec3* Object::getScalePointer()
 {
 	return &scaleVector;
+}
+
+glm::vec3 Object::getPosition()
+{
+	return position;
+}
+
+glm::vec3 Object::getRotation()
+{
+	return rotation;
+}
+
+glm::vec3 Object::getScale()
+{
+	return scaleVector;
 }
 
 std::string& Object::getName()

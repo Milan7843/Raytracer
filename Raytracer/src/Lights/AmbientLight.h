@@ -13,7 +13,6 @@ public:
 
 	virtual bool drawInterface(Scene& scene);
 
-	// Write all the data of this directional light into the given shader
-	virtual bool writeToShader(AbstractShader* shader);
+	bool writeToShader(AbstractShader* shader) override;
 };
 
