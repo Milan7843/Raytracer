@@ -16,7 +16,7 @@
 */
 
 // Window size
-const int WIDTH = 1200, HEIGHT = 700;
+const int WIDTH = 1600, HEIGHT = 900;
 
 int main()
 {

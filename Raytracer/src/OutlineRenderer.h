@@ -22,15 +22,16 @@ public:
 	OutlineRenderer(unsigned int width, unsigned int height, unsigned int screenQuadVAO);
 	~OutlineRenderer();
 
-	// Set up everything needed for outline rendering
-	void setup();
-
 	// Render an outline for the given objects
 	void render(Scene& scene);
 
+	// Set the resolution the outline renderer is rendering at
+	void setResolution(unsigned int width, unsigned int height);
 
 
 private:
+
+	void deleteBuffers();
 
 	glm::vec3 outlineColor{ glm::vec3(0.9f, 0.3f, 0.8f) };
 
@@ -45,12 +46,12 @@ private:
 	unsigned int blurTexture{ 0 };
 
 	// Window parameters
-	unsigned int width;
-	unsigned int height;
+	unsigned int width{ 0 };
+	unsigned int height{ 0 };
 
 	// Texture parameters
-	const unsigned int textureWidth{ 1200 };
-	const unsigned int textureHeight{ 700 };
+	unsigned int textureWidth{ 0 };
+	unsigned int textureHeight{ 0 };
 
 	// The shader to render the objects to the textures
 	Shader objectRenderShader;

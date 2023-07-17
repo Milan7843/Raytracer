@@ -165,6 +165,21 @@
     <ClCompile Include="src\gui\ContextMenuSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\GraphEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImCurveEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGradient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGuizmo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImSequencer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -1407,6 +1422,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\ContextMenuSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImZoomSlider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\GraphEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImCurveEdit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGradient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGuizmo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImSequencer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

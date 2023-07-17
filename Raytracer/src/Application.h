@@ -78,4 +78,11 @@ private:
 	void processInput(GLFWwindow* window);
 
 	const char* saveFileName{ "saved_settings.save" };
+
+	void setupFramebuffer(glm::ivec2 renderedScreenSize);
+	void deleteFramebuffer();
+
+	unsigned int framebuffer{ 0 };
+	unsigned int screenTexture{ 0 };
+	unsigned int depthBuffer{ 0 };
 };

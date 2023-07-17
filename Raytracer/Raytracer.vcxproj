@@ -19,6 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\GraphEditor.cpp" />
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImCurveEdit.cpp" />
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGradient.cpp" />
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGuizmo.cpp" />
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImSequencer.cpp" />
     <ClCompile Include="src\gui\ContextMenuSource.cpp" />
     <ClCompile Include="src\Shaders\ComputeShaderInterface.cpp" />
     <ClCompile Include="src\Shaders\ComputeShaderInterface.h" />
@@ -71,6 +76,12 @@
     <ClCompile Include="src\Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\GraphEditor.h" />
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImCurveEdit.h" />
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGradient.h" />
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGuizmo.h" />
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImSequencer.h" />
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImZoomSlider.h" />
     <ClInclude Include="src\gui\ContextMenuSource.h" />
     <ClInclude Include="src\shaders\ShaderInterface.h" />
     <ClInclude Include="src\shaders\MultiComputeShader.h" />
@@ -726,12 +737,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)/src;$(ProjectDir)/src/file_handling;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)/include</IncludePath>
+    <IncludePath>$(ProjectDir)/include/imgui;$(ProjectDir)/src;$(ProjectDir)/src/file_handling;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)/include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)/libs</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)/src;$(ProjectDir)/src/file_handling;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)/include</IncludePath>
+    <IncludePath>$(ProjectDir)/include/imgui;$(ProjectDir)/src;$(ProjectDir)/src/file_handling;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)/include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)/libs</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

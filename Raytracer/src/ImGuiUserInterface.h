@@ -22,6 +22,8 @@
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+#include "imguizmo/ImGuizmo.h"
+
 #include "ImGuiUtility.h"
 #include "Scene.h"
 #include "SceneManager.h"
@@ -47,7 +49,8 @@ public:
 		Camera& camera,
 		Renderer& renderer,
 		ApplicationRenderMode& applicationRenderMode,
-		ContextMenuSource* contextMenuSource);
+		ContextMenuSource* contextMenuSource,
+		unsigned int screenTexture);
 
 	void handleInput(GLFWwindow* window, Camera& camera);
 
@@ -56,11 +59,34 @@ public:
 	// Get whether the mouse is currently on the GUI
 	bool isMouseOnGUI();
 
+	// Get whether the mouse is currently on the rendered screen
+	bool isMouseOnRenderedScreen();
+
+	// Get the position of the mouse ([0,1], [0,1])
+	glm::vec2 getMousePosition();
+
+	// Get the coordinates of the mouse (pixel index x and y)
+	glm::ivec2 getMouseCoordinates();
+
+	// Get the size of the screen we are rendering to
+	glm::ivec2 getRenderedScreenSize();
+
 private:
 	bool imGuiEnabled = true;
 	unsigned int guiSwitchKeyPreviousState = 0;
 
 	unsigned int interfaceToggleKey = GLFW_KEY_TAB;
+
+	glm::ivec2 mouseCoordinates{ glm::ivec2(0) };
+	glm::vec2 mousePosition{ glm::vec2(0) };
+	glm::ivec2 renderedScreenSize{ glm::ivec2(0) };
+
+	void drawGUI(GLFWwindow* window,
+		SceneManager& sceneManager,
+		Camera& camera,
+		Renderer& renderer,
+		ApplicationRenderMode& applicationRenderMode,
+		ContextMenuSource* contextMenuSource);
 
 	// Format a number of seconds
 	std::string formatTime(float time);
@@ -70,6 +96,21 @@ private:
 
 	// Draw the help menu window
 	void drawHelpMenu();
+
+	void drawSceneEditor(GLFWwindow* window,
+		SceneManager& sceneManager,
+		Camera& camera,
+		Renderer& renderer,
+		ApplicationRenderMode& applicationRenderMode,
+		ContextMenuSource* contextMenuSource);
+
+	// Draw the main menu bar
+	void drawMenuBar(GLFWwindow* window,
+		SceneManager& sceneManager,
+		Camera& camera,
+		Renderer& renderer,
+		ApplicationRenderMode& applicationRenderMode,
+		ContextMenuSource* contextMenuSource);
 
 	// Represent a material using ImGui
 	void drawMaterials(Scene& scene);

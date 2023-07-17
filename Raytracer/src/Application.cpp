@@ -11,6 +11,7 @@ Application::Application(unsigned int WIDTH, unsigned int HEIGHT)
 
 Application::~Application()
 {
+    deleteFramebuffer();
     Logger::log("Application instance destroyed");
 }
 
@@ -91,10 +92,12 @@ int Application::Start()
     SceneFileSaver::writeSceneToFile(scene, std::string("Scene 1 - testing"));
     */
 
+    glm::ivec2 renderedScreenSize{ glm::ivec2(0) };
+
     Logger::log("Initializing scene");
     SceneManager sceneManager{};
 
-    sceneManager.setAspectRatio(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+    sceneManager.setAspectRatio(renderedScreenSize.x, renderedScreenSize.y);
 
     std::string lastLoadedSceneName{};
     FileUtility::readSavedSettings(lastLoadedSceneName);
@@ -181,10 +184,14 @@ int Application::Start()
 
     ContextMenuSource* contextMenuSource{ nullptr };
 
+    setupFramebuffer(glm::ivec2(0));
+
     while (!glfwWindowShouldClose(window))
     {
-        // Setting viewport size
-        glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+        // Setting viewport size to the rendered screen size
+        glViewport(0, 0, renderedScreenSize.x, renderedScreenSize.y);
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -199,18 +206,30 @@ int Application::Start()
         if (frame % 10 == 0 && false)
             std::cout << "FPS: " << 1.0f / deltaTime << std::endl;
 
+        if (userInterface.getRenderedScreenSize() != renderedScreenSize)
+        {
+            renderedScreenSize = userInterface.getRenderedScreenSize();
+            // The screen size was updated
+            sceneManager.getCurrentScene().setAspectRatio(renderedScreenSize.x, renderedScreenSize.y);
+            outlineRenderer.setResolution(renderedScreenSize.x, renderedScreenSize.y);
+            objectScreenSelector.setResolution(renderedScreenSize.x, renderedScreenSize.y);
+            raytracingRenderer.setResolution(renderedScreenSize.x, renderedScreenSize.y);
+            setupFramebuffer(renderedScreenSize);
+        }
+
+        int mouseX{ userInterface.getMouseCoordinates().x };
+        int mouseY{ userInterface.getMouseCoordinates().y };
+
+
         // Input
         processInput(window);
 
         // Check whether the UI is enabled
-        if (!userInterface.isMouseOnGUI() && currentRenderMode != ApplicationRenderMode::RAYTRACED)
+        if (userInterface.isMouseOnRenderedScreen() && currentRenderMode != ApplicationRenderMode::RAYTRACED)
         {
-            // Calling the mouse callback
-            double xpos, ypos;
-            glfwGetCursorPos(window, &xpos, &ypos);
-
             // Process camera movement input
-            shouldReRender |= sceneManager.getCurrentScene().getActiveCamera().processInput(window, sceneManager.getCurrentScene(), xpos, ypos, deltaTime);
+            shouldReRender |= sceneManager.getCurrentScene().getActiveCamera().processInput(window,
+                sceneManager.getCurrentScene(), (double)mouseX, (double)mouseY, deltaTime);
         }
 
         //std::cout << camera.getInformation() << std::endl;
@@ -218,6 +237,7 @@ int Application::Start()
 
         // Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         raytracingRenderer.update(deltaTime, currentRenderMode == ApplicationRenderMode::REALTIME_RAYTRACED, shouldReRender, sceneManager.getCurrentScene());
@@ -228,7 +248,7 @@ int Application::Start()
             Shader* usedShader = &raytracedImageRendererShader;
 
             usedShader->use();
-            usedShader->setVector2("screenSize", WINDOW_SIZE_X, WINDOW_SIZE_Y);
+            usedShader->setVector2("screenSize", (float)renderedScreenSize.x, (float)renderedScreenSize.y);
             //usedShader->setVector3("cameraRotation", CoordinateUtility::vec3ToGLSLVec3(camera.getRotation()));
 
             // Making sure the pixel buffer is assigned for the raytracedImageRendererShader
@@ -242,7 +262,7 @@ int Application::Start()
         else
         {
             // Checking for a click on an object on mouse click and mouse not on GUI
-            if (userInterface.isEnabled() && !userInterface.isMouseOnGUI())
+            if (userInterface.isEnabled() && userInterface.isMouseOnRenderedScreen())
             {
                 bool leftMouse = leftMouseButtonState == GLFW_PRESS &&
                     glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE;
@@ -255,10 +275,8 @@ int Application::Start()
 
                 if (leftMouse)
                 {
-                    double xpos, ypos;
-                    glfwGetCursorPos(window, &xpos, &ypos);
-
-                    unsigned int objectClickedID = objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), xpos, ypos);
+                    unsigned int objectClickedID = objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), mouseX, mouseY);
+                    std::cout << "checking object clicked at " << mouseX << ", " << mouseY << std::endl;
 
                     // An object was clicked
                     // Using the data to select/deselect an object
@@ -294,17 +312,23 @@ int Application::Start()
             bvhHandler.draw(sceneManager.getCurrentScene(), raytracingRenderer.getBVHRenderMode());
 
             // Rendering a preview of the colours used to select an object by clicking on it
-            //objectScreenSelector.renderTexturePreview(sceneManager.getCurrentScene(), screenQuadVAO);
+            objectScreenSelector.renderTexturePreview(sceneManager.getCurrentScene(), screenQuadVAO);
         }
 
 
+        // Render to the screen again
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // Setting viewport size to full screen
+        glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
         userInterface.drawUserInterface(window,
             sceneManager,
             sceneManager.getCurrentScene().getActiveCamera(),
             raytracingRenderer,
             currentRenderMode,
-            contextMenuSource
+            contextMenuSource,
+            screenTexture
         );
 
         // Output
@@ -391,6 +415,56 @@ void Application::processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     */
+}
+
+void Application::setupFramebuffer(glm::ivec2 renderedScreenSize)
+{
+    // Cleaning up previous buffers
+    deleteFramebuffer();
+
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    glGenTextures(1, &screenTexture);
+
+
+    // Setting up the texture
+    glBindTexture(GL_TEXTURE_2D, screenTexture);
+
+    // Making it an empty image
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, renderedScreenSize.x, renderedScreenSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+    // Setting texture filter settings
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    // Generate and bind the depth buffer
+    glGenRenderbuffers(1, &depthBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+
+    // Set the storage for the depth buffer
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
+    // Attach the depth buffer to the framebuffer
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+
+    // Binding the texture to be drawn to
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, screenTexture, 0);
+
+    // Set the list of draw buffers (only draw to the first slot
+    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, drawBuffers);
+
+
+    // Unbinding the frame buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Application::deleteFramebuffer()
+{
+    glDeleteTextures(1, &screenTexture);
+    glDeleteFramebuffers(1, &framebuffer);
+    glDeleteRenderbuffers(1, &depthBuffer);
 }
 
 void Application::generateAxesVAO()

@@ -21,7 +21,7 @@ void Callbacks::framebuffer_size_callback(GLFWwindow* window, int width, int hei
 void Callbacks::framebuffer_size_callbackImpl(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
-    sceneManager->getCurrentScene().setAspectRatio(width, height);
+    //sceneManager->getCurrentScene().setAspectRatio(width, height);
 }
 
 void Callbacks::mouseCallback(GLFWwindow* window, double xpos, double ypos)

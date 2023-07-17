@@ -1,20 +1,22 @@
 #include "ObjectScreenSelector.h"
 
 ObjectScreenSelector::ObjectScreenSelector(unsigned int width, unsigned int height)
-	: width(width)
-	, height(height)
-	, objectColorShader("src/shader_src/solidColorVertexShader.shader", "src/shader_src/objectClickColoringShader.shader")
+	: objectColorShader("src/shader_src/solidColorVertexShader.shader", "src/shader_src/objectClickColoringShader.shader")
 	, textureRenderShader("src/shader_src/raymarchVertexShader.shader", "src/shader_src/screenTextureFragment.shader")
 {
-	setup();
+	setResolution(width, height);
 }
 
 ObjectScreenSelector::~ObjectScreenSelector()
 {
 }
 
-unsigned int ObjectScreenSelector::checkObjectClicked(Scene& scene, double x, double y)
+unsigned int ObjectScreenSelector::checkObjectClicked(Scene& scene, unsigned int x, unsigned int y)
 {
+	int framebufferBefore{ 0 };
+
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &framebufferBefore);
+
 	renderSceneToTexture(scene);
 
 	// Setting up for reading data
@@ -23,13 +25,15 @@ unsigned int ObjectScreenSelector::checkObjectClicked(Scene& scene, double x, do
 
 	// Reading data
 	std::vector<unsigned char> colorData(4);
-	glReadPixels((unsigned int)x, height-(unsigned int)y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, colorData.data());
+	glReadPixels(x, height-y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, colorData.data());
 
 	// Getting data
 	unsigned int objectID{ (unsigned int)colorData[0] };
 
-	// Unbinding the frame buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	std::cout << objectID << " at " << x << " " << y << std::endl;
+
+	// Rebinding the previous framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, framebufferBefore);
 
 	// Only found an object if objectID is not 0
 	return objectID;
@@ -58,8 +62,14 @@ void ObjectScreenSelector::renderTexturePreview(Scene& scene, unsigned int scree
 	glBindBuffer(GL_VERTEX_ARRAY, 0);
 }
 
-void ObjectScreenSelector::setup()
+void ObjectScreenSelector::setResolution(unsigned int width, unsigned int height)
 {
+	deleteBuffers();
+
+	// Saving the new parameters
+	this->width = width;
+	this->height = height;
+
 	glGenFramebuffers(1, &framebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
@@ -97,6 +107,12 @@ void ObjectScreenSelector::setup()
 
 	// Unbinding the frame buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void ObjectScreenSelector::deleteBuffers()
+{
+	glDeleteTextures(1, &objectClickTexture);
+	glDeleteFramebuffers(1, &framebuffer);
 }
 
 void ObjectScreenSelector::renderSceneToTexture(Scene& scene)

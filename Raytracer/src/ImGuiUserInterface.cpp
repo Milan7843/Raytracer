@@ -32,7 +32,8 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	Camera& camera,
 	Renderer& renderer,
 	ApplicationRenderMode& applicationRenderMode,
-	ContextMenuSource* contextMenuSource)
+	ContextMenuSource* contextMenuSource,
+	unsigned int screenTexture)
 {
 	if (!imGuiEnabled)
 	{
@@ -46,6 +47,24 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
+	ImGuiIO& io = ImGui::GetIO(); // Retrieve the ImGuiIO object
+
+	/*
+	ImGuizmo::BeginFrame();
+
+	// Set up the ImGuizmo parameters for the move gizmo
+	ImGuizmo::SetOrthographic(false);
+	ImGuizmo::SetDrawlist();
+	ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+
+	glm::mat4 objectMatrix(1.0f);
+
+	ImGuizmo::Manipulate(
+		glm::value_ptr(camera.getViewMatrix()), glm::value_ptr(camera.getProjectionMatrix()),
+		ImGuizmo::TRANSLATE, ImGuizmo::WORLD, glm::value_ptr(objectMatrix));
+	*/
+
+
 	bool showDemoWindow{ false };
 	if (showDemoWindow)
 	{
@@ -55,6 +74,203 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 		return;
 	}
 
+	if (false)
+		drawGUI(
+			window,
+			sceneManager,
+			camera,
+			renderer,
+			applicationRenderMode,
+			contextMenuSource
+		);
+
+	drawMenuBar(
+		window,
+		sceneManager,
+		camera,
+		renderer,
+		applicationRenderMode,
+		contextMenuSource
+	);
+
+	float windowWidth{ io.DisplaySize.x };
+	float windowHeight{ io.DisplaySize.y };
+	float topAreaHeight{ windowHeight * 0.1f };
+	float rightAreaWidth{ windowWidth * 0.2f };
+	float bottomAreaHeight{ windowHeight * 0.2f };
+	float centralAreaWidth{ windowWidth - rightAreaWidth };
+	float centralAreaHeight{ windowHeight - bottomAreaHeight - topAreaHeight };
+
+	// Create the layout for the user interface
+	//ImGui::SetNextWindowPos(ImVec2(0, 0));
+	//ImGui::SetNextWindowSize(ImVec2(windowWidth, windowHeight));
+	//ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+
+	// Top area
+	if (false)
+	{
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::SetNextWindowSize(ImVec2(windowWidth, topAreaHeight));
+		ImGui::Begin("Top Area", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+		// Add your ImGui widgets for the top area here
+		ImGui::End();
+	}
+
+	// Central area for rendering
+	ImGui::SetNextWindowPos(ImVec2(0, topAreaHeight));
+	ImGui::SetNextWindowSize(ImVec2(windowWidth - rightAreaWidth, windowHeight - bottomAreaHeight - topAreaHeight));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::Begin("Central Area", nullptr, ImGuiWindowFlags_NoDecoration);
+
+
+	// Add your rendering code here using OpenGL (e.g., glBindTexture, glDrawArrays, etc.)
+
+	//ImVec2 windowMin = ImVec2(0.0f + 5.0f, std::floor(topAreaHeight + 23.0f));
+	//ImVec2 windowMax = ImVec2(std::floor(windowMin.x + centralAreaWidth - 10.0f), std::floor(windowMin.y + centralAreaHeight - 29.0f));
+	ImVec2 windowMin = ImVec2(1.0f, std::floor(topAreaHeight + 1.0f));
+	ImVec2 windowMax = ImVec2(std::floor(windowMin.x + centralAreaWidth - 2.0f), std::floor(windowMin.y + centralAreaHeight - 2.0f));
+
+	ImVec2 centralAreaSize{ (windowMax.x - windowMin.x), (windowMax.y - windowMin.y) };
+
+	ImVec2 uvMin = ImVec2(0.0f, 1.0f); // UV coordinates for the top-left corner of the texture
+	ImVec2 uvMax = ImVec2(1.0f, 0.0f); // UV coordinates for the bottom-right corner of the texture
+
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+	drawList->AddImage((void*)(intptr_t)screenTexture, windowMin, windowMax, uvMin, uvMax);
+
+	std::cout << centralAreaSize.x << ", " << centralAreaSize.y << std::endl;
+
+	// No padding
+	ImGui::PopStyleVar(1);
+
+	// Finding the pixel coordinates of the mouse
+	ImVec2 mousePos = ImGui::GetIO().MousePos;
+	mousePos.x -= windowMin.x;
+	mousePos.y -= windowMin.y;
+
+	mouseCoordinates = glm::ivec2(
+		(unsigned int)std::floor(mousePos.x),
+		(unsigned int)std::floor(mousePos.y)
+	);
+
+	// Finding size of the rendered screen
+	renderedScreenSize = glm::ivec2(
+		(unsigned int)std::floor(windowMax.x - windowMin.x),
+		(unsigned int)std::floor(windowMax.y - windowMin.y)
+	);
+
+	// Finding the [0-1] coordinates of the mouse
+	mousePosition = glm::vec2(
+		(unsigned int)std::floor(mousePos.x / (windowMax.x - windowMin.x)),
+		(unsigned int)std::floor(mousePos.y / (windowMax.y - windowMin.y))
+	);
+
+	// Right area
+	{
+		ImGui::SetNextWindowPos(ImVec2(windowWidth - rightAreaWidth, topAreaHeight));
+		ImGui::SetNextWindowSize(ImVec2(rightAreaWidth, windowHeight - topAreaHeight - bottomAreaHeight));
+		ImGui::Begin("Right Area", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+
+		drawSceneEditor(
+			window,
+			sceneManager,
+			camera,
+			renderer,
+			applicationRenderMode,
+			contextMenuSource
+		);
+
+		ImGui::End();
+	}
+
+	// Bottom area
+	{
+		ImGui::SetNextWindowPos(ImVec2(0, windowHeight - bottomAreaHeight));
+		ImGui::SetNextWindowSize(ImVec2(windowWidth, bottomAreaHeight));
+		ImGui::Begin("Bottom Area", nullptr, ImGuiWindowFlags_NoResize);
+		// Add your ImGui widgets for the bottom area here
+		ImGui::End();
+	}
+
+	//ImGui::End(); // End of "Main Window"
+
+	// If the context menu source exists
+	sceneManager.getCurrentScene().renderContextMenus();
+
+	// Rendering
+	ImGui::Render();
+	//int display_w, display_h;
+	//glfwGetFramebufferSize(window, &display_w, &display_h);
+	//glViewport(0, 0, display_w, display_h);
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void ImGuiUserInterface::handleInput(GLFWwindow* window, Camera& camera)
+{
+	// Enable/disable the ImGui GUI on key switch
+	if (glfwGetKey(window, interfaceToggleKey) == GLFW_PRESS && guiSwitchKeyPreviousState == GLFW_RELEASE)
+	{
+		//imGuiEnabled = !imGuiEnabled;
+
+		// If the GUI is enabled, 
+		if (imGuiEnabled)
+		{
+			// free the mouse
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+		// Otherwise,
+		else
+		{
+			// Lock the mouse
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			// Reset offset (the mouse may have moved which should not be registered as camera movement)
+			camera.resetMouseOffset();
+		}
+	}
+
+	guiSwitchKeyPreviousState = glfwGetKey(window, interfaceToggleKey);
+}
+
+bool ImGuiUserInterface::isEnabled()
+{
+	return imGuiEnabled;
+}
+
+bool ImGuiUserInterface::isMouseOnGUI()
+{
+	return ImGui::GetIO().WantCaptureMouse;
+}
+
+bool ImGuiUserInterface::isMouseOnRenderedScreen()
+{
+	return getMousePosition().x >= 0.0f
+		&& getMousePosition().x < 1.0f
+		&& getMousePosition().y >= 0.0f
+		&& getMousePosition().y < 1.0f;
+}
+
+glm::vec2 ImGuiUserInterface::getMousePosition()
+{
+	return mousePosition;
+}
+
+glm::ivec2 ImGuiUserInterface::getMouseCoordinates()
+{
+	return mouseCoordinates;
+}
+
+glm::ivec2 ImGuiUserInterface::getRenderedScreenSize()
+{
+	return renderedScreenSize;
+}
+
+void ImGuiUserInterface::drawGUI(GLFWwindow* window,
+	SceneManager& sceneManager,
+	Camera& camera,
+	Renderer& renderer,
+	ApplicationRenderMode& applicationRenderMode,
+	ContextMenuSource* contextMenuSource)
+{
 	ImGuiWindowFlags window_flags{ 0 };
 	window_flags |= ImGuiWindowFlags_MenuBar;
 	window_flags |= ImGuiWindowFlags_NoNavInputs;
@@ -65,9 +281,342 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	// Creating the GUI window
 	ImGui::Begin("Editor", &windowOpen, window_flags);
 
+	// Holds new scene name input
+
+	ImGui::Text("Press TAB to open or close this interface.");
+
+	/*
+	if (ImGui::Button("Render frame"))
+	{
+		renderer.render();
+	}
+	*/
+	if (ImGui::Button("Render frame in blocks"))
+	{
+		renderer.startBlockRender();
+	}
+
+	// Render time left indicators
+	ImGui::ProgressBar(renderer.getRenderProgress());
+	ImGui::Text("Render time left: ");
+	ImGui::SameLine();
+	ImGui::Text(formatTime(renderer.getTimeLeft()).c_str());
+
+	static std::string renderSaveFileName{ "" };
+	static bool renderSaveFileNameError = false;
+
+	if (ImGui::Button("Save render"))
+		ImGui::OpenPopup("##save_render_popup");
+
+	if (ImGui::BeginPopup("##save_render_popup"))
+	{
+		// Name input field
+		ImGui::InputText("Render name", &renderSaveFileName);
+		if (renderSaveFileNameError)
+			ImGui::Text("Invalid image name. Make sure it does not contain periods ('.'), slashes ('/') or backslashes ('\\'),\n"
+				"and it is not empty.");
+
+		if (ImGui::Button("Save"))
+		{
+			if (FileUtility::isValidInput(renderSaveFileName))
+			{
+				// Saving the render
+				FileUtility::saveRender(renderSaveFileName + ".png", renderer.getWidth(), renderer.getHeight(), renderer.getPixelBuffer());
+
+				// Empty input field
+				renderSaveFileName = {};
+				// Close error
+				renderSaveFileNameError = false;
+				// Then close the popup
+				ImGui::CloseCurrentPopup();
+			}
+			else
+			{
+				// Activating the error
+				renderSaveFileNameError = true;
+			}
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel"))
+		{
+			// Empty input field
+			renderSaveFileName = {};
+			// Close error
+			renderSaveFileNameError = false;
+			// Then close the popup
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+
+	ImGui::EndTabBar();
+
+
+	// Drawing the selected object
+	ImGui::Separator();
+	sceneManager.getCurrentScene().drawCurrentlySelectedObjectInterface();
+
+	ImGui::End();
+}
+
+std::string ImGuiUserInterface::formatTime(float time)
+{
+	int secondsTotal = (int)time;
+	int seconds = secondsTotal % 60;
+	int minutes = (secondsTotal / 60) % 60;
+	int hours = secondsTotal / 3600;
+
+	return std::format("{}h {}m {}s", hours, minutes, seconds);
+}
+
+void ImGuiUserInterface::drawRenderSettings(SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode)
+{
+	renderer.drawInterface();
+
+	ImGui::Checkbox("Use HDRI as background", sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer());
+	ImGuiUtility::drawHelpMarker("Only if enabled, the HDRI will be drawn as the background.\nThe HDRI will be shown in reflections either way");
+
+	int renderMode = (int)applicationRenderMode;
+	// Button to switch between raytraced and rasterized views
+    ImGui::RadioButton("Rasterized", &renderMode, 0); ImGui::SameLine();
+    ImGui::RadioButton("Raytraced", &renderMode, 1); ImGui::SameLine();
+    ImGui::RadioButton("Realtime raytraced", &renderMode, 2);
+	applicationRenderMode = (ApplicationRenderMode)renderMode;
+}
+
+void ImGuiUserInterface::drawHelpMenu()
+{
+	ImGui::BeginTabBar("help_menu_tab_bar");
+
+	ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+
+	if (ImGui::BeginTabItem("Scene##scene_help_tab"))
+	{
+		ImGui::Text(
+			"Everything exists inside one single scene at a time."
+			"This means all models, spheres, lights, materials, the HDRI and the camera "
+			"belong to the scene and will be saved and loaded with the scene."
+
+		);
+		if (ImGui::CollapsingHeader("Saving and loading"))
+		{
+			ImGui::Text(
+				"To save a scene, press the 'Scene' button on the top bar, and select 'Save'."
+				"This will save the scene to it's current name, which it will have if it was loaded in."
+				"In case the scene does not yet have a name, you must choose one to have it saved by."
+			);
+			ImGui::Text(
+				"By using the 'Save as' button in the same menu, the scene "
+				"will be copied under another name, but you will stay in the same scene."
+			);
+
+			ImGui::Separator();
+
+			ImGui::Text(
+				"In order to load a scene from the disk, press the 'Scene' button on the top bar, then hover over 'Open scene'."
+				"This will open a menu with the names of all scenes available on your disk."
+				"To choose one simply press its name and it will be loaded as the current scene."
+			);
+		}
+		if (ImGui::CollapsingHeader("Manually importing a scene"))
+		{
+			ImGui::Text(
+				"In order to manually import a scene from another location, place a valid scene file in the 'scenes' folder."
+				"It can then be loaded into the program using the usual loading method."
+			);
+		}
+		if (ImGui::CollapsingHeader("Loading an HDRI"))
+		{
+			ImGui::Text(
+				"In order to load an HDRI from the disk, navigate to the 'Scene editing' tab"
+				"and press the button labeled 'Set HDRI'."
+			);
+			ImGui::Text(
+				"If your HDRI does not show up here, make sure it is:"
+			);
+			ImGui::BulletText("An image file of PNG type.");
+			ImGui::BulletText("Inside of the 'HDRIs' folder.");
+		}
+		ImGui::EndTabItem();
+	}
+
+	if (ImGui::BeginTabItem("Objects##objects_help_tab"))
+	{
+		ImGui::Text(
+			"In order to do anything to the objects in the scene, navigate to the 'Scene editing' tab."
+		);
+
+		ImGui::Text(
+			"From there, you can select any object by clicking on the correct tab, then clicking on it."
+			"Doing this opens up an editor panel for the selected object below, and the selected object also receives an outline."
+			"To edit any of the values in this editor panel, you can"
+		);
+		ImGui::BulletText("Click for a dropdown");
+		ImGui::BulletText("Click and drag for a numerical value");
+		ImGui::BulletText("Click and drag for a slider");
+
+		ImGui::Text("Any numerical value van also be changed manually by holding down the Ctrl key and clicking it.");
+
+		if (ImGui::CollapsingHeader("Materials"))
+		{
+			ImGui::Text(
+				"These are the properties of the materials:"
+			);
+			ImGui::BulletText("Color: the base color of the material");
+			ImGui::BulletText("Emission: not currently implemented");
+			ImGui::BulletText("Reflectiveness: how much the material reflects light.");
+			ImGui::BulletText("Transparency: how much the material lets light pass through.");
+			ImGui::BulletText("Refractiveness: how much light is bent when passing through the material.");
+			ImGui::BulletText("Reflective diffusion: how much light may be scattered on reflecting, which acts to blur the reflection.");
+		}
+
+		ImGui::EndTabItem();
+	}
+
+	if (ImGui::BeginTabItem("Camera##camera_help_tab"))
+	{
+		ImGui::Text(
+			"There is always a single camera available to move around and look through."
+			"Rendering is also done through this camera's perspective."
+			"To change any of said camera's settings check out the 'Camera settings' tab in the 'Editor' panel."
+		);
+		if (ImGui::CollapsingHeader("Available settings"))
+		{
+			ImGui::BulletText("Sensitivity: how fast the camera rotates with mouse movement.");
+			ImGui::BulletText("Movement speed: how fast the camera moves on keyboard input.");
+			ImGui::BulletText("Field of view: the wideness of the lens in degrees.");
+		}
+		if (ImGui::CollapsingHeader("Moving the camera"))
+		{
+			ImGui::Text("To move the camera, use the following keys:");
+			ImGui::BulletText("'W' to go forward.");
+			ImGui::BulletText("'S' to go backward.");
+			ImGui::BulletText("'A' to go left.");
+			ImGui::BulletText("'D' to go right.");
+			ImGui::BulletText("'Q' to go up.");
+			ImGui::BulletText("'E' to go down.");
+			ImGui::Text("Additionaly, you can hold the shift key to temporarily increase the camera's speed.");
+		}
+		ImGui::EndTabItem();
+	}
+
+	ImGui::PopTextWrapPos();
+
+	ImGui::EndTabBar();
+}
+
+void ImGuiUserInterface::drawSceneEditor(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode, ContextMenuSource* contextMenuSource)
+{
+	// Creating the tab bar
+	ImGui::BeginTabBar("full_tab_bar");
+
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.22f, 0.4f, 0.48f, 0.2f));
+
+	// Tab for editing any scene objects
+	if (ImGui::BeginTabItem("Scene editing"))
+	{
+		if (ImGui::Button("Set HDRI"))
+			ImGui::OpenPopup("##open_hdri_popup");
+
+		static bool updateHDRINames = true;
+
+		if (ImGui::BeginPopup("##open_hdri_popup"))
+		{
+			// Stop updating while the popup is open
+			updateHDRINames = false;
+
+			// Showing all possible scene names
+			for (std::string& name : sceneManager.getAvailableHDRINames(updateHDRINames))
+			{
+				// Making a button which loads the scene on click
+				if (ImGui::Button(name.c_str()))
+				{
+					// Setting the HDRI
+					sceneManager.loadHDRI(name);
+
+					// Update next time
+					updateHDRINames = true;
+
+					// Closing the popup
+					ImGui::CloseCurrentPopup();
+					break;
+				}
+			}
+			ImGui::EndPopup();
+		}
+
+
+		ImGui::BeginTabBar("scene_edit_tab_bar");
+		ImGui::BeginGroup();
+
+		/*
+		ImGuiTabItemFlags_ objectsFlag{ ImGuiTabItemFlags_None };
+		ImGuiTabItemFlags_ materialsFlag{ ImGuiTabItemFlags_None };
+		ImGuiTabItemFlags_ lightsFlag{ ImGuiTabItemFlags_None };
+
+		// Automatically open correct tab on selection
+		if (newObjectSelected)
+		{
+			std::cout << selectedObjectType << std::endl;
+			switch (selectedObjectType)
+			{
+				// Model or sphere: open the objects tab
+				case 1: // model
+				case 2: // sphere
+					objectsFlag = ImGuiTabItemFlags_SetSelected;
+					break;
+			}
+		}
+		*/
+
+		//if (ImGui::BeginTabItem("Objects", (bool*)0, objectsFlag))
+		if (ImGui::BeginTabItem("Objects"))
+		{
+			drawObjects(sceneManager);
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem("Materials"))
+		{
+			drawMaterials(sceneManager.getCurrentScene());
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem("Lights"))
+		{
+			drawLights(sceneManager.getCurrentScene());
+			ImGui::EndTabItem();
+		}
+
+		ImGui::EndTabBar();
+		ImGui::EndGroup();
+		ImGui::EndTabItem();
+	}
+
+	// Tap for all settings related to rendering
+	if (ImGui::BeginTabItem("Render settings"))
+	{
+		ImGui::BeginGroup();
+		drawRenderSettings(sceneManager, camera, renderer, applicationRenderMode);
+		ImGui::EndGroup();
+		ImGui::EndTabItem();
+	}
+
+	// Camera settings (speed, fov etc.)
+	if (ImGui::BeginTabItem("Camera settings"))
+	{
+		ImGui::SliderFloat("Move speed", camera.getCameraSpeedPointer(), 0.1f, 10.0f);
+		ImGui::SliderFloat("Sensitivity", camera.getSensitivityPointer(), 0.1f, 5.0f);
+		ImGui::SliderFloat("Field of view", camera.getFovPointer(), 10.0f, 90.0f);
+		ImGui::EndTabItem();
+	}
+	ImGui::PopStyleColor();
+}
+
+void ImGuiUserInterface::drawMenuBar(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode, ContextMenuSource* contextMenuSource)
+{
 	static bool updateSceneNames{ true };
 
-	// Holds new scene name input
 	static std::string newSceneNameInput{};
 	static bool sceneNameInputError = false;
 	bool openSaveAsPopup{ false };
@@ -76,8 +625,8 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	//sceneManager.getCurrentScene().markAllUnselected();
 
 	bool openHelpMenuButtonPressed{ false };
-	// Menu Bar
-	if (ImGui::BeginMenuBar())
+
+	if (ImGui::BeginMainMenuBar())
 	{
 		if (ImGui::BeginMenu("Scene"))
 		{
@@ -244,380 +793,6 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 
 		ImGui::EndPopup();
 	}
-
-	ImGui::Text("Press TAB to open or close this interface.");
-
-	/*
-	if (ImGui::Button("Render frame"))
-	{
-		renderer.render();
-	}
-	*/
-	if (ImGui::Button("Render frame in blocks"))
-	{
-		renderer.startBlockRender();
-	}
-
-	// Render time left indicators
-	ImGui::ProgressBar(renderer.getRenderProgress());
-	ImGui::Text("Render time left: ");
-	ImGui::SameLine();
-	ImGui::Text(formatTime(renderer.getTimeLeft()).c_str());
-
-	static std::string renderSaveFileName{ "" };
-	static bool renderSaveFileNameError = false;
-
-	if (ImGui::Button("Save render"))
-		ImGui::OpenPopup("##save_render_popup");
-
-	if (ImGui::BeginPopup("##save_render_popup"))
-	{
-		// Name input field
-		ImGui::InputText("Render name", &renderSaveFileName);
-		if (renderSaveFileNameError)
-			ImGui::Text("Invalid image name. Make sure it does not contain periods ('.'), slashes ('/') or backslashes ('\\'),\n"
-				"and it is not empty.");
-
-		if (ImGui::Button("Save"))
-		{
-			if (FileUtility::isValidInput(renderSaveFileName))
-			{
-				// Saving the render
-				FileUtility::saveRender(renderSaveFileName + ".png", renderer.getWidth(), renderer.getHeight(), renderer.getPixelBuffer());
-
-				// Empty input field
-				renderSaveFileName = {};
-				// Close error
-				renderSaveFileNameError = false;
-				// Then close the popup
-				ImGui::CloseCurrentPopup();
-			}
-			else
-			{
-				// Activating the error
-				renderSaveFileNameError = true;
-			}
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Cancel"))
-		{
-			// Empty input field
-			renderSaveFileName = {};
-			// Close error
-			renderSaveFileNameError = false;
-			// Then close the popup
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::EndPopup();
-	}
-
-
-	// Creating the tab bar
-	ImGui::BeginTabBar("full_tab_bar");
-
-
-	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.22f, 0.4f, 0.48f, 0.2f));
-
-	// Tap for all settings related to rendering
-	if (ImGui::BeginTabItem("Render settings"))
-	{
-		ImGui::BeginGroup();
-		drawRenderSettings(sceneManager, camera, renderer, applicationRenderMode);
-		ImGui::EndGroup();
-		ImGui::EndTabItem();
-	}
-
-	// Tab for editing any scene objects
-	if (ImGui::BeginTabItem("Scene editing"))
-	{
-		if (ImGui::Button("Set HDRI"))
-			ImGui::OpenPopup("##open_hdri_popup");
-
-		static bool updateHDRINames = true;
-
-		if (ImGui::BeginPopup("##open_hdri_popup"))
-		{
-			// Stop updating while the popup is open
-			updateHDRINames = false;
-
-			// Showing all possible scene names
-			for (std::string& name : sceneManager.getAvailableHDRINames(updateHDRINames))
-			{
-				// Making a button which loads the scene on click
-				if (ImGui::Button(name.c_str()))
-				{
-					// Setting the HDRI
-					sceneManager.loadHDRI(name);
-
-					// Update next time
-					updateHDRINames = true;
-
-					// Closing the popup
-					ImGui::CloseCurrentPopup();
-					break;
-				}
-			}
-			ImGui::EndPopup();
-		}
-
-
-		ImGui::BeginTabBar("scene_edit_tab_bar");
-		ImGui::BeginGroup();
-
-		/*
-		ImGuiTabItemFlags_ objectsFlag{ ImGuiTabItemFlags_None };
-		ImGuiTabItemFlags_ materialsFlag{ ImGuiTabItemFlags_None };
-		ImGuiTabItemFlags_ lightsFlag{ ImGuiTabItemFlags_None };
-
-		// Automatically open correct tab on selection
-		if (newObjectSelected)
-		{
-			std::cout << selectedObjectType << std::endl;
-			switch (selectedObjectType)
-			{
-				// Model or sphere: open the objects tab
-				case 1: // model
-				case 2: // sphere
-					objectsFlag = ImGuiTabItemFlags_SetSelected;
-					break;
-			}
-		}
-		*/
-
-		//if (ImGui::BeginTabItem("Objects", (bool*)0, objectsFlag))
-		if (ImGui::BeginTabItem("Objects"))
-		{
-			drawObjects(sceneManager);
-			ImGui::EndTabItem();
-		}
-
-		if (ImGui::BeginTabItem("Materials"))
-		{
-			drawMaterials(sceneManager.getCurrentScene());
-			ImGui::EndTabItem();
-		}
-
-		if (ImGui::BeginTabItem("Lights"))
-		{
-			drawLights(sceneManager.getCurrentScene());
-			ImGui::EndTabItem();
-		}
-
-		ImGui::EndTabBar();
-		ImGui::EndGroup();
-		ImGui::EndTabItem();
-	}
-
-	// Camera settings (speed, fov etc.)
-	if (ImGui::BeginTabItem("Camera settings"))
-	{
-		ImGui::SliderFloat("Move speed", camera.getCameraSpeedPointer(), 0.1f, 10.0f);
-		ImGui::SliderFloat("Sensitivity", camera.getSensitivityPointer(), 0.1f, 5.0f);
-		ImGui::SliderFloat("Field of view", camera.getFovPointer(), 10.0f, 90.0f);
-		ImGui::EndTabItem();
-	}
-	ImGui::PopStyleColor();
-
-	ImGui::EndTabBar();
-
-
-	// Drawing the selected object
-	ImGui::Separator();
-	sceneManager.getCurrentScene().drawCurrentlySelectedObjectInterface();
-
-	ImGui::End();
-
-	// If the context menu source exists
-	sceneManager.getCurrentScene().renderContextMenus();
-
-	// Rendering
-	ImGui::Render();
-	//int display_w, display_h;
-	//glfwGetFramebufferSize(window, &display_w, &display_h);
-	//glViewport(0, 0, display_w, display_h);
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void ImGuiUserInterface::handleInput(GLFWwindow* window, Camera& camera)
-{
-	// Enable/disable the ImGui GUI on key switch
-	if (glfwGetKey(window, interfaceToggleKey) == GLFW_PRESS && guiSwitchKeyPreviousState == GLFW_RELEASE)
-	{
-		//imGuiEnabled = !imGuiEnabled;
-
-		// If the GUI is enabled, 
-		if (imGuiEnabled)
-		{
-			// free the mouse
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		}
-		// Otherwise,
-		else
-		{
-			// Lock the mouse
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			// Reset offset (the mouse may have moved which should not be registered as camera movement)
-			camera.resetMouseOffset();
-		}
-	}
-
-	guiSwitchKeyPreviousState = glfwGetKey(window, interfaceToggleKey);
-}
-
-bool ImGuiUserInterface::isEnabled()
-{
-	return imGuiEnabled;
-}
-
-bool ImGuiUserInterface::isMouseOnGUI()
-{
-	return ImGui::GetIO().WantCaptureMouse;
-}
-
-std::string ImGuiUserInterface::formatTime(float time)
-{
-	int secondsTotal = (int)time;
-	int seconds = secondsTotal % 60;
-	int minutes = (secondsTotal / 60) % 60;
-	int hours = secondsTotal / 3600;
-
-	return std::format("{}h {}m {}s", hours, minutes, seconds);
-}
-
-void ImGuiUserInterface::drawRenderSettings(SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode)
-{
-	renderer.drawInterface();
-
-	ImGui::Checkbox("Use HDRI as background", sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer());
-	ImGuiUtility::drawHelpMarker("Only if enabled, the HDRI will be drawn as the background.\nThe HDRI will be shown in reflections either way");
-
-	int renderMode = (int)applicationRenderMode;
-	// Button to switch between raytraced and rasterized views
-    ImGui::RadioButton("Rasterized", &renderMode, 0); ImGui::SameLine();
-    ImGui::RadioButton("Raytraced", &renderMode, 1); ImGui::SameLine();
-    ImGui::RadioButton("Realtime raytraced", &renderMode, 2);
-	applicationRenderMode = (ApplicationRenderMode)renderMode;
-}
-
-void ImGuiUserInterface::drawHelpMenu()
-{
-	ImGui::BeginTabBar("help_menu_tab_bar");
-
-	ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-
-	if (ImGui::BeginTabItem("Scene##scene_help_tab"))
-	{
-		ImGui::Text(
-			"Everything exists inside one single scene at a time."
-			"This means all models, spheres, lights, materials, the HDRI and the camera "
-			"belong to the scene and will be saved and loaded with the scene."
-
-		);
-		if (ImGui::CollapsingHeader("Saving and loading"))
-		{
-			ImGui::Text(
-				"To save a scene, press the 'Scene' button on the top bar, and select 'Save'."
-				"This will save the scene to it's current name, which it will have if it was loaded in."
-				"In case the scene does not yet have a name, you must choose one to have it saved by."
-			);
-			ImGui::Text(
-				"By using the 'Save as' button in the same menu, the scene "
-				"will be copied under another name, but you will stay in the same scene."
-			);
-
-			ImGui::Separator();
-
-			ImGui::Text(
-				"In order to load a scene from the disk, press the 'Scene' button on the top bar, then hover over 'Open scene'."
-				"This will open a menu with the names of all scenes available on your disk."
-				"To choose one simply press its name and it will be loaded as the current scene."
-			);
-		}
-		if (ImGui::CollapsingHeader("Manually importing a scene"))
-		{
-			ImGui::Text(
-				"In order to manually import a scene from another location, place a valid scene file in the 'scenes' folder."
-				"It can then be loaded into the program using the usual loading method."
-			);
-		}
-		if (ImGui::CollapsingHeader("Loading an HDRI"))
-		{
-			ImGui::Text(
-				"In order to load an HDRI from the disk, navigate to the 'Scene editing' tab"
-				"and press the button labeled 'Set HDRI'."
-			);
-			ImGui::Text(
-				"If your HDRI does not show up here, make sure it is:"
-			);
-			ImGui::BulletText("An image file of PNG type.");
-			ImGui::BulletText("Inside of the 'HDRIs' folder.");
-		}
-		ImGui::EndTabItem();
-	}
-
-	if (ImGui::BeginTabItem("Objects##objects_help_tab"))
-	{
-		ImGui::Text(
-			"In order to do anything to the objects in the scene, navigate to the 'Scene editing' tab."
-		);
-
-		ImGui::Text(
-			"From there, you can select any object by clicking on the correct tab, then clicking on it."
-			"Doing this opens up an editor panel for the selected object below, and the selected object also receives an outline."
-			"To edit any of the values in this editor panel, you can"
-		);
-		ImGui::BulletText("Click for a dropdown");
-		ImGui::BulletText("Click and drag for a numerical value");
-		ImGui::BulletText("Click and drag for a slider");
-
-		ImGui::Text("Any numerical value van also be changed manually by holding down the Ctrl key and clicking it.");
-
-		if (ImGui::CollapsingHeader("Materials"))
-		{
-			ImGui::Text(
-				"These are the properties of the materials:"
-			);
-			ImGui::BulletText("Color: the base color of the material");
-			ImGui::BulletText("Emission: not currently implemented");
-			ImGui::BulletText("Reflectiveness: how much the material reflects light.");
-			ImGui::BulletText("Transparency: how much the material lets light pass through.");
-			ImGui::BulletText("Refractiveness: how much light is bent when passing through the material.");
-			ImGui::BulletText("Reflective diffusion: how much light may be scattered on reflecting, which acts to blur the reflection.");
-		}
-
-		ImGui::EndTabItem();
-	}
-
-	if (ImGui::BeginTabItem("Camera##camera_help_tab"))
-	{
-		ImGui::Text(
-			"There is always a single camera available to move around and look through."
-			"Rendering is also done through this camera's perspective."
-			"To change any of said camera's settings check out the 'Camera settings' tab in the 'Editor' panel."
-		);
-		if (ImGui::CollapsingHeader("Available settings"))
-		{
-			ImGui::BulletText("Sensitivity: how fast the camera rotates with mouse movement.");
-			ImGui::BulletText("Movement speed: how fast the camera moves on keyboard input.");
-			ImGui::BulletText("Field of view: the wideness of the lens in degrees.");
-		}
-		if (ImGui::CollapsingHeader("Moving the camera"))
-		{
-			ImGui::Text("To move the camera, use the following keys:");
-			ImGui::BulletText("'W' to go forward.");
-			ImGui::BulletText("'S' to go backward.");
-			ImGui::BulletText("'A' to go left.");
-			ImGui::BulletText("'D' to go right.");
-			ImGui::BulletText("'Q' to go up.");
-			ImGui::BulletText("'E' to go down.");
-			ImGui::Text("Additionaly, you can hold the shift key to temporarily increase the camera's speed.");
-		}
-		ImGui::EndTabItem();
-	}
-
-	ImGui::PopTextWrapPos();
-
-	ImGui::EndTabBar();
 }
 
 void ImGuiUserInterface::drawMaterials(Scene& scene)

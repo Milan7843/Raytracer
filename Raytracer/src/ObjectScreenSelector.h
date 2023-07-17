@@ -14,15 +14,15 @@ public:
 
 	// Set the clicked object in the given scene at the coordinates to be selected
 	// Returns the id of the object that was clicked, or 0 for no object hit
-	unsigned int checkObjectClicked(Scene& scene, double x, double y);
+	unsigned int checkObjectClicked(Scene& scene, unsigned int x, unsigned int y);
 
 	// Render the texture used to decide what object was clicked
 	void renderTexturePreview(Scene& scene, unsigned int screenQuadVAO);
 
-private:
+	// Set the resolution the object screen selector is rendering at
+	void setResolution(unsigned int width, unsigned int height);
 
-	// Set up everything needed for object screen click selection
-	void setup();
+private:
 
 	// Renders the scene to the texture, giving each a different color
 	void renderSceneToTexture(Scene& scene);
@@ -31,9 +31,11 @@ private:
 
 	unsigned int objectClickTexture{ 0 };
 
+	void deleteBuffers();
+
 	// Window parameters
-	unsigned int width;
-	unsigned int height;
+	unsigned int width{ 0 };
+	unsigned int height{ 0 };
 
 	// Renders each object with a unique color
 	Shader objectColorShader;
