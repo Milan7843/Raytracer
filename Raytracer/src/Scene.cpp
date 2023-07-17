@@ -321,6 +321,7 @@ bool Scene::deleteModel(unsigned int id)
 			// A model with the given ID was found:
 			// Now erase it from the list and recalculate the shader indices
 			models.erase(models.begin() + i);
+
 			recalculateModelIndices();
 
 			onObjectDeleted(id);
@@ -422,7 +423,7 @@ bool Scene::deleteMaterial(unsigned int id)
 
 void Scene::recalculateModelIndices()
 {
-	unsigned int triangleCount{ 0 };
+	this->triangleCount = 0;
 
 	this->meshCount = 0;
 

@@ -11,7 +11,13 @@ Model::Model(std::string& name, std::vector<unsigned int>& meshMaterialIndices,
 {
 	this->name = name;
 
+	// Checking how many triangles this model adds
+	unsigned int triangleCountBefore{ *triangleCount };
 	loadModel(path, meshMaterialIndices, meshCount, triangleCount, MAX_MESH_COUNT);
+	unsigned int triangleCountAfter{ *triangleCount };
+
+	this->triangleCount = triangleCountAfter - triangleCountBefore;
+
 	setType(MODEL);
 }
 
@@ -421,4 +427,9 @@ BVHNode* Model::getRootNode()
 		setVertexDataChanged(false);
 	}
 	return bvhRootNode;
+}
+
+unsigned int Model::getTriangleCount()
+{
+	return triangleCount;
 }

@@ -62,6 +62,7 @@ public:
 
 	BVHNode* getRootNode();
 
+	unsigned int getTriangleCount();
 private:
 	std::string directory;
 	std::string path;
@@ -69,6 +70,8 @@ private:
 	bool vertexDataChanged{ true };
 
 	BVHNode* bvhRootNode{ nullptr };
+
+	unsigned int triangleCount{ 0 };
 
 	void loadModel(std::string path, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
 	void loadModel(std::string path, unsigned int meshMaterialIndex, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
