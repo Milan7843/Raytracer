@@ -43,6 +43,8 @@ public:
 
 	std::string& getName();
 
+	void setTransformation(glm::mat4& transformMatrix);
+
 protected:
 	// Abstract class, no need to instantiate this class
 	Object() : ImGuiEditorInterface() {}

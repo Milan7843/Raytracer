@@ -91,6 +91,22 @@ std::string& Object::getName()
 	return name;
 }
 
+void Object::setTransformation(glm::mat4& transformMatrix)
+{
+	// Extract position
+	position = glm::vec3(transformMatrix[3]);
+
+	// Extract scale
+	scaleVector.x = glm::length(glm::vec3(transformMatrix[0]));
+	scaleVector.y = glm::length(glm::vec3(transformMatrix[1]));
+	scaleVector.z = glm::length(glm::vec3(transformMatrix[2]));
+
+	// Extract rotation
+	glm::mat3 rotationMatrix(transformMatrix);
+	glm::quat rotationQuat(rotationMatrix);
+	rotation = glm::eulerAngles(rotationQuat);
+}
+
 glm::mat4 Object::getRotationMatrix()
 {
 	// Creating an identity matrix

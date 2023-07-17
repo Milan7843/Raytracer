@@ -262,7 +262,7 @@ int Application::Start()
         else
         {
             // Checking for a click on an object on mouse click and mouse not on GUI
-            if (userInterface.isEnabled() && userInterface.isMouseOnRenderedScreen())
+            if (!userInterface.isMouseOnGUI() && userInterface.isEnabled() && userInterface.isMouseOnRenderedScreen())
             {
                 bool leftMouse = leftMouseButtonState == GLFW_PRESS &&
                     glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE;
@@ -276,7 +276,6 @@ int Application::Start()
                 if (leftMouse)
                 {
                     unsigned int objectClickedID = objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), mouseX, mouseY);
-                    std::cout << "checking object clicked at " << mouseX << ", " << mouseY << std::endl;
 
                     // An object was clicked
                     // Using the data to select/deselect an object

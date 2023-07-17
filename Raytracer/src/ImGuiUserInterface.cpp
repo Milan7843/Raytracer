@@ -49,21 +49,6 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 
 	ImGuiIO& io = ImGui::GetIO(); // Retrieve the ImGuiIO object
 
-	/*
-	ImGuizmo::BeginFrame();
-
-	// Set up the ImGuizmo parameters for the move gizmo
-	ImGuizmo::SetOrthographic(false);
-	ImGuizmo::SetDrawlist();
-	ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-
-	glm::mat4 objectMatrix(1.0f);
-
-	ImGuizmo::Manipulate(
-		glm::value_ptr(camera.getViewMatrix()), glm::value_ptr(camera.getProjectionMatrix()),
-		ImGuizmo::TRANSLATE, ImGuizmo::WORLD, glm::value_ptr(objectMatrix));
-	*/
-
 
 	bool showDemoWindow{ false };
 	if (showDemoWindow)
@@ -95,7 +80,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 
 	float windowWidth{ io.DisplaySize.x };
 	float windowHeight{ io.DisplaySize.y };
-	float topAreaHeight{ windowHeight * 0.1f };
+	float topAreaHeight{ 19.0f };
 	float rightAreaWidth{ windowWidth * 0.2f };
 	float bottomAreaHeight{ windowHeight * 0.2f };
 	float centralAreaWidth{ windowWidth - rightAreaWidth };
@@ -143,6 +128,26 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	// No padding
 	ImGui::PopStyleVar(1);
 
+	ImGuizmo::BeginFrame();
+
+	// Set up the ImGuizmo parameters for the move gizmo
+	ImGuizmo::SetOrthographic(false);
+	ImGuizmo::SetDrawlist();
+	ImGuizmo::SetRect(windowMin.x, windowMin.y, centralAreaSize.x, centralAreaSize.y);
+
+	Object* object{ sceneManager.getCurrentScene().getObjectFromSelected() };
+
+	if (object != nullptr)
+	{
+		glm::mat4 objectMatrix{ object->getTransformationMatrix() };
+
+		ImGuizmo::Manipulate(
+			glm::value_ptr(camera.getViewMatrix()), glm::value_ptr(camera.getProjectionMatrix()),
+			ImGuizmo::TRANSLATE, ImGuizmo::WORLD, glm::value_ptr(objectMatrix));
+
+		object->setTransformation(objectMatrix);
+	}
+
 	// Finding the pixel coordinates of the mouse
 	ImVec2 mousePos = ImGui::GetIO().MousePos;
 	mousePos.x -= windowMin.x;
@@ -169,7 +174,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	{
 		ImGui::SetNextWindowPos(ImVec2(windowWidth - rightAreaWidth, topAreaHeight));
 		ImGui::SetNextWindowSize(ImVec2(rightAreaWidth, windowHeight - topAreaHeight - bottomAreaHeight));
-		ImGui::Begin("Right Area", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+		ImGui::Begin("Right Area", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
 
 		drawSceneEditor(
 			window,
@@ -187,12 +192,14 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	{
 		ImGui::SetNextWindowPos(ImVec2(0, windowHeight - bottomAreaHeight));
 		ImGui::SetNextWindowSize(ImVec2(windowWidth, bottomAreaHeight));
-		ImGui::Begin("Bottom Area", nullptr, ImGuiWindowFlags_NoResize);
+		ImGui::Begin("Bottom Area", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
 		// Add your ImGui widgets for the bottom area here
 		ImGui::End();
 	}
 
 	//ImGui::End(); // End of "Main Window"
+
+	// Window rounding
 
 	// If the context menu source exists
 	sceneManager.getCurrentScene().renderContextMenus();
@@ -238,7 +245,7 @@ bool ImGuiUserInterface::isEnabled()
 
 bool ImGuiUserInterface::isMouseOnGUI()
 {
-	return ImGui::GetIO().WantCaptureMouse;
+	return ImGuizmo::IsOver();;
 }
 
 bool ImGuiUserInterface::isMouseOnRenderedScreen()
@@ -301,53 +308,6 @@ void ImGuiUserInterface::drawGUI(GLFWwindow* window,
 	ImGui::Text("Render time left: ");
 	ImGui::SameLine();
 	ImGui::Text(formatTime(renderer.getTimeLeft()).c_str());
-
-	static std::string renderSaveFileName{ "" };
-	static bool renderSaveFileNameError = false;
-
-	if (ImGui::Button("Save render"))
-		ImGui::OpenPopup("##save_render_popup");
-
-	if (ImGui::BeginPopup("##save_render_popup"))
-	{
-		// Name input field
-		ImGui::InputText("Render name", &renderSaveFileName);
-		if (renderSaveFileNameError)
-			ImGui::Text("Invalid image name. Make sure it does not contain periods ('.'), slashes ('/') or backslashes ('\\'),\n"
-				"and it is not empty.");
-
-		if (ImGui::Button("Save"))
-		{
-			if (FileUtility::isValidInput(renderSaveFileName))
-			{
-				// Saving the render
-				FileUtility::saveRender(renderSaveFileName + ".png", renderer.getWidth(), renderer.getHeight(), renderer.getPixelBuffer());
-
-				// Empty input field
-				renderSaveFileName = {};
-				// Close error
-				renderSaveFileNameError = false;
-				// Then close the popup
-				ImGui::CloseCurrentPopup();
-			}
-			else
-			{
-				// Activating the error
-				renderSaveFileNameError = true;
-			}
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Cancel"))
-		{
-			// Empty input field
-			renderSaveFileName = {};
-			// Close error
-			renderSaveFileNameError = false;
-			// Then close the popup
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::EndPopup();
-	}
 
 	ImGui::EndTabBar();
 
@@ -611,6 +571,8 @@ void ImGuiUserInterface::drawSceneEditor(GLFWwindow* window, SceneManager& scene
 		ImGui::EndTabItem();
 	}
 	ImGui::PopStyleColor();
+
+	ImGui::EndTabBar();
 }
 
 void ImGuiUserInterface::drawMenuBar(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode, ContextMenuSource* contextMenuSource)
@@ -625,6 +587,9 @@ void ImGuiUserInterface::drawMenuBar(GLFWwindow* window, SceneManager& sceneMana
 	//sceneManager.getCurrentScene().markAllUnselected();
 
 	bool openHelpMenuButtonPressed{ false };
+
+	static std::string renderSaveFileName{ "" };
+	static bool renderSaveFileNameError = false;
 
 	if (ImGui::BeginMainMenuBar())
 	{
@@ -694,7 +659,64 @@ void ImGuiUserInterface::drawMenuBar(GLFWwindow* window, SceneManager& sceneMana
 			ImGui::EndMenu();
 		}
 
+		if (ImGui::BeginMenu("Render"))
+		{
+			if (ImGui::MenuItem("Render frame"))
+			{
+				renderer.startBlockRender();
+			}
+
+			if (ImGui::MenuItem("Save render"))
+			{
+				ImGui::OpenPopup("##save_render_popup");
+			}
+
+			ImGui::EndMenu();
+		}
+
 		ImGui::EndMenuBar();
+	}
+
+
+	if (ImGui::BeginPopup("##save_render_popup"))
+	{
+		// Name input field
+		ImGui::InputText("Render name", &renderSaveFileName);
+		if (renderSaveFileNameError)
+			ImGui::Text("Invalid image name. Make sure it does not contain periods ('.'), slashes ('/') or backslashes ('\\'),\n"
+				"and it is not empty.");
+
+		if (ImGui::Button("Save"))
+		{
+			if (FileUtility::isValidInput(renderSaveFileName))
+			{
+				// Saving the render
+				FileUtility::saveRender(renderSaveFileName + ".png", renderer.getWidth(), renderer.getHeight(), renderer.getPixelBuffer());
+
+				// Empty input field
+				renderSaveFileName = {};
+				// Close error
+				renderSaveFileNameError = false;
+				// Then close the popup
+				ImGui::CloseCurrentPopup();
+			}
+			else
+			{
+				// Activating the error
+				renderSaveFileNameError = true;
+			}
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel"))
+		{
+			// Empty input field
+			renderSaveFileName = {};
+			// Close error
+			renderSaveFileNameError = false;
+			// Then close the popup
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
 	}
 
 	if (openHelpMenuButtonPressed)
@@ -1123,8 +1145,6 @@ void ImGuiUserInterface::drawMesh(Mesh& object, Scene& scene, const char* materi
 		ImGui::EndCombo();
 	}
 }
-
-
 
 void ImGuiUserInterface::drawObject(Sphere& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray)
 {
