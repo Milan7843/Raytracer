@@ -136,7 +136,7 @@ int Application::Start()
 
     // Raytraced renderer
     Logger::log("Loading raytracing shader");
-    MultiComputeShader raytracingComputeShader(0, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
+    MultiComputeShader raytracingComputeShader(1, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
     //ComputeShader raytracingComputeShader("src/shader_src/raytraceComputeShaderSampledUpdated.shader");
     Renderer raytracingRenderer(raytracingComputeShader, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
@@ -210,7 +210,7 @@ int Application::Start()
         {
             renderedScreenSize = userInterface.getRenderedScreenSize();
             // The screen size was updated
-            sceneManager.getCurrentScene().setAspectRatio(renderedScreenSize.x, renderedScreenSize.y);
+            sceneManager.setAspectRatio(renderedScreenSize.x, renderedScreenSize.y);
             outlineRenderer.setResolution(renderedScreenSize.x, renderedScreenSize.y);
             objectScreenSelector.setResolution(renderedScreenSize.x, renderedScreenSize.y);
             raytracingRenderer.setResolution(renderedScreenSize.x, renderedScreenSize.y);

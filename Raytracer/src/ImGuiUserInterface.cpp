@@ -123,8 +123,6 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	ImDrawList* drawList = ImGui::GetWindowDrawList();
 	drawList->AddImage((void*)(intptr_t)screenTexture, windowMin, windowMax, uvMin, uvMax);
 
-	std::cout << centralAreaSize.x << ", " << centralAreaSize.y << std::endl;
-
 	// No padding
 	ImGui::PopStyleVar(1);
 
@@ -184,6 +182,14 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 			applicationRenderMode,
 			contextMenuSource
 		);
+
+		// Render time left indicators
+		ImGui::ProgressBar(renderer.getRenderProgress());
+		ImGui::Text("Render time left: ");
+		ImGui::SameLine();
+		ImGui::Text(formatTime(renderer.getTimeLeft()).c_str());
+
+		ImGui::EndTabBar();
 
 		ImGui::End();
 	}
@@ -302,14 +308,6 @@ void ImGuiUserInterface::drawGUI(GLFWwindow* window,
 	{
 		renderer.startBlockRender();
 	}
-
-	// Render time left indicators
-	ImGui::ProgressBar(renderer.getRenderProgress());
-	ImGui::Text("Render time left: ");
-	ImGui::SameLine();
-	ImGui::Text(formatTime(renderer.getTimeLeft()).c_str());
-
-	ImGui::EndTabBar();
 
 
 	// Drawing the selected object

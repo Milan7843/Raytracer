@@ -66,6 +66,7 @@ public:
 	Model* addModel(std::string& name, std::vector<unsigned int>& meshMaterialIndices, const std::string& path);
 	Model* addModel(const std::string& path, unsigned int materialIndex);
 	bool deleteModel(unsigned int id);
+	Model* getModelByID(unsigned int id);
 	// Add a sphere to the scene, returns whether the addition was succesfull
 	bool addSphere(Sphere& sphere);
 	Sphere* addSphere(glm::vec3 position, float radius, unsigned int materialIndex);

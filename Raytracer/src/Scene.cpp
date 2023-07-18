@@ -333,6 +333,19 @@ bool Scene::deleteModel(unsigned int id)
 	return false;
 }
 
+Model* Scene::getModelByID(unsigned int id)
+{
+	for (Model& model : models)
+	{
+		if (model.getID() == id)
+		{
+			return &model;
+		}
+	}
+
+	return nullptr;
+}
+
 bool Scene::addSphere(Sphere& sphere)
 {
 	// Full of spheres
@@ -741,22 +754,39 @@ std::vector<AmbientLight>& Scene::getAmbientLights()
 
 void Scene::markSelected(unsigned int objectID)
 {
-	if (!hasObjectSelected())
+	// Getting a pointer to the selected object
+	ImGuiEditorInterface* newlySelectedObject{ getImGuiEditorInterfaceByID(objectID) };
+	if (newlySelectedObject->getType() == MESH)
 	{
-		currentlySelectedObject = objectID;
-	}
-	else
-	{
-		// Getting a pointer to the selected object
-		ImGuiEditorInterface* selectedObject{ getSelectedObject() };
+		Mesh* selectedMesh{ dynamic_cast<Mesh*>(newlySelectedObject) };
+		unsigned int parentModelID = selectedMesh->getModelID();
 
-		// If the newly selected object was the same mesh again, now we select the object instead
-		if (objectID == currentlySelectedObject && selectedObject->getType() == MESH)
+		// If the parent model has only one mesh, always select the model
+		Model* parentModel{ getModelByID(parentModelID) };
+		if (parentModel->getMeshes().size() <= 1)
 		{
-			objectID = (dynamic_cast<Mesh*>(selectedObject))->getModelID();
+			objectID = parentModelID;
+			std::cout << "selecting 1" << std::endl;
 		}
-		currentlySelectedObject = objectID;
+		// A model with >1 submeshes was selected
+		else
+		{
+			// If we select the same mesh again, now select the parent model
+			if (objectID == currentlySelectedObject)
+			{
+				objectID = parentModelID;
+				std::cout << "selecting 2" << std::endl;
+			}
+			else
+			{
+				// Select the mesh
+				std::cout << "selecting 3" << std::endl;
+			}
+		}
 	}
+	std::cout << "selecting 4" << std::endl;
+
+	currentlySelectedObject = objectID;
 
 	Object* object{ getObjectFromSelected() };
 	if (object != nullptr)
