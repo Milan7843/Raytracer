@@ -68,6 +68,21 @@ void BlockRenderProcess::update(float deltaTime, ComputeShader& computeShader)
 	}
 }
 
+void BlockRenderProcess::start(HGLRC renderContext, HDC currentDC)
+{
+	while (!finished)
+	{
+		update(0.016f, computeShader);
+	}
+}
+
+void BlockRenderProcess::startThread(HGLRC renderContext, HDC currentDC)
+{
+	std::thread renderThread(&BlockRenderProcess::start, this, renderContext, currentDC);
+	renderThread.detach();
+	//start(window);
+}
+
 void BlockRenderProcess::generateIndirectLightingDataBuffer()
 {
 	// Deleting the previous pixel buffer

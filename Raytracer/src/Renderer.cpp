@@ -1,7 +1,12 @@
 #include "Renderer.h"
 
-Renderer::Renderer(ComputeShader& raytraceComputeShader, unsigned int width, unsigned int height)
-	: computeShader(raytraceComputeShader), width(width), height(height)
+Renderer::Renderer(ComputeShader& raytraceComputeShader, GLFWwindow* window, HDC currentDC, HGLRC renderContext, unsigned int width, unsigned int height)
+	: computeShader(raytraceComputeShader)
+	, window(window)
+	, currentDC(currentDC)
+	, renderContext(renderContext)
+	, width(width)
+	, height(height)
 {
 	// Immediately creating the pixel buffer with the given width and height
 	setResolution(width, height);
@@ -40,10 +45,22 @@ void Renderer::startBlockRender()
 {
 	delete currentRenderProcess;
 
+	if (!wglMakeCurrent(currentDC, renderContext))
+	{
+		GLenum error = glGetError();
+		std::cerr << "Failed to set shared context to new (renderer). Error code: " << error << std::endl;
+
+		std::cerr << "Current OpenGL rendering context: " << renderContext << std::endl;
+		std::cerr << "Current device context: " << currentDC << std::endl;
+		return;
+	}
+
 	setUpForRender(sceneManagerBound->getCurrentScene(), &sceneManagerBound->getCurrentScene().getActiveCamera());
 
 	// Starting a new render process
-	currentRenderProcess = new BlockRenderProcess(computeShader, width, height, blockSize, renderPassCount);
+	BlockRenderProcess* currentBlockRenderProcess = new BlockRenderProcess(computeShader, width, height, blockSize, renderPassCount);
+	currentBlockRenderProcess->startThread(renderContext, currentDC);
+	currentRenderProcess = currentBlockRenderProcess;
 }
 
 void Renderer::startRealtimeFrameRender()
@@ -94,6 +111,8 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 
 void Renderer::update(float deltaTime, bool realtimeRaytracing, bool cameraMoved, Scene& currentScene)
 {
+	return;
+
 	// If we should be realtime rendering, and the camera has actually moved,
 	// we start a new realtime render
 	if (realtimeRaytracing && (cameraMoved || currentScene.checkObjectUpdates(&computeShader)))

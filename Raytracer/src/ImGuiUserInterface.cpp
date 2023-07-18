@@ -123,8 +123,6 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	ImDrawList* drawList = ImGui::GetWindowDrawList();
 	drawList->AddImage((void*)(intptr_t)screenTexture, windowMin, windowMax, uvMin, uvMax);
 
-	std::cout << centralAreaSize.x << ", " << centralAreaSize.y << std::endl;
-
 	// No padding
 	ImGui::PopStyleVar(1);
 
@@ -556,6 +554,12 @@ void ImGuiUserInterface::drawSceneEditor(GLFWwindow* window, SceneManager& scene
 	// Tap for all settings related to rendering
 	if (ImGui::BeginTabItem("Render settings"))
 	{
+		// Render time left indicators
+		ImGui::ProgressBar(renderer.getRenderProgress());
+		ImGui::Text("Render time left: ");
+		ImGui::SameLine();
+		ImGui::Text(formatTime(renderer.getTimeLeft()).c_str());
+
 		ImGui::BeginGroup();
 		drawRenderSettings(sceneManager, camera, renderer, applicationRenderMode);
 		ImGui::EndGroup();

@@ -19,7 +19,7 @@ enum class BVHRenderMode
 class Renderer
 {
 public:
-	Renderer(ComputeShader& raytraceComputeShader, unsigned int width, unsigned int height);
+	Renderer(ComputeShader& raytraceComputeShader, GLFWwindow* window, HDC currentDC, HGLRC renderContext, unsigned int width, unsigned int height);
 	~Renderer();
 
 	// Bind the scene to be rendered
@@ -118,6 +118,11 @@ private:
 	// How the BVH's are rendered
 	BVHRenderMode bvhRenderMode{ BVHRenderMode::DISABLED };
 
-	RenderProcess* currentRenderProcess = nullptr;
+	RenderProcess* currentRenderProcess{ nullptr };
+
+	GLFWwindow* window{ nullptr };
+
+	HGLRC renderContext;
+	HDC currentDC;
 };
 

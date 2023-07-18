@@ -2,6 +2,9 @@
 
 #include "RenderProcess.h"
 
+#include <thread>
+#include <windows.h>
+
 struct IndirectLightingPixelData
 {
 	glm::vec3 position;
@@ -27,7 +30,11 @@ public:
 
 	float getRenderProgressPrecise() override;
 
+	void startThread(HGLRC renderContext, HDC currentDC);
+
 private:
+
+	void start(HGLRC renderContext, HDC currentDC);
 
 	void generateIndirectLightingDataBuffer();
 	void generateStackBuffer() override;

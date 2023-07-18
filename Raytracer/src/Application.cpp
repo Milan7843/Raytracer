@@ -31,6 +31,15 @@ int Application::Start()
     }
     glfwMakeContextCurrent(window);
 
+    HGLRC currentContext = wglGetCurrentContext();
+    HDC currentDC = wglGetCurrentDC();
+    HGLRC secondContext = wglCreateContext(currentDC);
+    std::cerr << "Current OpenGL rendering context: " << currentContext << std::endl;
+    std::cerr << "Current device context: " << currentDC << std::endl;
+    std::cerr << "Second OpenGL rendering context: " << secondContext << std::endl;
+    std::cerr << "Second device context: " << currentDC << std::endl;
+    wglShareLists(secondContext, currentContext);
+
     ImGuiUserInterface userInterface;
 
     Logger::log("Initializing ImGui");
@@ -136,9 +145,28 @@ int Application::Start()
 
     // Raytraced renderer
     Logger::log("Loading raytracing shader");
-    MultiComputeShader raytracingComputeShader(0, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
+
+
+    if (!wglMakeCurrent(currentDC, secondContext))
+    {
+        GLenum error = glGetError();
+        std::cerr << "Failed to set shared context to new (renderer). Error code: " << error << std::endl;
+
+        std::cerr << "Current OpenGL rendering context 123: " << secondContext << std::endl;
+        std::cerr << "Current device context: " << currentDC << std::endl;
+    }
+    MultiComputeShader raytracingComputeShader(1, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
     //ComputeShader raytracingComputeShader("src/shader_src/raytraceComputeShaderSampledUpdated.shader");
-    Renderer raytracingRenderer(raytracingComputeShader, WINDOW_SIZE_X, WINDOW_SIZE_Y);
+    Renderer raytracingRenderer(raytracingComputeShader, window, currentDC, secondContext, WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
+    if (!wglMakeCurrent(currentDC, currentContext))
+    {
+        GLenum error = glGetError();
+        std::cerr << "Failed to set shared context back to main 456. Error code: " << error << std::endl;
+
+        std::cerr << "Current OpenGL rendering context: " << currentContext << std::endl;
+        std::cerr << "Current device context: " << currentDC << std::endl;
+    }
 
     Logger::log("Loading HDRI renderer");
     HDRIRenderer hdriRenderer("src/shader_src/hdriVertex.shader", "src/shader_src/hdriFragment.shader");
@@ -188,6 +216,15 @@ int Application::Start()
 
     while (!glfwWindowShouldClose(window))
     {
+        if (!wglMakeCurrent(currentDC, currentContext))
+        {
+            GLenum error = glGetError();
+            std::cerr << "Failed to set shared context back to main. Error code: " << error << std::endl;
+
+            std::cerr << "Current OpenGL rendering context: " << currentContext << std::endl;
+            std::cerr << "Current device context: " << currentDC << std::endl;
+        }
+
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
         // Setting viewport size to the rendered screen size
