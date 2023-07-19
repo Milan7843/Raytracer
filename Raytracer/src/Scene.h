@@ -14,6 +14,7 @@
 #include "Camera.h"
 #include "BVH/BVH.h"
 #include "gui/ContextMenuSource.h"
+#include "InputManager.h"
 
 #include <iostream>
 
@@ -156,6 +157,9 @@ public:
 	unsigned int triangleCount{ 0 };
 
 	glm::vec3 getRotationPoint();
+
+	// Verify the pointer of each mesh to its parent model
+	void verifyMeshModelPointers();
 
 private:
 

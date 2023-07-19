@@ -205,19 +205,20 @@ void Renderer::drawInterface()
 	ImGui::DragFloat("HDRI light strength", &hdriLightStrength, 0.01f, 0.0f, 1.0f, "%.2f");
 	ImGuiUtility::drawHelpMarker("How much the HDRI influences the lighting of the scene.");
 
-	ImGui::Text("BVH render mode");
+	ImGui::Text("BVH display");
 	ImGui::SameLine();
+
+	const char* bvhRenderModes[] = { "Disabled", "Only leaves", "All" };
 	int bvhRenderModeInt = (int)bvhRenderMode;
-	ImGui::RadioButton("Disabled", &bvhRenderModeInt, 0); ImGui::SameLine();
-	ImGui::RadioButton("Only leaves", &bvhRenderModeInt, 1); ImGui::SameLine();
-	ImGui::RadioButton("All", &bvhRenderModeInt, 2);
+	ImGui::Combo("BVH Render Mode", &bvhRenderModeInt, bvhRenderModes, IM_ARRAYSIZE(bvhRenderModes));
 	bvhRenderMode = (BVHRenderMode)bvhRenderModeInt;
+
 	ImGuiUtility::drawHelpMarker((std::string("How the BVH (Bounding Volume Hierarchy) is drawn. ") +
 		"BVH is a way of structuring a model's triangle data in such a way that " +
 		"not all triangles have to be checked in order to know if a ray collision has occured." +
 		"\n'Disabled' will not draw anything." +
 		"\n'Only leaves' will draw onyl the nodes that contain vertices." +
-		"\n'All will' draw all nodes.").c_str());
+		"\n'All' will draw all nodes.").c_str());
 }
 
 float Renderer::getRenderProgressPrecise()

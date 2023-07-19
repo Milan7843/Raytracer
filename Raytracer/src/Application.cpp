@@ -37,6 +37,8 @@ int Application::Start()
 
     userInterface.initialiseImGui(window);
 
+    InputManager::initialise(window);
+
     Logger::log("Initializing GLAD");
     // GLAD manages function pointers for OpenGL, so we cannot run without it
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -223,6 +225,8 @@ int Application::Start()
 
         // Input
         processInput(window);
+
+        InputManager::takeInput(sceneManager.getCurrentScene());
 
         // Check whether the UI is enabled
         if (userInterface.isMouseOnRenderedScreen() && currentRenderMode != ApplicationRenderMode::RAYTRACED)

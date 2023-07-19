@@ -33,7 +33,14 @@ bool Mesh::drawInterface(Scene& scene)
 {
     unsigned int i = 0;
 
-    bool materialUpdated{ false };
+    bool anyPropertiesChanged{ false };
+
+    //anyPropertiesChanged |= ImGui::InputText("Name", &getName());
+    ImGui::InputText("Name", &getName());
+    // Showing transformations
+    anyPropertiesChanged |= ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
+    anyPropertiesChanged |= ImGui::DragFloat3("Rotation", (float*)getRotationPointer(), 0.01f);
+    anyPropertiesChanged |= ImGui::DragFloat3("Scale", (float*)getScalePointer(), 0.01f);
 
     // Preview the currently selected name
     if (ImGui::BeginCombo((getName() + "##combo").c_str(), (*(scene.getMaterials()[*getMaterialIndexPointer()].getNamePointer())).c_str()))
@@ -48,7 +55,7 @@ bool Mesh::drawInterface(Scene& scene)
             if (ImGui::Selectable((*(scene.getMaterials()[i].getNamePointer())).c_str()))
             {
                 *getMaterialIndexPointer() = i;
-                materialUpdated = true;
+                anyPropertiesChanged = true;
             }
 
             if (thisMaterialSelected)
@@ -64,7 +71,14 @@ bool Mesh::drawInterface(Scene& scene)
         ImGui::EndCombo();
     }
 
-    return materialUpdated;
+
+    // If anything changed, that means the vertex data may have been updated
+    if (anyPropertiesChanged)
+    {
+        setVertexDataChanged(true);
+    }
+
+    return anyPropertiesChanged;
 }
 
 int Mesh::getTriangleSize()
@@ -237,6 +251,7 @@ void Mesh::setVertexDataChanged(bool newValue)
 {
     vertexDataChanged = newValue;
 
+    // Mark the model as having vertex data changed, but only this 
     getModel()->setVertexDataChanged(true, false);
 }
 

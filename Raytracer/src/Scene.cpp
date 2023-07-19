@@ -304,10 +304,7 @@ Model* Scene::addModel(std::string& name, std::vector<unsigned int>& meshMateria
 	models.push_back(model);
 
 	// Making sure the meshes' parent model pointers are still valid after resizing
-	for (Model& model : models)
-	{
-		model.updateChildPointers();
-	}
+	verifyMeshModelPointers();
 
 	return &(models[models.size() - 1]);
 }
@@ -318,10 +315,7 @@ Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
 	models.push_back(model);
 
 	// Making sure the meshes' parent model pointers are still valid after resizing
-	for (Model& model : models)
-	{
-		model.updateChildPointers();
-	}
+	verifyMeshModelPointers();
 
 	return &(models[models.size() - 1]);
 }
@@ -341,10 +335,7 @@ bool Scene::deleteModel(unsigned int id)
 			onObjectDeleted(id);
 
 			// Making sure the meshes' parent model pointers are still valid after resizing
-			for (Model& model : models)
-			{
-				model.updateChildPointers();
-			}
+			verifyMeshModelPointers();
 
 			return true;
 		}
@@ -779,7 +770,13 @@ void Scene::markSelected(unsigned int objectID)
 	{
 		// Deselect
 		currentlySelectedObject = objectID;
+		//InputManager::resetCurrentAction();
 		return;
+	}
+
+	for (unsigned int i{ 0 }; i < models.size(); i++)
+	{
+		std::cout << "model " << &models[i] << std::endl;
 	}
 
 	// Getting a pointer to the selected object
@@ -1048,6 +1045,15 @@ BVH& Scene::getBVH()
 glm::vec3 Scene::getRotationPoint()
 {
 	return rotationPoint;
+}
+
+void Scene::verifyMeshModelPointers()
+{
+	// Making sure the meshes' parent model pointers are still valid after resizing
+	for (Model& model : models)
+	{
+		model.updateChildPointers();
+	}
 }
 
 bool Scene::replace(std::string& str, const std::string& from, const std::string& to)

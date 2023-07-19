@@ -186,7 +186,12 @@ void Model::setVertexDataChanged(bool newValue, bool alsoSetMeshes)
 {
 	vertexDataChanged = newValue;
 
-	if (!vertexDataChanged || !alsoSetMeshes)
+	if (!vertexDataChanged)
+	{
+		return;
+	}
+
+	if (!alsoSetMeshes)
 	{
 		return;
 	}

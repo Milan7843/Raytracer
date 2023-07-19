@@ -32,6 +32,7 @@
 #include "FileUtility.h"
 #include "ApplicationRenderMode.h"
 #include "gui/ContextMenuSource.h"
+#include "InputManager.h"
 
 class ImGuiUserInterface
 {

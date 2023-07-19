@@ -26,6 +26,7 @@
 #include "OutlineRenderer.h"
 #include "ObjectScreenSelector.h"
 #include "BVH/BVHHandler.h"
+#include "InputManager.h"
 
 #include "CoordinateUtility.h"
 #include "Logger.h"

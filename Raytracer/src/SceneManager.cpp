@@ -53,6 +53,7 @@ void SceneManager::changeScene(const std::string& sceneName)
 	currentScene = loadedScene;
 	hasSceneLoaded = true;
 	getCurrentScene().setAspectRatio(width, height);
+	currentScene.verifyMeshModelPointers();
 }
 
 void SceneManager::revertChanges()

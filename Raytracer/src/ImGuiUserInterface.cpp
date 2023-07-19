@@ -140,58 +140,66 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 
 	if (object != nullptr)
 	{
-		if (type == ObjectType::MODEL)
+		// Only show a gizmo if we are actually transforming
+		if (InputManager::getCurrentAction() == InputManager::Action::TRANSFORM)
 		{
-			glm::mat4 objectMatrix{ object->getTransformationMatrix() };
+			ImGuizmo::OPERATION currentOperation{ InputManager::getCurrentActionAsImGuizmoOperation() };
 
-			// Define the delta matrix: this will hold all changes made to the object matrix
-			glm::mat4 deltaMatrix;
-
-			ImGuizmo::Manipulate(
-				glm::value_ptr(camera.getViewMatrix()),
-				glm::value_ptr(camera.getProjectionMatrix()),
-				ImGuizmo::TRANSLATE,
-				ImGuizmo::WORLD,
-				glm::value_ptr(objectMatrix)
-			);
-
-			object->setTransformation(objectMatrix);
-
-			// If anything changed
-			//if (deltaMatrix != glm::mat4(1.0f))
+			if (type == ObjectType::MODEL)
 			{
-				Model* model{ dynamic_cast<Model*>(object) };
-				model->setVertexDataChanged(true);
+				glm::mat4 objectMatrix{ object->getTransformationMatrix() };
+
+				// Define the delta matrix: this will hold all changes made to the object matrix
+				glm::mat4 deltaMatrix;
+
+				ImGuizmo::Manipulate(
+					glm::value_ptr(camera.getViewMatrix()),
+					glm::value_ptr(camera.getProjectionMatrix()),
+					currentOperation,
+					ImGuizmo::WORLD,
+					glm::value_ptr(objectMatrix)
+				);
+
+				object->setTransformation(objectMatrix);
+
+				// If anything changed
+				// TODO this if statement is not accurate
+				if (deltaMatrix != glm::mat4(1.0f))
+				{
+					Model* model{ dynamic_cast<Model*>(object) };
+					model->setVertexDataChanged(true);
+				}
 			}
-		}
-		else if (type == ObjectType::MESH)
-		{
-			Mesh* mesh{ dynamic_cast<Mesh*>(object) };
-			Model* model{ sceneManager.getCurrentScene().getModelByID(mesh->getModelID()) };
-
-			// Create a copy of the original matrix
-			glm::mat4 objectMatrix{ model->getTransformationMatrix() * mesh->getTransformationMatrix() };
-			objectMatrix = glm::translate(objectMatrix, mesh->getAverageVertexPosition());
-
-			// Define the delta matrix: this will hold all changes made to the object matrix
-			glm::mat4 deltaMatrix;
-
-			ImGuizmo::Manipulate(
-				glm::value_ptr(camera.getViewMatrix()),
-				glm::value_ptr(camera.getProjectionMatrix()),
-				ImGuizmo::TRANSLATE,
-				ImGuizmo::MODE::WORLD,
-				glm::value_ptr(objectMatrix),
-				glm::value_ptr(deltaMatrix)
-			);
-
-			glm::mat4 newMeshMatrix{ mesh->getTransformationMatrix() * deltaMatrix };
-			mesh->setTransformation(newMeshMatrix);
-
-			// If anything changed
-			if (deltaMatrix != glm::mat4(1.0f))
+			else if (type == ObjectType::MESH)
 			{
-				mesh->setVertexDataChanged(true);
+				Mesh* mesh{ dynamic_cast<Mesh*>(object) };
+				Model* model{ mesh->getModel() };
+
+				// Create a copy of the original matrix
+				glm::mat4 objectMatrix{ model->getTransformationMatrix() * mesh->getTransformationMatrix() };
+				objectMatrix = glm::translate(objectMatrix, mesh->getAverageVertexPosition());
+
+				// Define the delta matrix: this will hold all changes made to the object matrix
+				glm::mat4 deltaMatrix;
+
+				ImGuizmo::Manipulate(
+					glm::value_ptr(camera.getViewMatrix()),
+					glm::value_ptr(camera.getProjectionMatrix()),
+					currentOperation,
+					ImGuizmo::MODE::WORLD,
+					glm::value_ptr(objectMatrix),
+					glm::value_ptr(deltaMatrix)
+				);
+
+				glm::mat4 newMeshMatrix{ mesh->getTransformationMatrix() * deltaMatrix };
+				mesh->setTransformation(newMeshMatrix);
+
+				// If anything changed
+				// TODO this if statement is not accurate
+				if (deltaMatrix != glm::mat4(1.0f))
+				{
+					mesh->setVertexDataChanged(true);
+				}
 			}
 		}
 	}
