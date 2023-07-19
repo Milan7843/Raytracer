@@ -6,18 +6,20 @@
 
 
 Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices, glm::vec3 position
-    , unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex, unsigned int modelID)
+    , unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex, unsigned int modelID, Model* model)
     : name(name)
     , shaderArraybeginIndex(startIndex)
     , shaderMeshIndex(meshIndex)
     , materialIndex(materialIndex)
     , modelID(modelID)
+    , averageVertexPosition(position)
+    , model(model)
     , Object()
     , ContextMenuSource()
 {
     this->vertices = vertices;
     this->indices = indices;
-    this->position = position;
+    //this->position = position;
     setupMesh();
     setType(MESH);
 }
@@ -82,7 +84,7 @@ void Mesh::writeToShader(AbstractShader* shader, unsigned int ssbo, const glm::m
     writePositionToShader(shader);
     //shader->setVector3(("meshes[" + std::to_string(shaderMeshIndex) + "].position").c_str(), CoordinateUtility::vec3ToGLSLVec3(position));
     shader->setInt(("meshes[" + std::to_string(shaderMeshIndex) + "].material").c_str(), materialIndex);
-    shader->setMat4(("meshes[" + std::to_string(shaderMeshIndex) + "].transformation").c_str(), transformation);
+    shader->setMat4(("meshes[" + std::to_string(shaderMeshIndex) + "].transformation").c_str(), transformation * this->getTransformationMatrix());
 }
 
 void Mesh::writePositionToShader(AbstractShader* shader)
@@ -169,11 +171,12 @@ void Mesh::onDeleteMaterial(unsigned int index)
     }
 }
 
-void Mesh::draw(AbstractShader* shader, Scene* scene)
+void Mesh::draw(AbstractShader* shader, Scene* scene, glm::mat4& modelTransformation)
 {
     // Setting up the shader for the material used by this mesh
     shader->setVector3("inputColor", scene->getMaterials()[materialIndex].color);
     shader->setInt("materialIndex", materialIndex);
+    shader->setMat4("model", modelTransformation * this->getTransformationMatrix());
 
     glBindVertexArray(VAO);
 
@@ -203,4 +206,48 @@ unsigned int Mesh::getModelID()
 
 void Mesh::renderContextMenuItems(Scene& scene)
 {
+}
+
+void Mesh::setModel(Model* model)
+{
+    this->model = model;
+}
+
+Model* Mesh::getModel()
+{
+    return this->model;
+}
+
+glm::vec3 Mesh::getAverageVertexPosition()
+{
+    return averageVertexPosition;
+}
+
+glm::vec3 Mesh::getRotationPoint()
+{
+    return getAverageVertexPosition();
+}
+
+bool Mesh::isVertexDataChanged()
+{
+    return vertexDataChanged;
+}
+
+void Mesh::setVertexDataChanged(bool newValue)
+{
+    vertexDataChanged = newValue;
+
+    getModel()->setVertexDataChanged(true, false);
+}
+
+BVHNode* Mesh::getRootNode(Model& model)
+{
+    // TODO update on mesh update
+    if (isVertexDataChanged())// || true)
+    {
+        // Creating a BVH from the model
+        this->bvhRootNode = BVHHandler::generateFromMesh(model, *this, bvhRootNode);
+        setVertexDataChanged(false);
+    }
+    return bvhRootNode;
 }

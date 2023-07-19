@@ -76,6 +76,11 @@ glm::vec3 Object::getPosition()
 	return position;
 }
 
+glm::vec3 Object::getRotationPoint()
+{
+	return getPosition();
+}
+
 glm::vec3 Object::getRotation()
 {
 	return rotation;

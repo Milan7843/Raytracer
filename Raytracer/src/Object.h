@@ -38,6 +38,7 @@ public:
 	glm::vec3* getScalePointer();
 
 	glm::vec3 getPosition();
+	virtual glm::vec3 getRotationPoint();
 	glm::vec3 getRotation();
 	glm::vec3 getScale();
 

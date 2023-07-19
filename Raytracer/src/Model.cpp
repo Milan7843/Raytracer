@@ -71,7 +71,8 @@ void Model::draw(AbstractShader* shader, Scene* scene)
 	{
 		shader->setInt("objectID", meshes[i].getID());
 
-		meshes[i].draw(shader, scene);
+		glm::mat4 transformation{ this->getTransformationMatrix() };
+		meshes[i].draw(shader, scene, transformation);
 	}
 }
 
@@ -115,9 +116,11 @@ bool Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
 		return false;
 	}
 
+	std::cout << "m " << getPosition().x << ", " << getPosition().y << ", " << getPosition().z << std::endl;
+
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
-		meshes[i].writeToShader(shader, ssbo, getTransformationMatrix());
+		meshes[i].writeToShader(shader, ssbo, getTransformationMatrix() * meshes[i].getTransformationMatrix());
 	}
 
 	markShaderAsWrittenTo(shader);
@@ -146,6 +149,15 @@ void Model::renderContextMenuItems(Scene& scene)
 	}
 }
 
+void Model::updateChildPointers()
+{
+	// Updating each submesh
+	for (Mesh& mesh : meshes)
+	{
+		mesh.setModel(this);
+	}
+}
+
 void Model::resetShaderIndices(unsigned int* triangleCount, unsigned int* meshCount)
 {
 	for (Mesh& mesh : meshes)
@@ -170,9 +182,20 @@ bool Model::isVertexDataChanged()
 	return vertexDataChanged;
 }
 
-void Model::setVertexDataChanged(bool newValue)
+void Model::setVertexDataChanged(bool newValue, bool alsoSetMeshes)
 {
 	vertexDataChanged = newValue;
+
+	if (!vertexDataChanged || !alsoSetMeshes)
+	{
+		return;
+	}
+
+	// If this model changed, all submeshes must have also changed
+	for (Mesh& mesh : meshes)
+	{
+		mesh.setVertexDataChanged(true);
+	}
 }
 
 void Model::loadModel(std::string path, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT)
@@ -309,7 +332,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCou
 
 	std::string meshName{ mesh->mName.C_Str() };
 
-	return Mesh(meshName, vertices, indices, meshPosition, beginTriangleCount, meshCount, mesh->mMaterialIndex, this->getID());
+	return Mesh(meshName, vertices, indices, meshPosition, beginTriangleCount, meshCount, mesh->mMaterialIndex, this->getID(), this);
 }
 
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materialIndex, unsigned int meshCount, unsigned int* triangleCount)
@@ -388,7 +411,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 
 	std::string meshName{ mesh->mName.C_Str() };
 
-	return Mesh(meshName, vertices, indices, meshPosition, beginTriangleCount, meshCount, materialIndex, this->getID());
+	return Mesh(meshName, vertices, indices, meshPosition, beginTriangleCount, meshCount, materialIndex, this->getID(), this);
 }
 
 

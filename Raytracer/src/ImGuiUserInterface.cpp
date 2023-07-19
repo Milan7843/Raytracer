@@ -83,6 +83,8 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	float topAreaHeight{ 19.0f };
 	float rightAreaWidth{ windowWidth * 0.2f };
 	float bottomAreaHeight{ windowHeight * 0.2f };
+	float topRightAreaHeight{ windowHeight * 0.2f };
+	float bottomRightAreaHeight{ windowHeight - topRightAreaHeight - bottomAreaHeight };
 	float centralAreaWidth{ windowWidth - rightAreaWidth };
 	float centralAreaHeight{ windowHeight - bottomAreaHeight - topAreaHeight };
 
@@ -134,16 +136,64 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	ImGuizmo::SetRect(windowMin.x, windowMin.y, centralAreaSize.x, centralAreaSize.y);
 
 	Object* object{ sceneManager.getCurrentScene().getObjectFromSelected() };
+	ObjectType type{ sceneManager.getCurrentScene().getSelectedObjectType() };
 
 	if (object != nullptr)
 	{
-		glm::mat4 objectMatrix{ object->getTransformationMatrix() };
+		if (type == ObjectType::MODEL)
+		{
+			glm::mat4 objectMatrix{ object->getTransformationMatrix() };
 
-		ImGuizmo::Manipulate(
-			glm::value_ptr(camera.getViewMatrix()), glm::value_ptr(camera.getProjectionMatrix()),
-			ImGuizmo::TRANSLATE, ImGuizmo::WORLD, glm::value_ptr(objectMatrix));
+			// Define the delta matrix: this will hold all changes made to the object matrix
+			glm::mat4 deltaMatrix;
 
-		object->setTransformation(objectMatrix);
+			ImGuizmo::Manipulate(
+				glm::value_ptr(camera.getViewMatrix()),
+				glm::value_ptr(camera.getProjectionMatrix()),
+				ImGuizmo::TRANSLATE,
+				ImGuizmo::WORLD,
+				glm::value_ptr(objectMatrix)
+			);
+
+			object->setTransformation(objectMatrix);
+
+			// If anything changed
+			//if (deltaMatrix != glm::mat4(1.0f))
+			{
+				Model* model{ dynamic_cast<Model*>(object) };
+				model->setVertexDataChanged(true);
+			}
+		}
+		else if (type == ObjectType::MESH)
+		{
+			Mesh* mesh{ dynamic_cast<Mesh*>(object) };
+			Model* model{ sceneManager.getCurrentScene().getModelByID(mesh->getModelID()) };
+
+			// Create a copy of the original matrix
+			glm::mat4 objectMatrix{ model->getTransformationMatrix() * mesh->getTransformationMatrix() };
+			objectMatrix = glm::translate(objectMatrix, mesh->getAverageVertexPosition());
+
+			// Define the delta matrix: this will hold all changes made to the object matrix
+			glm::mat4 deltaMatrix;
+
+			ImGuizmo::Manipulate(
+				glm::value_ptr(camera.getViewMatrix()),
+				glm::value_ptr(camera.getProjectionMatrix()),
+				ImGuizmo::TRANSLATE,
+				ImGuizmo::MODE::WORLD,
+				glm::value_ptr(objectMatrix),
+				glm::value_ptr(deltaMatrix)
+			);
+
+			glm::mat4 newMeshMatrix{ mesh->getTransformationMatrix() * deltaMatrix };
+			mesh->setTransformation(newMeshMatrix);
+
+			// If anything changed
+			if (deltaMatrix != glm::mat4(1.0f))
+			{
+				mesh->setVertexDataChanged(true);
+			}
+		}
 	}
 
 	// Finding the pixel coordinates of the mouse
@@ -168,11 +218,31 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 		(unsigned int)std::floor(mousePos.y / (windowMax.y - windowMin.y))
 	);
 
-	// Right area
+	// Top right area
 	{
 		ImGui::SetNextWindowPos(ImVec2(windowWidth - rightAreaWidth, topAreaHeight));
-		ImGui::SetNextWindowSize(ImVec2(rightAreaWidth, windowHeight - topAreaHeight - bottomAreaHeight));
-		ImGui::Begin("Right Area", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
+		ImGui::SetNextWindowSize(ImVec2(rightAreaWidth, topAreaHeight + topRightAreaHeight));
+		ImGui::Begin("Top Right Area", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
+
+		drawSceneSelector(
+			window,
+			sceneManager,
+			camera,
+			renderer,
+			applicationRenderMode,
+			contextMenuSource
+		);
+
+		ImGui::EndTabBar();
+
+		ImGui::End();
+	}
+
+	// Bottom right area
+	{
+		ImGui::SetNextWindowPos(ImVec2(windowWidth - rightAreaWidth, topAreaHeight + topRightAreaHeight));
+		ImGui::SetNextWindowSize(ImVec2(rightAreaWidth, topAreaHeight + topRightAreaHeight + bottomRightAreaHeight));
+		ImGui::Begin("Bottom Right Area", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
 
 		drawSceneEditor(
 			window,
@@ -188,6 +258,11 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 		ImGui::Text("Render time left: ");
 		ImGui::SameLine();
 		ImGui::Text(formatTime(renderer.getTimeLeft()).c_str());
+
+
+		// Drawing the selected object
+		ImGui::Separator();
+		sceneManager.getCurrentScene().drawCurrentlySelectedObjectInterface();
 
 		ImGui::EndTabBar();
 
@@ -308,11 +383,6 @@ void ImGuiUserInterface::drawGUI(GLFWwindow* window,
 	{
 		renderer.startBlockRender();
 	}
-
-
-	// Drawing the selected object
-	ImGui::Separator();
-	sceneManager.getCurrentScene().drawCurrentlySelectedObjectInterface();
 
 	ImGui::End();
 }
@@ -463,6 +533,59 @@ void ImGuiUserInterface::drawHelpMenu()
 	ImGui::EndTabBar();
 }
 
+void ImGuiUserInterface::drawSceneSelector(GLFWwindow* window,
+	SceneManager& sceneManager,
+	Camera& camera,
+	Renderer& renderer,
+	ApplicationRenderMode& applicationRenderMode,
+	ContextMenuSource* contextMenuSource)
+{
+	ImGui::BeginTabBar("scene_edit_tab_bar");
+	ImGui::BeginGroup();
+
+	/*
+	ImGuiTabItemFlags_ objectsFlag{ ImGuiTabItemFlags_None };
+	ImGuiTabItemFlags_ materialsFlag{ ImGuiTabItemFlags_None };
+	ImGuiTabItemFlags_ lightsFlag{ ImGuiTabItemFlags_None };
+
+	// Automatically open correct tab on selection
+	if (newObjectSelected)
+	{
+		std::cout << selectedObjectType << std::endl;
+		switch (selectedObjectType)
+		{
+			// Model or sphere: open the objects tab
+			case 1: // model
+			case 2: // sphere
+				objectsFlag = ImGuiTabItemFlags_SetSelected;
+				break;
+		}
+	}
+	*/
+
+	//if (ImGui::BeginTabItem("Objects", (bool*)0, objectsFlag))
+	if (ImGui::BeginTabItem("Objects"))
+	{
+		drawObjects(sceneManager);
+		ImGui::EndTabItem();
+	}
+
+	if (ImGui::BeginTabItem("Materials"))
+	{
+		drawMaterials(sceneManager.getCurrentScene());
+		ImGui::EndTabItem();
+	}
+
+	if (ImGui::BeginTabItem("Lights"))
+	{
+		drawLights(sceneManager.getCurrentScene());
+		ImGui::EndTabItem();
+	}
+
+	ImGui::EndTabBar();
+	ImGui::EndGroup();
+}
+
 void ImGuiUserInterface::drawSceneEditor(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode, ContextMenuSource* contextMenuSource)
 {
 	// Creating the tab bar
@@ -503,51 +626,6 @@ void ImGuiUserInterface::drawSceneEditor(GLFWwindow* window, SceneManager& scene
 			ImGui::EndPopup();
 		}
 
-
-		ImGui::BeginTabBar("scene_edit_tab_bar");
-		ImGui::BeginGroup();
-
-		/*
-		ImGuiTabItemFlags_ objectsFlag{ ImGuiTabItemFlags_None };
-		ImGuiTabItemFlags_ materialsFlag{ ImGuiTabItemFlags_None };
-		ImGuiTabItemFlags_ lightsFlag{ ImGuiTabItemFlags_None };
-
-		// Automatically open correct tab on selection
-		if (newObjectSelected)
-		{
-			std::cout << selectedObjectType << std::endl;
-			switch (selectedObjectType)
-			{
-				// Model or sphere: open the objects tab
-				case 1: // model
-				case 2: // sphere
-					objectsFlag = ImGuiTabItemFlags_SetSelected;
-					break;
-			}
-		}
-		*/
-
-		//if (ImGui::BeginTabItem("Objects", (bool*)0, objectsFlag))
-		if (ImGui::BeginTabItem("Objects"))
-		{
-			drawObjects(sceneManager);
-			ImGui::EndTabItem();
-		}
-
-		if (ImGui::BeginTabItem("Materials"))
-		{
-			drawMaterials(sceneManager.getCurrentScene());
-			ImGui::EndTabItem();
-		}
-
-		if (ImGui::BeginTabItem("Lights"))
-		{
-			drawLights(sceneManager.getCurrentScene());
-			ImGui::EndTabItem();
-		}
-
-		ImGui::EndTabBar();
-		ImGui::EndGroup();
 		ImGui::EndTabItem();
 	}
 

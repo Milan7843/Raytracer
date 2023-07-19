@@ -179,9 +179,9 @@ uniform int ambientLightCount;
 // Mesh
 struct Mesh
 {
-    vec3 position;
-    int material;
     mat4 transformation;
+    int material;
+    int padding[3];
 };
 layout(std430, binding = 8) buffer Meshes
 {
@@ -997,7 +997,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         return closestIntersection;
     }*/
     
-    /*
+    
     // Performing BVH traversal
     int top = -1;
     initializeStack(top);
@@ -1068,11 +1068,11 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
                 pushStack(node.rightChild, top);
             }
         }
-    }*/
+    }
 
 
     // Checking triangle ray hits
-    
+    /*
     for (int j = 0; j < triangles.length(); j++)
     {
         // Skip already hit tri
@@ -1086,7 +1086,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
             // TODO optimise this to to as few getNormal calls as possible (not on underlying faces)
             closestIntersection.normal = getNormal(triangles[j], isec.pos);
         }
-    }
+    }*/
 
     // Calculating ray-sphere intersections
     for (int j = 0; j < sphereCount; j++)
@@ -1171,7 +1171,7 @@ Intersection triangleIntersection(Tri tri, Ray ray)
         return i;
     }
     float f = 1. / a;
-    vec3 s = ray.pos - (vert1 + meshes[tri.mesh].position);
+    vec3 s = ray.pos - vert1;
     float u = f * dot(s, h);
     if (u < 0.0 || u > 1.)
     {

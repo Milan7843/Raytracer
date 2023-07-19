@@ -302,6 +302,13 @@ Model* Scene::addModel(std::string& name, std::vector<unsigned int>& meshMateria
 	Model model(name, meshMaterialIndices, path, &meshCount, &triangleCount, MAX_MESH_COUNT);
 	
 	models.push_back(model);
+
+	// Making sure the meshes' parent model pointers are still valid after resizing
+	for (Model& model : models)
+	{
+		model.updateChildPointers();
+	}
+
 	return &(models[models.size() - 1]);
 }
 
@@ -309,6 +316,13 @@ Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
 {
 	Model model(materialIndex, path, &meshCount, &triangleCount, MAX_MESH_COUNT);
 	models.push_back(model);
+
+	// Making sure the meshes' parent model pointers are still valid after resizing
+	for (Model& model : models)
+	{
+		model.updateChildPointers();
+	}
+
 	return &(models[models.size() - 1]);
 }
 
@@ -325,6 +339,13 @@ bool Scene::deleteModel(unsigned int id)
 			recalculateModelIndices();
 
 			onObjectDeleted(id);
+
+			// Making sure the meshes' parent model pointers are still valid after resizing
+			for (Model& model : models)
+			{
+				model.updateChildPointers();
+			}
+
 			return true;
 		}
 	}
@@ -542,7 +563,8 @@ void Scene::drawSelected(AbstractShader* shader)
 			if (mesh.getID() == currentlySelectedObject)
 			{
 				model.prepareForDraw(shader);
-				mesh.draw(shader, (Scene*)this);
+				glm::mat4 transformation{ model.getTransformationMatrix() };
+				mesh.draw(shader, (Scene*)this, transformation);
 			}
 		}
 	}
@@ -649,9 +671,8 @@ void Scene::writeObjectsToShader(AbstractShader* shader)
 		for (Mesh& mesh : model.getMeshes())
 		{
 			ShaderMesh shaderMesh{
-				mesh.getPosition(),
-				mesh.getMaterialIndex(),
-				transformation
+				transformation * mesh.getTransformationMatrix(),
+				mesh.getMaterialIndex()
 			};
 
 			shaderMeshes.push_back(shaderMesh);
@@ -754,6 +775,13 @@ std::vector<AmbientLight>& Scene::getAmbientLights()
 
 void Scene::markSelected(unsigned int objectID)
 {
+	if (objectID == 0)
+	{
+		// Deselect
+		currentlySelectedObject = objectID;
+		return;
+	}
+
 	// Getting a pointer to the selected object
 	ImGuiEditorInterface* newlySelectedObject{ getImGuiEditorInterfaceByID(objectID) };
 	if (newlySelectedObject->getType() == MESH)
@@ -766,7 +794,6 @@ void Scene::markSelected(unsigned int objectID)
 		if (parentModel->getMeshes().size() <= 1)
 		{
 			objectID = parentModelID;
-			std::cout << "selecting 1" << std::endl;
 		}
 		// A model with >1 submeshes was selected
 		else
@@ -775,23 +802,20 @@ void Scene::markSelected(unsigned int objectID)
 			if (objectID == currentlySelectedObject)
 			{
 				objectID = parentModelID;
-				std::cout << "selecting 2" << std::endl;
 			}
 			else
 			{
 				// Select the mesh
-				std::cout << "selecting 3" << std::endl;
 			}
 		}
 	}
-	std::cout << "selecting 4" << std::endl;
 
 	currentlySelectedObject = objectID;
 
 	Object* object{ getObjectFromSelected() };
 	if (object != nullptr)
 	{
-		rotationPoint = *object->getPositionPointer();
+		rotationPoint = object->getRotationPoint();
 	}
 }
 
@@ -855,6 +879,17 @@ Object* Scene::getObjectByID(unsigned int objectID)
 	}
 
 	return dynamic_cast<Object*>(selectedObject);
+}
+
+ObjectType Scene::getSelectedObjectType()
+{
+	ImGuiEditorInterface* selectedObject{ getSelectedObject() };
+	if (selectedObject == nullptr)
+	{
+		return ObjectType::NONE;
+	}
+	ObjectType type{ selectedObject->getType() };
+	return type;
 }
 
 ContextMenuSource* Scene::getContextMenuSourceByID(unsigned int objectID)

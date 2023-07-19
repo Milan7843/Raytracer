@@ -180,7 +180,6 @@ uniform int ambientLightCount;
 // Mesh
 struct Mesh
 {
-    vec3 position;
     int material;
     mat4 transformation;
 };
@@ -1049,7 +1048,7 @@ Intersection triangleIntersection(Tri tri, Ray ray)
         return i;
     }
     float f = 1. / a;
-    vec3 s = ray.pos - (vert1 + meshes[tri.mesh].position);
+    vec3 s = ray.pos - vert1;
     float u = f * dot(s, h);
     if (u < 0.0 || u > 1.)
     {

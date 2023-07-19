@@ -50,6 +50,10 @@ public:
 
 	void renderContextMenuItems(Scene& scene) override;
 
+	// Update the references from the child meshes to this model
+	// Needs to be done in case the address of this model could have changed,
+	// such as the vector containing it resizing.
+	void updateChildPointers();
 
 	void resetShaderIndices(unsigned int* triangleCount, unsigned int* meshCount);
 
@@ -58,7 +62,7 @@ public:
 	std::vector<Mesh> meshes;
 
 	bool isVertexDataChanged();
-	void setVertexDataChanged(bool newValue);
+	void setVertexDataChanged(bool newValue, bool alsoSetMeshes=true);
 
 	BVHNode* getRootNode();
 

@@ -97,6 +97,13 @@ private:
 	// Draw the help menu window
 	void drawHelpMenu();
 
+	void drawSceneSelector(GLFWwindow* window,
+		SceneManager& sceneManager,
+		Camera& camera,
+		Renderer& renderer,
+		ApplicationRenderMode& applicationRenderMode,
+		ContextMenuSource* contextMenuSource);
+
 	void drawSceneEditor(GLFWwindow* window,
 		SceneManager& sceneManager,
 		Camera& camera,

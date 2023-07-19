@@ -90,7 +90,7 @@ BVHNode* BVHHandler::generateFromModel(Model& model, BVHNode* oldBVHRoot)
 	for (Mesh& mesh : model.getMeshes())
 	{
 		// Generating a new tree from the mesh
-		meshRootNodes.push_back(generateFromMesh(model, mesh, nullptr));
+		meshRootNodes.push_back(mesh.getRootNode(model));
 	}
 
 	// Generating a new BVH using the root nodes
@@ -117,13 +117,14 @@ BVHNode* BVHHandler::generateFromMesh(Model& model, Mesh& mesh, BVHNode* oldBVHR
 	// Applying the translation onto each of the triangles
 	for (Triangle& triangle : translatedTriangles)
 	{
-		triangle.v1 = model.getTransformationMatrix() * triangle.v1;
-		triangle.v2 = model.getTransformationMatrix() * triangle.v2;
-		triangle.v3 = model.getTransformationMatrix() * triangle.v3;
+		triangle.v1 = model.getTransformationMatrix() * mesh.getTransformationMatrix() * triangle.v1;
+		triangle.v2 = model.getTransformationMatrix() * mesh.getTransformationMatrix() * triangle.v2;
+		triangle.v3 = model.getTransformationMatrix() * mesh.getTransformationMatrix() * triangle.v3;
 	}
 
 	// Generating a new BVH
 	BVHNode* meshRootNode = generateBVHRecursively(translatedTriangles, indices, 0, mesh.shaderArraybeginIndex);
+	meshRootNode->isModelRoot = true;
 	return meshRootNode;
 }
 

@@ -50,7 +50,7 @@ class Mesh : public Object, public ContextMenuSource
 {
 public:
 	Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices, glm::vec3 position,
-		unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex, unsigned int modelID);
+		unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex, unsigned int modelID, Model* model);
 	~Mesh();
 
 	void writeToShader(AbstractShader* shader, unsigned int ssbo, const glm::mat4& transformation);
@@ -79,7 +79,7 @@ public:
 	void onDeleteMaterial(unsigned int index);
 
 	// Draws this mesh using the active shader
-	void draw(AbstractShader* shader, Scene* scene);
+	void draw(AbstractShader* shader, Scene* scene, glm::mat4& modelTransformation);
 
 	unsigned int VAO, VBO, EBO;
 
@@ -94,12 +94,32 @@ public:
 
 	void renderContextMenuItems(Scene& scene) override;
 
+	void setModel(Model* model);
+	Model* getModel();
+
+	// Get the average vertex position from the origin of the model
+	glm::vec3 getAverageVertexPosition();
+
+	glm::vec3 getRotationPoint() override;
+
+	bool isVertexDataChanged();
+	void setVertexDataChanged(bool newValue);
+
+	BVHNode* getRootNode(Model& model);
+
 private:
 	void setupMesh();
 
 	// The index of the material this mesh uses
 	unsigned int materialIndex;
 
+	glm::vec3 averageVertexPosition;
+
 	std::string name;
 	unsigned int modelID{ 0 };
+	Model* model;
+
+	bool vertexDataChanged{ true };
+
+	BVHNode* bvhRootNode{ nullptr };
 };

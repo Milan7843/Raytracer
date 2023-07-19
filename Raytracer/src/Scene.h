@@ -19,9 +19,9 @@
 
 struct ShaderMesh
 {
-	glm::vec3 position;
-	int material;
 	glm::mat4 transformation;
+	int material;
+	int padding[3];
 };
 
 class Scene
@@ -106,6 +106,8 @@ public:
 
 	Object* getObjectFromSelected();
 	Object* getObjectByID(unsigned int objectID);
+
+	ObjectType getSelectedObjectType();
 
 	void renderContextMenus();
 
