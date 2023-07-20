@@ -28,7 +28,7 @@ public:
 	void resetRotation();
 
 	// Get a single matrix which includes all transformations
-	virtual glm::mat4 getTransformationMatrix();
+	virtual glm::mat4 getTransformationMatrix() const;
 
 	// Draw this object given the shader
 	virtual void draw(AbstractShader* shader);
@@ -37,10 +37,10 @@ public:
 	glm::vec3* getRotationPointer();
 	glm::vec3* getScalePointer();
 
-	glm::vec3 getPosition();
-	virtual glm::vec3 getRotationPoint();
-	glm::vec3 getRotation();
-	glm::vec3 getScale();
+	glm::vec3 getPosition() const;
+	virtual glm::vec3 getRotationPoint() const;
+	glm::vec3 getRotation() const;
+	glm::vec3 getScale() const;
 
 	std::string& getName();
 
@@ -52,7 +52,7 @@ protected:
 	virtual ~Object() {}
 
 	// Generate and get the rotation matrix
-	glm::mat4 getRotationMatrix();
+	glm::mat4 getRotationMatrix() const;
 
 	// Transformations
 	glm::vec3 position{ glm::vec3(0.0f) };

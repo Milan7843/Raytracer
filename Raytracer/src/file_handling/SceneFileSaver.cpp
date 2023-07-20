@@ -248,6 +248,35 @@ void readModels(std::ifstream& filestream, Scene& scene)
 		model->setRotation(rotation);
 		model->scale(scale);
 
+		// Reading all material indices for the submeshes
+		filestream >> numberOfSubmeshes;
+
+		// Reading each mesh properties
+		for (unsigned int i = 0; i < numberOfSubmeshes; i++)
+		{
+			// Retrieving the mesh data into 
+			std::string meshName;
+			glm::vec3 meshPosition;
+			glm::vec3 meshRotation;
+			glm::vec3 meshScale;
+
+			// Skip a line then get the name and other properties
+			std::getline(filestream, meshName);
+			std::getline(filestream, meshName);
+			meshPosition = readVec3(filestream);
+			meshRotation = readVec3(filestream);
+			meshScale = readVec3(filestream);
+
+			model->getMeshes()[i].move(meshPosition);
+			model->getMeshes()[i].rotate(meshRotation);
+			model->getMeshes()[i].scale(meshScale);
+
+			std::cout << "read nam " << (i+1) << " " << meshName << std::endl;
+			std::cout << "read pos " << (i+1) << " " << meshPosition.x << ", " << meshPosition.y << ", " << meshPosition.z << std::endl;
+			std::cout << "read rot " << (i+1) << " " << meshRotation.x << ", " << meshRotation.y << ", " << meshRotation.z << std::endl;
+			std::cout << "read scl " << (i+1) << " " << meshScale.x << ", " << meshScale.y << ", " << meshScale.z << std::endl;
+		}
+
 		// Skipping two lines
 		std::getline(filestream, buffer);
 	}

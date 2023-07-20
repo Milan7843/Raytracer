@@ -176,8 +176,8 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 				Model* model{ mesh->getModel() };
 
 				// Create a copy of the original matrix
-				glm::mat4 objectMatrix{ model->getTransformationMatrix() * mesh->getTransformationMatrix() };
-				objectMatrix = glm::translate(objectMatrix, mesh->getAverageVertexPosition());
+				glm::mat4 objectMatrix{ mesh->getTransformationMatrix() * model->getTransformationMatrix() };
+				//objectMatrix = glm::translate(objectMatrix, mesh->getAverageVertexPosition());
 
 				// Define the delta matrix: this will hold all changes made to the object matrix
 				glm::mat4 deltaMatrix;
@@ -191,7 +191,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 					glm::value_ptr(deltaMatrix)
 				);
 
-				glm::mat4 newMeshMatrix{ mesh->getTransformationMatrix() * deltaMatrix };
+				glm::mat4 newMeshMatrix{ deltaMatrix * mesh->getTransformationMatrix() };
 				mesh->setTransformation(newMeshMatrix);
 
 				// If anything changed

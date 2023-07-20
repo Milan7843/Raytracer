@@ -53,6 +53,12 @@ void Model::writeDataToStream(std::ofstream& filestream)
 	{
 		filestream << *mesh.getMaterialIndexPointer() << "\n";
 	}
+
+	filestream << meshes.size() << "\n";
+	for (Mesh& mesh : meshes)
+	{
+		mesh.writeDataToStream(filestream);
+	}
 }
 
 void Model::prepareForDraw(AbstractShader* shader)

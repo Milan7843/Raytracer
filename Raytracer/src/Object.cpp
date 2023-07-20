@@ -43,7 +43,7 @@ void Object::resetRotation()
 	this->rotation = glm::vec3(0.0f);
 }
 
-glm::mat4 Object::getTransformationMatrix()
+glm::mat4 Object::getTransformationMatrix() const
 {
 	// Creating an identity matrix
 	glm::mat4 baseMatrix = glm::mat4(1.0f);
@@ -71,22 +71,22 @@ glm::vec3* Object::getScalePointer()
 	return &scaleVector;
 }
 
-glm::vec3 Object::getPosition()
+glm::vec3 Object::getPosition() const
 {
 	return position;
 }
 
-glm::vec3 Object::getRotationPoint()
+glm::vec3 Object::getRotationPoint() const
 {
 	return getPosition();
 }
 
-glm::vec3 Object::getRotation()
+glm::vec3 Object::getRotation() const
 {
 	return rotation;
 }
 
-glm::vec3 Object::getScale()
+glm::vec3 Object::getScale() const
 {
 	return scaleVector;
 }
@@ -112,7 +112,7 @@ void Object::setTransformation(glm::mat4& transformMatrix)
 	rotation = glm::eulerAngles(rotationQuat);
 }
 
-glm::mat4 Object::getRotationMatrix()
+glm::mat4 Object::getRotationMatrix() const
 {
 	// Creating an identity matrix
 	glm::mat4 rotationMatrix(1.0f);

@@ -7,8 +7,7 @@
 
 Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices, glm::vec3 position
     , unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex, unsigned int modelID, Model* model)
-    : name(name)
-    , shaderArraybeginIndex(startIndex)
+    : shaderArraybeginIndex(startIndex)
     , shaderMeshIndex(meshIndex)
     , materialIndex(materialIndex)
     , modelID(modelID)
@@ -17,9 +16,19 @@ Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned
     , Object()
     , ContextMenuSource()
 {
+    this->name = name;
     this->vertices = vertices;
+
+    glm::vec4 positionVec4{ glm::vec4(position, 0.0f) };
+
+    // Normalzing the vertex positions
+    for (Vertex& vertex : this->vertices)
+    {
+        vertex.position -= positionVec4;
+    }
+
     this->indices = indices;
-    //this->position = position;
+    this->position = position;
     setupMesh();
     setType(MESH);
 }
@@ -158,6 +167,16 @@ unsigned int Mesh::getTriangleCount()
     return triangles.size();
 }
 
+void Mesh::writeDataToStream(std::ofstream& filestream)
+{
+    filestream << getName() << "\n";
+    // Position moved
+    glm::vec3 offsetPosition{ getPosition() - getAverageVertexPosition() };
+    filestream << offsetPosition.x << " " << offsetPosition.y << " " << offsetPosition.z << "\n";
+    filestream << rotation.x << " " << rotation.y << " " << rotation.z << "\n";
+    filestream << scaleVector.x << " " << scaleVector.y << " " << scaleVector.z << "\n";
+}
+
 void Mesh::setShaderMeshIndex(unsigned int shaderMeshIndex)
 {
     this->shaderMeshIndex = shaderMeshIndex;
@@ -185,12 +204,17 @@ void Mesh::onDeleteMaterial(unsigned int index)
     }
 }
 
+void Mesh::setMaterialIndex(unsigned int index)
+{
+    this->materialIndex = index;
+}
+
 void Mesh::draw(AbstractShader* shader, Scene* scene, glm::mat4& modelTransformation)
 {
     // Setting up the shader for the material used by this mesh
     shader->setVector3("inputColor", scene->getMaterials()[materialIndex].color);
     shader->setInt("materialIndex", materialIndex);
-    shader->setMat4("model", modelTransformation * this->getTransformationMatrix());
+    shader->setMat4("model", this->getTransformationMatrix() * modelTransformation);
 
     glBindVertexArray(VAO);
 
@@ -201,11 +225,6 @@ void Mesh::draw(AbstractShader* shader, Scene* scene, glm::mat4& modelTransforma
 unsigned int* Mesh::getMaterialIndexPointer()
 {
     return &materialIndex;
-}
-
-std::string& Mesh::getName()
-{
-    return name;
 }
 
 unsigned int Mesh::getMaterialIndex() const
@@ -232,12 +251,12 @@ Model* Mesh::getModel()
     return this->model;
 }
 
-glm::vec3 Mesh::getAverageVertexPosition()
+glm::vec3 Mesh::getAverageVertexPosition() const
 {
     return averageVertexPosition;
 }
 
-glm::vec3 Mesh::getRotationPoint()
+glm::vec3 Mesh::getRotationPoint() const
 {
     return getAverageVertexPosition();
 }

@@ -43,7 +43,7 @@ public:
 	static BVHNode* generateFromModel(Model& model, BVHNode* oldBVHRoot);
 
 	// Generate the BVH nodes from a given mesh
-	static BVHNode* generateFromMesh(Model& model, Mesh& mesh, BVHNode* oldBVHRoot);
+	static BVHNode* generateFromMesh(Model& model, const Mesh& mesh, BVHNode* oldBVHRoot);
 
 	// Write the given BVH into two SSBOs: one for position/size/structure data and one for index data
 	static void writeIntoSSBOs(BVHNode* root, unsigned int dataSSBO, unsigned int triangleSSBO);

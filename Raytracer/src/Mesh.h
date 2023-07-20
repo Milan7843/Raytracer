@@ -72,11 +72,16 @@ public:
 	// Get the number of triangles in this single mesh
 	unsigned int getTriangleCount();
 
+	void writeDataToStream(std::ofstream& filestream) override;
+
 	// Set the index of the mesh this triangle belongs to
 	void setShaderMeshIndex(unsigned int shaderMeshIndex);
 
 	// Should be called when a material was deleted
 	void onDeleteMaterial(unsigned int index);
+
+	// Set the active material index
+	void setMaterialIndex(unsigned int index);
 
 	// Draws this mesh using the active shader
 	void draw(AbstractShader* shader, Scene* scene, glm::mat4& modelTransformation);
@@ -84,8 +89,6 @@ public:
 	unsigned int VAO, VBO, EBO;
 
 	unsigned int* getMaterialIndexPointer();
-
-	std::string& getName();
 
 	// Get the index of the material this mesh uses
 	unsigned int getMaterialIndex() const;
@@ -98,9 +101,9 @@ public:
 	Model* getModel();
 
 	// Get the average vertex position from the origin of the model
-	glm::vec3 getAverageVertexPosition();
+	glm::vec3 getAverageVertexPosition() const;
 
-	glm::vec3 getRotationPoint() override;
+	glm::vec3 getRotationPoint() const override;
 
 	bool isVertexDataChanged();
 	void setVertexDataChanged(bool newValue);
@@ -115,7 +118,6 @@ private:
 
 	glm::vec3 averageVertexPosition;
 
-	std::string name;
 	unsigned int modelID{ 0 };
 	Model* model;
 

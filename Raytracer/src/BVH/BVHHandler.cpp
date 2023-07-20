@@ -100,7 +100,7 @@ BVHNode* BVHHandler::generateFromModel(Model& model, BVHNode* oldBVHRoot)
 	return rootNode;
 }
 
-BVHNode* BVHHandler::generateFromMesh(Model& model, Mesh& mesh, BVHNode* oldBVHRoot)
+BVHNode* BVHHandler::generateFromMesh(Model& model, const Mesh& mesh, BVHNode* oldBVHRoot)
 {
 	// Deleting any old data we have already
 	deleteBVH(oldBVHRoot);
