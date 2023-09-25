@@ -112,6 +112,11 @@ void Object::setTransformation(glm::mat4& transformMatrix)
 	rotation = glm::eulerAngles(rotationQuat);
 }
 
+float Object::getAppropriateCameraFocusDistance()
+{
+	return 0.5f;
+}
+
 glm::mat4 Object::getRotationMatrix() const
 {
 	// Creating an identity matrix

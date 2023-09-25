@@ -67,6 +67,11 @@ public:
 	BVHNode* getRootNode();
 
 	unsigned int getTriangleCount();
+
+	// Get an approximation of an appropriate distance the camera should be from the object
+	// after clicking the focus button.
+	virtual float getAppropriateCameraFocusDistance() override;
+
 private:
 	std::string directory;
 	std::string path;

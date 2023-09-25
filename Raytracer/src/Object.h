@@ -46,6 +46,10 @@ public:
 
 	void setTransformation(glm::mat4& transformMatrix);
 
+	// Get an approximation of an appropriate distance the camera should be from the object
+	// after clicking the focus button.
+	virtual float getAppropriateCameraFocusDistance();
+
 protected:
 	// Abstract class, no need to instantiate this class
 	Object() : ImGuiEditorInterface() {}

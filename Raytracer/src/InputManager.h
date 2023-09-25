@@ -45,6 +45,12 @@ namespace InputManager
 		X, Y, Z
 	};
 
+	enum class InputKey
+	{
+		MOVE_VIEW_TO_SELECTED,
+		CANCEL_TRANSLATION
+	};
+
 	// Initialise the input manager with the window to take input on
 	void initialise(GLFWwindow* newWindow);
 
@@ -61,5 +67,22 @@ namespace InputManager
 	void resetCurrentAction();
 
 	ImGuizmo::OPERATION getCurrentActionAsImGuizmoOperation();
+
+	// Check whether the key for a specific action is pressed.
+	// Only returns true on the first frame the key is pressed.
+	bool keyPressed(InputKey key);
+
+	// Check whether the key for a specific action is currently pressed
+	bool keyHeld(InputKey key);
+
+	// Check whether the key for a specific action is not pressed.
+	// Only returns true on the first frame the key is released.
+	bool keyReleased(InputKey key);
+
+	// Check whether the key for a specific action is currently not pressed
+	bool keyUp(InputKey key);
+
+	// Update all keybinds' previous values to have the new old values
+	void updateKeyBindsPreviousValues();
 };
 

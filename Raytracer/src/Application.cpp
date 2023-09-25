@@ -334,6 +334,8 @@ int Application::Start()
             screenTexture
         );
 
+        InputManager::updateKeyBindsPreviousValues();
+
         // Output
         glfwSwapBuffers(window);
         // Check for input

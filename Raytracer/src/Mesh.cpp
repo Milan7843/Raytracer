@@ -21,11 +21,37 @@ Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned
 
     glm::vec4 positionVec4{ glm::vec4(position, 0.0f) };
 
+    // Finding the size of the object
+    glm::vec4 minPosition{ glm::vec4(0.0f) };
+    glm::vec4 maxPosition{ glm::vec4(0.0f) };
+
+    // If there are any vertices we use the first to set the initial values
+    if (this->vertices.size() > 0)
+    {
+        minPosition = this->vertices[0].position - positionVec4;
+        maxPosition = this->vertices[1].position - positionVec4;
+    }
+
     // Normalzing the vertex positions
     for (Vertex& vertex : this->vertices)
     {
         vertex.position -= positionVec4;
+        //minPosition.x = glm::min(vertex.position.x, minPosition.x);
+        //minPosition.y = glm::min(vertex.position.y, minPosition.y);
+        //minPosition.z = glm::min(vertex.position.z, minPosition.z);
+        //maxPosition.x = glm::max(vertex.position.x, maxPosition.x);
+        //maxPosition.y = glm::max(vertex.position.y, maxPosition.y);
+        //maxPosition.z = glm::max(vertex.position.z, maxPosition.z);
+        minPosition = glm::min(vertex.position, minPosition);
+        maxPosition = glm::max(vertex.position, maxPosition);
     }
+
+    // Now taking the difference between the minimum and maximum position
+    this->boundingBoxSize = glm::vec3(
+        maxPosition.x - minPosition.x,
+        maxPosition.y - minPosition.y,
+        maxPosition.z - minPosition.z
+    );
 
     this->indices = indices;
     this->position = position;
@@ -112,6 +138,16 @@ void Mesh::writeToShader(AbstractShader* shader, unsigned int ssbo, const glm::m
 
 void Mesh::writePositionToShader(AbstractShader* shader)
 {
+}
+
+float Mesh::getAppropriateCameraFocusDistance()
+{
+    //std::cout << "bb " << this->boundingBoxSize.x << ", " << this->boundingBoxSize.y << ", " << this->boundingBoxSize.z << std::endl;
+    return glm::max(glm::max(
+        this->boundingBoxSize.x * this->getScale().x,
+        this->boundingBoxSize.y * this->getScale().y),
+        this->boundingBoxSize.z * this->getScale().z
+    ) * 2.0f;
 }
 
 void Mesh::setupMesh()

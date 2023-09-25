@@ -17,6 +17,7 @@
 #include <sstream>
 
 #include "Logger.h"
+#include "Maths.h"
 
 enum class MovementMode
 {
@@ -94,5 +95,13 @@ private:
 	double scrollDeltaX{ 0.0 };
 	double scrollDeltaY{ 0.0 };
 
+	
+	bool movingToPosition{ false };
+	float movingToPositionProgress{ 0.0f };
+	glm::vec3 positionMovingFrom{ glm::vec3(0.0f) };
+	glm::vec3 positionMovingTo{ glm::vec3(0.0f) };
+	
+	float movingToPositionDuration{ 0.2f };
+	
 	MovementMode currentMode{ MovementMode::GLOBAL };
 };

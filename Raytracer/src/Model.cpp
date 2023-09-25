@@ -243,6 +243,19 @@ void Model::loadModel(std::string path, unsigned int meshMaterialIndex, unsigned
 	processNode(scene->mRootNode, scene, meshMaterialIndex, meshCount, triangleCount, MAX_MESH_COUNT);
 }
 
+float Model::getAppropriateCameraFocusDistance()
+{
+	// TODO make this implementation more precise
+	float maxDistance{ 0.0f };
+
+	for (Mesh& mesh : meshes)
+	{
+		maxDistance = glm::max(maxDistance, mesh.getAppropriateCameraFocusDistance());
+	}
+
+	return maxDistance;
+}
+
 void Model::processNode(aiNode* node, const aiScene* scene, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* meshIndex, unsigned int* triangleCount,
 	unsigned int MAX_MESH_COUNT)
 {

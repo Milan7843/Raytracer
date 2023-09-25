@@ -110,6 +110,10 @@ public:
 
 	BVHNode* getRootNode(Model& model);
 
+	// Get an approximation of an appropriate distance the camera should be from the object
+	// after clicking the focus button.
+	virtual float getAppropriateCameraFocusDistance() override;
+
 private:
 	void setupMesh();
 
@@ -117,6 +121,8 @@ private:
 	unsigned int materialIndex;
 
 	glm::vec3 averageVertexPosition;
+
+	glm::vec3 boundingBoxSize{ glm::vec3(0.0f) };
 
 	unsigned int modelID{ 0 };
 	Model* model;

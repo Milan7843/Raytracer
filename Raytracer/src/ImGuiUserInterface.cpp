@@ -109,9 +109,6 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::Begin("Central Area", nullptr, ImGuiWindowFlags_NoDecoration);
 
-
-	// Add your rendering code here using OpenGL (e.g., glBindTexture, glDrawArrays, etc.)
-
 	//ImVec2 windowMin = ImVec2(0.0f + 5.0f, std::floor(topAreaHeight + 23.0f));
 	//ImVec2 windowMax = ImVec2(std::floor(windowMin.x + centralAreaWidth - 10.0f), std::floor(windowMin.y + centralAreaHeight - 29.0f));
 	ImVec2 windowMin = ImVec2(1.0f, std::floor(topAreaHeight + 1.0f));

@@ -20,6 +20,15 @@ namespace InputManager
 		unsigned int axisKeyYPreviousState{ GLFW_RELEASE };
 		unsigned int axisKeyZPreviousState{ GLFW_RELEASE };
 
+		const unsigned int numKeyBinds{ 2 };
+
+		int keyBinds[] = {
+			GLFW_KEY_Q,
+			GLFW_MOUSE_BUTTON_RIGHT
+		};
+
+		int keyBindsPreviousState[numKeyBinds];
+
 		Action currentAction{ Action::NONE };
 		TransformAction currentTransformAction{ TransformAction::TRANSLATE };
 		Axis currentAxis{ Axis::NONE };
@@ -36,6 +45,12 @@ namespace InputManager
 	void initialise(GLFWwindow* newWindow)
 	{
 		window = newWindow;
+
+		// Setting all key binds' initial states to be non-pressed
+		for (unsigned int i{ 0 }; i < numKeyBinds; i++)
+		{
+			keyBindsPreviousState[i] = GLFW_RELEASE;
+		}
 	}
 
 	void takeInput(Scene& scene)
@@ -202,6 +217,51 @@ namespace InputManager
 				}
 			default:
 				return ImGuizmo::OPERATION::TRANSLATE;
+		}
+	}
+
+	bool keyPressed(InputKey key)
+	{
+		unsigned int keyIndex{ (unsigned int)key };
+		int currentState{ glfwGetKey(window, keyBinds[keyIndex]) };
+		int previousState{ keyBindsPreviousState[keyIndex] };
+
+		// Must be pressed now and released on the previous frame
+		return currentState == GLFW_PRESS && previousState == GLFW_RELEASE;
+	}
+
+	bool keyHeld(InputKey key)
+	{
+		unsigned int keyIndex{ (unsigned int)key };
+
+		// Checking whether the key is currently pressed
+		return glfwGetKey(window, keyBinds[keyIndex]) == GLFW_PRESS;
+	}
+
+	bool keyReleased(InputKey key)
+	{
+		unsigned int keyIndex{ (unsigned int)key };
+		int currentState{ glfwGetKey(window, keyBinds[keyIndex]) };
+		int previousState{ keyBindsPreviousState[keyIndex] };
+
+		// Must be released now and pressed on the previous frame
+		return currentState == GLFW_RELEASE && previousState == GLFW_PRESS;
+	}
+
+	bool keyUp(InputKey key)
+	{
+		unsigned int keyIndex{ (unsigned int)key };
+
+		// Checking whether the key is currently not pressed
+		return glfwGetKey(window, keyBinds[keyIndex]) == GLFW_RELEASE;
+	}
+
+	void updateKeyBindsPreviousValues()
+	{
+		// Setting all key binds' states to the current values
+		for (unsigned int i{ 0 }; i < numKeyBinds; i++)
+		{
+			keyBindsPreviousState[i] = glfwGetKey(window, keyBinds[i]);
 		}
 	}
 };

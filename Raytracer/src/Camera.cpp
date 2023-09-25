@@ -184,6 +184,49 @@ bool Camera::processInputFirstPerson(GLFWwindow* window, Scene& scene, double xp
 
 bool Camera::processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, double xscroll, double yscroll, float deltaTime)
 {
+	if (movingToPosition)
+	{
+		// Moving along the path
+		this->position = Maths::cerp<glm::vec3>(
+			this->positionMovingFrom,
+			this->positionMovingTo,
+			this->movingToPositionProgress / this->movingToPositionDuration
+		);
+
+		if (this->movingToPositionProgress >= this->movingToPositionDuration)
+		{
+			// Reached the desired position
+			this->position = this->positionMovingTo;
+			this->movingToPosition = false;
+		}
+
+		// Moving along
+		this->movingToPositionProgress += deltaTime;
+
+		return true;
+	}
+	else
+	{
+		// Check for the input to move to the selected object position
+		if (InputManager::keyPressed(InputManager::InputKey::MOVE_VIEW_TO_SELECTED))
+		{
+			Object* selectedObject{ scene.getObjectFromSelected() };
+
+			if (selectedObject != nullptr)
+			{
+				this->positionMovingFrom = this->position;
+				
+				// Finding an appropriate distance from the object
+				float distanceFromObject{ selectedObject->getAppropriateCameraFocusDistance() };
+
+				this->positionMovingTo = selectedObject->getPosition() - this->forward * distanceFromObject;
+				this->movingToPositionProgress = 0.0f;
+				this->movingToPosition = true;
+			}
+			return false;
+		}
+	}
+
 	// Saving the previous camera position to compare to the new to determine if the camera moved
 	glm::vec3 prevPosition = position;
 
