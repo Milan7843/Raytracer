@@ -48,7 +48,13 @@ namespace InputManager
 	enum class InputKey
 	{
 		MOVE_VIEW_TO_SELECTED,
-		CANCEL_TRANSLATION
+		CANCEL_TRANSLATION,
+		TRANSLATE,
+		ROTATE,
+		SCALE,
+		AXIS_X,
+		AXIS_Y,
+		AXIS_Z
 	};
 
 	enum class KeyType

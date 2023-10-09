@@ -6,30 +6,28 @@ namespace InputManager
 {
 	namespace
 	{
-		unsigned int translateKey{ GLFW_KEY_G };
-		unsigned int rotateKey{ GLFW_KEY_R };
-		unsigned int scaleKey{ GLFW_KEY_S };
-		unsigned int translateKeyPreviousState{ GLFW_RELEASE };
-		unsigned int rotateKeyPreviousState{ GLFW_RELEASE };
-		unsigned int scaleKeyPreviousState{ GLFW_RELEASE };
-
-		unsigned int axisKeyX{ GLFW_KEY_X };
-		unsigned int axisKeyY{ GLFW_KEY_Y };
-		unsigned int axisKeyZ{ GLFW_KEY_Z };
-		unsigned int axisKeyXPreviousState{ GLFW_RELEASE };
-		unsigned int axisKeyYPreviousState{ GLFW_RELEASE };
-		unsigned int axisKeyZPreviousState{ GLFW_RELEASE };
-
-		const unsigned int numKeyBinds{ 2 };
+		const unsigned int numKeyBinds{ 8 };
 
 		int keyBinds[] = {
 			GLFW_KEY_Q,
-			GLFW_MOUSE_BUTTON_RIGHT
+			GLFW_MOUSE_BUTTON_RIGHT,
+			GLFW_KEY_G,
+			GLFW_KEY_R,
+			GLFW_KEY_S,
+			GLFW_KEY_X,
+			GLFW_KEY_Y,
+			GLFW_KEY_Z
 		};
 
 		KeyType keyTypes[]{
 			KeyType::KEYBOARD,
-			KeyType::MOUSE
+			KeyType::MOUSE,
+			KeyType::KEYBOARD,
+			KeyType::KEYBOARD,
+			KeyType::KEYBOARD,
+			KeyType::KEYBOARD,
+			KeyType::KEYBOARD,
+			KeyType::KEYBOARD
 		};
 
 		int keyBindsPreviousState[numKeyBinds];
@@ -46,7 +44,7 @@ namespace InputManager
 				previousState == GLFW_RELEASE;
 		}
 
-		int getKeyState(unsigned int keyIndex)
+		int getKeyStateFromIndex(unsigned int keyIndex)
 		{
 			KeyType keyType = keyTypes[keyIndex];
 			unsigned int key = keyBinds[keyIndex];
@@ -58,6 +56,12 @@ namespace InputManager
 				case KeyType::MOUSE:
 					return glfwGetMouseButton(window, key);
 			}
+		}
+
+		int getKeyState(InputKey key)
+		{
+			unsigned int keyIndex{ (unsigned int)key };
+			return getKeyStateFromIndex(keyIndex);
 		}
 	}
 
@@ -77,17 +81,17 @@ namespace InputManager
 		switch (currentAction)
 		{
 			case Action::NONE:
-				if (glfwGetKey(window, translateKey) == GLFW_PRESS && scene.hasObjectSelected())
+				if (getKeyState(InputKey::TRANSLATE) == GLFW_PRESS && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::TRANSLATE;
 				}
-				else if (glfwGetKey(window, rotateKey) == GLFW_PRESS && scene.hasObjectSelected())
+				else if (getKeyState(InputKey::ROTATE) == GLFW_PRESS && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::ROTATE;
 				}
-				else if (glfwGetKey(window, scaleKey) == GLFW_PRESS && scene.hasObjectSelected())
+				else if (getKeyState(InputKey::SCALE) == GLFW_PRESS && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::SCALE;
@@ -102,26 +106,25 @@ namespace InputManager
 					break;
 				}
 				// Setting the transformation action based on the key press
-				if (glfwGetKey(window, translateKey) == GLFW_PRESS && scene.hasObjectSelected())
+				if (getKeyState(InputKey::TRANSLATE) == GLFW_PRESS && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::TRANSLATE;
 				}
-				else if (glfwGetKey(window, rotateKey) == GLFW_PRESS && scene.hasObjectSelected())
+				else if (getKeyState(InputKey::ROTATE) == GLFW_PRESS && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::ROTATE;
 				}
-				else if (glfwGetKey(window, scaleKey) == GLFW_PRESS && scene.hasObjectSelected())
+				else if (getKeyState(InputKey::SCALE) == GLFW_PRESS && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::SCALE;
 				}
 
 				// Setting the axis based on the key press 
-				if (isClicked(axisKeyX, axisKeyXPreviousState))
+				if (keyPressed(InputKey::AXIS_X))
 				{
-					std::cout << "on axis X" << std::endl;
 					// If we were already on this axis, now go to no specific axis
 					if (currentAxis == Axis::X)
 					{
@@ -133,7 +136,7 @@ namespace InputManager
 						currentAxis = Axis::X;
 					}
 				}
-				if (isClicked(axisKeyY, axisKeyYPreviousState))
+				if (keyPressed(InputKey::AXIS_Y))
 				{
 					// If we were already on this axis, now go to no specific axis
 					if (currentAxis == Axis::Y)
@@ -146,7 +149,7 @@ namespace InputManager
 						currentAxis = Axis::Y;
 					}
 				}
-				if (isClicked(axisKeyZ, axisKeyZPreviousState))
+				if (keyPressed(InputKey::AXIS_Z))
 				{
 					// If we were already on this axis, now go to no specific axis
 					if (currentAxis == Axis::Z)
@@ -161,13 +164,6 @@ namespace InputManager
 				}
 				break;
 		}
-
-		translateKeyPreviousState = glfwGetKey(window, translateKey);
-		rotateKeyPreviousState = glfwGetKey(window, rotateKey);
-		scaleKeyPreviousState = glfwGetKey(window, scaleKey);
-		axisKeyXPreviousState = glfwGetKey(window, axisKeyX);
-		axisKeyYPreviousState = glfwGetKey(window, axisKeyY);
-		axisKeyZPreviousState = glfwGetKey(window, axisKeyZ);
 	}
 
 	Action getCurrentAction()
@@ -197,7 +193,6 @@ namespace InputManager
 					case InputManager::Axis::NONE:
 						return ImGuizmo::OPERATION::TRANSLATE;
 					case InputManager::Axis::X:
-						std::cout << "on axis X" << std::endl;
 						return ImGuizmo::OPERATION::TRANSLATE_X;
 					case InputManager::Axis::Y:
 						return ImGuizmo::OPERATION::TRANSLATE_Y;
@@ -242,7 +237,7 @@ namespace InputManager
 	bool keyPressed(InputKey key)
 	{
 		unsigned int keyIndex{ (unsigned int)key };
-		int currentState{ getKeyState(keyIndex) };
+		int currentState{ getKeyState(key) };
 		int previousState{ keyBindsPreviousState[keyIndex] };
 
 		// Must be pressed now and released on the previous frame
@@ -251,16 +246,14 @@ namespace InputManager
 
 	bool keyHeld(InputKey key)
 	{
-		unsigned int keyIndex{ (unsigned int)key };
-
 		// Checking whether the key is currently pressed
-		return getKeyState(keyIndex) == GLFW_PRESS;
+		return getKeyState(key) == GLFW_PRESS;
 	}
 
 	bool keyReleased(InputKey key)
 	{
 		unsigned int keyIndex{ (unsigned int)key };
-		int currentState{ getKeyState(keyIndex) };
+		int currentState{ getKeyState(key) };
 		int previousState{ keyBindsPreviousState[keyIndex] };
 
 		// Must be released now and pressed on the previous frame
@@ -269,10 +262,8 @@ namespace InputManager
 
 	bool keyUp(InputKey key)
 	{
-		unsigned int keyIndex{ (unsigned int)key };
-
 		// Checking whether the key is currently not pressed
-		return getKeyState(keyIndex) == GLFW_RELEASE;
+		return getKeyState(key) == GLFW_RELEASE;
 	}
 
 	void updateKeyBindsPreviousValues()
@@ -280,7 +271,7 @@ namespace InputManager
 		// Setting all key binds' states to the current values
 		for (unsigned int i{ 0 }; i < numKeyBinds; i++)
 		{
-			keyBindsPreviousState[i] = getKeyState(i);
+			keyBindsPreviousState[i] = getKeyStateFromIndex(i);
 		}
 	}
 };
