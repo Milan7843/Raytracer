@@ -46,3 +46,18 @@ void Logger::stop()
 {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
 }
+
+void Logger::logMatrix(glm::mat4& matrix, const char* message)
+{
+    std::cout << message << ":\n";
+    std::cout << std::fixed << std::setprecision(2); // Set fixed-point format with 4 decimal places
+
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            std::cout << std::setw(5) << matrix[i][j] << " "; // Set width to 7 to accommodate 4 characters plus 3 decimal places
+        }
+        std::cout << "\n";
+    }
+}

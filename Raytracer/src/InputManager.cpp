@@ -27,6 +27,11 @@ namespace InputManager
 			GLFW_MOUSE_BUTTON_RIGHT
 		};
 
+		KeyType keyTypes[]{
+			KeyType::KEYBOARD,
+			KeyType::MOUSE
+		};
+
 		int keyBindsPreviousState[numKeyBinds];
 
 		Action currentAction{ Action::NONE };
@@ -39,6 +44,20 @@ namespace InputManager
 		{
 			return glfwGetKey(window, key) == GLFW_PRESS &&
 				previousState == GLFW_RELEASE;
+		}
+
+		int getKeyState(unsigned int keyIndex)
+		{
+			KeyType keyType = keyTypes[keyIndex];
+			unsigned int key = keyBinds[keyIndex];
+
+			switch (keyType)
+			{
+				case KeyType::KEYBOARD:
+					return glfwGetKey(window, key);
+				case KeyType::MOUSE:
+					return glfwGetMouseButton(window, key);
+			}
 		}
 	}
 
@@ -223,7 +242,7 @@ namespace InputManager
 	bool keyPressed(InputKey key)
 	{
 		unsigned int keyIndex{ (unsigned int)key };
-		int currentState{ glfwGetKey(window, keyBinds[keyIndex]) };
+		int currentState{ getKeyState(keyIndex) };
 		int previousState{ keyBindsPreviousState[keyIndex] };
 
 		// Must be pressed now and released on the previous frame
@@ -235,13 +254,13 @@ namespace InputManager
 		unsigned int keyIndex{ (unsigned int)key };
 
 		// Checking whether the key is currently pressed
-		return glfwGetKey(window, keyBinds[keyIndex]) == GLFW_PRESS;
+		return getKeyState(keyIndex) == GLFW_PRESS;
 	}
 
 	bool keyReleased(InputKey key)
 	{
 		unsigned int keyIndex{ (unsigned int)key };
-		int currentState{ glfwGetKey(window, keyBinds[keyIndex]) };
+		int currentState{ getKeyState(keyIndex) };
 		int previousState{ keyBindsPreviousState[keyIndex] };
 
 		// Must be released now and pressed on the previous frame
@@ -253,7 +272,7 @@ namespace InputManager
 		unsigned int keyIndex{ (unsigned int)key };
 
 		// Checking whether the key is currently not pressed
-		return glfwGetKey(window, keyBinds[keyIndex]) == GLFW_RELEASE;
+		return getKeyState(keyIndex) == GLFW_RELEASE;
 	}
 
 	void updateKeyBindsPreviousValues()
@@ -261,7 +280,7 @@ namespace InputManager
 		// Setting all key binds' states to the current values
 		for (unsigned int i{ 0 }; i < numKeyBinds; i++)
 		{
-			keyBindsPreviousState[i] = glfwGetKey(window, keyBinds[i]);
+			keyBindsPreviousState[i] = getKeyState(i);
 		}
 	}
 };

@@ -2,6 +2,8 @@
 
 #include <string>
 #include <iostream>
+#include <iomanip>
+#include <glm/glm.hpp>
 
 // For colored text
 #define NOMINMAX
@@ -32,4 +34,7 @@ namespace Logger
 
 	// Stop this logger
 	void stop();
+
+	// Log a matrix with the given message
+	void logMatrix(glm::mat4& matrix, const char* message);
 }

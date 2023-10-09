@@ -82,6 +82,14 @@ private:
 	glm::vec2 mousePosition{ glm::vec2(0) };
 	glm::ivec2 renderedScreenSize{ glm::ivec2(0) };
 
+	// Transformation saved variables
+	bool transformationFirstFrame{ true };
+	glm::mat4 transformationInitialObjectMatrix;
+	glm::mat4 transformationInitialMeshMatrix;
+	unsigned int currentTransformationObjectID;
+	bool previousFrameTransformationDragging{ false };
+	bool transformationCancelled{ false };
+
 	void drawGUI(GLFWwindow* window,
 		SceneManager& sceneManager,
 		Camera& camera,

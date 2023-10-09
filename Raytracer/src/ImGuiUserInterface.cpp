@@ -135,8 +135,17 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	Object* object{ sceneManager.getCurrentScene().getObjectFromSelected() };
 	ObjectType type{ sceneManager.getCurrentScene().getSelectedObjectType() };
 
+	bool showingTransformation{ false };
+
 	if (object != nullptr)
 	{
+		if (currentTransformationObjectID != object->getID())
+		{
+			// When we selected a new object, it must be the first frame it is being transformed
+			transformationFirstFrame = true;
+			currentTransformationObjectID = object->getID();
+		}
+
 		// Only show a gizmo if we are actually transforming
 		if (InputManager::getCurrentAction() == InputManager::Action::TRANSFORM)
 		{
@@ -144,7 +153,31 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 
 			if (type == ObjectType::MODEL)
 			{
+				showingTransformation = true;
+
 				glm::mat4 objectMatrix{ object->getTransformationMatrix() };
+
+				// When the gizmo first appears (for the currently selected object)
+				if (transformationFirstFrame)
+				{
+					transformationInitialObjectMatrix = objectMatrix;
+				}
+
+				// Toggle the "interacting after cancel" state
+				if (InputManager::keyPressed(InputManager::InputKey::CANCEL_TRANSLATION))
+				{
+					transformationCancelled = true;
+					Logger::logMatrix(transformationInitialObjectMatrix, "Initial object matrix");
+
+					object->setTransformation(transformationInitialObjectMatrix);
+					objectMatrix = object->getTransformationMatrix();
+				}
+
+				// Once we stop using, we reset the "cancelled" state
+				if (!ImGuizmo::IsUsing())
+				{
+					transformationCancelled = false;
+				}
 
 				// Define the delta matrix: this will hold all changes made to the object matrix
 				glm::mat4 deltaMatrix;
@@ -154,27 +187,71 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 					glm::value_ptr(camera.getProjectionMatrix()),
 					currentOperation,
 					ImGuizmo::WORLD,
-					glm::value_ptr(objectMatrix)
+					glm::value_ptr(objectMatrix),
+					glm::value_ptr(deltaMatrix)
 				);
 
-				object->setTransformation(objectMatrix);
 
-				// If anything changed
-				// TODO this if statement is not accurate
-				if (deltaMatrix != glm::mat4(1.0f))
+				// When the user stops dragging the gizmo
+				if (!ImGuizmo::IsUsing() && previousFrameTransformationDragging)
 				{
-					Model* model{ dynamic_cast<Model*>(object) };
-					model->setVertexDataChanged(true);
+					glm::mat4 totalTransformationMatrix{ transformationInitialObjectMatrix * glm::inverse(objectMatrix) };
+
+					Logger::logMatrix(totalTransformationMatrix, "Total transformation matrix");
+
+					transformationInitialObjectMatrix = objectMatrix;
 				}
+
+				// Do not apply the gizmo transformation after having cancelled the transformation
+				if (!transformationCancelled)
+				{
+					object->setTransformation(objectMatrix);
+
+					// If anything changed
+					// TODO this if statement is not accurate
+					if (deltaMatrix != glm::mat4(1.0f))
+					{
+						Model* model{ dynamic_cast<Model*>(object) };
+						model->setVertexDataChanged(true);
+					}
+				}
+
+				transformationFirstFrame = false;
+				previousFrameTransformationDragging = ImGuizmo::IsUsing();
 			}
 			else if (type == ObjectType::MESH)
 			{
+				showingTransformation = true;
+
 				Mesh* mesh{ dynamic_cast<Mesh*>(object) };
 				Model* model{ mesh->getModel() };
 
 				// Create a copy of the original matrix
 				glm::mat4 objectMatrix{ mesh->getTransformationMatrix() * model->getTransformationMatrix() };
 				//objectMatrix = glm::translate(objectMatrix, mesh->getAverageVertexPosition());
+
+				// When the gizmo first appears (for the currently selected object)
+				if (transformationFirstFrame)
+				{
+					transformationInitialObjectMatrix = objectMatrix;
+					transformationInitialMeshMatrix = mesh->getTransformationMatrix();
+				}
+
+				// Toggle the "interacting after cancel" state
+				if (InputManager::keyPressed(InputManager::InputKey::CANCEL_TRANSLATION))
+				{
+					transformationCancelled = true;
+					Logger::logMatrix(transformationInitialMeshMatrix, "Initial mesh matrix");
+
+					mesh->setTransformation(transformationInitialMeshMatrix);
+					objectMatrix = mesh->getTransformationMatrix() * model->getTransformationMatrix();
+				}
+
+				// Once we stop using, we reset the "cancelled" state
+				if (!ImGuizmo::IsUsing())
+				{
+					transformationCancelled = false;
+				}
 
 				// Define the delta matrix: this will hold all changes made to the object matrix
 				glm::mat4 deltaMatrix;
@@ -188,17 +265,42 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 					glm::value_ptr(deltaMatrix)
 				);
 
-				glm::mat4 newMeshMatrix{ deltaMatrix * mesh->getTransformationMatrix() };
-				mesh->setTransformation(newMeshMatrix);
+				//std::cout << "using? " << (ImGuizmo::IsUsing() ? "ye" : "nah") << " okay and prev? " << (previousFrameTransformationDragging ? "ye" : "nah") << std::endl;
 
-				// If anything changed
-				// TODO this if statement is not accurate
-				if (deltaMatrix != glm::mat4(1.0f))
+				// When the user stops dragging the gizmo
+				if (!ImGuizmo::IsUsing() && previousFrameTransformationDragging)
 				{
-					mesh->setVertexDataChanged(true);
+					glm::mat4 totalTransformationMatrix{ transformationInitialObjectMatrix * glm::inverse(objectMatrix) };
+
+					Logger::logMatrix(totalTransformationMatrix, "Total transformation matrix");
+
+					transformationInitialObjectMatrix = objectMatrix;
+					transformationInitialMeshMatrix = mesh->getTransformationMatrix();
 				}
+
+				// Do not apply the gizmo transformation after having cancelled the transformation
+				if (!transformationCancelled)
+				{
+					glm::mat4 newMeshMatrix{ deltaMatrix * mesh->getTransformationMatrix() };
+					mesh->setTransformation(newMeshMatrix);
+
+					// If anything changed
+					// TODO this if statement is not accurate
+					if (deltaMatrix != glm::mat4(1.0f))
+					{
+						mesh->setVertexDataChanged(true);
+					}
+				}
+
+				transformationFirstFrame = false;
+				previousFrameTransformationDragging = ImGuizmo::IsUsing();
 			}
 		}
+	}
+	
+	if (!showingTransformation)
+	{
+		transformationFirstFrame = true;
 	}
 
 	// Finding the pixel coordinates of the mouse

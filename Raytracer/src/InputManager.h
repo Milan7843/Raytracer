@@ -51,6 +51,12 @@ namespace InputManager
 		CANCEL_TRANSLATION
 	};
 
+	enum class KeyType
+	{
+		MOUSE,
+		KEYBOARD
+	};
+
 	// Initialise the input manager with the window to take input on
 	void initialise(GLFWwindow* newWindow);
 
