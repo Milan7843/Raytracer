@@ -275,6 +275,21 @@ unsigned int Mesh::getModelID()
 
 void Mesh::renderContextMenuItems(Scene& scene)
 {
+    // Draw some text
+    ImGui::Text((getName()).c_str());
+
+    // Add a separator line
+    ImGui::Separator();
+
+    if (ImGui::MenuItem("Option 1"))
+    {
+        // Handle option 1 selection
+    }
+
+    if (ImGui::MenuItem("Option 2"))
+    {
+        // Handle option 2 selection
+    }
 }
 
 void Mesh::setModel(Model* model)

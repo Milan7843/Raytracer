@@ -81,17 +81,17 @@ namespace InputManager
 		switch (currentAction)
 		{
 			case Action::NONE:
-				if (getKeyState(InputKey::TRANSLATE) == GLFW_PRESS && scene.hasObjectSelected())
+				if (keyPressed(InputKey::TRANSLATE) && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::TRANSLATE;
 				}
-				else if (getKeyState(InputKey::ROTATE) == GLFW_PRESS && scene.hasObjectSelected())
+				else if (keyPressed(InputKey::ROTATE) && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::ROTATE;
 				}
-				else if (getKeyState(InputKey::SCALE) == GLFW_PRESS && scene.hasObjectSelected())
+				else if (keyPressed(InputKey::SCALE) && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::SCALE;
@@ -106,17 +106,17 @@ namespace InputManager
 					break;
 				}
 				// Setting the transformation action based on the key press
-				if (getKeyState(InputKey::TRANSLATE) == GLFW_PRESS && scene.hasObjectSelected())
+				if (keyPressed(InputKey::TRANSLATE) && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::TRANSLATE;
 				}
-				else if (getKeyState(InputKey::ROTATE) == GLFW_PRESS && scene.hasObjectSelected())
+				else if (keyPressed(InputKey::ROTATE) && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::ROTATE;
 				}
-				else if (getKeyState(InputKey::SCALE) == GLFW_PRESS && scene.hasObjectSelected())
+				else if (keyPressed(InputKey::SCALE) && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::SCALE;

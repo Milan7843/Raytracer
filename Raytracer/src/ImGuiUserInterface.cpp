@@ -433,7 +433,7 @@ bool ImGuiUserInterface::isEnabled()
 
 bool ImGuiUserInterface::isMouseOnGUI()
 {
-	return ImGuizmo::IsOver();;
+	return ImGuizmo::IsOver();
 }
 
 bool ImGuiUserInterface::isMouseOnRenderedScreen()

@@ -145,8 +145,15 @@ void Model::onDeleteMaterial(unsigned int index)
 
 void Model::renderContextMenuItems(Scene& scene)
 {
+	// Draw some text
+	ImGui::Text((getName()).c_str());
+
+	// Add a separator line
+	ImGui::Separator();
+
 	if (ImGui::MenuItem("Delete"))
 	{
+		// TODO when delete is called, the click may still select one of its meshes, which causes an error
 		scene.deleteModel(this->getID());
 	}
 	if (ImGui::MenuItem("Option 2"))

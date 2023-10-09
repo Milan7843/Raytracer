@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 // ImGui
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -25,7 +27,7 @@ class ContextMenuSource
 public:
     virtual void renderContextMenu(Scene& scene) final
     {
-        if (ImGui::BeginPopup(id))
+        if (ImGui::BeginPopup(id.c_str()))
         {
             // Rendering the context menu specific to the subclass
             renderContextMenuItems(scene);
@@ -34,7 +36,7 @@ public:
         }
         if (openNextCall)
         {
-            ImGui::OpenPopup(id);
+            ImGui::OpenPopup(id.c_str());
             openNextCall = false;
         }
     }
@@ -48,7 +50,7 @@ protected:
 	ContextMenuSource()
     {
         std::string idStr = std::to_string(instanceCount++);
-        id = idStr.c_str();
+        id = idStr;
     }
 	~ContextMenuSource() {
     }
@@ -59,7 +61,7 @@ private:
 
     bool openNextCall{ false };
 
-    const char* id;
+    std::string id;
 
     // Static variable to keep track of the instance count to give each instance a unique ID
     static unsigned int instanceCount;

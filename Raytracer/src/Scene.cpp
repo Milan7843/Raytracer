@@ -1019,6 +1019,10 @@ void Scene::renderContextMenus()
 	for (Model& model : models)
 	{
 		model.renderContextMenu(*this);
+		for (Mesh& mesh : model.getMeshes())
+		{
+			mesh.renderContextMenu(*this);
+		}
 	}
 }
 
