@@ -27,6 +27,7 @@
 #include "ObjectScreenSelector.h"
 #include "BVH/BVHHandler.h"
 #include "InputManager.h"
+#include "gui/GizmoRenderer.h"
 
 #include "CoordinateUtility.h"
 #include "Logger.h"

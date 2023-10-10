@@ -54,6 +54,9 @@ public:
 
 	void setAspectRatio(int width, int height);
 
+	// Get the ratio width/height
+	float getAspectRatio();
+
 	// Write this light to the given filestream
 	virtual void writeDataToStream(std::ofstream& filestream);
 

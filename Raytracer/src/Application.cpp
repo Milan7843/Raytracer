@@ -145,6 +145,10 @@ int Application::Start()
     Logger::log("Loading HDRI renderer");
     HDRIRenderer hdriRenderer("src/shader_src/hdriVertex.shader", "src/shader_src/hdriFragment.shader");
 
+    GizmoRenderer gizmoRenderer("src/shader_src/gizmo_shaders/gizmoVertex.shader",
+        "src/shader_src/gizmo_shaders/gizmoGeometry.shader",
+        "src/shader_src/gizmo_shaders/gizmoFragment.shader");
+
     ObjectScreenSelector objectScreenSelector(WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
     raytracingRenderer.bindSceneManager(&sceneManager);
@@ -308,6 +312,19 @@ int Application::Start()
 
             /* Rasterized scene rendering */
             sceneManager.getCurrentScene().draw(&rasterizedShader);
+
+            // Rendering the gizmos for the pointlights
+            std::vector<GizmoDrawData> gizmoDrawData;
+            for (PointLight& light : sceneManager.getCurrentScene().getPointLights())
+            {
+                gizmoDrawData.push_back(
+                    GizmoDrawData{
+                        light.getPosition(),
+                        light.getColor()
+                    }
+                );
+            }
+            gizmoRenderer.render(gizmoDrawData, GizmoType::POINTLIGHT, sceneManager.getCurrentScene().getActiveCamera());
 
             // Rendering the outlines for selected objects
             outlineRenderer.render(sceneManager.getCurrentScene());

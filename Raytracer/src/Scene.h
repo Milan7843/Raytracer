@@ -15,6 +15,7 @@
 #include "BVH/BVH.h"
 #include "gui/ContextMenuSource.h"
 #include "InputManager.h"
+#include "ImageLoader.h"
 
 #include <iostream>
 

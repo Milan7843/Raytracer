@@ -875,7 +875,7 @@ vec3 calculateDirectLightingContribution(Intersection intersection, int seed)
 
                 float falloff = 1.0 / (dist.x * dist.x + dist.y * dist.y + dist.z * dist.z);
 
-                finalLight += intensity * pointLights[i].color * pointLights[i].intensity * falloff * closestIntersection.color;
+                finalLight += intensity * pointLights[i].color * pointLights[i].intensity * falloff;
             }
             else
             {

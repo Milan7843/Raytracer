@@ -659,6 +659,11 @@ Plane
 # Models end
 
 # Point lights
+Point light
+1 1 1
+1
+0 1.44 0
+0
 # Point lights end
 
 # Directional lights
@@ -673,11 +678,11 @@ Directional light
 # Ambient lights end
 
 # Cameras
-1.13143 1.48311 1.90239
--17.7002
-3484.65
+0.92571 1.83043 0.452261
+-24.2002
+3452.75
 1
-39.333
+37.333
 1.844
 # Cameras end
 

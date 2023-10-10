@@ -27,6 +27,8 @@ public:
 
 	void setIndex(unsigned int index);
 
+	glm::vec3 getColor();
+
 	glm::vec3* getPositionPointer();
 	glm::vec3* getColorPointer();
 	float* getIntensityPointer();

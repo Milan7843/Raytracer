@@ -38,6 +38,11 @@ void Light::setIndex(unsigned int index)
 	this->index = index;
 }
 
+glm::vec3 Light::getColor()
+{
+	return color;
+}
+
 glm::vec3* Light::getPositionPointer()
 {
 	return &position;

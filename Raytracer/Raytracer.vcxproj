@@ -24,6 +24,8 @@
     <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGradient.cpp" />
     <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGuizmo.cpp" />
     <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImSequencer.cpp" />
+    <ClCompile Include="src\gui\GizmoRenderer.cpp" />
+    <ClCompile Include="src\ImageLoader.cpp" />
     <ClCompile Include="src\Maths.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\gui\ContextMenuSource.cpp" />
@@ -84,6 +86,8 @@
     <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGuizmo.h" />
     <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImSequencer.h" />
     <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImZoomSlider.h" />
+    <ClInclude Include="src\gui\GizmoRenderer.h" />
+    <ClInclude Include="src\ImageLoader.h" />
     <ClInclude Include="src\Maths.h" />
     <ClInclude Include="src\InputManager.h" />
     <ClInclude Include="src\gui\ContextMenuSource.h" />
@@ -654,6 +658,9 @@
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationFragment.shader" />
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationGeometry.shader" />
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationVertex.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoFragment.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoGeometry.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoVertex.shader" />
     <None Include="src\shader_src\hdriFragment.shader" />
     <None Include="src\shader_src\hdriVertex.shader" />
     <None Include="src\shader_src\indirectLightingCalculation.shader" />

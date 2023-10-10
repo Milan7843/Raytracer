@@ -88,6 +88,11 @@ void Camera::setAspectRatio(int width, int height)
 	this->height = height;
 }
 
+float Camera::getAspectRatio()
+{
+	return (float)width / (float)height;
+}
+
 void Camera::writeDataToStream(std::ofstream& filestream)
 {
 	filestream << position.x << " " << position.y << " " << position.z << "\n";
