@@ -2,6 +2,7 @@
 
 #include "ComputeShaderInterface.h"
 #include "AbstractShader.h"
+#include <vector>
 
 class ComputeShader : public AbstractShader, public ComputeShaderInterface
 {

@@ -21,6 +21,9 @@ int Application::Start()
 
     initialiseGLFW();
 
+    Logger::log("Initializing cache");
+    Cache::initialise();
+
     // Making a GLFW window
     GLFWwindow* window = glfwCreateWindow(WINDOW_SIZE_X, WINDOW_SIZE_Y, "OpenGL", NULL, NULL);
     if (window == NULL)
@@ -138,7 +141,7 @@ int Application::Start()
 
     // Raytraced renderer
     Logger::log("Loading raytracing shader");
-    MultiComputeShader raytracingComputeShader(1, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
+    MultiComputeShader raytracingComputeShader(2, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
     //ComputeShader raytracingComputeShader("src/shader_src/raytraceComputeShaderSampledUpdated.shader");
     Renderer raytracingRenderer(raytracingComputeShader, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 

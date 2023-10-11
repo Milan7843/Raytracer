@@ -83,6 +83,38 @@ bool AbstractShader::replace(std::string& str, const std::string& from, const st
 	return true;
 }
 
+std::string AbstractShader::extractFileName(const char* filePath)
+{
+	// Convert the const char* to a string for easier manipulation
+	std::string path(filePath);
+
+	// Find the last path separator (either '/' or '\\') in the string
+	size_t lastSeparator = path.find_last_of("/\\");
+
+	if (lastSeparator != std::string::npos)
+	{
+		// Extract the substring after the last separator (i.e., the file name with extension)
+		std::string fileNameWithExtension = path.substr(lastSeparator + 1);
+
+		// Find the last dot in the substring to determine the file extension
+		size_t lastDot = fileNameWithExtension.find_last_of('.');
+
+		if (lastDot != std::string::npos)
+		{
+			// Extract the substring before the last dot (i.e., the file name without extension)
+			return fileNameWithExtension.substr(0, lastDot);
+		}
+		else
+		{
+			// If there is no dot, the file has no extension, so return the whole name
+			return fileNameWithExtension;
+		}
+	}
+
+	// If no separator is found, return the entire path as the file name
+	return path;
+}
+
 std::string AbstractShader::readFile(const char* shaderPath)
 {
 	/* Retrieving the shader data from the file */
@@ -123,8 +155,6 @@ void AbstractShader::linkProgram()
 	{
 		int success;
 		char infoLog[512];
-
-		std::cout << "glGetProgramiv" << std::endl;
 
 		glGetProgramiv(ID, GL_LINK_STATUS, &success);
 

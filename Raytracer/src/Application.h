@@ -32,6 +32,7 @@
 #include "CoordinateUtility.h"
 #include "Logger.h"
 #include "SceneFileSaver.h"
+#include "file_handling/Cache.h"
 
 #include "ApplicationRenderMode.h"
 

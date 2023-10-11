@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ShaderInterface.h"
+#include "../file_handling/Cache.h"
 
 class AbstractShader : public ShaderInterface
 {
@@ -28,10 +29,13 @@ public:
 protected:
 	unsigned int compileShader(GLenum type, const char* code);
 	bool replace(std::string& str, const std::string& from, const std::string& to);
+	std::string extractFileName(const char* filePath);
 	std::string readFile(const char* shaderPath);
 	void linkProgram();
 
 	// Cannot be instantiated
 	AbstractShader() {}
 	~AbstractShader();
+
+	const char* cacheLocation;
 };
