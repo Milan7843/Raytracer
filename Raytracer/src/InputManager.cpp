@@ -6,7 +6,7 @@ namespace InputManager
 {
 	namespace
 	{
-		const unsigned int numKeyBinds{ 8 };
+		const unsigned int numKeyBinds{ 9 };
 
 		int keyBinds[] = {
 			GLFW_KEY_Q,
@@ -16,7 +16,8 @@ namespace InputManager
 			GLFW_KEY_S,
 			GLFW_KEY_X,
 			GLFW_KEY_Y,
-			GLFW_KEY_Z
+			GLFW_KEY_Z,
+			GLFW_MOUSE_BUTTON_LEFT
 		};
 
 		KeyType keyTypes[]{
@@ -27,7 +28,8 @@ namespace InputManager
 			KeyType::KEYBOARD,
 			KeyType::KEYBOARD,
 			KeyType::KEYBOARD,
-			KeyType::KEYBOARD
+			KeyType::KEYBOARD,
+			KeyType::MOUSE
 		};
 
 		int keyBindsPreviousState[numKeyBinds];

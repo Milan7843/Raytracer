@@ -199,6 +199,8 @@ int Application::Start()
 
     setupFramebuffer(glm::ivec2(0));
 
+    bool popupOpenOnStartClick{ false };
+
     while (!glfwWindowShouldClose(window))
     {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -276,8 +278,19 @@ int Application::Start()
         }
         else
         {
+            bool popupOpen{ ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopup) };
+            if (InputManager::keyPressed(InputManager::InputKey::CLICK))
+            {
+                popupOpenOnStartClick = popupOpen;
+            }
+            if (InputManager::keyUp(InputManager::InputKey::CLICK))
+            {
+                popupOpenOnStartClick = false;
+            }
+            std::cout << popupOpenOnStartClick << std::endl;
+
             // Checking for a click on an object on mouse click and mouse not on GUI
-            if (!userInterface.isMouseOnGUI() && userInterface.isEnabled() && userInterface.isMouseOnRenderedScreen())
+            if (!popupOpen && !popupOpenOnStartClick && !userInterface.isMouseOnGUI() && userInterface.isEnabled() && userInterface.isMouseOnRenderedScreen())
             {
                 bool leftMouse = leftMouseButtonState == GLFW_PRESS &&
                     glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE;

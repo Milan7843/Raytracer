@@ -54,7 +54,8 @@ namespace InputManager
 		SCALE,
 		AXIS_X,
 		AXIS_Y,
-		AXIS_Z
+		AXIS_Z,
+		CLICK
 	};
 
 	enum class KeyType
