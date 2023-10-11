@@ -16,6 +16,7 @@
 #include "gui/ContextMenuSource.h"
 #include "InputManager.h"
 #include "ImageLoader.h"
+#include "gui/GizmoRenderer.h"
 
 #include <iostream>
 
@@ -108,6 +109,7 @@ public:
 
 	Object* getObjectFromSelected();
 	Object* getObjectByID(unsigned int objectID);
+	bool isObjectSelected(unsigned int objectID);
 
 	ObjectType getSelectedObjectType();
 
@@ -150,6 +152,9 @@ public:
 	std::vector<Model>& getModels();
 	std::vector<Sphere>& getSpheres();
 
+	void drawGizmos(GizmoRenderer& renderer);
+	void drawClickSelectGizmos(GizmoRenderer& renderer);
+	
 	// Update the BVH according to the scene
 	void updateBVH();
 

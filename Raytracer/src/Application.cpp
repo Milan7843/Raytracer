@@ -149,6 +149,10 @@ int Application::Start()
         "src/shader_src/gizmo_shaders/gizmoGeometry.shader",
         "src/shader_src/gizmo_shaders/gizmoFragment.shader");
 
+    GizmoRenderer objectClickGizmoRenderer("src/shader_src/gizmo_shaders/gizmoClickSelectVertex.shader",
+        "src/shader_src/gizmo_shaders/gizmoClickSelectGeometry.shader",
+        "src/shader_src/gizmo_shaders/gizmoClickSelectFragment.shader");
+
     ObjectScreenSelector objectScreenSelector(WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
     raytracingRenderer.bindSceneManager(&sceneManager);
@@ -283,7 +287,7 @@ int Application::Start()
 
                 if (leftMouse)
                 {
-                    unsigned int objectClickedID = objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), mouseX, mouseY);
+                    unsigned int objectClickedID = objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), mouseX, mouseY, objectClickGizmoRenderer);
 
                     // An object was clicked
                     // Using the data to select/deselect an object
@@ -313,18 +317,7 @@ int Application::Start()
             /* Rasterized scene rendering */
             sceneManager.getCurrentScene().draw(&rasterizedShader);
 
-            // Rendering the gizmos for the pointlights
-            std::vector<GizmoDrawData> gizmoDrawData;
-            for (PointLight& light : sceneManager.getCurrentScene().getPointLights())
-            {
-                gizmoDrawData.push_back(
-                    GizmoDrawData{
-                        light.getPosition(),
-                        light.getColor()
-                    }
-                );
-            }
-            gizmoRenderer.render(gizmoDrawData, GizmoType::POINTLIGHT, sceneManager.getCurrentScene().getActiveCamera());
+            sceneManager.getCurrentScene().drawGizmos(gizmoRenderer);
 
             // Rendering the outlines for selected objects
             outlineRenderer.render(sceneManager.getCurrentScene());
@@ -332,7 +325,7 @@ int Application::Start()
             bvhHandler.draw(sceneManager.getCurrentScene(), raytracingRenderer.getBVHRenderMode());
 
             // Rendering a preview of the colours used to select an object by clicking on it
-            objectScreenSelector.renderTexturePreview(sceneManager.getCurrentScene(), screenQuadVAO);
+            //objectScreenSelector.renderTexturePreview(sceneManager.getCurrentScene(), screenQuadVAO, objectClickGizmoRenderer);
         }
 
 

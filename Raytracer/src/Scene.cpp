@@ -862,6 +862,11 @@ ObjectType Scene::getSelectedObjectType()
 	return type;
 }
 
+bool Scene::isObjectSelected(unsigned int objectID)
+{
+	return objectID == currentlySelectedObject;
+}
+
 ContextMenuSource* Scene::getContextMenuSourceByID(unsigned int objectID)
 {
 	for (Model& model : models)
@@ -1007,6 +1012,45 @@ std::vector<Model>& Scene::getModels()
 std::vector<Sphere>& Scene::getSpheres()
 {
 	return spheres;
+}
+
+void Scene::drawGizmos(GizmoRenderer& renderer)
+{
+	// Rendering the gizmos for the pointlights
+	std::vector<GizmoDrawData> gizmoDrawData;
+
+	glm::vec3 selectedGizmoColor{ glm::vec3(0.9f, 0.3f, 0.8f) };
+	for (PointLight& light : getPointLights())
+	{
+		bool selected{ isObjectSelected(light.getID()) };
+
+		gizmoDrawData.push_back(
+			GizmoDrawData{
+				light.getPosition(),
+				selected ? selectedGizmoColor : light.getColor()
+			}
+		);
+	}
+	renderer.render(gizmoDrawData, GizmoType::POINTLIGHT, getActiveCamera());
+}
+
+void Scene::drawClickSelectGizmos(GizmoRenderer& renderer)
+{
+	// Rendering the gizmos for the pointlights
+	std::vector<GizmoClickSelectDrawData> gizmoDrawData;
+
+	glm::vec3 selectedGizmoColor{ glm::vec3(0.9f, 0.3f, 0.8f) };
+	for (PointLight& light : getPointLights())
+	{
+		std::cout << "light id " << light.getID() << std::endl;
+		gizmoDrawData.push_back(
+			GizmoClickSelectDrawData{
+				light.getPosition(),
+				light.getID()
+			}
+		);
+	}
+	renderer.render(gizmoDrawData, GizmoType::POINTLIGHT, getActiveCamera());
 }
 
 void Scene::updateBVH()

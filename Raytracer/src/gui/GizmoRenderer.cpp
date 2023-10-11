@@ -12,14 +12,14 @@ GizmoRenderer::GizmoRenderer(const char* vertexShaderPath,
 	}
 
 	// Generating the required buffers
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
+	glGenVertexArrays(1, &regularVAO);
+	glGenBuffers(1, &regularVBO);
 
 	// Making sure everything gets put on this specific VAO
-	glBindVertexArray(VAO);
+	glBindVertexArray(regularVAO);
 
 	// Binding the buffer
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, regularVBO);
 
 	// Letting OpenGL know how to interpret the data:
 	// vec3 for position
@@ -32,15 +32,41 @@ GizmoRenderer::GizmoRenderer(const char* vertexShaderPath,
 	// Unbinding
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
+
+
+	// Generating the required buffers
+	glGenVertexArrays(1, &clickSelectVAO);
+	glGenBuffers(1, &clickSelectVBO);
+
+	// Making sure everything gets put on this specific VAO
+	glBindVertexArray(clickSelectVAO);
+
+	// Binding the buffer
+	glBindBuffer(GL_ARRAY_BUFFER, clickSelectVBO);
+
+	// Letting OpenGL know how to interpret the data:
+	// vec3 for position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// int for objectID
+	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	// Unbinding
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 GizmoRenderer::~GizmoRenderer()
 {
-	glDeleteBuffers(1, &VBO);
-	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &regularVBO);
+	glDeleteVertexArrays(1, &regularVAO);
+	glDeleteBuffers(1, &clickSelectVBO);
+	glDeleteVertexArrays(1, &clickSelectVAO);
 }
 
-void GizmoRenderer::render(std::vector<GizmoDrawData>& points, GizmoType type, Camera& camera)
+void GizmoRenderer::render(std::vector<GizmoDrawData>& data, GizmoType type, Camera& camera)
 {
 	Gizmo gizmo = gizmos[(unsigned int)type];
 
@@ -56,17 +82,46 @@ void GizmoRenderer::render(std::vector<GizmoDrawData>& points, GizmoType type, C
 	shader.setMat4("projection", projection);
 
 	shader.setInt("gizmoTexture", 0);
-	shader.setFloat("gizmoSize", gizmo.gizmoSize);
+	shader.setFloat("gizmoScreenSize", gizmo.gizmoScreenSize);
+	shader.setFloat("gizmoWorldSize", gizmo.gizmoWorldSize);
 	shader.setFloat("aspectRatio", camera.getAspectRatio());
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gizmo.textureId);
 
-	writeDataToVAO(points);
+	writeDataToVAO(data);
 
-	glBindVertexArray(VAO);
+	glBindVertexArray(regularVAO);
 
-	glDrawArrays(GL_POINTS, 0, points.size());
+	glDrawArrays(GL_POINTS, 0, data.size());
+
+	glBindVertexArray(0);
+}
+
+void GizmoRenderer::render(std::vector<GizmoClickSelectDrawData>& data, GizmoType type, Camera& camera)
+{
+	Gizmo gizmo = gizmos[(unsigned int)type];
+
+	shader.use();
+
+	// View matrix
+	glm::mat4 view{ camera.getViewMatrix() };
+	shader.setMat4("view", view);
+
+	// Projection matrix
+	glm::mat4 projection{ camera.getProjectionMatrix() };
+	shader.setMat4("projection", projection);
+
+	shader.setInt("gizmoTexture", 0);
+	shader.setFloat("gizmoScreenSize", gizmo.gizmoScreenSize);
+	shader.setFloat("gizmoWorldSize", gizmo.gizmoWorldSize);
+	shader.setFloat("aspectRatio", camera.getAspectRatio());
+
+	writeDataToVAO(data);
+
+	glBindVertexArray(clickSelectVAO);
+
+	glDrawArrays(GL_POINTS, 0, data.size());
 
 	glBindVertexArray(0);
 }
@@ -93,10 +148,29 @@ unsigned int GizmoRenderer::loadImage(std::string imageName)
 void GizmoRenderer::writeDataToVAO(std::vector<GizmoDrawData>& data)
 {
 	// Making sure everything gets put on this specific VAO
-	glBindVertexArray(VAO);
+	glBindVertexArray(regularVAO);
 
 	// Binding the buffer
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, regularVBO);
+
+	// Putting the draw data into the buffer
+	glBufferData(GL_ARRAY_BUFFER,
+		data.size() * sizeof(data),
+		data.data(),
+		GL_STATIC_DRAW);
+
+	// Unbinding
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+void GizmoRenderer::writeDataToVAO(std::vector<GizmoClickSelectDrawData>& data)
+{
+	// Making sure everything gets put on this specific VAO
+	glBindVertexArray(clickSelectVAO);
+
+	// Binding the buffer
+	glBindBuffer(GL_ARRAY_BUFFER, clickSelectVBO);
 
 	// Putting the draw data into the buffer
 	glBufferData(GL_ARRAY_BUFFER,

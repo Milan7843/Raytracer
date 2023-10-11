@@ -2,6 +2,7 @@
 
 #include "Scene.h"
 #include "shaders/Shader.h"
+#include "gui/GizmoRenderer.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -14,10 +15,13 @@ public:
 
 	// Set the clicked object in the given scene at the coordinates to be selected
 	// Returns the id of the object that was clicked, or 0 for no object hit
-	unsigned int checkObjectClicked(Scene& scene, unsigned int x, unsigned int y);
+	unsigned int checkObjectClicked(Scene& scene,
+		unsigned int x,
+		unsigned int y,
+		GizmoRenderer& objectClickGizmoRenderer);
 
 	// Render the texture used to decide what object was clicked
-	void renderTexturePreview(Scene& scene, unsigned int screenQuadVAO);
+	void renderTexturePreview(Scene& scene, unsigned int screenQuadVAO, GizmoRenderer& objectClickGizmoRenderer);
 
 	// Set the resolution the object screen selector is rendering at
 	void setResolution(unsigned int width, unsigned int height);
@@ -25,7 +29,7 @@ public:
 private:
 
 	// Renders the scene to the texture, giving each a different color
-	void renderSceneToTexture(Scene& scene);
+	void renderSceneToTexture(Scene& scene, GizmoRenderer& objectClickGizmoRenderer);
 
 	unsigned int framebuffer{ 0 };
 

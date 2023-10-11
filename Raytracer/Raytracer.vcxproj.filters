@@ -1931,6 +1931,9 @@
     <None Include="src\shader_src\gizmo_shaders\gizmoGeometry.shader" />
     <None Include="src\shader_src\gizmo_shaders\gizmoFragment.shader" />
     <None Include="src\shader_src\gizmo_shaders\gizmoVertex.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectVertex.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectGeometry.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectFragment.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />

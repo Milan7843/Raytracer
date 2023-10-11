@@ -658,6 +658,9 @@
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationFragment.shader" />
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationGeometry.shader" />
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationVertex.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectFragment.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectGeometry.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectVertex.shader" />
     <None Include="src\shader_src\gizmo_shaders\gizmoFragment.shader" />
     <None Include="src\shader_src\gizmo_shaders\gizmoGeometry.shader" />
     <None Include="src\shader_src\gizmo_shaders\gizmoVertex.shader" />
