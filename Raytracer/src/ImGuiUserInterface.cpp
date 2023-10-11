@@ -295,6 +295,73 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 				transformationFirstFrame = false;
 				previousFrameTransformationDragging = ImGuizmo::IsUsing();
 			}
+			else if (type == ObjectType::POINT_LIGHT)
+			{
+				showingTransformation = true;
+
+				glm::mat4 objectMatrix{ object->getTransformationMatrix() };
+
+				// When the gizmo first appears (for the currently selected object)
+				if (transformationFirstFrame)
+				{
+					transformationInitialObjectMatrix = objectMatrix;
+				}
+
+				// Toggle the "interacting after cancel" state
+				if (InputManager::keyPressed(InputManager::InputKey::CANCEL_TRANSLATION))
+				{
+					transformationCancelled = true;
+					Logger::logMatrix(transformationInitialObjectMatrix, "Initial object matrix");
+
+					object->setTransformation(transformationInitialObjectMatrix);
+					objectMatrix = object->getTransformationMatrix();
+				}
+
+				// Once we stop using, we reset the "cancelled" state
+				if (!ImGuizmo::IsUsing())
+				{
+					transformationCancelled = false;
+				}
+
+				// Define the delta matrix: this will hold all changes made to the object matrix
+				glm::mat4 deltaMatrix;
+
+				ImGuizmo::Manipulate(
+					glm::value_ptr(camera.getViewMatrix()),
+					glm::value_ptr(camera.getProjectionMatrix()),
+					currentOperation,
+					ImGuizmo::WORLD,
+					glm::value_ptr(objectMatrix),
+					glm::value_ptr(deltaMatrix)
+				);
+
+
+				// When the user stops dragging the gizmo
+				if (!ImGuizmo::IsUsing() && previousFrameTransformationDragging)
+				{
+					glm::mat4 totalTransformationMatrix{ transformationInitialObjectMatrix * glm::inverse(objectMatrix) };
+
+					Logger::logMatrix(totalTransformationMatrix, "Total transformation matrix");
+
+					transformationInitialObjectMatrix = objectMatrix;
+				}
+
+				// Do not apply the gizmo transformation after having cancelled the transformation
+				if (!transformationCancelled)
+				{
+					object->setTransformation(objectMatrix);
+
+					// If anything changed
+					// TODO this if statement is not accurate
+					if (deltaMatrix != glm::mat4(1.0f))
+					{
+						dynamic_cast<Light*>(object)->clearShaderWrittenTo();
+					}
+				}
+
+				transformationFirstFrame = false;
+				previousFrameTransformationDragging = ImGuizmo::IsUsing();
+			}
 		}
 	}
 	

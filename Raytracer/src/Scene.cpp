@@ -843,7 +843,7 @@ Object* Scene::getObjectByID(unsigned int objectID)
 
 	// If the newly selected object was the same mesh again, now we select the object instead
 	// TODO add supported context menus here
-	if (type != MODEL && type != MESH)
+	if (type != MODEL && type != MESH && type != POINT_LIGHT)
 	{
 		return nullptr;
 	}

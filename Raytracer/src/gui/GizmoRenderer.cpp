@@ -93,6 +93,9 @@ void GizmoRenderer::render(std::vector<GizmoDrawData>& data, GizmoType type, Cam
 
 	glBindVertexArray(regularVAO);
 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+
 	glDrawArrays(GL_POINTS, 0, data.size());
 
 	glBindVertexArray(0);

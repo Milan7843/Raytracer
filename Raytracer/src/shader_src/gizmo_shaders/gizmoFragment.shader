@@ -10,10 +10,5 @@ void main()
 {
     vec4 iconColor = texture(gizmoTexture, texCoord) * vec4(color, 1.);
 
-    if (iconColor.a < 0.001)
-    {
-        discard;
-    }
-
     fragColor = iconColor;
 }
