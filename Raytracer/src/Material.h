@@ -3,6 +3,7 @@
 #include "ShaderWritable.h"
 #include "ImGuiUtility.h"
 #include "ImGuiEditorInterface.h"
+#include "TextureHandler.h"
 
 #include <glm/glm.hpp>
 #include <string>
@@ -58,6 +59,8 @@ public:
 	float* getReflectionDiffusionPointer();
 	glm::vec3* getEmissionPointer();
 
+	void setTexture(std::string& path, bool pixelPerfect);
+
 	// Write this material to the stream (human readable format)
 	friend std::ostream& operator<< (std::ostream& stream, const Material& material);
 protected:
@@ -65,4 +68,8 @@ protected:
 
 private:
 	std::string name;
+	bool hasAlbedoTexture;
+	Texture albedoTexture;
+	bool hasNormalTexture;
+	Texture normalTexture;
 };

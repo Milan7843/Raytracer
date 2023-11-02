@@ -167,6 +167,8 @@ void Mesh::setupMesh()
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+    glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -186,6 +188,10 @@ void Mesh::setupMesh()
         tri.n1 = -CoordinateUtility::vec4ToGLSLVec4(v1.normal);
         tri.n2 = -CoordinateUtility::vec4ToGLSLVec4(v2.normal);
         tri.n3 = -CoordinateUtility::vec4ToGLSLVec4(v3.normal);
+
+        tri.uv1 = v1.uv;
+        tri.uv2 = v2.uv;
+        tri.uv3 = v3.uv;
 
         tri.color = glm::vec3(1.0f);
         glm::vec3 ab = v2.position - v1.position;

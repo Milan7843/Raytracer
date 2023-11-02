@@ -386,6 +386,15 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 			vertex.normal = aiVector3DToGLMVec4(mesh->mNormals[i]);
 		}
 
+		if (mesh->HasTextureCoords(0))
+		{
+			vertex.uv = aiVector3DToGLMVec4(mesh->mTextureCoords[0][i]);
+		}
+		else
+		{
+			vertex.uv = glm::vec4(0.0f);
+		}
+
 		// Putting the new vertex into the vertices vector
 		vertices.push_back(vertex);
 

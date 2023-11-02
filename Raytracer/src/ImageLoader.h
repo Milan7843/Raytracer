@@ -13,5 +13,5 @@
 
 namespace ImageLoader
 {
-	unsigned int loadImage(std::string imagePath);
+	unsigned int loadImage(std::string imagePath, bool pixelPerfect = false);
 }

@@ -79,6 +79,7 @@
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\shaders\Shader.cpp" />
     <ClCompile Include="src\Sphere.cpp" />
+    <ClCompile Include="src\TextureHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\GraphEditor.h" />
@@ -506,6 +507,7 @@
     <ClInclude Include="src\Sphere.h" />
     <ClInclude Include="src\stb_image.h" />
     <ClInclude Include="src\stb_image_write.h" />
+    <ClInclude Include="src\TextureHandler.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc142-mtd.dll" />

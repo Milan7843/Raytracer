@@ -461,12 +461,13 @@ vec3 calculateIndirectLightingContribution(IndirectLightingPixelData data, int s
     // Do no further indirect lighting calculation if the quality is set to 1
     if (indirectLightingQuality == 1)
     {
-        return finalColor * data.color;
+        //return finalColor * data.color;
     }
 
     // Then doing it again for a single bounce
     vec3 dir = getRandomDirectionFollowingNormal(data.normal, seed + 9);// +i * 31 + 10);
 
+    
     Ray ray;
     ray.pos = data.position;
     ray.dir = dir;
@@ -714,7 +715,7 @@ vec3 calculateDirectLightingContribution(Intersection intersection, int seed)
 {
     vec3 finalLight = vec3(0.);
 
-    int samplesPerLight = 10;
+    int samplesPerLight = 1;
 
     for (int sampleIndex = 0; sampleIndex < samplesPerLight; sampleIndex++)
     {

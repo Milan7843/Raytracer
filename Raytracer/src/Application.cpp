@@ -287,7 +287,6 @@ int Application::Start()
             {
                 popupOpenOnStartClick = false;
             }
-            std::cout << popupOpenOnStartClick << std::endl;
 
             // Checking for a click on an object on mouse click and mouse not on GUI
             if (!popupOpen && !popupOpenOnStartClick && !userInterface.isMouseOnGUI() && userInterface.isEnabled() && userInterface.isMouseOnRenderedScreen())

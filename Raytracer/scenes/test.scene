@@ -1,0 +1,54 @@
+default_hdri.png
+# Materials
+New material
+0.8 0.8 0.8
+0
+0
+0
+0
+1 1 1
+0
+0
+# Materials end
+
+# Spheres
+# Spheres end
+
+# Models
+indirect_lighting_test
+0 0 0
+0 -0 0
+1 1 1
+src/models/indirect_lighting_test.obj
+1
+1
+1
+Cube_Cube.002
+0 0 0
+0 0 0
+1 1 1
+# Models end
+
+# Point lights
+Point light
+1 1 1
+1
+0 -0.0258036 -0.564177
+0
+# Point lights end
+
+# Directional lights
+# Directional lights end
+
+# Ambient lights
+# Ambient lights end
+
+# Cameras
+2.73397 0.475235 0.697532
+-16.6
+199.8
+1
+40
+1
+# Cameras end
+

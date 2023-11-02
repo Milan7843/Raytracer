@@ -4,6 +4,7 @@ out vec4 FragColor;
 
 in vec3 FragPos;
 in vec3 Normal;
+in vec3 uv;
 
 #define NUM_POINT_LIGHTS 10
 #define NUM_DIR_LIGHTS 10
@@ -116,7 +117,9 @@ void main()
 {
     vec3 viewDir = normalize(cameraPos - FragPos);
 
-    FragColor = vec4(materials[materialIndex].color * calculateLights(FragPos, Normal, viewDir), 1.);
+    //FragColor = vec4(materials[materialIndex].color * calculateLights(FragPos, Normal, viewDir), 1.);
+
+    FragColor = vec4(uv, 1.0);
 }
 
 vec3 calculateLights(vec3 pos, vec3 normal, vec3 viewDir)

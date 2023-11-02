@@ -25,6 +25,7 @@ struct Vertex
 {
 	glm::vec4 position;
 	glm::vec4 normal;
+	glm::vec4 uv;
 };
 
 struct Triangle
@@ -35,6 +36,9 @@ struct Triangle
 	glm::vec4 n1;
 	glm::vec4 n2;
 	glm::vec4 n3;
+	glm::vec4 uv1;
+	glm::vec4 uv2;
+	glm::vec4 uv3;
 	glm::vec3 normal;
 	float reflectiveness;
 	glm::vec3 color;
