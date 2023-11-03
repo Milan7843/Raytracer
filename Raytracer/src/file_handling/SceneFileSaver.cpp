@@ -120,6 +120,7 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		Material material(buffer, color, reflectiveness, transparency, refractiveness, reflectionDiffusion, emission, emissionStrength, fresnelReflectionStrength);
 
 		material.setAlbedoTexture("src/Textures/test.png", false);
+		material.setNormalTexture("src/Textures/normal_map_test_2.png", false);
 
 		// And adding the material to the scene
 		scene.addMaterial(material);

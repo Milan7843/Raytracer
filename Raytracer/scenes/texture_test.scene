@@ -30,23 +30,23 @@ Cube
 # Models end
 
 # Point lights
+Point light
+1 1 1
+2.32
+2.80731 1.19859 -0.421477
+0
 # Point lights end
 
 # Directional lights
-Directional light
-1 1 1
-1
--1 -1 1
-0
 # Directional lights end
 
 # Ambient lights
 # Ambient lights end
 
 # Cameras
-3.01035 1.2074 4.46989
--13.3
-235.6
+5.65003 2.76582 -0.861406
+-18.3
+170
 1
 40
 1
