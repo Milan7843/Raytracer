@@ -21,7 +21,7 @@ texture_test_cube
 1 1 1
 src/models/texture_test_cube.obj
 1
-0
+1
 1
 Cube
 0 0 0
@@ -44,9 +44,9 @@ Directional light
 # Ambient lights end
 
 # Cameras
-4.58261 2.66292 -1.55193
--29.5
-160.8
+3.01035 1.2074 4.46989
+-13.3
+235.6
 1
 40
 1

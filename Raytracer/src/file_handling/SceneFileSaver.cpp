@@ -119,6 +119,8 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		// Creating the material with the read properties
 		Material material(buffer, color, reflectiveness, transparency, refractiveness, reflectionDiffusion, emission, emissionStrength, fresnelReflectionStrength);
 
+		material.setAlbedoTexture("src/Textures/test.png", false);
+
 		// And adding the material to the scene
 		scene.addMaterial(material);
 

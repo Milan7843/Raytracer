@@ -133,6 +133,25 @@ bool Material::writeToShader(AbstractShader* shader, unsigned int index)
 	shader->setFloat(("materials[" + std::to_string(index) + "].emissionStrength").c_str(), emissionStrength);
 	shader->setFloat(("materials[" + std::to_string(index) + "].fresnelReflectionStrength").c_str(), fresnelReflectionStrength);
 
+	// Writing texture data
+	shader->setBool(("materials[" + std::to_string(index) + "].hasAlbedoTexture").c_str(), m_hasAlbedoTexture);
+	shader->setBool(("materials[" + std::to_string(index) + "].hasNormalTexture").c_str(), m_hasNormalTexture);
+
+	if (hasAlbedoTexture())
+	{
+		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_xMin").c_str(), albedoTexture.xMin);
+		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_xMax").c_str(), albedoTexture.xMax);
+		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_yMin").c_str(), albedoTexture.yMin);
+		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_yMax").c_str(), albedoTexture.yMax);
+	}
+	if (hasNormalTexture())
+	{
+		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_xMin").c_str(), normalTexture.xMin);
+		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_xMax").c_str(), normalTexture.xMax);
+		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_yMin").c_str(), normalTexture.yMin);
+		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_yMax").c_str(), normalTexture.yMax);
+	}
+
 	// The given shader now has updated data
 	markShaderAsWrittenTo(shader);
 
@@ -173,6 +192,54 @@ float* Material::getReflectionDiffusionPointer()
 glm::vec3* Material::getEmissionPointer()
 {
 	return &emission;
+}
+
+void Material::setTexture(std::string& path, bool pixelPerfect)
+{
+}
+
+bool Material::hasAlbedoTexture()
+{
+	return m_hasAlbedoTexture;
+}
+
+void Material::setAlbedoTexture(std::string& path, bool pixelPerfect)
+{
+	m_hasAlbedoTexture = true;
+	albedoTexture = TextureHandler::loadTexture(path, pixelPerfect);
+}
+
+void Material::setAlbedoTexture(const char* path, bool pixelPerfect)
+{
+	m_hasAlbedoTexture = true;
+	albedoTexture = TextureHandler::loadTexture(path, pixelPerfect);
+}
+
+Texture& Material::getAlbedoTexture()
+{
+	return albedoTexture;
+}
+
+bool Material::hasNormalTexture()
+{
+	return m_hasNormalTexture;
+}
+
+void Material::setNormalTexture(std::string& path, bool pixelPerfect)
+{
+	m_hasNormalTexture = true;
+	normalTexture = TextureHandler::loadTexture(path, pixelPerfect);
+}
+
+void Material::setNormalTexture(const char* path, bool pixelPerfect)
+{
+	m_hasNormalTexture = true;
+	normalTexture = TextureHandler::loadTexture(path, pixelPerfect);
+}
+
+Texture& Material::getNormalTexture()
+{
+	return normalTexture;
 }
 
 std::ostream& operator<<(std::ostream& stream, const Material& material)

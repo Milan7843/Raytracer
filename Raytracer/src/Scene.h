@@ -17,6 +17,7 @@
 #include "InputManager.h"
 #include "ImageLoader.h"
 #include "gui/GizmoRenderer.h"
+#include "TextureHandler.h"
 
 #include <iostream>
 

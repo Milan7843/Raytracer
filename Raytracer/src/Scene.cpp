@@ -480,9 +480,23 @@ void Scene::draw(AbstractShader* shader)
 	glClear(GL_DEPTH_BUFFER_BIT);
 	shader->use();
 
+	// Binding the hdri
+	shader->setInt("hdri", 0);
+
+	// Binding the texture atlas
+	shader->setInt("textureAtlas", 1);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, getHDRI());
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, TextureHandler::packTextures(materials));
+
 	// First writing all material data to the shader
 	writeMaterialsToShader(shader);
 	shader->setVector3("cameraPos", getActiveCamera().getPosition());
+
+	shader->setFloat("materials[0].normalTexture_xMax", 1.0f);
 
 	// View matrix
 	glm::mat4 view = glm::mat4(1.0f);
@@ -493,12 +507,6 @@ void Scene::draw(AbstractShader* shader)
 	glm::mat4 projection;
 	projection = getActiveCamera().getProjectionMatrix();
 	shader->setMat4("projection", projection);
-
-	// Binding the hdri
-	shader->setInt("hdri", 0);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, getHDRI());
 
 	for (Model& model : models)
 	{

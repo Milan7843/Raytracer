@@ -28,6 +28,7 @@
 #include "BVH/BVHHandler.h"
 #include "InputManager.h"
 #include "gui/GizmoRenderer.h"
+#include "TextureHandler.h"
 
 #include "CoordinateUtility.h"
 #include "Logger.h"

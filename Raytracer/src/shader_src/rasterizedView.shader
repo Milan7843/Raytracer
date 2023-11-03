@@ -4,7 +4,7 @@ out vec4 FragColor;
 
 in vec3 FragPos;
 in vec3 Normal;
-in vec3 uv;
+in vec2 uv;
 
 #define NUM_POINT_LIGHTS 10
 #define NUM_DIR_LIGHTS 10
@@ -50,16 +50,25 @@ struct Material
     float transparency;
     float refractiveness;
     float reflectionDiffusion;
+    bool hasAlbedoTexture;
+    float albedoTexture_xMin;
+    float albedoTexture_xMax;
+    float albedoTexture_yMin;
+    float albedoTexture_yMax;
+    bool hasNormalTexture;
+    float normalTexture_xMin;
+    float normalTexture_xMax;
+    float normalTexture_yMin;
+    float normalTexture_yMax;
 };
 uniform Material materials[NUM_MATERIALS];
 
 uniform int materialIndex;
 
 
-
-
 // Skybox
 uniform sampler2D hdri;
+uniform sampler2D textureAtlas;
 
 #define PI 3.14159265359
 float atan2(float x, float z)
@@ -71,6 +80,38 @@ float atan2(float x, float z)
 float rand(vec2 co)
 {
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+vec3 sampleAlbedo(vec2 uv)
+{
+    if (!materials[materialIndex].hasAlbedoTexture)
+    {
+        return materials[materialIndex].color;
+    }
+
+    float u = (uv.x * materials[materialIndex].albedoTexture_xMax - materials[materialIndex].albedoTexture_xMin) + materials[materialIndex].albedoTexture_xMin;
+    float v = (uv.y * materials[materialIndex].albedoTexture_yMax - materials[materialIndex].albedoTexture_yMin) + materials[materialIndex].albedoTexture_yMin;
+    return materials[materialIndex].color * texture(textureAtlas, vec2(u, v)).rgb;
+}
+
+vec3 sampleNormal(vec2 uv)
+{
+    if (!materials[materialIndex].hasNormalTexture)
+    {
+        return materials[materialIndex].color;
+    }
+
+    float u = (uv.x * materials[materialIndex].normalTexture_xMax - materials[materialIndex].normalTexture_xMin) + materials[materialIndex].normalTexture_xMin;
+    float v = (uv.y * materials[materialIndex].normalTexture_yMax - materials[materialIndex].normalTexture_yMin) + materials[materialIndex].normalTexture_yMin;
+
+    vec3 normalFromMap = texture(textureAtlas, vec2(u, v)).xyz;
+    normalFromMap.x = normalFromMap.x * 2. - 1.;
+    normalFromMap.y = normalFromMap.y * 2. - 1.;
+    normalFromMap.z = normalFromMap.z * 2. - 1.;
+
+    vec3 normalFromMapInWorldSpace = normalize(vec3(rotation * vec4(aNormal, 1.0)));
+
+    return normalFromMap;
 }
 
 vec3 sampleHDRI(vec3 direction)
@@ -116,10 +157,11 @@ vec3 calculateAmbientLight(AmbientLight light);
 void main()
 {
     vec3 viewDir = normalize(cameraPos - FragPos);
+    vec3 albedo = sampleAlbedo(uv);
 
     //FragColor = vec4(materials[materialIndex].color * calculateLights(FragPos, Normal, viewDir), 1.);
 
-    FragColor = vec4(uv, 1.0);
+    FragColor = vec4(albedo, 1.0);
 }
 
 vec3 calculateLights(vec3 pos, vec3 normal, vec3 viewDir)

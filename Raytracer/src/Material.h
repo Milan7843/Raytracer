@@ -61,6 +61,16 @@ public:
 
 	void setTexture(std::string& path, bool pixelPerfect);
 
+	bool hasAlbedoTexture();
+	void setAlbedoTexture(std::string& path, bool pixelPerfect);
+	void setAlbedoTexture(const char* path, bool pixelPerfect);
+	Texture& getAlbedoTexture();
+
+	bool hasNormalTexture();
+	void setNormalTexture(std::string& path, bool pixelPerfect);
+	void setNormalTexture(const char* path, bool pixelPerfect);
+	Texture& getNormalTexture();
+
 	// Write this material to the stream (human readable format)
 	friend std::ostream& operator<< (std::ostream& stream, const Material& material);
 protected:
@@ -68,8 +78,8 @@ protected:
 
 private:
 	std::string name;
-	bool hasAlbedoTexture;
+	bool m_hasAlbedoTexture;
 	Texture albedoTexture;
-	bool hasNormalTexture;
+	bool m_hasNormalTexture;
 	Texture normalTexture;
 };

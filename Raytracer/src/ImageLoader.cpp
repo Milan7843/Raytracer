@@ -5,6 +5,55 @@
 
 namespace ImageLoader
 {
+	Texture loadTexture(std::string imagePath, bool pixelPerfect)
+	{
+		std::string fileName = imagePath;
+
+		unsigned int textureID;
+		glGenTextures(1, &textureID);
+
+		int width, height, nrComponents;
+		unsigned char* data = stbi_load(fileName.c_str(), &width, &height, &nrComponents, 0);
+		
+		if (data)
+		{
+			size_t dataSize = width * height * nrComponents;
+
+			// Use vector constructor to copy the data from the pointer
+			std::vector<unsigned char> dataVector(data, data + dataSize);
+
+			stbi_image_free(data);
+
+			return Texture{
+				imagePath,
+				pixelPerfect,
+				width,
+				height,
+				0.0f,
+				0.0f,
+				0.0f,
+				0.0f,
+				dataVector
+			};
+		}
+		else
+		{
+			Logger::logError("Error loading texture " + imagePath);
+		}
+
+		return Texture{
+			imagePath,
+			pixelPerfect,
+			width,
+			height,
+			0.0f,
+			0.0f,
+			0.0f,
+			0.0f,
+			std::vector<unsigned char>()
+		};
+	}
+
 	unsigned int loadImage(std::string imagePath, bool pixelPerfect)
 	{
 		std::string fileName = imagePath;
