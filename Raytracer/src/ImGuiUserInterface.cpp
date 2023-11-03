@@ -32,6 +32,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	Camera& camera,
 	Renderer& renderer,
 	ApplicationRenderMode& applicationRenderMode,
+	RasterizedDebugMode& rasterizedDebugMode,
 	ContextMenuSource* contextMenuSource,
 	unsigned int screenTexture)
 {
@@ -75,6 +76,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 		camera,
 		renderer,
 		applicationRenderMode,
+		rasterizedDebugMode,
 		contextMenuSource
 	);
 
@@ -825,7 +827,13 @@ void ImGuiUserInterface::drawSceneEditor(GLFWwindow* window, SceneManager& scene
 	ImGui::EndTabBar();
 }
 
-void ImGuiUserInterface::drawMenuBar(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode, ContextMenuSource* contextMenuSource)
+void ImGuiUserInterface::drawMenuBar(GLFWwindow* window,
+	SceneManager& sceneManager,
+	Camera& camera,
+	Renderer& renderer,
+	ApplicationRenderMode& applicationRenderMode,
+	RasterizedDebugMode& rasterizedDebugMode,
+	ContextMenuSource* contextMenuSource)
 {
 	static bool updateSceneNames{ true };
 
@@ -919,6 +927,36 @@ void ImGuiUserInterface::drawMenuBar(GLFWwindow* window, SceneManager& sceneMana
 			if (ImGui::MenuItem("Save render"))
 			{
 				ImGui::OpenPopup("##save_render_popup");
+			}
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("View"))
+		{
+			if (ImGui::BeginMenu("Debug view"))
+			{
+				if (ImGui::MenuItem("Disabled"))
+				{
+					rasterizedDebugMode = RasterizedDebugMode::REGULAR;
+				}
+
+				if (ImGui::MenuItem("Albedo"))
+				{
+					rasterizedDebugMode = RasterizedDebugMode::ALBEDO;
+				}
+
+				if (ImGui::MenuItem("Normal"))
+				{
+					rasterizedDebugMode = RasterizedDebugMode::NORMALS;
+				}
+
+				if (ImGui::MenuItem("UVs"))
+				{
+					rasterizedDebugMode = RasterizedDebugMode::UVS;
+				}
+
+				ImGui::EndMenu();
 			}
 
 			ImGui::EndMenu();

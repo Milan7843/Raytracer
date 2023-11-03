@@ -243,6 +243,27 @@ int Application::Start()
         // Input
         processInput(window);
 
+        /*
+        OPENFILENAME ofn;
+        TCHAR szFile[260] = { 0 };
+
+        ZeroMemory(&ofn, sizeof(ofn));
+        ofn.lStructSize = sizeof(ofn);
+        ofn.hwndOwner = glfwGetWin32Window(window);
+        ofn.lpstrFile = szFile;
+        ofn.nMaxFile = sizeof(szFile);
+        ofn.lpstrFilter = TEXT("All Files\0*.*\0");
+        ofn.nFilterIndex = 1;
+        ofn.lpstrFileTitle = NULL;
+        ofn.nMaxFileTitle = 0;
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+        if (GetOpenFileName(&ofn) == TRUE)
+        {
+            MessageBox(NULL, ofn.lpstrFile, TEXT("Selected File"), MB_OK);
+        }
+        */
+
         InputManager::takeInput(sceneManager.getCurrentScene());
 
         // Check whether the UI is enabled
@@ -334,7 +355,8 @@ int Application::Start()
             drawAxes(axesVAO, &solidColorShader, &sceneManager.getCurrentScene().getActiveCamera());
 
             /* Rasterized scene rendering */
-            sceneManager.getCurrentScene().draw(&rasterizedShader);
+            std::cout << (int)currentRasterizedDebugMode << std::endl;
+            sceneManager.getCurrentScene().draw(&rasterizedShader, currentRasterizedDebugMode);
 
             sceneManager.getCurrentScene().drawGizmos(gizmoRenderer);
 
@@ -359,6 +381,7 @@ int Application::Start()
             sceneManager.getCurrentScene().getActiveCamera(),
             raytracingRenderer,
             currentRenderMode,
+            currentRasterizedDebugMode,
             contextMenuSource,
             screenTexture
         );

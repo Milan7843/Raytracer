@@ -66,6 +66,11 @@ uniform Material materials[NUM_MATERIALS];
 
 uniform int materialIndex;
 
+// 0: regular
+// 1: albedo
+// 2: normals
+// 3: uvs
+uniform int debugMode;
 
 // Skybox
 uniform sampler2D hdri;
@@ -166,11 +171,23 @@ void main()
     vec3 albedo = sampleAlbedo(uv);
     vec3 normal = sampleNormal(uv);
 
-    FragColor = vec4(albedo * calculateLights(FragPos, normal, viewDir), 1.);
-    //FragColor = vec4(calculateLights(FragPos, normal, viewDir), 1.);
 
-    //FragColor = vec4(albedo, 1.0);
-    //FragColor = vec4(normal, 1.0);
+    if (debugMode == 0)
+    {
+        FragColor = vec4(albedo * calculateLights(FragPos, normal, viewDir), 1.);
+    }
+    if (debugMode == 1)
+    {
+        FragColor = vec4(albedo, 1.0);
+    }
+    if (debugMode == 2)
+    {
+        FragColor = vec4(normal, 1.0);
+    }
+    if (debugMode == 3)
+    {
+        FragColor = vec4(uv, 0., 1.0);
+    }
 }
 
 vec3 calculateLights(vec3 pos, vec3 normal, vec3 viewDir)

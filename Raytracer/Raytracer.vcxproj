@@ -94,6 +94,7 @@
     <ClInclude Include="src\Maths.h" />
     <ClInclude Include="src\InputManager.h" />
     <ClInclude Include="src\gui\ContextMenuSource.h" />
+    <ClInclude Include="src\RasterizedDebugMode.h" />
     <ClInclude Include="src\shaders\ShaderInterface.h" />
     <ClInclude Include="src\shaders\MultiComputeShader.h" />
     <ClInclude Include="src\BVH\BVHNode.h" />

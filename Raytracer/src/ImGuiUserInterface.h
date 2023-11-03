@@ -31,6 +31,7 @@
 #include "Renderer.h"
 #include "FileUtility.h"
 #include "ApplicationRenderMode.h"
+#include "RasterizedDebugMode.h"
 #include "gui/ContextMenuSource.h"
 #include "InputManager.h"
 
@@ -50,6 +51,7 @@ public:
 		Camera& camera,
 		Renderer& renderer,
 		ApplicationRenderMode& applicationRenderMode,
+		RasterizedDebugMode& rasterizedDebugMode,
 		ContextMenuSource* contextMenuSource,
 		unsigned int screenTexture);
 
@@ -126,6 +128,7 @@ private:
 		Camera& camera,
 		Renderer& renderer,
 		ApplicationRenderMode& applicationRenderMode,
+		RasterizedDebugMode& rasterizedDebugMode,
 		ContextMenuSource* contextMenuSource);
 
 	// Represent a material using ImGui

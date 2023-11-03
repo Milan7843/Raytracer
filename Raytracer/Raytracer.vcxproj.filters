@@ -1478,6 +1478,9 @@
     <ClInclude Include="src\TextureHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\RasterizedDebugMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\assimp\color4.inl">

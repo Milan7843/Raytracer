@@ -18,6 +18,7 @@
 #include "ImageLoader.h"
 #include "gui/GizmoRenderer.h"
 #include "TextureHandler.h"
+#include "RasterizedDebugMode.h"
 
 #include <iostream>
 
@@ -94,7 +95,7 @@ public:
 	Camera& getActiveCamera();
 
 	// Draw this scene with the given shader
-	void draw(AbstractShader* shader);
+	void draw(AbstractShader* shader, RasterizedDebugMode debugMode = RasterizedDebugMode::REGULAR);
 
 	// Draw only the selected objects in this scene with the given shader
 	void drawSelected(AbstractShader* shader);

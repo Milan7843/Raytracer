@@ -36,6 +36,7 @@
 #include "file_handling/Cache.h"
 
 #include "ApplicationRenderMode.h"
+#include "RasterizedDebugMode.h"
 
 class Application
 {
@@ -57,6 +58,7 @@ private:
 	float lastFrame = 0.0f; // Time of last frame
 
 	ApplicationRenderMode currentRenderMode = ApplicationRenderMode::RASTERIZED;
+	RasterizedDebugMode currentRasterizedDebugMode = RasterizedDebugMode::REGULAR;
 
 	unsigned int WINDOW_SIZE_X = 1200, WINDOW_SIZE_Y = 700;
 

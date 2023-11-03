@@ -91,6 +91,14 @@ bool Material::drawInterface(Scene& scene)
 	anyPropertiesChanged |= ImGui::DragFloat("Fresnel reflection strength", &fresnelReflectionStrength, 0.01f, 0.0f, 1.0f, "%.2f");
 	ImGuiUtility::drawHelpMarker("How much the reflection can be diffused. Basically acts as a blur.");
 
+	if (ImGui::Button("choose image"))
+	{
+	}
+	if (ImGui::BeginCombo("Image Selection", "Select an Image"))
+	{
+		ImGui::EndCombo();
+	}
+
 	// If anything changed, no shader will have the updated data
 	if (anyPropertiesChanged)
 	{

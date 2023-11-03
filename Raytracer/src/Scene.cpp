@@ -474,11 +474,14 @@ Camera& Scene::getActiveCamera()
 	return cameras[activeCamera];
 }
 
-void Scene::draw(AbstractShader* shader)
+void Scene::draw(AbstractShader* shader, RasterizedDebugMode debugMode)
 {
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	shader->use();
+
+	// Debug mode
+	shader->setInt("debugMode", (int)debugMode);
 
 	// Binding the hdri
 	shader->setInt("hdri", 0);
