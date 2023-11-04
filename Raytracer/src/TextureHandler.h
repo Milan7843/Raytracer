@@ -13,8 +13,8 @@ class Material;
 
 namespace TextureHandler
 {
-	Texture loadTexture(const std::string& spritePath, bool pixelPerfect);
-	Texture loadTexture(const char* spritePath, bool pixelPerfect);
+	std::shared_ptr<Texture> loadTexture(const std::string& spritePath, bool pixelPerfect);
+	std::shared_ptr<Texture> loadTexture(const char* spritePath, bool pixelPerfect);
 
 	unsigned int packTextures(std::vector<Material>& materials);
 };

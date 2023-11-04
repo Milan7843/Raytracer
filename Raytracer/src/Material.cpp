@@ -74,6 +74,14 @@ void Material::writeDataToStream(std::ofstream& filestream)
 	filestream << emission.r << " " << emission.g << " " << emission.b << "\n";
 	filestream << emissionStrength << "\n";
 	filestream << fresnelReflectionStrength << "\n";
+
+	filestream << m_hasAlbedoTexture << "\n";
+	if (m_hasAlbedoTexture)
+		filestream << albedoTexture->path << "\n";
+
+	filestream << m_hasNormalTexture << "\n";
+	if (m_hasNormalTexture)
+		filestream << normalTexture->path << "\n";
 }
 
 bool Material::drawInterface(Scene& scene)
@@ -91,12 +99,54 @@ bool Material::drawInterface(Scene& scene)
 	anyPropertiesChanged |= ImGui::DragFloat("Fresnel reflection strength", &fresnelReflectionStrength, 0.01f, 0.0f, 1.0f, "%.2f");
 	ImGuiUtility::drawHelpMarker("How much the reflection can be diffused. Basically acts as a blur.");
 
-	if (ImGui::Button("choose image"))
+	// The albedo texture must have some data
+	//if (!albedoTexture->data.empty())
 	{
+		ImGui::Text("Color texture");
+		unsigned int previewTextureID{ 0 };
+		unsigned int previewTextureWidth{ 80 };
+		unsigned int previewTextureHeight{ 80 };
+
+		if (m_hasAlbedoTexture)
+		{
+			previewTextureID = albedoTexture->previewTextureID;
+			previewTextureWidth = albedoTexture->previewWidth;
+			previewTextureHeight = albedoTexture->previewHeight;
+		}
+
+		if (ImGui::ImageButton((void*)(intptr_t)previewTextureID, ImVec2(previewTextureWidth, previewTextureHeight)))
+		{
+			std::string imagePath = WindowUtility::openImageFileChooseDialog();
+
+			if (imagePath != std::string(""))
+			{
+				setAlbedoTexture(imagePath, false);
+			}
+		}
 	}
-	if (ImGui::BeginCombo("Image Selection", "Select an Image"))
+
 	{
-		ImGui::EndCombo();
+		ImGui::Text("Normal map");
+		unsigned int previewTextureID{ 0 };
+		unsigned int previewTextureWidth{ 80 };
+		unsigned int previewTextureHeight{ 80 };
+
+		if (m_hasNormalTexture)
+		{
+			previewTextureID = normalTexture->previewTextureID;
+			previewTextureWidth = normalTexture->previewWidth;
+			previewTextureHeight = normalTexture->previewHeight;
+		}
+
+		if (ImGui::ImageButton((void*)(intptr_t)previewTextureID, ImVec2(previewTextureWidth, previewTextureHeight)))
+		{
+			std::string imagePath = WindowUtility::openImageFileChooseDialog();
+
+			if (imagePath != std::string(""))
+			{
+				setNormalTexture(imagePath, false);
+			}
+		}
 	}
 
 	// If anything changed, no shader will have the updated data
@@ -147,17 +197,17 @@ bool Material::writeToShader(AbstractShader* shader, unsigned int index)
 
 	if (hasAlbedoTexture())
 	{
-		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_xMin").c_str(), albedoTexture.xMin);
-		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_xMax").c_str(), albedoTexture.xMax);
-		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_yMin").c_str(), albedoTexture.yMin);
-		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_yMax").c_str(), albedoTexture.yMax);
+		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_xMin").c_str(), albedoTexture->xMin);
+		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_xMax").c_str(), albedoTexture->xMax);
+		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_yMin").c_str(), albedoTexture->yMin);
+		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_yMax").c_str(), albedoTexture->yMax);
 	}
 	if (hasNormalTexture())
 	{
-		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_xMin").c_str(), normalTexture.xMin);
-		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_xMax").c_str(), normalTexture.xMax);
-		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_yMin").c_str(), normalTexture.yMin);
-		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_yMax").c_str(), normalTexture.yMax);
+		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_xMin").c_str(), normalTexture->xMin);
+		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_xMax").c_str(), normalTexture->xMax);
+		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_yMin").c_str(), normalTexture->yMin);
+		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_yMax").c_str(), normalTexture->yMax);
 	}
 
 	// The given shader now has updated data
@@ -223,9 +273,9 @@ void Material::setAlbedoTexture(const char* path, bool pixelPerfect)
 	albedoTexture = TextureHandler::loadTexture(path, pixelPerfect);
 }
 
-Texture& Material::getAlbedoTexture()
+Texture* Material::getAlbedoTexture()
 {
-	return albedoTexture;
+	return albedoTexture.get();
 }
 
 bool Material::hasNormalTexture()
@@ -245,9 +295,9 @@ void Material::setNormalTexture(const char* path, bool pixelPerfect)
 	normalTexture = TextureHandler::loadTexture(path, pixelPerfect);
 }
 
-Texture& Material::getNormalTexture()
+Texture* Material::getNormalTexture()
 {
-	return normalTexture;
+	return normalTexture.get();
 }
 
 std::ostream& operator<<(std::ostream& stream, const Material& material)

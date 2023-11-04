@@ -876,12 +876,12 @@ void ImGuiUserInterface::drawMenuBar(GLFWwindow* window,
 				updateSceneNames = true;
 			}
 
-			if (ImGui::MenuItem("New scene"))
+			if (ImGui::MenuItem("New scene", "CTRL+N"))
 			{
 				sceneManager.newScene();
 			}
 
-			if (ImGui::MenuItem("Save"))
+			if (ImGui::MenuItem("Save", "CTRL+S"))
 			{
 				// If this scene does not yet have a name, open the save as popup
 				if ((*sceneManager.getCurrentScene().getNamePointer()).empty())
@@ -890,7 +890,7 @@ void ImGuiUserInterface::drawMenuBar(GLFWwindow* window,
 					sceneManager.saveChanges();
 			}
 
-			if (ImGui::MenuItem("Save as"))
+			if (ImGui::MenuItem("Save as", "CTRL+SHIFT+S"))
 			{
 				openSaveAsPopup = true;
 			}
@@ -936,25 +936,56 @@ void ImGuiUserInterface::drawMenuBar(GLFWwindow* window,
 		{
 			if (ImGui::BeginMenu("Debug view"))
 			{
-				if (ImGui::MenuItem("Disabled"))
+				if (ImGui::MenuItem("Disabled", NULL, rasterizedDebugMode == RasterizedDebugMode::REGULAR))
 				{
 					rasterizedDebugMode = RasterizedDebugMode::REGULAR;
 				}
 
-				if (ImGui::MenuItem("Albedo"))
+				if (ImGui::MenuItem("Albedo", NULL, rasterizedDebugMode == RasterizedDebugMode::ALBEDO))
 				{
 					rasterizedDebugMode = RasterizedDebugMode::ALBEDO;
 				}
 
-				if (ImGui::MenuItem("Normal"))
+				if (ImGui::MenuItem("Normal", NULL, rasterizedDebugMode == RasterizedDebugMode::NORMALS))
 				{
 					rasterizedDebugMode = RasterizedDebugMode::NORMALS;
 				}
 
-				if (ImGui::MenuItem("UVs"))
+				if (ImGui::MenuItem("UVs", NULL, rasterizedDebugMode == RasterizedDebugMode::UVS))
 				{
 					rasterizedDebugMode = RasterizedDebugMode::UVS;
 				}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("BVH display"))
+			{
+				if (ImGui::MenuItem("Disabled", NULL, renderer.getBVHRenderMode() == BVHRenderMode::DISABLED))
+				{
+					renderer.setBVHRenderMode(BVHRenderMode::DISABLED);
+				}
+
+				if (ImGui::MenuItem("Only leaves", NULL, renderer.getBVHRenderMode() == BVHRenderMode::LEAVES))
+				{
+					renderer.setBVHRenderMode(BVHRenderMode::LEAVES);
+				}
+
+				if (ImGui::MenuItem("All", NULL, renderer.getBVHRenderMode() == BVHRenderMode::ALL))
+				{
+					renderer.setBVHRenderMode(BVHRenderMode::ALL);
+				}
+				/*
+				if (ImGui::BeginMenu("Help"))
+				{
+					ImGui::Text((std::string("How the BVH (Bounding Volume Hierarchy) is drawn. ") +
+						"BVH is a way of structuring a model's triangle data in such a way that " +
+						"not all triangles have to be checked in order to know if a ray collision has occured." +
+						"\n'Disabled' will not draw anything." +
+						"\n'Only leaves' will draw onyl the nodes that contain vertices." +
+						"\n'All' will draw all nodes.").c_str());
+					ImGui::EndMenu();
+				}*/
 
 				ImGui::EndMenu();
 			}

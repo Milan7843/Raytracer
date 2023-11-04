@@ -11,10 +11,7 @@
 #include <sstream>
 #include <iostream>
 
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
-#include <Windows.h>
+#include "WindowUtility.h"
 
 // Forward declaration of the Shader class
 class AbstractShader;
@@ -69,12 +66,12 @@ public:
 	bool hasAlbedoTexture();
 	void setAlbedoTexture(std::string& path, bool pixelPerfect);
 	void setAlbedoTexture(const char* path, bool pixelPerfect);
-	Texture& getAlbedoTexture();
+	Texture* getAlbedoTexture();
 
 	bool hasNormalTexture();
 	void setNormalTexture(std::string& path, bool pixelPerfect);
 	void setNormalTexture(const char* path, bool pixelPerfect);
-	Texture& getNormalTexture();
+	Texture* getNormalTexture();
 
 	// Write this material to the stream (human readable format)
 	friend std::ostream& operator<< (std::ostream& stream, const Material& material);
@@ -84,7 +81,7 @@ protected:
 private:
 	std::string name;
 	bool m_hasAlbedoTexture;
-	Texture albedoTexture;
+	std::shared_ptr<Texture> albedoTexture;
 	bool m_hasNormalTexture;
-	Texture normalTexture;
+	std::shared_ptr<Texture> normalTexture;
 };

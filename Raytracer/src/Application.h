@@ -30,6 +30,8 @@
 #include "gui/GizmoRenderer.h"
 #include "TextureHandler.h"
 
+#include "WindowUtility.h"
+
 #include "CoordinateUtility.h"
 #include "Logger.h"
 #include "SceneFileSaver.h"

@@ -5,12 +5,9 @@
 
 namespace ImageLoader
 {
-	Texture loadTexture(std::string imagePath, bool pixelPerfect)
+	std::shared_ptr<Texture> loadTexture(std::string imagePath, bool pixelPerfect)
 	{
 		std::string fileName = imagePath;
-
-		unsigned int textureID;
-		glGenTextures(1, &textureID);
 
 		int width, height, nrComponents;
 		unsigned char* data = stbi_load(fileName.c_str(), &width, &height, &nrComponents, 0);
@@ -24,34 +21,72 @@ namespace ImageLoader
 
 			stbi_image_free(data);
 
-			return Texture{
+			// Creating preview data from the original data vector
+			int previewWidth = 80;
+			int previewHeight = 80;
+
+			std::vector<unsigned char> previewDataVector(previewWidth * previewHeight * nrComponents);
+
+			copyImageToFixedSize(width, height, previewWidth, previewHeight, nrComponents, dataVector, previewDataVector);
+
+			unsigned int previewTextureID{ 0 };
+
+			glGenTextures(1, &previewTextureID);
+			glBindTexture(GL_TEXTURE_2D, previewTextureID);
+
+			if (nrComponents == 3)
+			{
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, previewWidth, previewHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, previewDataVector.data());
+			}
+			else if (nrComponents == 4)
+			{
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, previewWidth, previewHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, previewDataVector.data());
+			}
+			else
+			{
+				Logger::logError("Texture loaded with invalid number of channels");
+			}
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			return std::make_shared<Texture>(
 				imagePath,
 				pixelPerfect,
 				width,
 				height,
+				previewWidth,
+				previewHeight,
 				0.0f,
 				0.0f,
 				0.0f,
 				0.0f,
-				dataVector
-			};
+				nrComponents,
+				dataVector,
+				previewTextureID
+			);
 		}
 		else
 		{
 			Logger::logError("Error loading texture " + imagePath);
 		}
 
-		return Texture{
+		return std::make_shared<Texture>(
 			imagePath,
 			pixelPerfect,
 			width,
 			height,
+			0,
+			0,
 			0.0f,
 			0.0f,
 			0.0f,
 			0.0f,
-			std::vector<unsigned char>()
-		};
+			0,
+			std::vector<unsigned char>(),
+			0
+		);
 	}
 
 	unsigned int loadImage(std::string imagePath, bool pixelPerfect)
@@ -78,7 +113,6 @@ namespace ImageLoader
 			glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 
-
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -94,5 +128,32 @@ namespace ImageLoader
 		stbi_image_free(data);
 
 		return textureID;
+	}
+
+	void copyImageToFixedSize(int width, int height, int newWidth, int newHeight, int nrComponents,
+		const std::vector<unsigned char>& data,
+		std::vector<unsigned char>& newData)
+	{
+		// Calculate scaling factors
+		float scaleX = (float)width / newWidth;
+		float scaleY = (float)height / newHeight;
+
+		// Loop through the new image dimensions
+		for (int y = 0; y < newHeight; ++y)
+		{
+			for (int x = 0; x < newWidth; ++x)
+			{
+				// Calculate the starting pixel in the original image
+				int startX = static_cast<int>(x * scaleX);
+				int startY = static_cast<int>(y * scaleY);
+
+				// Average the pixel values in the original image to determine the pixel value in the resized image
+				for (int c = 0; c < nrComponents; ++c)
+				{
+					// Calculate the average pixel value for the resized image
+					newData[(y * newWidth + x) * nrComponents + c] = data[(startX + startY * width) * nrComponents + c];
+				}
+			}
+		}
 	}
 }

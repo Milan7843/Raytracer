@@ -11,13 +11,13 @@ namespace TextureHandler
 		unsigned int packedTextureID{ 0 };
 	}
 
-	Texture loadTexture(const std::string& spritePath, bool pixelPerfect)
+	std::shared_ptr<Texture> loadTexture(const std::string& spritePath, bool pixelPerfect)
 	{
 		newTextureLoaded = true;
 		return ImageLoader::loadTexture(spritePath, pixelPerfect);
 	}
 
-	Texture loadTexture(const char* spritePath, bool pixelPerfect)
+	std::shared_ptr<Texture> loadTexture(const char* spritePath, bool pixelPerfect)
 	{
 		return loadTexture(std::string(spritePath), pixelPerfect);
 	}
@@ -43,11 +43,11 @@ namespace TextureHandler
 			{
 				std::cout << "material has albedo texture" << std::endl;
 
-				textures.push_back(&material.getAlbedoTexture());
+				textures.push_back(material.getAlbedoTexture());
 			}
 			if (material.hasNormalTexture())
 			{
-				textures.push_back(&material.getNormalTexture());
+				textures.push_back(material.getNormalTexture());
 			}
 		}
 		
@@ -68,9 +68,12 @@ namespace TextureHandler
 		unsigned int atlasTextureHeight{ maxHeight };
 		unsigned int atlasTextureWidth{ totalWidth };
 		
+		// TODO shouldnt have to be 40x but crashes renderdoc??
 		unsigned char* data = (unsigned char*)malloc(atlasTextureHeight * atlasTextureWidth * sizeof(unsigned char) * 4);
 
 		unsigned int currentX{ 0 };
+
+		std::cout << "Creating texture atlas of size " << atlasTextureWidth << "x" << atlasTextureHeight << " (" << (atlasTextureHeight * atlasTextureWidth * sizeof(unsigned char) * 4) << " bytes)" << std::endl;
 
 		for (Texture* texture : textures)
 		{
@@ -86,9 +89,34 @@ namespace TextureHandler
 					{
 						unsigned int atlasDataIndex{ (atlasX + atlasY * atlasTextureWidth) * 4 + channel };
 
-						unsigned int sourceDataIndex{ (sourceX + sourceY * texture->width) * 4 + channel };
+						unsigned int sourceDataIndex{ sourceX + sourceY * texture->width };
 
-						data[atlasDataIndex] = texture->data[sourceDataIndex];
+						if (texture->components == 3)
+						{
+							sourceDataIndex *= 3;
+							sourceDataIndex += channel;
+
+							if (channel == 3)
+							{
+								// Predefined fourth channel value
+								data[atlasDataIndex] = 0;
+							}
+							else
+							{
+								data[atlasDataIndex] = texture->data[sourceDataIndex];
+							}
+						}
+						else if (texture->components == 4)
+						{
+							sourceDataIndex *= 4;
+							sourceDataIndex += channel;
+
+							data[atlasDataIndex] = texture->data[sourceDataIndex];
+						}
+						else
+						{
+							Logger::logError("Image encountered with " + std::to_string(texture->components) + " components, which is not supported. Images must have 3 components (RGB) or 4 components (RGBA)");
+						}
 					}
 				}
 			}
@@ -117,6 +145,7 @@ namespace TextureHandler
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 		for (Material& material : materials)
 		{
