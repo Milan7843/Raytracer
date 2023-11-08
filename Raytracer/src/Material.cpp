@@ -82,6 +82,7 @@ void Material::writeDataToStream(std::ofstream& filestream)
 	filestream << m_hasNormalTexture << "\n";
 	if (m_hasNormalTexture)
 		filestream << normalTexture->path << "\n";
+	filestream << normalMapStrength << "\n";
 }
 
 bool Material::drawInterface(Scene& scene)
@@ -97,6 +98,7 @@ bool Material::drawInterface(Scene& scene)
 	anyPropertiesChanged |= ImGui::DragFloat("Refractiveness", getRefractivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat("Reflective diffusion", getReflectionDiffusionPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat("Fresnel reflection strength", &fresnelReflectionStrength, 0.01f, 0.0f, 1.0f, "%.2f");
+
 	ImGuiUtility::drawHelpMarker("How much the reflection can be diffused. Basically acts as a blur.");
 
 	// The albedo texture must have some data
@@ -147,6 +149,10 @@ bool Material::drawInterface(Scene& scene)
 				setNormalTexture(imagePath, false);
 			}
 		}
+		if (m_hasNormalTexture)
+		{
+			anyPropertiesChanged |= ImGui::SliderFloat("Normal map strength", &normalMapStrength, 0.0f, 1.0f, "%.2f");
+		}
 	}
 
 	// If anything changed, no shader will have the updated data
@@ -192,22 +198,25 @@ bool Material::writeToShader(AbstractShader* shader, unsigned int index)
 	shader->setFloat(("materials[" + std::to_string(index) + "].fresnelReflectionStrength").c_str(), fresnelReflectionStrength);
 
 	// Writing texture data
-	shader->setBool(("materials[" + std::to_string(index) + "].hasAlbedoTexture").c_str(), m_hasAlbedoTexture);
-	shader->setBool(("materials[" + std::to_string(index) + "].hasNormalTexture").c_str(), m_hasNormalTexture);
+	shader->setBool(("materialTextureData[" + std::to_string(index) + "].hasAlbedoTexture").c_str(), m_hasAlbedoTexture);
+	shader->setBool(("materialTextureData[" + std::to_string(index) + "].hasNormalTexture").c_str(), m_hasNormalTexture);
+	shader->setFloat(("materialTextureData[" + std::to_string(index) + "].normalMapStrength").c_str(), normalMapStrength);
 
 	if (hasAlbedoTexture())
 	{
-		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_xMin").c_str(), albedoTexture->xMin);
-		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_xMax").c_str(), albedoTexture->xMax);
-		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_yMin").c_str(), albedoTexture->yMin);
-		shader->setFloat(("materials[" + std::to_string(index) + "].albedoTexture_yMax").c_str(), albedoTexture->yMax);
+		// Setting the boundaries of where to find the albedo texture in the big texture atlas
+		shader->setFloat(("materialTextureData[" + std::to_string(index) + "].albedoTexture_xMin").c_str(), albedoTexture->xMin);
+		shader->setFloat(("materialTextureData[" + std::to_string(index) + "].albedoTexture_xMax").c_str(), albedoTexture->xMax);
+		shader->setFloat(("materialTextureData[" + std::to_string(index) + "].albedoTexture_yMin").c_str(), albedoTexture->yMin);
+		shader->setFloat(("materialTextureData[" + std::to_string(index) + "].albedoTexture_yMax").c_str(), albedoTexture->yMax);
 	}
 	if (hasNormalTexture())
 	{
-		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_xMin").c_str(), normalTexture->xMin);
-		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_xMax").c_str(), normalTexture->xMax);
-		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_yMin").c_str(), normalTexture->yMin);
-		shader->setFloat(("materials[" + std::to_string(index) + "].normalTexture_yMax").c_str(), normalTexture->yMax);
+		// Setting the boundaries of where to find the normal texture in the big texture atlas
+		shader->setFloat(("materialTextureData[" + std::to_string(index) + "].normalTexture_xMin").c_str(), normalTexture->xMin);
+		shader->setFloat(("materialTextureData[" + std::to_string(index) + "].normalTexture_xMax").c_str(), normalTexture->xMax);
+		shader->setFloat(("materialTextureData[" + std::to_string(index) + "].normalTexture_yMin").c_str(), normalTexture->yMin);
+		shader->setFloat(("materialTextureData[" + std::to_string(index) + "].normalTexture_yMax").c_str(), normalTexture->yMax);
 	}
 
 	// The given shader now has updated data
@@ -293,6 +302,11 @@ void Material::setNormalTexture(const char* path, bool pixelPerfect)
 {
 	m_hasNormalTexture = true;
 	normalTexture = TextureHandler::loadTexture(path, pixelPerfect);
+}
+
+void Material::setNormalMapStrength(float strength)
+{
+	normalMapStrength = glm::clamp<float>(strength, 0.0f, 1.0f);
 }
 
 Texture* Material::getNormalTexture()

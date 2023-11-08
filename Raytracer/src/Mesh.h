@@ -41,6 +41,12 @@ struct Triangle
 	glm::vec4 uv1;
 	glm::vec4 uv2;
 	glm::vec4 uv3;
+	glm::vec4 t1;
+	glm::vec4 t2;
+	glm::vec4 t3;
+	glm::vec4 b1;
+	glm::vec4 b2;
+	glm::vec4 b3;
 	glm::vec3 normal;
 	float reflectiveness;
 	glm::vec3 color;

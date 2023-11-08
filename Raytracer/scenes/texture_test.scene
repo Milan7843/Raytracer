@@ -9,8 +9,11 @@ New material
 1 1 1
 0
 0
-0
-0
+1
+C:\Git\Raytracer\Raytracer\src\Textures\hampter.png
+1
+C:\Git\Raytracer\Raytracer\src\Textures\image0011.png
+1
 # Materials end
 
 # Spheres
@@ -46,9 +49,9 @@ Point light
 # Ambient lights end
 
 # Cameras
-5.65003 2.76582 -0.861406
--18.3
-170
+4.90663 2.35022 -3.27354
+-14.2
+145
 1
 40
 1

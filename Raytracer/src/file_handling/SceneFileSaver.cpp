@@ -110,6 +110,7 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		std::string albedoTexturePath;
 		bool hasNormalTexture;
 		std::string normalTexturePath;
+		float normalTextureStrength;
 
 		// Then getting said data
 		color = readVec3(filestream);
@@ -134,6 +135,7 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 			std::getline(filestream, buffer);
 			std::getline(filestream, normalTexturePath);
 		}
+		filestream >> normalTextureStrength;
 
 		/*
 		std::cout << "albedo map ? " << hasAlbedoTexture << ": " << albedoTexturePath << std::endl;
@@ -149,6 +151,7 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		if (hasNormalTexture)
 			material.setNormalTexture(normalTexturePath, false);
 
+		material.setNormalMapStrength(normalTextureStrength);
 		
 		//material.setNormalTexture("src/Textures/normal_map_test_2.png", false);
 		
@@ -158,8 +161,8 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 
 		// Skipping two lines
 		// due to the fact that if the last data collection was already a getline, this one doubles
-		if (!hasNormalTexture)
-			std::getline(filestream, buffer);
+		//if (!hasNormalTexture)
+		std::getline(filestream, buffer);
 		std::getline(filestream, buffer);
 	}
 }

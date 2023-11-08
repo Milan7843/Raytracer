@@ -682,6 +682,7 @@
     <None Include="src\shader_src\raymarchVertexShader.shader" />
     <None Include="src\shader_src\raytraceComputeShaderSampled.shader" />
     <None Include="src\shader_src\raytraceComputeShaderSampledUpdated.shader" />
+    <None Include="src\shader_src\raytraceComputeShaderSampledUpdatedBackup.shader" />
     <None Include="src\shader_src\raytracingFragmentShader.shader" />
     <None Include="src\shader_src\screenTextureFragment.shader" />
     <None Include="src\shader_src\solidColorFragmentShader.shader" />

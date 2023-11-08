@@ -51,6 +51,9 @@ struct Material
     float transparency;
     float refractiveness;
     float reflectionDiffusion;
+};
+struct MaterialTextureData
+{
     bool hasAlbedoTexture;
     float albedoTexture_xMin;
     float albedoTexture_xMax;
@@ -61,8 +64,11 @@ struct Material
     float normalTexture_xMax;
     float normalTexture_yMin;
     float normalTexture_yMax;
+    float normalMapStrength;
 };
 uniform Material materials[NUM_MATERIALS];
+uniform MaterialTextureData materialTextureData[NUM_MATERIALS];
+
 
 uniform int materialIndex;
 
@@ -90,7 +96,7 @@ float rand(vec2 co)
 
 vec3 sampleAlbedo(vec2 uv)
 {
-    if (!materials[materialIndex].hasAlbedoTexture)
+    if (!materialTextureData[materialIndex].hasAlbedoTexture)
     {
         return materials[materialIndex].color;
     }
@@ -98,15 +104,15 @@ vec3 sampleAlbedo(vec2 uv)
     uv.x = mod(uv.x + 1.0, 1.0);
     uv.y = mod(uv.y + 1.0, 1.0);
 
-    float u = (uv.x * materials[materialIndex].albedoTexture_xMax - materials[materialIndex].albedoTexture_xMin) + materials[materialIndex].albedoTexture_xMin;
-    float v = (uv.y * materials[materialIndex].albedoTexture_yMax - materials[materialIndex].albedoTexture_yMin) + materials[materialIndex].albedoTexture_yMin;
+    float u = (uv.x * (materialTextureData[materialIndex].albedoTexture_xMax - materialTextureData[materialIndex].albedoTexture_xMin)) + materialTextureData[materialIndex].albedoTexture_xMin;
+    float v = (uv.y * (materialTextureData[materialIndex].albedoTexture_yMax - materialTextureData[materialIndex].albedoTexture_yMin)) + materialTextureData[materialIndex].albedoTexture_yMin;
 
     return materials[materialIndex].color * texture(textureAtlas, vec2(u, v)).rgb;
 }
 
 vec3 sampleNormal(vec2 uv)
 {
-    if (!materials[materialIndex].hasNormalTexture)
+    if (!materialTextureData[materialIndex].hasNormalTexture)
     {
         return Normal;
     }
@@ -114,15 +120,15 @@ vec3 sampleNormal(vec2 uv)
     uv.x = mod(uv.x + 1.0, 1.0);
     uv.y = mod(uv.y + 1.0, 1.0);
 
-    float u = (uv.x * (materials[materialIndex].normalTexture_xMax - materials[materialIndex].normalTexture_xMin)) + materials[materialIndex].normalTexture_xMin;
-    float v = (uv.y * (materials[materialIndex].normalTexture_yMax - materials[materialIndex].normalTexture_yMin)) + materials[materialIndex].normalTexture_yMin;
+    float u = (uv.x * (materialTextureData[materialIndex].normalTexture_xMax - materialTextureData[materialIndex].normalTexture_xMin)) + materialTextureData[materialIndex].normalTexture_xMin;
+    float v = (uv.y * (materialTextureData[materialIndex].normalTexture_yMax - materialTextureData[materialIndex].normalTexture_yMin)) + materialTextureData[materialIndex].normalTexture_yMin;
 
     vec3 normalFromMap = texture(textureAtlas, vec2(u, v)).xyz;
 
     normalFromMap = normalFromMap * 2.0 - 1.0;
     normalFromMap = normalize(tbn * normalFromMap);
 
-    return normalFromMap;
+    return normalize(materialTextureData[materialIndex].normalMapStrength * normalFromMap + (1.0 - materialTextureData[materialIndex].normalMapStrength) * Normal);
 }
 
 vec3 sampleHDRI(vec3 direction)

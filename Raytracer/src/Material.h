@@ -71,6 +71,7 @@ public:
 	bool hasNormalTexture();
 	void setNormalTexture(std::string& path, bool pixelPerfect);
 	void setNormalTexture(const char* path, bool pixelPerfect);
+	void setNormalMapStrength(float strength);
 	Texture* getNormalTexture();
 
 	// Write this material to the stream (human readable format)
@@ -84,4 +85,5 @@ private:
 	std::shared_ptr<Texture> albedoTexture;
 	bool m_hasNormalTexture;
 	std::shared_ptr<Texture> normalTexture;
+	float normalMapStrength;
 };

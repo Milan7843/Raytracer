@@ -199,7 +199,7 @@ private:
 	unsigned int MAX_POINT_LIGHT_COUNT = 10;
 	unsigned int MAX_DIR_LIGHT_COUNT = 10;
 	unsigned int MAX_AMBIENT_LIGHT_COUNT = 10;
-	unsigned int MAX_MATERIAL_COUNT = 40;
+	unsigned int MAX_MATERIAL_COUNT = 20;
 	unsigned int MAX_SPHERE_COUNT = 10;
 	unsigned int MAX_MESH_COUNT = 100;
 

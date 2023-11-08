@@ -89,6 +89,12 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, scene.getHDRI());
 
+	// Binding the texture atlas
+	computeShader.setInt("textureAtlas", 4);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, TextureHandler::packTextures(scene.getMaterials()));
+
 	bindPixelBuffer();
 }
 

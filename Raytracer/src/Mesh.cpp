@@ -197,6 +197,13 @@ void Mesh::setupMesh()
         tri.uv2 = v2.uv;
         tri.uv3 = v3.uv;
 
+        tri.t1 = CoordinateUtility::vec4ToGLSLVec4(v1.tangent);
+        tri.t2 = CoordinateUtility::vec4ToGLSLVec4(v2.tangent);
+        tri.t3 = CoordinateUtility::vec4ToGLSLVec4(v3.tangent);
+        tri.b1 = CoordinateUtility::vec4ToGLSLVec4(v1.bitangent);
+        tri.b2 = CoordinateUtility::vec4ToGLSLVec4(v2.bitangent);
+        tri.b3 = CoordinateUtility::vec4ToGLSLVec4(v3.bitangent);
+
         tri.color = glm::vec3(1.0f);
         glm::vec3 ab = v2.position - v1.position;
         glm::vec3 ac = v3.position - v1.position;

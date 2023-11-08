@@ -17,6 +17,8 @@ namespace WindowUtility
         OPENFILENAME ofn;
         TCHAR szFile[260] = { 0 };
 
+        std::filesystem::path initialDir = std::filesystem::current_path();
+
         ZeroMemory(&ofn, sizeof(ofn));
         ofn.lStructSize = sizeof(ofn);
         ofn.hwndOwner = glfwGetWin32Window(savedWindow);
@@ -35,8 +37,14 @@ namespace WindowUtility
             std::wstring wstr(ofn.lpstrFile);
             std::string filePath(wstr.begin(), wstr.end());
 
+            // Restoring the original path
+            std::filesystem::current_path(initialDir);
+
             return filePath;
         }
+
+        // Restoring the original path
+        std::filesystem::current_path(initialDir);
 
         return std::string("");
     }
