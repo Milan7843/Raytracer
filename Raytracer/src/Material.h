@@ -66,13 +66,15 @@ public:
 	bool hasAlbedoTexture();
 	void setAlbedoTexture(std::string& path, bool pixelPerfect);
 	void setAlbedoTexture(const char* path, bool pixelPerfect);
-	Texture* getAlbedoTexture();
+	void removeAlbedoTexture();
+	AtlasTexture* getAlbedoTexture();
 
 	bool hasNormalTexture();
 	void setNormalTexture(std::string& path, bool pixelPerfect);
 	void setNormalTexture(const char* path, bool pixelPerfect);
+	void removeNormalTexture();
 	void setNormalMapStrength(float strength);
-	Texture* getNormalTexture();
+	AtlasTexture* getNormalTexture();
 
 	// Write this material to the stream (human readable format)
 	friend std::ostream& operator<< (std::ostream& stream, const Material& material);
@@ -82,8 +84,8 @@ protected:
 private:
 	std::string name;
 	bool m_hasAlbedoTexture;
-	std::shared_ptr<Texture> albedoTexture;
+	std::shared_ptr<AtlasTexture> albedoTexture;
 	bool m_hasNormalTexture;
-	std::shared_ptr<Texture> normalTexture;
+	std::shared_ptr<AtlasTexture> normalTexture;
 	float normalMapStrength;
 };

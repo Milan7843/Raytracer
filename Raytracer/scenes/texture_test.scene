@@ -1,4 +1,5 @@
-default_hdri.png
+1
+C:\Git\Raytracer\Raytracer\HDRIs\hdri_default.png
 # Materials
 New material
 0.8 0.8 0.8
@@ -13,7 +14,7 @@ New material
 C:\Git\Raytracer\Raytracer\src\Textures\hampter.png
 1
 C:\Git\Raytracer\Raytracer\src\Textures\image0011.png
-1
+0.57
 # Materials end
 
 # Spheres
@@ -38,7 +39,7 @@ Cube
 Point light
 1 1 1
 2.32
-2.80731 1.19859 -0.421477
+1.72266 1.71644 -1.5014
 0
 # Point lights end
 
@@ -49,9 +50,9 @@ Point light
 # Ambient lights end
 
 # Cameras
-4.90663 2.35022 -3.27354
--14.2
-145
+3.22397 1.28344 -3.51933
+-14.6
+500.7
 1
 40
 1

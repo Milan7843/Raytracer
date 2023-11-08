@@ -5,11 +5,12 @@
 
 namespace ImageLoader
 {
-	std::shared_ptr<Texture> loadTexture(std::string imagePath, bool pixelPerfect)
+	std::shared_ptr<AtlasTexture> loadAtlasTexture(std::string imagePath, bool pixelPerfect, float previewAspectRatio)
 	{
 		std::string fileName = imagePath;
 
 		int width, height, nrComponents;
+		stbi_set_flip_vertically_on_load(true);
 		unsigned char* data = stbi_load(fileName.c_str(), &width, &height, &nrComponents, 0);
 		
 		if (data)
@@ -22,7 +23,114 @@ namespace ImageLoader
 			stbi_image_free(data);
 
 			// Creating preview data from the original data vector
-			int previewWidth = 80;
+			int previewWidth = (int)(80 * previewAspectRatio);
+			int previewHeight = 80;
+
+			std::vector<unsigned char> previewDataVector(previewWidth * previewHeight * nrComponents);
+
+			copyImageToFixedSize(width, height, previewWidth, previewHeight, nrComponents, dataVector, previewDataVector);
+
+			unsigned int previewTextureID{ 0 };
+
+			glGenTextures(1, &previewTextureID);
+			glBindTexture(GL_TEXTURE_2D, previewTextureID);
+
+			if (nrComponents == 3)
+			{
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, previewWidth, previewHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, previewDataVector.data());
+			}
+			else if (nrComponents == 4)
+			{
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, previewWidth, previewHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, previewDataVector.data());
+			}
+			else
+			{
+				Logger::logError("Texture loaded with invalid number of channels");
+			}
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			return std::make_shared<AtlasTexture>(
+				imagePath,
+				pixelPerfect,
+				width,
+				height,
+				previewWidth,
+				previewHeight,
+				0.0f,
+				0.0f,
+				0.0f,
+				0.0f,
+				nrComponents,
+				dataVector,
+				previewTextureID
+			);
+		}
+		else
+		{
+			Logger::logError("Error loading texture " + imagePath);
+		}
+
+		return std::make_shared<AtlasTexture>(
+			imagePath,
+			pixelPerfect,
+			width,
+			height,
+			0,
+			0,
+			0.0f,
+			0.0f,
+			0.0f,
+			0.0f,
+			0,
+			std::vector<unsigned char>(),
+			0
+		);
+	}
+
+	std::shared_ptr<Texture> loadTexture(std::string imagePath, bool pixelPerfect, float previewAspectRatio)
+	{
+		std::string fileName = imagePath;
+
+		int width, height, nrComponents;
+		stbi_set_flip_vertically_on_load(true);
+		unsigned char* data = stbi_load(fileName.c_str(), &width, &height, &nrComponents, 0);
+
+		if (data)
+		{
+			size_t dataSize = width * height * nrComponents;
+
+			// Use vector constructor to copy the data from the pointer
+			std::vector<unsigned char> dataVector(data, data + dataSize);
+
+			stbi_image_free(data);
+
+			unsigned int textureID{ 0 };
+
+			glGenTextures(1, &textureID);
+			glBindTexture(GL_TEXTURE_2D, textureID);
+
+			if (nrComponents == 3)
+			{
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, dataVector.data());
+			}
+			else if (nrComponents == 4)
+			{
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, dataVector.data());
+			}
+			else
+			{
+				Logger::logError("Texture loaded with invalid number of channels");
+			}
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			// Creating preview data from the original data vector
+			int previewWidth = (int)(80 * previewAspectRatio);
 			int previewHeight = 80;
 
 			std::vector<unsigned char> previewDataVector(previewWidth * previewHeight * nrComponents);
@@ -64,7 +172,8 @@ namespace ImageLoader
 				0.0f,
 				nrComponents,
 				dataVector,
-				previewTextureID
+				previewTextureID,
+				textureID
 			);
 		}
 		else
@@ -85,8 +194,9 @@ namespace ImageLoader
 			0.0f,
 			0,
 			std::vector<unsigned char>(),
+			0,
 			0
-		);
+			);
 	}
 
 	unsigned int loadImage(std::string imagePath, bool pixelPerfect)
@@ -138,6 +248,11 @@ namespace ImageLoader
 		float scaleX = (float)width / newWidth;
 		float scaleY = (float)height / newHeight;
 
+		if (newWidth == 0 || newHeight == 0)
+		{
+			return;
+		}
+
 		// Loop through the new image dimensions
 		for (int y = 0; y < newHeight; ++y)
 		{
@@ -146,6 +261,9 @@ namespace ImageLoader
 				// Calculate the starting pixel in the original image
 				int startX = static_cast<int>(x * scaleX);
 				int startY = static_cast<int>(y * scaleY);
+
+				// Flipping the image
+				y = newHeight - 1 - y;
 
 				// Average the pixel values in the original image to determine the pixel value in the resized image
 				for (int c = 0; c < nrComponents; ++c)

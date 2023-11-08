@@ -11,15 +11,25 @@ namespace TextureHandler
 		unsigned int packedTextureID{ 0 };
 	}
 
-	std::shared_ptr<Texture> loadTexture(const std::string& spritePath, bool pixelPerfect)
+	std::shared_ptr<AtlasTexture> loadAtlasTexture(const std::string& spritePath, bool pixelPerfect, float previewAspectRatio)
 	{
 		newTextureLoaded = true;
-		return ImageLoader::loadTexture(spritePath, pixelPerfect);
+		return ImageLoader::loadAtlasTexture(spritePath, pixelPerfect, previewAspectRatio);
 	}
 
-	std::shared_ptr<Texture> loadTexture(const char* spritePath, bool pixelPerfect)
+	std::shared_ptr<AtlasTexture> loadAtlasTexture(const char* spritePath, bool pixelPerfect, float previewAspectRatio)
 	{
-		return loadTexture(std::string(spritePath), pixelPerfect);
+		return loadAtlasTexture(std::string(spritePath), pixelPerfect, previewAspectRatio);
+	}
+
+	std::shared_ptr<Texture> loadTexture(const std::string& spritePath, bool pixelPerfect, float previewAspectRatio)
+	{
+		return ImageLoader::loadTexture(spritePath, pixelPerfect, previewAspectRatio);
+	}
+
+	std::shared_ptr<Texture> loadTexture(const char* spritePath, bool pixelPerfect, float previewAspectRatio)
+	{
+		return loadTexture(std::string(spritePath), pixelPerfect, previewAspectRatio);
 	}
 
 	unsigned int packTextures(std::vector<Material>& materials)
@@ -35,7 +45,7 @@ namespace TextureHandler
 		}
 		
 
-		std::vector<Texture*> textures = std::vector<Texture*>();
+		std::vector<AtlasTexture*> textures = std::vector<AtlasTexture*>();
 		
 		for (Material& material : materials)
 		{
@@ -55,7 +65,7 @@ namespace TextureHandler
 		unsigned int totalWidth{ 0 };
 
 		// Finding the final texture size: the maximum height and the total width
-		for (Texture* texture : textures)
+		for (AtlasTexture* texture : textures)
 		{
 			if (texture->height > maxHeight)
 			{
@@ -75,7 +85,7 @@ namespace TextureHandler
 
 		std::cout << "Creating texture atlas of size " << atlasTextureWidth << "x" << atlasTextureHeight << " (" << (atlasTextureHeight * atlasTextureWidth * sizeof(unsigned char) * 4) << " bytes)" << std::endl;
 
-		for (Texture* texture : textures)
+		for (AtlasTexture* texture : textures)
 		{
 			// Adding the texture to the atlas
 			for (unsigned int sourceY{ 0 }; sourceY < texture->height; sourceY++)
@@ -158,5 +168,10 @@ namespace TextureHandler
 		newTextureLoaded = false;
 		
 		return packedTextureID;
+	}
+
+	void textureRemoved()
+	{
+		newTextureLoaded = true;
 	}
 };

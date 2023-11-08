@@ -19,6 +19,7 @@
 #include "gui/GizmoRenderer.h"
 #include "TextureHandler.h"
 #include "RasterizedDebugMode.h"
+#include "TextureHandler.h"
 
 #include <iostream>
 
@@ -42,8 +43,10 @@ public:
 	void setName(std::string name);
 
 	// Set the HDRI used in this scene
-	void loadHDRI(const std::string& imageName);
-	unsigned int getHDRI();
+	void loadHDRI(const std::string& imagePath);
+	Texture* getHDRI();
+	bool hasHDRI();
+	void removeHDRI();
 
 
 	// Add a point light to the scene
@@ -186,8 +189,7 @@ private:
 	ImGuiEditorInterface* getSelectedObject();
 
 	// The hdri currently loaded
-	unsigned int hdri = 0;
-	std::string loadedHDRIName{"default_hdri.png"};
+	std::shared_ptr<Texture> hdri;
 
 	// Keeping track of the lights in this scene
 	std::vector<PointLight> pointLights;

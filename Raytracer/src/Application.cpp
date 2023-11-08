@@ -147,7 +147,7 @@ int Application::Start()
 
     // Raytraced renderer
     Logger::log("Loading raytracing shader");
-    MultiComputeShader raytracingComputeShader(1, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
+    MultiComputeShader raytracingComputeShader(2, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
     //ComputeShader raytracingComputeShader("src/shader_src/raytraceComputeShaderSampledUpdated.shader");
     Renderer raytracingRenderer(raytracingComputeShader, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
@@ -324,8 +324,8 @@ int Application::Start()
 
             glDisable(GL_DEPTH_TEST);
             // Drawing the HDRI (skybox) if using it as a background is enabled
-            if (*sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer())
-                hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI(), sceneManager.getCurrentScene().getActiveCamera());
+            if (*sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer() && sceneManager.getCurrentScene().hasHDRI())
+                hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI()->textureID, sceneManager.getCurrentScene().getActiveCamera());
 
             glEnable(GL_DEPTH_TEST);
 

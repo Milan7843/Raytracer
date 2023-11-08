@@ -330,7 +330,7 @@ vec3 getNormal(Tri tri, vec3 p)
         return normalize(tri.n1 * area1 + tri.n2 * area2 + tri.n3 * area3).xyz;
     }
     */
-    if (true)
+    if (materialTextureData[meshes[tri.mesh].material].hasNormalTexture)
     {
         vec3 v1 = (meshes[tri.mesh].transformation * vec4(tri.v1.xyz, 1.0)).zyx;
         vec3 v2 = (meshes[tri.mesh].transformation * vec4(tri.v2.xyz, 1.0)).zyx;
@@ -459,7 +459,6 @@ vec3 sampleAlbedo(Tri tri, vec3 p)
 
 
     vec3 textureAlbedo = texture(textureAtlas, vec2(u, v)).xyz;
-    return textureAlbedo;
 
     // Default harsh normals
     return textureAlbedo * materials[meshes[tri.mesh].material].color;
@@ -690,7 +689,7 @@ vec3 fireRayAndGetFinalColor(int blockLocalX, int blockLocalY, vec3 pos, vec3 di
         {
             // Calculating HDRI position
             float yaw = atan2(ray.dir.z, ray.dir.x);
-            float pitch = (ray.dir.y / 2 + 0.5);
+            float pitch = (-ray.dir.y / 2 + 0.5);
 
             skyColor = texture(hdri, vec2(yaw / (2 * PI), -pitch)).rgb;
         }

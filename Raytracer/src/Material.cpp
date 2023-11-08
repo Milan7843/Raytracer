@@ -125,6 +125,21 @@ bool Material::drawInterface(Scene& scene)
 				setAlbedoTexture(imagePath, false);
 			}
 		}
+
+		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+		{
+			ImGui::OpenPopup("AlbedoTextureRightClick");
+		}
+
+		if (ImGui::BeginPopup("AlbedoTextureRightClick"))
+		{
+			if (ImGui::MenuItem("Remove"))
+			{
+				removeAlbedoTexture();
+			}
+
+			ImGui::EndPopup();
+		}
 	}
 
 	{
@@ -148,7 +163,25 @@ bool Material::drawInterface(Scene& scene)
 			{
 				setNormalTexture(imagePath, false);
 			}
+
+			
 		}
+
+		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+		{
+			ImGui::OpenPopup("NormalTextureRightClick");
+		}
+
+		if (ImGui::BeginPopup("NormalTextureRightClick"))
+		{
+			if (ImGui::MenuItem("Remove"))
+			{
+				removeNormalTexture();
+			}
+
+			ImGui::EndPopup();
+		}
+		
 		if (m_hasNormalTexture)
 		{
 			anyPropertiesChanged |= ImGui::SliderFloat("Normal map strength", &normalMapStrength, 0.0f, 1.0f, "%.2f");
@@ -273,16 +306,26 @@ bool Material::hasAlbedoTexture()
 void Material::setAlbedoTexture(std::string& path, bool pixelPerfect)
 {
 	m_hasAlbedoTexture = true;
-	albedoTexture = TextureHandler::loadTexture(path, pixelPerfect);
+	albedoTexture = TextureHandler::loadAtlasTexture(path, pixelPerfect);
+	clearShaderWrittenTo();
 }
 
 void Material::setAlbedoTexture(const char* path, bool pixelPerfect)
 {
 	m_hasAlbedoTexture = true;
-	albedoTexture = TextureHandler::loadTexture(path, pixelPerfect);
+	albedoTexture = TextureHandler::loadAtlasTexture(path, pixelPerfect);
+	clearShaderWrittenTo();
 }
 
-Texture* Material::getAlbedoTexture()
+void Material::removeAlbedoTexture()
+{
+	m_hasAlbedoTexture = false;
+	albedoTexture = nullptr;
+	TextureHandler::textureRemoved();
+	clearShaderWrittenTo();
+}
+
+AtlasTexture* Material::getAlbedoTexture()
 {
 	return albedoTexture.get();
 }
@@ -295,13 +338,23 @@ bool Material::hasNormalTexture()
 void Material::setNormalTexture(std::string& path, bool pixelPerfect)
 {
 	m_hasNormalTexture = true;
-	normalTexture = TextureHandler::loadTexture(path, pixelPerfect);
+	normalTexture = TextureHandler::loadAtlasTexture(path, pixelPerfect);
+	clearShaderWrittenTo();
 }
 
 void Material::setNormalTexture(const char* path, bool pixelPerfect)
 {
 	m_hasNormalTexture = true;
-	normalTexture = TextureHandler::loadTexture(path, pixelPerfect);
+	normalTexture = TextureHandler::loadAtlasTexture(path, pixelPerfect);
+	clearShaderWrittenTo();
+}
+
+void Material::removeNormalTexture()
+{
+	m_hasNormalTexture = false;
+	normalTexture = nullptr;
+	TextureHandler::textureRemoved();
+	clearShaderWrittenTo();
 }
 
 void Material::setNormalMapStrength(float strength)
@@ -309,7 +362,7 @@ void Material::setNormalMapStrength(float strength)
 	normalMapStrength = glm::clamp<float>(strength, 0.0f, 1.0f);
 }
 
-Texture* Material::getNormalTexture()
+AtlasTexture* Material::getNormalTexture()
 {
 	return normalTexture.get();
 }

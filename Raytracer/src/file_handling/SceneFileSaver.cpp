@@ -43,8 +43,17 @@ Scene SceneFileSaver::readSceneFromFile(const std::string& fileName, bool* succe
 
 	// String buffer for file data
 	std::string buffer;
+	bool hasHDRI;
+	filestream >> hasHDRI;
+
+	// Moving to the next line 
 	std::getline(filestream, buffer);
-	scene.loadHDRI(buffer);
+
+	// Reading the HDRI path
+	std::getline(filestream, buffer);
+	if (hasHDRI)
+		scene.loadHDRI(buffer);
+
 	std::getline(filestream, buffer);
 
 	// Loading all important scene data

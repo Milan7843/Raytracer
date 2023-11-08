@@ -777,6 +777,46 @@ void ImGuiUserInterface::drawSceneEditor(GLFWwindow* window, SceneManager& scene
 
 		static bool updateHDRINames = true;
 
+		ImGui::Text("HDRI");
+		unsigned int previewTextureID{ 0 };
+		unsigned int previewTextureWidth{ 80 };
+		unsigned int previewTextureHeight{ 80 };
+
+		if (sceneManager.getCurrentScene().hasHDRI())
+		{
+			Texture* hdriTexture = sceneManager.getCurrentScene().getHDRI();
+
+			previewTextureID = hdriTexture->previewTextureID;
+			previewTextureWidth = hdriTexture->previewWidth;
+			previewTextureHeight = hdriTexture->previewHeight;
+		}
+
+		if (ImGui::ImageButton((void*)(intptr_t)previewTextureID, ImVec2(previewTextureWidth, previewTextureHeight)))
+		{
+			std::string imagePath = WindowUtility::openImageFileChooseDialog();
+
+			if (imagePath != std::string(""))
+			{
+				sceneManager.getCurrentScene().loadHDRI(imagePath);
+			}
+		}
+
+		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+		{
+			ImGui::OpenPopup("HDRITextureRightClick");
+		}
+
+		if (ImGui::BeginPopup("HDRITextureRightClick"))
+		{
+			if (ImGui::MenuItem("Remove"))
+			{
+				sceneManager.getCurrentScene().removeHDRI();
+			}
+
+			ImGui::EndPopup();
+		}
+
+		/*
 		if (ImGui::BeginPopup("##open_hdri_popup"))
 		{
 			// Stop updating while the popup is open
@@ -800,7 +840,7 @@ void ImGuiUserInterface::drawSceneEditor(GLFWwindow* window, SceneManager& scene
 				}
 			}
 			ImGui::EndPopup();
-		}
+		}*/
 
 		ImGui::EndTabItem();
 	}

@@ -137,7 +137,7 @@ vec3 sampleHDRI(vec3 direction)
 
     // Calculating HDRI base position
     float yaw = atan2(dir.x, dir.z);
-    float pitch = (dir.y / 2 + 0.5);
+    float pitch = (-dir.y / 2.0 + 0.5);
 
     float randomness = materials[materialIndex].reflectionDiffusion * 0.01;
 

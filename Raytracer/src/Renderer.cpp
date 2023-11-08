@@ -87,7 +87,7 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	computeShader.setInt("hdri", 3);
 
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, scene.getHDRI());
+	glBindTexture(GL_TEXTURE_2D, scene.getHDRI()->textureID);
 
 	// Binding the texture atlas
 	computeShader.setInt("textureAtlas", 4);
