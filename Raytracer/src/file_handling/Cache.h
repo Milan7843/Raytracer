@@ -8,11 +8,7 @@
 
 namespace Cache
 {
-	void initialise();
-
-	void cacheFile();
-
-	void readCachedFile();
+	void initialise(bool enabled = true);
 
 	bool cachedFileExists(std::string& path);
 

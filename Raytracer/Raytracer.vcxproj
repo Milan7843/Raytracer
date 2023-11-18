@@ -665,6 +665,7 @@
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationFragment.shader" />
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationGeometry.shader" />
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationVertex.shader" />
+    <None Include="src\shader_src\denoise.shader" />
     <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectFragment.shader" />
     <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectGeometry.shader" />
     <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectVertex.shader" />
@@ -680,6 +681,7 @@
     <None Include="src\shader_src\raymarchFragmentShader.shader" />
     <None Include="src\shader_src\raymarchFragmentShaderBackup.shader" />
     <None Include="src\shader_src\raymarchVertexShader.shader" />
+    <None Include="src\shader_src\raytraceComputeShaderProbabilistic.shader" />
     <None Include="src\shader_src\raytraceComputeShaderSampled.shader" />
     <None Include="src\shader_src\raytraceComputeShaderSampledUpdated.shader" />
     <None Include="src\shader_src\raytraceComputeShaderSampledUpdatedBackup.shader" />

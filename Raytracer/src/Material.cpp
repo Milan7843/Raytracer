@@ -259,6 +259,88 @@ bool Material::writeToShader(AbstractShader* shader, unsigned int index)
 	return true;
 }
 
+// Getters
+glm::vec3 Material::getColor() const
+{
+	return color;
+}
+
+float Material::getReflectiveness() const
+{
+	return reflectiveness;
+}
+
+float Material::getTransparency() const
+{
+	return transparency;
+}
+
+float Material::getRefractiveness() const
+{
+	return refractiveness;
+}
+
+float Material::getReflectionDiffusion() const
+{
+	return reflectionDiffusion;
+}
+
+glm::vec3 Material::getEmission() const
+{
+	return emission;
+}
+
+float Material::getEmissionStrength() const
+{
+	return emissionStrength;
+}
+
+float Material::getFresnelReflectionStrength() const
+{
+	return fresnelReflectionStrength;
+}
+
+// Setters
+void Material::setColor(const glm::vec3& newColor)
+{
+	color = newColor;
+}
+
+void Material::setReflectiveness(float newReflectiveness)
+{
+	reflectiveness = newReflectiveness;
+}
+
+void Material::setTransparency(float newTransparency)
+{
+	transparency = newTransparency;
+}
+
+void Material::setRefractiveness(float newRefractiveness)
+{
+	refractiveness = newRefractiveness;
+}
+
+void Material::setReflectionDiffusion(float newReflectionDiffusion)
+{
+	reflectionDiffusion = newReflectionDiffusion;
+}
+
+void Material::setEmission(const glm::vec3& newEmission)
+{
+	emission = newEmission;
+}
+
+void Material::setEmissionStrength(float newEmissionStrength)
+{
+	emissionStrength = newEmissionStrength;
+}
+
+void Material::setFresnelReflectionStrength(float newFresnelReflectionStrength)
+{
+	fresnelReflectionStrength = newFresnelReflectionStrength;
+}
+
 std::string* Material::getNamePointer()
 {
 	return &name;
@@ -360,6 +442,11 @@ void Material::removeNormalTexture()
 void Material::setNormalMapStrength(float strength)
 {
 	normalMapStrength = glm::clamp<float>(strength, 0.0f, 1.0f);
+}
+
+float Material::getNormalMapStrength() const
+{
+	return normalMapStrength;
 }
 
 AtlasTexture* Material::getNormalTexture()

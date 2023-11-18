@@ -1,0 +1,370 @@
+1
+C:\Git\Raytracer\Raytracer\HDRIs\hdri_default.png
+# Materials
+Couch
+0.635294 0.384314 0.0901961
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Rug
+0.439216 0.407843 0.431373
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Pillows
+0.439216 0.223529 0.121569
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Curtains
+0.439216 0.223529 0.121569
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Curtain rod
+0.220588 0.220588 0.220588
+0.5
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Walls
+0.270588 0.27451 0.164706
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Floor
+0.203922 0.2 0.188235
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Window
+1 1 1
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Coffee table
+0.495098 0.484819 0.465975
+0.2
+0
+0
+0
+1 1 1
+0
+0
+1
+C:\Git\Raytracer\Raytracer\src\Textures\Wood_027_basecolor.jpg
+1
+C:\Git\Raytracer\Raytracer\src\Textures\Wood_027_normal.jpg
+0
+
+Coffee table plate
+0.941176 0.643137 0.368627
+0.2
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Coffee mug
+0.941176 0.333333 0.27451
+0.2
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Donut
+0.498039 0.333333 0.223529
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Donut glazing
+0.635294 0.309804 0.341176
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Sprinkles
+0.8 0 0
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Small table
+0.745098 0.623529 0.309804
+0.52
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Small table legs
+0 0 0
+0.5
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Plant pot
+0.431373 0.266667 0.211765
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Plant
+0.290196 0.8 0.0627451
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Coffee
+0.329412 0.101961 0.00784314
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Wall lamp
+1 1 1
+0
+0
+0
+0
+1 1 1
+10
+0
+0
+0
+0
+# Materials end
+
+# Spheres
+# Spheres end
+
+# Models
+coffee_table
+0 0 0
+0 0 0
+1 1 1
+src/models/coffee_table.obj
+14
+20
+11
+10
+10
+12
+13
+13
+12
+15
+6
+14
+14
+14
+9
+14
+lamp_Cylinder.001
+0 0 0
+0 0 0
+1 1 1
+cup_Circle.001
+0 0 0
+0 0 0
+1 1 1
+donut_plate_Circle.003
+0 0 0
+0 0 0
+1 1 1
+mug_plate_Circle.003
+0 0 0
+0 0 0
+1 1 1
+donut_Torus.001
+0 0 0
+0 0 0
+1 1 1
+Torus.015_donut_glazing
+0 0 0
+0 0 0
+1 1 1
+donut_glazing_2_Torus.004
+0 0 0
+0 0 0
+1 1 1
+donut_2_Torus.005
+0 0 0
+0 0 0
+1 1 1
+lamp.001_Cylinder.006
+0 0 0
+0 0 0
+1 1 1
+coffee_Circle.004
+0 0 0
+0 0 0
+1 1 1
+Cube.019_sprinkles
+0 0 0
+0 0 0
+1 1 1
+Material.032
+0 0 0
+0 0 0
+1 1 1
+Material.033
+0 0 0
+0 0 0
+1 1 1
+Plane
+0 0 0
+0 0 0
+1 1 1
+# Models end
+
+# Point lights
+# Point lights end
+
+# Directional lights
+# Directional lights end
+
+# Ambient lights
+Ambient light
+1 1 1
+1
+# Ambient lights end
+
+# Cameras
+-3.10125 3.56095 2.78834
+-37.4003
+3559.05
+1
+10
+1.844
+# Cameras end
+

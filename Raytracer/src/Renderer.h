@@ -87,6 +87,7 @@ private:
 
 	// The compute shader used to render to the buffer
 	ComputeShader& computeShader;
+	ComputeShader denoiseShader;
 
 	// The buffer to store rendered pixel data
 	unsigned int pixelBuffer;

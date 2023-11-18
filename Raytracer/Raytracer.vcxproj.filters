@@ -1956,6 +1956,8 @@
     <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectGeometry.shader" />
     <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectFragment.shader" />
     <None Include="src\shader_src\raytraceComputeShaderSampledUpdatedBackup.shader" />
+    <None Include="src\shader_src\raytraceComputeShaderProbabilistic.shader" />
+    <None Include="src\shader_src\denoise.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />

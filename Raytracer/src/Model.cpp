@@ -389,7 +389,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 		if (mesh->HasTextureCoords(0))
 		{
 			vertex.uv = aiVector3DToGLMVec4(mesh->mTextureCoords[0][i]);
-			std::cout << "uv " << vertex.uv.x << ", " << vertex.uv.y << ", " << vertex.uv.z << std::endl;
+			//std::cout << "uv " << vertex.uv.x << ", " << vertex.uv.y << ", " << vertex.uv.z << std::endl;
 		}
 		else
 		{
@@ -493,8 +493,8 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 		// There is at least one tangent/bitangent: take the average
 		vertices[i].tangent = tangents[i] / (float)bi_ti_samplesPerVertex[i];
 		vertices[i].bitangent = bitangents[i] / (float)bi_ti_samplesPerVertex[i];
-		std::cout << "tangent vertex " << i << ": " << vertices[i].tangent.x << ", " << vertices[i].tangent.y << ", " << vertices[i].tangent.z << std::endl;
-		std::cout << "bitangent vertex " << i << ": " << vertices[i].bitangent.x << ", " << vertices[i].bitangent.y << ", " << vertices[i].bitangent.z << std::endl;
+		//std::cout << "tangent vertex " << i << ": " << vertices[i].tangent.x << ", " << vertices[i].tangent.y << ", " << vertices[i].tangent.z << std::endl;
+		//std::cout << "bitangent vertex " << i << ": " << vertices[i].bitangent.x << ", " << vertices[i].bitangent.y << ", " << vertices[i].bitangent.z << std::endl;
 	}
 
 	std::string meshName{ mesh->mName.C_Str() };

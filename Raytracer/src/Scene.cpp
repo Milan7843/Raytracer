@@ -388,6 +388,8 @@ void Scene::addMaterial(Material& material)
 	if (this->materialCount >= MAX_MATERIAL_COUNT)
 		return;
 
+	std::cout << "adding material " << this->materialCount << std::endl;
+
 	// Adding a new material and incrementing the counter for this
 	materials.push_back(material);
 	this->materialCount++;
@@ -724,6 +726,80 @@ void Scene::generateMeshBuffer(std::vector<ShaderMesh>& shaderMeshes)
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 	Logger::log("Making " + std::to_string(shaderMeshes.size() * sizeof(ShaderMesh)) + " bytes in SSBO " + std::to_string(meshBufferSSBO));
+}
+
+void Scene::bindMaterialsBuffer()
+{
+	// Generate the buffer if it didn't exist yet
+	if (materialsBufferSSBO == 0)
+	{
+		glGenBuffers(1, &materialsBufferSSBO);
+	}
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, materialsBufferSSBO);
+
+	std::vector<ShaderMaterial> shaderMaterials;
+
+	for (Material& material : materials)
+	{
+		/*
+		glm::vec3 color;
+		glm::vec3 emission;
+		float reflectiveness;
+		float transparency;
+		float refractiveness;
+		float reflectionDiffusion;
+		float emissionStrength;
+		float fresnelReflectionStrength;
+
+		bool hasAlbedoTexture;
+		float albedoTexture_xMin;
+		float albedoTexture_xMax;
+		float albedoTexture_yMin;
+		float albedoTexture_yMax;
+
+		bool hasNormalTexture;
+		float normalTexture_xMin;
+		float normalTexture_xMax;
+		float normalTexture_yMin;
+		float normalTexture_yMax;
+		float normalMapStrength;
+		*/
+
+		shaderMaterials.push_back(
+			ShaderMaterial{
+				glm::vec4(material.getColor(), 1.0f),
+				glm::vec4(material.getEmission(), 1.0f),
+				material.getReflectiveness(),
+				material.getTransparency(),
+				material.getRefractiveness(),
+				material.getReflectionDiffusion(),
+				material.getEmissionStrength(),
+				material.getFresnelReflectionStrength(),
+				material.hasAlbedoTexture() ? 1 : 0,
+				material.hasAlbedoTexture() ? material.getAlbedoTexture()->xMin : 0.0f,
+				material.hasAlbedoTexture() ? material.getAlbedoTexture()->xMax : 0.0f,
+				material.hasAlbedoTexture() ? material.getAlbedoTexture()->yMin : 0.0f,
+				material.hasAlbedoTexture() ? material.getAlbedoTexture()->yMax : 0.0f,
+				material.hasNormalTexture() ? 1 : 0,
+				material.hasNormalTexture() ? material.getNormalTexture()->xMin : 0.0f,
+				material.hasNormalTexture() ? material.getNormalTexture()->xMax : 0.0f,
+				material.hasNormalTexture() ? material.getNormalTexture()->yMin : 0.0f,
+				material.hasNormalTexture() ? material.getNormalTexture()->yMax : 0.0f,
+				material.getNormalMapStrength()
+			}
+		);
+
+		std::cout << "has albedo texture? " << material.hasAlbedoTexture() << std::endl;
+	}
+
+	// Loading zero-data into the new buffer
+	std::cout << "A single shader material is " << sizeof(ShaderMaterial) << "bytes" << std::endl;
+	std::cout << "There are " << shaderMaterials.size() << "shader materials" << std::endl;
+	glBufferData(GL_SHADER_STORAGE_BUFFER, shaderMaterials.size() * sizeof(ShaderMaterial), &shaderMaterials[0], GL_DYNAMIC_READ);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 9, materialsBufferSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	Logger::log("Making " + std::to_string(shaderMaterials.size() * sizeof(ShaderMaterial)) + " bytes in SSBO " + std::to_string(materialsBufferSSBO) + " for materials");
 }
 
 std::string* Scene::getNamePointer()

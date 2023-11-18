@@ -43,7 +43,7 @@
 class Application
 {
 public:
-	Application(unsigned int WIDTH, unsigned int HEIGHT);
+	Application(unsigned int WIDTH, unsigned int HEIGHT, bool useShaderCache);
 	~Application();
 
 	// Start up the application
@@ -63,6 +63,7 @@ private:
 	RasterizedDebugMode currentRasterizedDebugMode = RasterizedDebugMode::REGULAR;
 
 	unsigned int WINDOW_SIZE_X = 1200, WINDOW_SIZE_Y = 700;
+	bool useShaderCache;
 
 	// Initialise GLFW
 	void initialiseGLFW();

@@ -48,6 +48,26 @@ public:
 	float emissionStrength;
 	float fresnelReflectionStrength;
 
+	// Getters
+	glm::vec3 getColor() const;
+	float getReflectiveness() const;
+	float getTransparency() const;
+	float getRefractiveness() const;
+	float getReflectionDiffusion() const;
+	glm::vec3 getEmission() const;
+	float getEmissionStrength() const;
+	float getFresnelReflectionStrength() const;
+
+	// Setters
+	void setColor(const glm::vec3& newColor);
+	void setReflectiveness(float newReflectiveness);
+	void setTransparency(float newTransparency);
+	void setRefractiveness(float newRefractiveness);
+	void setReflectionDiffusion(float newReflectionDiffusion);
+	void setEmission(const glm::vec3& newEmission);
+	void setEmissionStrength(float newEmissionStrength);
+	void setFresnelReflectionStrength(float newFresnelReflectionStrength);
+
 	// Write this material into the shader at the provided index
 	// Returns whether any data was written
 	bool writeToShader(AbstractShader* shader, unsigned int index);
@@ -74,6 +94,7 @@ public:
 	void setNormalTexture(const char* path, bool pixelPerfect);
 	void removeNormalTexture();
 	void setNormalMapStrength(float strength);
+	float getNormalMapStrength() const;
 	AtlasTexture* getNormalTexture();
 
 	// Write this material to the stream (human readable format)

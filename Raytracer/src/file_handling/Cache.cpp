@@ -2,7 +2,12 @@
 
 namespace Cache
 {
-	void initialise()
+	namespace
+	{
+		bool cacheEnabled;
+	};
+
+	void initialise(bool enabled)
 	{
 		if (CreateDirectory(L"cache", NULL) ||
 			ERROR_ALREADY_EXISTS == GetLastError())
@@ -11,10 +16,17 @@ namespace Cache
 		else
 		{
 		}
+
+		cacheEnabled = enabled;
 	}
 
 	bool cachedFileExists(std::string& path)
 	{
+		if (!cacheEnabled)
+		{
+			return false;
+		}
+
 		std::ifstream file(path);
 		return file.good();
 	}

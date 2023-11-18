@@ -30,6 +30,34 @@ struct ShaderMesh
 	int padding[3];
 };
 
+struct ShaderMaterial
+{
+	glm::vec4 color; // 1
+	glm::vec4 emission; // 2
+	float reflectiveness;
+	float transparency;
+	float refractiveness;
+	float reflectionDiffusion; // 3
+	float emissionStrength;
+	float fresnelReflectionStrength;
+
+	int hasAlbedoTexture;
+	float albedoTexture_xMin; // 4
+	float albedoTexture_xMax;
+	float albedoTexture_yMin;
+	float albedoTexture_yMax;
+
+	int hasNormalTexture; // 5
+	float normalTexture_xMin;
+	float normalTexture_xMax;
+	float normalTexture_yMin;
+	float normalTexture_yMax; // 6
+	float normalMapStrength;
+	float pad1;
+	float pad2;
+	float pad3; // 7
+};
+
 class Scene
 {
 public:
@@ -128,6 +156,8 @@ public:
 	// Returns whether any new data was written to the shader
 	bool writeMaterialsToShader(AbstractShader* shader);
 
+	void bindMaterialsBuffer();
+
 	// Return whether there are any updates to the scene data required on this shader
 	bool checkObjectUpdates(AbstractShader* shader);
 	// Update any changed data on the given shader
@@ -201,7 +231,7 @@ private:
 	unsigned int MAX_POINT_LIGHT_COUNT = 10;
 	unsigned int MAX_DIR_LIGHT_COUNT = 10;
 	unsigned int MAX_AMBIENT_LIGHT_COUNT = 10;
-	unsigned int MAX_MATERIAL_COUNT = 20;
+	unsigned int MAX_MATERIAL_COUNT = 1000; // no max
 	unsigned int MAX_SPHERE_COUNT = 10;
 	unsigned int MAX_MESH_COUNT = 100;
 
@@ -223,6 +253,8 @@ private:
 	unsigned int triangleBufferSSBO = 0;
 
 	unsigned int meshBufferSSBO{ 0 };
+
+	unsigned int materialsBufferSSBO{ 0 };
 
 	// Keeping track of the materials
 	std::vector<Material> materials;

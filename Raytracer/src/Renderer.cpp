@@ -2,6 +2,7 @@
 
 Renderer::Renderer(ComputeShader& raytraceComputeShader, unsigned int width, unsigned int height)
 	: computeShader(raytraceComputeShader), width(width), height(height)
+	, denoiseShader("src/shader_src/denoise.shader")
 {
 	// Immediately creating the pixel buffer with the given width and height
 	setResolution(width, height);
@@ -63,8 +64,9 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	scene.writeObjectsToShader(&computeShader);
 
 	scene.bindTriangleBuffer();
+	scene.bindMaterialsBuffer();
 	scene.writeLightsToShader(&computeShader, true);
-	scene.writeMaterialsToShader(&computeShader);
+	//scene.writeMaterialsToShader(&computeShader);
 
 	// Writing camera data to the compute shader
 	computeShader.setVector3("cameraPosition", CoordinateUtility::vec3ToGLSLVec3(camera->getPosition()));
@@ -115,6 +117,13 @@ void Renderer::update(float deltaTime, bool realtimeRaytracing, bool cameraMoved
 	// Check if the process is finished; if it is, no need to update it anymore
 	if (currentRenderProcess->isFinished())
 	{
+		bindPixelBuffer();
+		denoiseShader.use();
+		// Denoising
+		denoiseShader.setVector2("screenSize", width, height);
+		denoiseShader.setInt("screenWidth", width);
+		denoiseShader.run((width-1) / 16 + 1, (height-1) / 16 + 1, 1);
+
 		Logger::log("Finished render in " + formatTime(currentRenderProcess->getCurrentProcessTime()));
 		delete currentRenderProcess;
 		currentRenderProcess = nullptr;

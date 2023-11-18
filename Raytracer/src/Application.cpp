@@ -3,8 +3,9 @@
 #include "Application.h"
 
 
-Application::Application(unsigned int WIDTH, unsigned int HEIGHT)
+Application::Application(unsigned int WIDTH, unsigned int HEIGHT, bool useShaderCache)
     : WINDOW_SIZE_X(WIDTH), WINDOW_SIZE_Y(HEIGHT), camera(glm::vec3(6.7f, 2.7f, -3.7f))
+    , useShaderCache(useShaderCache)
 {
 
 }
@@ -22,7 +23,7 @@ int Application::Start()
     initialiseGLFW();
 
     Logger::log("Initializing cache");
-    Cache::initialise();
+    Cache::initialise(useShaderCache);
 
     // Making a GLFW window
     GLFWwindow* window = glfwCreateWindow(WINDOW_SIZE_X, WINDOW_SIZE_Y, "OpenGL", NULL, NULL);
@@ -146,8 +147,9 @@ int Application::Start()
     Shader raytracedImageRendererShader("src/shader_src/raymarchVertexShader.shader", "src/shader_src/raytracedImageRendererShader.glsl");
 
     // Raytraced renderer
-    Logger::log("Loading raytracing shader");
-    MultiComputeShader raytracingComputeShader(2, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
+    Logger::log("Loading raytracing shader"); 
+    //MultiComputeShader raytracingComputeShader(2, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
+    MultiComputeShader raytracingComputeShader(1, "src/shader_src/raytraceComputeShaderProbabilistic.shader");
     //ComputeShader raytracingComputeShader("src/shader_src/raytraceComputeShaderSampledUpdated.shader");
     Renderer raytracingRenderer(raytracingComputeShader, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
