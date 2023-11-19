@@ -6,6 +6,15 @@ layout(std140, binding = 3) buffer Pixels
     vec4 colors[];
 };
 
+struct PixelData
+{
+    vec4 dir;
+};
+layout(std140, binding = 10) buffer PixelDataBuffer
+{
+    PixelData pixelData[];
+};
+
 uniform int screenWidth;
 uniform int sampleCount;
 
@@ -281,13 +290,12 @@ Intersection triangleIntersection(Tri tri, Ray ray);
 Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere);
 
 // Fire a ray through a pixel and get the final color
-vec3 fireRayAtPixelPositionIndex(int blockLocalX, int blockLocalY, vec2 pixelPosIndex, int seed);
-
-// Fire a ray, calculate the lighting and return the final color
-vec3 fireRayAndGetFinalColor(int blockLocalX, int blockLocalY, vec3 pos, vec3 direction, int sampleIndex, int seed);
+vec3 fireRayAtPixelPositionIndex(vec3 dir, int seed);
 
 // Fire a ray, get the last intersection it makes
-vec3 fireRay(vec3 pos, vec3 direction, bool reflect, int seed, bool ignoreRefraction, int skipTri, int skipSphere);
+vec3 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection);
+
+vec3 getRayDirection(int pixelIndex, vec2 pixelPosIndex);
 
 // Get a random 3D unit vector
 vec3 getRandomDirection(int seed);
@@ -466,9 +474,21 @@ float rand(float seed)
     return fract(sin(seedUsed) * 43758.5453);
 }
 
+float rand(int x, int y)
+{
+    int seed = x * 73856093 + y * 19349663;
+    seed = (seed << 13) ^ seed;
+    return fract((seed * (seed * seed * 15731 + 789221) + 1376312589) / 65536.0);
+}
+
+int randomInRange(int x, int y, float min, float max)
+{
+    return int(mix(min, max, rand(x, y)));
+}
+
 float rand(int seed)
 {
-    float seedUsed = mod(float(seed * 43), 2 * PI);
+    float seedUsed = mod(float(seed), 2 * PI);
     return fract(sin(seedUsed) * 43758.5453);
 }
 
@@ -565,8 +585,8 @@ void main()
     }*/
 
     vec3 finalColor = vec3(0.);
-    finalColor += fireRayAtPixelPositionIndex(blockLocalX, blockLocalY, vec2(raydir_cx + 0.5, raydir_cy + 0.5),
-        (pixelIndex % 146791) * 11 + currentBlockRenderPassIndex * 171);
+    vec3 rayDir = getRayDirection(pixelIndex, vec2(raydir_cx + 0.5, raydir_cy + 0.5));
+    finalColor += fireRayAtPixelPositionIndex(rayDir, randomInRange(cx - currentBlockRenderPassIndex, cy + currentBlockRenderPassIndex * 3, 0, 14951) + currentBlockRenderPassIndex * 171);
 
     //finalColor = materials[int(pixelIndex / 50) % 21].color.rgb;
     //finalColor = vec3(materials[int(pixelIndex / 50) % 21].hasAlbedoTexture ? 1. : 0., 0., 0.);
@@ -575,7 +595,8 @@ void main()
     if (currentBlockRenderPassIndex == 0)
     {
         // Empty the buffer here
-        //colors[pixelIndex] = vec4(0.0);
+        colors[pixelIndex] = vec4(0.0);
+        pixelData[pixelIndex].dir = vec4(0.0);
     }
 
     float t = 1.0 / (float(currentBlockRenderPassIndex) + 1.0);
@@ -609,10 +630,17 @@ void main()
 }
 
 
-vec3 fireRayAtPixelPositionIndex(int blockLocalX, int blockLocalY, vec2 pixelPosIndex, int seed)
+vec3 getRayDirection(int pixelIndex, vec2 pixelPosIndex)
 {
-    float d = 1 / tan(radians(fov) / 2);
+    // Already buffered, just return that
+    if (pixelData[pixelIndex].dir.w != 0.0)
+    {
+        return pixelData[pixelIndex].dir.xyz;
+    }
+
     vec3 dir;
+    
+    float d = 1 / tan(radians(fov) / 2);
     float aspect_ratio = screenSize.x / screenSize.y;
 
     dir.x = aspect_ratio * (2 * pixelPosIndex.x / screenSize.x) - aspect_ratio;
@@ -623,7 +651,6 @@ vec3 fireRayAtPixelPositionIndex(int blockLocalX, int blockLocalY, vec2 pixelPos
     float a = cameraRotation.x;
     float b = cameraRotation.y;
     float c = cameraRotation.z;
-
     // Precalculating sin
     float sa = sin(a);
     float sb = sin(b);
@@ -647,14 +674,30 @@ vec3 fireRayAtPixelPositionIndex(int blockLocalX, int blockLocalY, vec2 pixelPos
 
     dir = vec3(x, y, z);
 
+    // Buffering the direction calculated
+    pixelData[pixelIndex].dir = vec4(dir, 1.0);
+    return dir;
+}
+
+
+
+
+vec3 fireRayAtPixelPositionIndex(vec3 dir, int seed)
+{
     vec3 finalColor = vec3(0.);
+
+    Ray startRay = Ray(cameraPosition, dir, false, 10000., vec3(0.), 0., 0, -1);
+    Intersection startIntersection = getAllIntersections(startRay, -1, -1);
 
     for (int i = 0; i < sampleCount; i++)
     {
         //Ray ray = fireRay(cameraPosition, dir, true, i + seed * 53);
         //Ray ray = fireRay(cameraPosition, dir, true, i * 67 * i + seed * 1471 * seed);
         //Ray ray = fireRay(cameraPosition, dir, true, i * 67 * i + seed * 17 * seed);
-        finalColor += fireRayAndGetFinalColor(blockLocalX, blockLocalY, cameraPosition, dir, i, seed + i * 5);
+
+        vec3 color = fireRay(true, seed + i * 5, startRay, startIntersection);
+        finalColor += color;
+        //finalColor += fireRayAndGetFinalColor(blockLocalX, blockLocalY, cameraPosition, dir, i, seed + i * 5);
     }
     finalColor = finalColor / float(sampleCount);
     return finalColor;
@@ -664,40 +707,22 @@ vec3 fireRayAtPixelPositionIndex(int blockLocalX, int blockLocalY, vec2 pixelPos
 
 
 
-
-vec3 fireRayAndGetFinalColor(int blockLocalX, int blockLocalY, vec3 pos, vec3 direction, int sampleIndex, int seed)
+vec3 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
 {
-    Ray ray = Ray(pos, direction, false, 10000., vec3(0.), 0., 0, -1);
-    vec3 color = fireRay(pos, direction, true, seed, false, -1, -1);
-
-    vec3 finalColor = color;
-
-    return finalColor;
-}
-
-
-
-
-
-vec3 fireRay(vec3 pos, vec3 direction, bool reflect, int seed, bool ignoreRefraction, int skipTri, int skipSphere)
-{
-    Ray ray = Ray(pos, direction, false, 10000., vec3(0.), 0., 0, -1);
     bool inTransparentMaterial = false;
     vec3 transparencyColorMultiplier = vec3(1.0);
 
     Intersection totalClosestIntersection;
 
     // Start by skipping the given values
-    int skipTriThisIteration = skipTri;
-    int skipSphereThisIteration = skipSphere;
+    int skipTriThisIteration = -1;
+    int skipSphereThisIteration = -1;
 
     vec3 color = vec3(1.0);
 
     // Reflections loop
     for (int i = 0; i < MAX_REFLECTIONS; i++)
     {
-        Intersection closestIntersection = getAllIntersections(ray, skipTriThisIteration, skipSphereThisIteration);
-
         // After this point no more skipping
         skipTriThisIteration = -1;
         skipSphereThisIteration = -1;
@@ -762,7 +787,7 @@ vec3 fireRay(vec3 pos, vec3 direction, bool reflect, int seed, bool ignoreRefrac
                 ray.dir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
                 ray.pos = closestIntersection.pos + EPSILON * ray.dir;
 
-                continue; // reflecting
+                //continue; // reflecting
             }
             else if (closestIntersection.transparency > EPSILON && i != MAX_REFLECTIONS - 1 && rand(seed * 13 + i * 47 + 5779) < closestIntersection.transparency)
             {
@@ -771,14 +796,11 @@ vec3 fireRay(vec3 pos, vec3 direction, bool reflect, int seed, bool ignoreRefrac
                 bool isEnteringTransparentMaterial = rayDirNormalDotProduct <= 0.0;
                 vec3 rayPositionBeforeUpdate = ray.pos;
 
-                if (!ignoreRefraction)
-                {
-                    vec3 normal = sign(rayDirNormalDotProduct) * closestIntersection.normal;
-                    vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness +
-                        (1.0 - closestIntersection.refractiveness) * ray.dir);
-
-                    ray.dir = refractedRayDir;
-                }
+                // Refracting
+                vec3 normal = sign(rayDirNormalDotProduct) * closestIntersection.normal;
+                vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness +
+                    (1.0 - closestIntersection.refractiveness) * ray.dir);
+                ray.dir = refractedRayDir;
 
                 ray.pos = closestIntersection.pos + EPSILON * ray.dir;
 
@@ -808,7 +830,7 @@ vec3 fireRay(vec3 pos, vec3 direction, bool reflect, int seed, bool ignoreRefrac
                 totalClosestIntersection = closestIntersection;
                 //return totalClosestIntersection;
 
-                continue; // refracting
+                //continue; // refracting
                 /*
                 Ray refractedRay =
                     fireSecondaryRay(
@@ -837,9 +859,12 @@ vec3 fireRay(vec3 pos, vec3 direction, bool reflect, int seed, bool ignoreRefrac
                 //return closestIntersection.color;
                 //return materials[closestIntersection.materialIndex].color.rgb;
 
-                continue;
+                //continue;
             }
         }
+
+        // Updating the closest intersection after the first iteration
+        closestIntersection = getAllIntersections(ray, skipTriThisIteration, skipSphereThisIteration);
     }
 
     return color * transparencyColorMultiplier;

@@ -92,6 +92,9 @@ private:
 	// The buffer to store rendered pixel data
 	unsigned int pixelBuffer;
 
+	// The buffer to store other pixel data (e.g. ray direction)
+	unsigned int pixelDataBuffer;
+
 	// The resolution used to render
 	unsigned int width, height;
 

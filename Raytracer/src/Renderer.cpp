@@ -154,13 +154,30 @@ void Renderer::setResolution(unsigned int width, unsigned int height)
 	// Creating the pixel array buffer
 	pixelBuffer = 0;
 
-	// Problematic statement: very slow
+	// Problematic statement: very slow (?)
 	glGenBuffers(1, &pixelBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelBuffer);
 
 	// Setting buffer size to be width x height x 16, for 16 bytes per pixel
 	glBufferData(GL_SHADER_STORAGE_BUFFER, width * height * 16, 0, GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, pixelBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+
+
+	// Deleting the previous pixel data buffer
+	glDeleteBuffers(1, &pixelDataBuffer);
+
+	// Creating the pixel data array buffer
+	pixelDataBuffer = 0;
+
+	// Problematic statement: very slow (?)
+	glGenBuffers(1, &pixelDataBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelDataBuffer);
+
+	// Setting buffer size to be width x height x 16, for 16 bytes per pixel
+	glBufferData(GL_SHADER_STORAGE_BUFFER, width * height * 16, 0, GL_STATIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, pixelDataBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
@@ -178,6 +195,8 @@ void Renderer::bindPixelBuffer()
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelBuffer);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, pixelBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelDataBuffer);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, pixelDataBuffer);
 }
 
 unsigned int Renderer::getPixelBuffer()
