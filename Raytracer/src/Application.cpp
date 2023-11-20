@@ -59,6 +59,8 @@ int Application::Start()
     // Change the viewport size if the window is resized
     glfwSetFramebufferSizeCallback(window, &Callbacks::framebuffer_size_callback);
 
+    Random::initialise();
+
     /*
     // Making a scene
     Scene scene = Scene();
@@ -384,6 +386,8 @@ int Application::Start()
     glDeleteVertexArrays(1, &screenQuadVAO);
     glDeleteBuffers(1, &screenQuadVBO);
     glDeleteBuffers(1, &screenQuadEBO);
+
+    Random::terminate();
 
     Logger::stop();
 

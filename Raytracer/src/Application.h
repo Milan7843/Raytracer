@@ -29,6 +29,7 @@
 #include "InputManager.h"
 #include "gui/GizmoRenderer.h"
 #include "TextureHandler.h"
+#include "Random.h"
 
 #include "WindowUtility.h"
 

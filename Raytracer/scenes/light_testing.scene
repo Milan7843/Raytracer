@@ -55,13 +55,13 @@ src/models/full_light_testing.obj
 1
 2
 3
-Light
+Plane
 0 0 0
-0 -0 0
+0 0 0
 1 1 1
 Icosphere
 0 0 0
-0 -0 0
+0 0 0
 1 1 1
 Plane.001
 0 0 0
@@ -84,9 +84,9 @@ Directional light
 # Ambient lights end
 
 # Cameras
--1.47041 0.845949 -0.214493
--30.8
-369
+-1.57948 0.986549 -0.386711
+-33
+380.9
 1
 40
 1

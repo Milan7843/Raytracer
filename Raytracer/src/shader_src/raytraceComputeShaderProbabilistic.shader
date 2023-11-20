@@ -466,7 +466,17 @@ vec3 sampleAlbedo(Tri tri, vec3 p)
 }
 
 #define PI 3.14159265359
+#define RANDOM_TEXTURE_SIZE 8192
 
+uniform sampler1D randomTexture;
+
+float rand(int seed)
+{
+    float value = ((seed << 13) ^ seed) / 65536.4;
+    return texture(randomTexture, fract(value)).r;
+}
+
+/*
 // Returns a random value between 0 and 1 [0, 1)
 float rand(float seed)
 {
@@ -488,9 +498,15 @@ int randomInRange(int x, int y, float min, float max)
 
 float rand(int seed)
 {
+    seed = (seed << 13) ^ seed;
+    return fract((seed * (seed * seed * 15731 + 789221) + 1376312589) / 65536.0);
+}*/
+/*
+float rand(int seed)
+{
     float seedUsed = mod(float(seed), 2 * PI);
     return fract(sin(seedUsed) * 43758.5453);
-}
+}*/
 
 float atan2(float x, float z)
 {
@@ -509,7 +525,7 @@ int toPixelIndex(int x, int y)
 
 vec3 getRandomDirection(int seed)
 {
-    vec3 dir = vec3(rand(seed) * 2.0 - 1.0, rand(seed + seed % 31) * 2.0 - 1.0, rand(seed + seed % 17) * 2.0 - 1.0);
+    vec3 dir = vec3(rand(seed) * 2.0 - 1.0, rand(seed*3 + seed % 31) * 2.0 - 1.0, rand(seed*7 + seed % 17) * 2.0 - 1.0);
     return normalize(dir);
 }
 
@@ -586,7 +602,8 @@ void main()
 
     vec3 finalColor = vec3(0.);
     vec3 rayDir = getRayDirection(pixelIndex, vec2(raydir_cx + 0.5, raydir_cy + 0.5));
-    finalColor += fireRayAtPixelPositionIndex(rayDir, randomInRange(cx - currentBlockRenderPassIndex, cy + currentBlockRenderPassIndex * 3, 0, 14951) + currentBlockRenderPassIndex * 171);
+    int seed = int(rand(cx) * 10000) * int(rand(cy * 2000) * 10000) + currentBlockRenderPassIndex * 171;
+    finalColor += fireRayAtPixelPositionIndex(rayDir, seed);
 
     //finalColor = materials[int(pixelIndex / 50) % 21].color.rgb;
     //finalColor = vec3(materials[int(pixelIndex / 50) % 21].hasAlbedoTexture ? 1. : 0., 0., 0.);
@@ -610,6 +627,8 @@ void main()
     5: 0.83 - 0.17 t= 0.17
     */
     colors[pixelIndex] = colors[pixelIndex] * (1.0 - t) + vec4(finalColor, 1.0) * t;
+
+    //colors[pixelIndex] = vec4(rand(seed));
 
     // Writing the same pixel several times if we are rendering to multiple pixels
     if (pixelRenderSize != 1)
@@ -831,15 +850,13 @@ vec3 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
                 //return totalClosestIntersection;
 
                 //continue; // refracting
-                /*
-                Ray refractedRay =
-                    fireSecondaryRay(
-                        ray.pos + EPSILON * refractedRayDir,
-                        refractedRayDir,
-                        true,
-                        seed*29 + i*577
-                    );
-                */
+                //Ray refractedRay =
+                //    fireSecondaryRay(
+                //        ray.pos + EPSILON * refractedRayDir,
+                //        refractedRayDir,
+                //        true,
+                //        seed*29 + i*577
+                //    );
 
                 //ray.finalColor = refractedRay.finalColor;
                 //ray.hit = false;
@@ -851,6 +868,7 @@ vec3 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
                 ray.dir = getRandomDirectionFollowingNormal(closestIntersection.normal, seed * 7 + i * 19 + 371);
                 ray.pos = closestIntersection.pos + EPSILON * ray.dir;
                 color *= closestIntersection.color;
+                color *= dot(closestIntersection.normal, ray.dir);
 
                 //return vec3(float(seed * 7 + i * 19 + 371) / 2147483647.0 * 7);
 
@@ -1040,8 +1058,6 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 
         float det = b * b - 4 * c;
 
-        Intersection isec = Intersection(false, 0, vec3(.0), -1, -1, vec3(0.), vec3(0.), .0, .0, .0, 0, vec3(0.0), vec3(0.0));
-
         if (b > 0.0 || det < 0.0
             // Allows for single-sided spheres, necessary for sphere transparency and refraction
             || c < 0)
@@ -1052,6 +1068,8 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         // Two intersections
         else
         {
+            Intersection isec = Intersection(false, 0, vec3(.0), -1, -1, vec3(0.), vec3(0.), .0, .0, .0, 0, vec3(0.0), vec3(0.0));
+
             isec.intersected = true;
 
             isec.depth = (-b - sqrt(det)) / 2.;
@@ -1081,7 +1099,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
         vec3 o_c = ray.pos - pointLights[j].pos; // (o-c)
         float half_b = dot(ray.dir, o_c);
         float b = 2.0 * half_b;
-        float r = 0.1;
+        float r = 0.2;
         float c = dot(o_c, o_c) - r * r;
 
         float det = b * b - 4 * c;
@@ -1106,12 +1124,8 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
 
                 isec.depth = depth;
                 isec.pos = ray.pos + ray.dir * isec.depth;
-                isec.reflectiveness = materials[spheres[j].material].reflectiveness;
-                isec.transparency = materials[spheres[j].material].transparency;
-                isec.refractiveness = materials[spheres[j].material].refractiveness;
-                isec.materialIndex = spheres[j].material;
-                isec.color = materials[spheres[j].material].color.rgb;
-                isec.normal = normalize(isec.pos - spheres[j].pos);
+                isec.color = pointLights[j].color;
+                isec.normal = normalize(isec.pos - pointLights[j].pos);
                 isec.emission = pointLights[j].color * pointLights[j].intensity * 10.0;
 
 

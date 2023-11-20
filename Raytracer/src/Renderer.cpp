@@ -67,6 +67,8 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	scene.bindMaterialsBuffer();
 	scene.writeLightsToShader(&computeShader, true);
 	//scene.writeMaterialsToShader(&computeShader);
+	Random::bindRandomTexture();
+	computeShader.setInt("randomTexture", 5);
 
 	// Writing camera data to the compute shader
 	computeShader.setVector3("cameraPosition", CoordinateUtility::vec3ToGLSLVec3(camera->getPosition()));
@@ -88,8 +90,11 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	// Binding the hdri
 	computeShader.setInt("hdri", 3);
 
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, scene.getHDRI()->textureID);
+	if (scene.hasHDRI())
+	{
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, scene.getHDRI()->textureID);
+	}
 
 	// Binding the texture atlas
 	computeShader.setInt("textureAtlas", 4);
@@ -122,7 +127,7 @@ void Renderer::update(float deltaTime, bool realtimeRaytracing, bool cameraMoved
 		// Denoising
 		denoiseShader.setVector2("screenSize", width, height);
 		denoiseShader.setInt("screenWidth", width);
-		denoiseShader.run((width-1) / 16 + 1, (height-1) / 16 + 1, 1);
+		//denoiseShader.run((width-1) / 16 + 1, (height-1) / 16 + 1, 1);
 
 		Logger::log("Finished render in " + formatTime(currentRenderProcess->getCurrentProcessTime()));
 		delete currentRenderProcess;

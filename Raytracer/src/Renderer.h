@@ -8,6 +8,7 @@
 #include "Render processes/BlockRenderProcess.h"
 #include "Render processes/RealtimeRenderProcess.h"
 #include "ImGuiEditorInterface.h"
+#include "Random.h"
 
 enum class BVHRenderMode
 {

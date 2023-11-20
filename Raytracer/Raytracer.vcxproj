@@ -24,6 +24,7 @@
     <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGradient.cpp" />
     <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGuizmo.cpp" />
     <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImSequencer.cpp" />
+    <ClCompile Include="src\Random.cpp" />
     <ClCompile Include="src\file_handling\Cache.cpp" />
     <ClCompile Include="src\gui\GizmoRenderer.cpp" />
     <ClCompile Include="src\ImageLoader.cpp" />
@@ -89,6 +90,7 @@
     <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGuizmo.h" />
     <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImSequencer.h" />
     <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImZoomSlider.h" />
+    <ClInclude Include="src\Random.h" />
     <ClInclude Include="src\file_handling\Cache.h" />
     <ClInclude Include="src\gui\GizmoRenderer.h" />
     <ClInclude Include="src\ImageLoader.h" />
