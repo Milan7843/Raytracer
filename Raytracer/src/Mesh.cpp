@@ -113,6 +113,11 @@ bool Mesh::drawInterface(Scene& scene)
         setVertexDataChanged(true);
     }
 
+    if (anyPropertiesChanged)
+    {
+        markUnsavedChanges();
+    }
+
     return anyPropertiesChanged;
 }
 

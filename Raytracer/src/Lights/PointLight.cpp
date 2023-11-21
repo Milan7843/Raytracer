@@ -33,6 +33,11 @@ bool PointLight::drawInterface(Scene& scene)
 		clearShaderWrittenTo();
 	}
 
+	if (anyPropertiesChanged)
+	{
+		markUnsavedChanges();
+	}
+
 	return anyPropertiesChanged;
 }
 

@@ -290,12 +290,12 @@ src/models/coffee_table.obj
 9
 14
 lamp_Cylinder.001
-0 0 0
+0 -0.000183403 0
 0 0 0
 1 1 1
 cup_Circle.001
 0 0 0
-0 0 0
+0 0.02 0
 1 1 1
 donut_plate_Circle.003
 0 0 0
@@ -315,7 +315,7 @@ Torus.015_donut_glazing
 1 1 1
 donut_glazing_2_Torus.004
 0 0 0
-0 0 0
+0 1.28 0
 1 1 1
 donut_2_Torus.005
 0 0 0
@@ -360,9 +360,9 @@ Ambient light
 # Ambient lights end
 
 # Cameras
--3.10125 3.56095 2.78834
--37.4003
-3559.05
+-4.91871 1.70967 3.24335
+-14.1003
+3566.15
 1
 10
 1.844

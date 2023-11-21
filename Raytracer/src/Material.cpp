@@ -122,6 +122,7 @@ bool Material::drawInterface(Scene& scene)
 
 			if (imagePath != std::string(""))
 			{
+				anyPropertiesChanged = true;
 				setAlbedoTexture(imagePath, false);
 			}
 		}
@@ -135,6 +136,7 @@ bool Material::drawInterface(Scene& scene)
 		{
 			if (ImGui::MenuItem("Remove"))
 			{
+				anyPropertiesChanged = true;
 				removeAlbedoTexture();
 			}
 
@@ -161,10 +163,9 @@ bool Material::drawInterface(Scene& scene)
 
 			if (imagePath != std::string(""))
 			{
+				anyPropertiesChanged = true;
 				setNormalTexture(imagePath, false);
 			}
-
-			
 		}
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
@@ -176,6 +177,7 @@ bool Material::drawInterface(Scene& scene)
 		{
 			if (ImGui::MenuItem("Remove"))
 			{
+				anyPropertiesChanged = true;
 				removeNormalTexture();
 			}
 
@@ -192,6 +194,11 @@ bool Material::drawInterface(Scene& scene)
 	if (anyPropertiesChanged)
 	{
 		clearShaderWrittenTo();
+	}
+
+	if (anyPropertiesChanged)
+	{
+		markUnsavedChanges();
 	}
 
 	return anyPropertiesChanged;

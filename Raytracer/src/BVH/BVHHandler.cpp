@@ -105,6 +105,8 @@ BVHNode* BVHHandler::generateFromMesh(Model& model, const Mesh& mesh, BVHNode* o
 	// Deleting any old data we have already
 	deleteBVH(oldBVHRoot);
 
+	//std::cout << mesh.triangles.size() << std::endl;
+
 	std::vector<unsigned int> indices(mesh.triangles.size());
 
 	for (unsigned int i{ 0 }; i < mesh.triangles.size(); i++)

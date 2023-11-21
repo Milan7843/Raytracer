@@ -49,6 +49,24 @@ public:
 		return this->type;
 	}
 
+	// Get whether this object has unsaved changes
+	bool hasUnsavedChanges()
+	{
+		return unsavedChanges;
+	}
+
+	// Mark all changes to this object as saved
+	void markChangesSaved()
+	{
+		unsavedChanges = false;
+	}
+
+	// Mark this object as having unsaved changes
+	void markUnsavedChanges()
+	{
+		unsavedChanges = true;
+	}
+
 protected:
 	ImGuiEditorInterface()
 	{
@@ -73,4 +91,5 @@ private:
 	// Static variable to keep track of the instance count to give each instance a unique ID
 	static unsigned int instanceCount;
 	ObjectType type{ NONE };
+	bool unsavedChanges{ false };
 };

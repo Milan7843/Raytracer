@@ -211,7 +211,7 @@ int Application::Start()
 
     bool popupOpenOnStartClick{ false };
 
-    while (!glfwWindowShouldClose(window))
+    while (true)
     {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
@@ -245,6 +245,26 @@ int Application::Start()
         int mouseX{ userInterface.getMouseCoordinates().x };
         int mouseY{ userInterface.getMouseCoordinates().y };
 
+        if (sceneManager.hasUnsavedChanges())
+        {
+            WindowUtility::markUnsavedChanges();
+        }
+        else
+        {
+            WindowUtility::markSavedChanges();
+        }
+
+        // When the user requests to exit the application
+        if (glfwWindowShouldClose(window))
+        {
+            // First check if there are unsaved changes
+            // This will close the window if there aren't any
+            // And ask the user to save if there are
+            userInterface.requestExit();
+
+            // Set it back to false
+            glfwSetWindowShouldClose(window, GLFW_FALSE);
+        }
 
         // Input
         processInput(window);
@@ -378,10 +398,16 @@ int Application::Start()
         glfwPollEvents();
 
         frame++;
+
+        // If an exit is requested and everything is okay to exit
+        if (userInterface.isExitOkay())
+        {
+            break;
+        }
     }
 
     // Saving the last opened scene
-    FileUtility::saveSettings(*sceneManager.getCurrentScene().getNamePointer());
+    sceneManager.saveSceneLoaded();
 
     glDeleteVertexArrays(1, &screenQuadVAO);
     glDeleteBuffers(1, &screenQuadVBO);

@@ -84,6 +84,11 @@ void Sphere::drawInterface()
 	{
 		clearShaderWrittenTo();
 	}
+
+	if (anyPropertiesChanged)
+	{
+		markUnsavedChanges();
+	}
 }
 
 void Sphere::setShaderSphereIndex(unsigned int shaderSphereIndex)

@@ -66,12 +66,13 @@ bool FileUtility::isValidInput(std::string& input)
 	return true;
 }
 
-void FileUtility::saveSettings(std::string& loadedSceneName)
+void FileUtility::saveSettings(const std::string& loadedSceneName)
 {
 	// The data stream into the file
 	std::ofstream filestream{ "saved_settings.save" };
 
 	// Writing all settings data
+	std::cout << "saving current scene as " << loadedSceneName << std::endl;
 	filestream << loadedSceneName << "\n";
 
 	// Done writing so flush data and close filestream

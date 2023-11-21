@@ -74,9 +74,15 @@ public:
 	// Get the size of the screen we are rendering to
 	glm::ivec2 getRenderedScreenSize();
 
+	bool isExitOkay();
+	void requestExit();
+
 private:
 	bool imGuiEnabled = true;
 	unsigned int guiSwitchKeyPreviousState = 0;
+
+	bool exitRequested{ false };
+	bool exitOkay{ false };
 
 	unsigned int interfaceToggleKey = GLFW_KEY_TAB;
 
@@ -124,6 +130,14 @@ private:
 
 	// Draw the main menu bar
 	void drawMenuBar(GLFWwindow* window,
+		SceneManager& sceneManager,
+		Camera& camera,
+		Renderer& renderer,
+		ApplicationRenderMode& applicationRenderMode,
+		RasterizedDebugMode& rasterizedDebugMode,
+		ContextMenuSource* contextMenuSource);
+
+	void drawExitWithUnsavedChangesPrompt(GLFWwindow* window,
 		SceneManager& sceneManager,
 		Camera& camera,
 		Renderer& renderer,

@@ -24,6 +24,9 @@ public:
 	// Save the changes in a new file
 	void saveChangesAs(std::string& sceneName);
 
+	// Save the currently loaded scene so it will be loaded on next startup automatically
+	void saveSceneLoaded();
+
 	// Change to another scene by name, will not overwrite current with empty scene on fail to load
 	void changeScene(const std::string& sceneName);
 
@@ -65,12 +68,16 @@ public:
 
 	void setAspectRatio(unsigned int width, unsigned int height);
 
+	bool hasUnsavedChanges();
+
 private:
 	// Keeps the current scene loaded in memory
 	Scene currentScene;
 
 	// Indicates whether a working scene has been loaded
 	bool hasSceneLoaded{ false };
+	// Indicates whether the user is working in an unnamed/unsaved scene
+	bool inUnnamedScene{ true };
 
 	// The scene names in the scene folder
 	std::vector<std::string> availableScenesNames;

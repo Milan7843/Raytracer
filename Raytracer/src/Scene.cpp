@@ -1172,6 +1172,104 @@ void Scene::verifyMeshModelPointers()
 	}
 }
 
+bool Scene::hasUnsavedChanges()
+{
+	for (Model& model : models)
+	{
+		if (model.hasUnsavedChanges())
+		{
+			return true;
+		}
+		for (Mesh& mesh : model.getMeshes())
+		{
+			if (mesh.hasUnsavedChanges())
+			{
+				return true;
+			}
+		}
+	}
+
+	for (Sphere& sphere : spheres)
+	{
+		if (sphere.hasUnsavedChanges())
+		{
+			return true;
+		}
+	}
+
+	// Checking all lights
+	for (PointLight& light : pointLights)
+	{
+		if (light.hasUnsavedChanges())
+		{
+			return true;
+		}
+	}
+	for (DirectionalLight& light : directionalLights)
+	{
+		if (light.hasUnsavedChanges())
+		{
+			return true;
+		}
+	}
+	for (AmbientLight& light : ambientLights)
+	{
+		if (light.hasUnsavedChanges())
+		{
+			return true;
+		}
+	}
+
+	// Checking all materials
+	for (Material& material : materials)
+	{
+		if (material.hasUnsavedChanges())
+		{
+			return true;
+		}
+	}
+
+	// No object has unsaved changes
+	return false;
+}
+
+void Scene::markAllChangesSaved()
+{
+	for (Model& model : models)
+	{
+		model.markChangesSaved();
+		for (Mesh& mesh : model.getMeshes())
+		{
+			mesh.markChangesSaved();
+		}
+	}
+
+	for (Sphere& sphere : spheres)
+	{
+		sphere.markChangesSaved();
+	}
+
+	// Checking all lights
+	for (PointLight& light : pointLights)
+	{
+		light.markChangesSaved();
+	}
+	for (DirectionalLight& light : directionalLights)
+	{
+		light.markChangesSaved();
+	}
+	for (AmbientLight& light : ambientLights)
+	{
+		light.markChangesSaved();
+	}
+
+	// Checking all materials
+	for (Material& material : materials)
+	{
+		material.markChangesSaved();
+	}
+}
+
 bool Scene::replace(std::string& str, const std::string& from, const std::string& to)
 {
 	size_t start_pos = str.find(from);

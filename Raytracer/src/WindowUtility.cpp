@@ -5,11 +5,50 @@ namespace WindowUtility
     namespace
     {
         GLFWwindow* savedWindow;
+        std::string currentWindowName{ "" };
+        bool unsavedChanges{ false };
+
+        const std::string newSceneWindowName{ "New Scene" };
     }
 
     void setWindow(GLFWwindow* window)
     {
         savedWindow = window;
+    }
+
+    void setWindowTitle(const std::string& title)
+    {
+        currentWindowName = title;
+        glfwSetWindowTitle(savedWindow, title.c_str());
+    }
+
+    void setWindowTitleNewScene()
+    {
+        setWindowTitle("New Scene");
+    }
+
+    void markUnsavedChanges()
+    {
+        // Check if it already marked as unsaved changes
+        if (unsavedChanges)
+        {
+            return;
+        }
+
+        unsavedChanges = true;
+        glfwSetWindowTitle(savedWindow, (currentWindowName + "*").c_str());
+    }
+
+    void markSavedChanges()
+    {
+        // Check if it already marked as no unsaved changes
+        if (!unsavedChanges)
+        {
+            return;
+        }
+
+        unsavedChanges = false;
+        glfwSetWindowTitle(savedWindow, currentWindowName.c_str());
     }
 
     std::string openImageFileChooseDialog()

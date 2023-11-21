@@ -528,6 +528,16 @@ glm::ivec2 ImGuiUserInterface::getRenderedScreenSize()
 	return renderedScreenSize;
 }
 
+bool ImGuiUserInterface::isExitOkay()
+{
+	return exitOkay;
+}
+
+void ImGuiUserInterface::requestExit()
+{
+	exitRequested = true;
+}
+
 void ImGuiUserInterface::drawGUI(GLFWwindow* window,
 	SceneManager& sceneManager,
 	Camera& camera,
@@ -1174,6 +1184,29 @@ void ImGuiUserInterface::drawMenuBar(GLFWwindow* window,
 
 		ImGui::EndPopup();
 	}
+
+	if (exitRequested)
+	{
+		if (sceneManager.hasUnsavedChanges())
+		{
+			ImGui::OpenPopup("##exit_with_unsaved_changes_popup");
+		}
+		else
+		{
+			// Tell the application to exit
+			exitOkay = true;
+		}
+	}
+
+	drawExitWithUnsavedChangesPrompt(
+		window,
+		sceneManager,
+		camera,
+		renderer,
+		applicationRenderMode,
+		rasterizedDebugMode,
+		contextMenuSource
+	);
 }
 
 void ImGuiUserInterface::drawMaterials(Scene& scene)
@@ -1359,6 +1392,45 @@ void ImGuiUserInterface::drawLight(AmbientLight& light, Scene& scene, unsigned i
 			scene.deleteAmbientLight(light.getID());
 		}
 		ImGui::EndPopup();
+	}
+}
+
+void ImGuiUserInterface::drawExitWithUnsavedChangesPrompt(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode, RasterizedDebugMode& rasterizedDebugMode, ContextMenuSource* contextMenuSource)
+{
+	ImGui::SetNextWindowPos(ImVec2((ImGui::GetIO().DisplaySize.x - 200) * 0.5f, (ImGui::GetIO().DisplaySize.y - 100) * 0.5f));
+
+	if (ImGui::BeginPopup("##exit_with_unsaved_changes_popup"))
+	{
+		ImGui::Text("Save changes before closing?");
+		ImGui::NewLine();
+
+		if (ImGui::Button("Save"))
+		{
+			// Save and then exit
+			sceneManager.saveChanges();
+			exitOkay = true;
+		}
+
+		ImGui::SameLine();
+		ImGui::Text(" ");
+		ImGui::SameLine();
+
+		if (ImGui::Button("Don't save"))
+		{
+			// Just exit
+			exitOkay = true;
+		}
+
+		ImGui::SameLine();
+		ImGui::Text(" ");
+		ImGui::SameLine();
+
+		if (ImGui::Button("Cancel"))
+		{
+			// No more exit is requested and close this popup
+			exitRequested = false;
+			ImGui::CloseCurrentPopup();
+		}
 	}
 }
 

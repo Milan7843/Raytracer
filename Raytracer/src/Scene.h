@@ -202,6 +202,9 @@ public:
 	// Verify the pointer of each mesh to its parent model
 	void verifyMeshModelPointers();
 
+	void markAllChangesSaved();
+	bool hasUnsavedChanges();
+
 private:
 
 	void generateMeshBuffer(std::vector<ShaderMesh>& shaderMeshes);

@@ -16,6 +16,8 @@ void SceneManager::update()
 void SceneManager::saveChanges()
 {
 	SceneFileSaver::writeSceneToFile(currentScene, *currentScene.getNamePointer());
+	inUnnamedScene = false;
+	getCurrentScene().markAllChangesSaved();
 }
 
 void SceneManager::saveChangesAs(std::string& sceneName)
@@ -25,6 +27,21 @@ void SceneManager::saveChangesAs(std::string& sceneName)
 	// Moving over to the new scene immediately
 	currentScene.setName(sceneName);
 	hasSceneLoaded = true;
+	inUnnamedScene = false;
+	FileUtility::saveSettings(sceneName);
+	WindowUtility::setWindowTitle(sceneName);
+	getCurrentScene().markAllChangesSaved();
+}
+
+void SceneManager::saveSceneLoaded()
+{
+	// Should not save the name of an unnamed scene
+	if (inUnnamedScene || !hasSceneLoaded)
+	{
+		return;
+	}
+
+	FileUtility::saveSettings(*getCurrentScene().getNamePointer());
 }
 
 void SceneManager::changeScene(const std::string& sceneName)
@@ -52,8 +69,11 @@ void SceneManager::changeScene(const std::string& sceneName)
 	// and set the scene name to the new one
 	currentScene = loadedScene;
 	hasSceneLoaded = true;
+	inUnnamedScene = false;
 	getCurrentScene().setAspectRatio(width, height);
 	currentScene.verifyMeshModelPointers();
+	FileUtility::saveSettings(sceneName);
+	WindowUtility::setWindowTitle(sceneName);
 }
 
 void SceneManager::revertChanges()
@@ -79,8 +99,11 @@ void SceneManager::newScene()
 	currentScene.addLight(directionalLight);
 
 	hasSceneLoaded = true;
+	inUnnamedScene = true;
 
 	getCurrentScene().setAspectRatio(width, height);
+
+	WindowUtility::setWindowTitleNewScene();
 }
 
 void SceneManager::loadAvailableScenesNames()
@@ -176,6 +199,11 @@ void SceneManager::setAspectRatio(unsigned int width, unsigned int height)
 	this->width = width;
 	this->height = height;
 	getCurrentScene().setAspectRatio(width, height);
+}
+
+bool SceneManager::hasUnsavedChanges()
+{
+	return getCurrentScene().hasUnsavedChanges();
 }
 
 std::vector<std::string> SceneManager::split(const std::string& input, char delim)
