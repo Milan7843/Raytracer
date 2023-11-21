@@ -21,7 +21,7 @@ void Callbacks::framebuffer_size_callback(GLFWwindow* window, int width, int hei
 void Callbacks::framebuffer_size_callbackImpl(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
-    sceneManager->getCurrentScene().setAspectRatio(width, height);
+    //sceneManager->getCurrentScene().setAspectRatio(width, height);
 }
 
 void Callbacks::mouseCallback(GLFWwindow* window, double xpos, double ypos)
@@ -29,7 +29,18 @@ void Callbacks::mouseCallback(GLFWwindow* window, double xpos, double ypos)
     getInstance().mouseCallbackImpl(window, xpos, ypos);
 }
 
+void Callbacks::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    getInstance().scrollCallbackImpl(window, xoffset, yoffset);
+}
+
 void Callbacks::mouseCallbackImpl(GLFWwindow* window, double xpos, double ypos)
 {
     //sceneManager->getCurrentScene().getActiveCamera().mouseCallback(window, xpos, ypos);
+}
+
+void Callbacks::scrollCallbackImpl(GLFWwindow* window, double xoffset, double yoffset)
+{
+    //sceneManager->getCurrentScene().getActiveCamera().mouseCallback(window, xpos, ypos);
+    sceneManager->getCurrentScene().getActiveCamera().scrollCallback(xoffset, yoffset);
 }

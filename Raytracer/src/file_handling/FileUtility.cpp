@@ -9,6 +9,8 @@ void removeFolderAndFiletype(std::vector<std::string>& fileNames, const char* fo
 
 std::vector<std::string> FileUtility::getFilesOfTypeInFolder(const char* folder, const char* filetype)
 {
+	//std::cout << std::filesystem::current_path() << std::endl;
+
 	std::vector<std::string> filesFound{};
 	try
 	{
@@ -64,12 +66,13 @@ bool FileUtility::isValidInput(std::string& input)
 	return true;
 }
 
-void FileUtility::saveSettings(std::string& loadedSceneName)
+void FileUtility::saveSettings(const std::string& loadedSceneName)
 {
 	// The data stream into the file
 	std::ofstream filestream{ "saved_settings.save" };
 
 	// Writing all settings data
+	std::cout << "saving current scene as " << loadedSceneName << std::endl;
 	filestream << loadedSceneName << "\n";
 
 	// Done writing so flush data and close filestream

@@ -1,10 +1,12 @@
 #include "Renderer.h"
 
-Renderer::Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height)
-	: computeShader(raytraceComputeShaderPath), width(width), height(height)
+Renderer::Renderer(ComputeShader& raytraceComputeShader, unsigned int width, unsigned int height)
+	: computeShader(raytraceComputeShader), width(width), height(height)
+	, denoiseShader("src/shader_src/denoise.shader")
 {
 	// Immediately creating the pixel buffer with the given width and height
 	setResolution(width, height);
+
 	// Retrieving the render settings from the save file
 	readRenderSettings();
 }
@@ -30,9 +32,7 @@ void Renderer::render()
 	computeShader.setInt("pixelRenderSize", 4);
 
 	// Running the compute shader once for each pixel
-	glDispatchCompute(width / 16 * 4, height / 16 * 4, 1);
-	//glDispatchCompute(std::ceil(float(size / 8.0f)), std::ceil(float(size / 8.0f)), 1);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	computeShader.run(width / 16 * 4, height / 16 * 4, 1);
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
@@ -64,8 +64,11 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	scene.writeObjectsToShader(&computeShader);
 
 	scene.bindTriangleBuffer();
+	scene.bindMaterialsBuffer();
 	scene.writeLightsToShader(&computeShader, true);
-	scene.writeMaterialsToShader(&computeShader);
+	//scene.writeMaterialsToShader(&computeShader);
+	Random::bindRandomTexture();
+	computeShader.setInt("randomTexture", 5);
 
 	// Writing camera data to the compute shader
 	computeShader.setVector3("cameraPosition", CoordinateUtility::vec3ToGLSLVec3(camera->getPosition()));
@@ -87,8 +90,17 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	// Binding the hdri
 	computeShader.setInt("hdri", 3);
 
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, scene.getHDRI());
+	if (scene.hasHDRI())
+	{
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, scene.getHDRI()->textureID);
+	}
+
+	// Binding the texture atlas
+	computeShader.setInt("textureAtlas", 4);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, TextureHandler::packTextures(scene.getMaterials()));
 
 	bindPixelBuffer();
 }
@@ -110,6 +122,13 @@ void Renderer::update(float deltaTime, bool realtimeRaytracing, bool cameraMoved
 	// Check if the process is finished; if it is, no need to update it anymore
 	if (currentRenderProcess->isFinished())
 	{
+		bindPixelBuffer();
+		denoiseShader.use();
+		// Denoising
+		denoiseShader.setVector2("screenSize", width, height);
+		denoiseShader.setInt("screenWidth", width);
+		//denoiseShader.run((width-1) / 16 + 1, (height-1) / 16 + 1, 1);
+
 		Logger::log("Finished render in " + formatTime(currentRenderProcess->getCurrentProcessTime()));
 		delete currentRenderProcess;
 		currentRenderProcess = nullptr;
@@ -139,12 +158,31 @@ void Renderer::setResolution(unsigned int width, unsigned int height)
 
 	// Creating the pixel array buffer
 	pixelBuffer = 0;
+
+	// Problematic statement: very slow (?)
 	glGenBuffers(1, &pixelBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelBuffer);
 
 	// Setting buffer size to be width x height x 16, for 16 bytes per pixel
 	glBufferData(GL_SHADER_STORAGE_BUFFER, width * height * 16, 0, GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, pixelBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+
+
+	// Deleting the previous pixel data buffer
+	glDeleteBuffers(1, &pixelDataBuffer);
+
+	// Creating the pixel data array buffer
+	pixelDataBuffer = 0;
+
+	// Problematic statement: very slow (?)
+	glGenBuffers(1, &pixelDataBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelDataBuffer);
+
+	// Setting buffer size to be width x height x 16, for 16 bytes per pixel
+	glBufferData(GL_SHADER_STORAGE_BUFFER, width * height * 16, 0, GL_STATIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, pixelDataBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
@@ -162,6 +200,8 @@ void Renderer::bindPixelBuffer()
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelBuffer);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, pixelBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelDataBuffer);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, pixelDataBuffer);
 }
 
 unsigned int Renderer::getPixelBuffer()
@@ -203,20 +243,6 @@ void Renderer::drawInterface()
 	// The strength of the HDRI lighting calculation
 	ImGui::DragFloat("HDRI light strength", &hdriLightStrength, 0.01f, 0.0f, 1.0f, "%.2f");
 	ImGuiUtility::drawHelpMarker("How much the HDRI influences the lighting of the scene.");
-
-	ImGui::Text("BVH render mode");
-	ImGui::SameLine();
-	int bvhRenderModeInt = (int)bvhRenderMode;
-	ImGui::RadioButton("Disabled", &bvhRenderModeInt, 0); ImGui::SameLine();
-	ImGui::RadioButton("Only leaves", &bvhRenderModeInt, 1); ImGui::SameLine();
-	ImGui::RadioButton("All", &bvhRenderModeInt, 2);
-	bvhRenderMode = (BVHRenderMode)bvhRenderModeInt;
-	ImGuiUtility::drawHelpMarker((std::string("How the BVH (Bounding Volume Hierarchy) is drawn. ") +
-		"BVH is a way of structuring a model's triangle data in such a way that " +
-		"not all triangles have to be checked in order to know if a ray collision has occured." +
-		"\n'Disabled' will not draw anything." +
-		"\n'Only leaves' will draw onyl the nodes that contain vertices." +
-		"\n'All will' draw all nodes.").c_str());
 }
 
 float Renderer::getRenderProgressPrecise()

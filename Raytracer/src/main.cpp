@@ -1,25 +1,35 @@
 #pragma once
 
 #include "Application.h"
-
-/* CONTROLS */
-/*
- - W to move forward
- - S to move backward
- - A to move left
- - D to move right
- - E to move up
- - Q to move down
- - R to enable/disable settings and info menu (coming soon)
- - V to enable/disable raytraced view
- - Mouse to look around
-*/
+#include <iostream>
+#include <unordered_map>
+#include <string>
 
 // Window size
-const int WIDTH = 1200, HEIGHT = 700;
+const int WIDTH = 1600, HEIGHT = 900;
 
-int main()
+int main(int argc, char* argv[])
 {
-	Application application(WIDTH, HEIGHT);
+    std::unordered_map<std::string, std::string> args;
+
+    // Loop through each argument and parse them
+    for (int i = 1; i < argc; i += 2)
+    {
+        if (i + 1 < argc)
+        {
+            // argv[i] is the argument name, and argv[i + 1] is its value
+            args[argv[i]] = argv[i + 1];
+        }
+    }
+
+    bool useShaderCache = true;
+
+    // Check if arguments are present and update values accordingly
+    if (args.count("-useShaderCache") > 0)
+    {
+        useShaderCache = args["-useShaderCache"] == "true";
+    }
+
+	Application application(WIDTH, HEIGHT, useShaderCache);
 	return application.Start();
 }

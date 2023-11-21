@@ -9,6 +9,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+Raytracer/cache/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -360,3 +361,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+Raytracer/cache/raytraceComputeShaderSampledUpdated.bin

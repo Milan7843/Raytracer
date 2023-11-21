@@ -3,11 +3,12 @@
 #include "Scene.h"
 #include "SceneManager.h"
 #include "Camera.h"
-#include "ComputeShader.h"
+#include "shaders/ComputeShader.h"
 #include "Render processes/RenderProcess.h"
 #include "Render processes/BlockRenderProcess.h"
 #include "Render processes/RealtimeRenderProcess.h"
 #include "ImGuiEditorInterface.h"
+#include "Random.h"
 
 enum class BVHRenderMode
 {
@@ -16,10 +17,10 @@ enum class BVHRenderMode
 	ALL
 };
 
-class Renderer : public ImGuiEditorInterface
+class Renderer
 {
 public:
-	Renderer(const char* raytraceComputeShaderPath, unsigned int width, unsigned int height);
+	Renderer(ComputeShader& raytraceComputeShader, unsigned int width, unsigned int height);
 	~Renderer();
 
 	// Bind the scene to be rendered
@@ -86,10 +87,14 @@ private:
 	float getRenderProgressPrecise();
 
 	// The compute shader used to render to the buffer
-	ComputeShader computeShader;
+	ComputeShader& computeShader;
+	ComputeShader denoiseShader;
 
 	// The buffer to store rendered pixel data
 	unsigned int pixelBuffer;
+
+	// The buffer to store other pixel data (e.g. ray direction)
+	unsigned int pixelDataBuffer;
 
 	// The resolution used to render
 	unsigned int width, height;

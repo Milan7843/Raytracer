@@ -24,6 +24,9 @@ public:
 	// Save the changes in a new file
 	void saveChangesAs(std::string& sceneName);
 
+	// Save the currently loaded scene so it will be loaded on next startup automatically
+	void saveSceneLoaded();
+
 	// Change to another scene by name, will not overwrite current with empty scene on fail to load
 	void changeScene(const std::string& sceneName);
 
@@ -63,12 +66,18 @@ public:
 	// Set the HDRI in the currently active scene
 	void loadHDRI(const std::string& imageName);
 
+	void setAspectRatio(unsigned int width, unsigned int height);
+
+	bool hasUnsavedChanges();
+
 private:
 	// Keeps the current scene loaded in memory
 	Scene currentScene;
 
 	// Indicates whether a working scene has been loaded
 	bool hasSceneLoaded{ false };
+	// Indicates whether the user is working in an unnamed/unsaved scene
+	bool inUnnamedScene{ true };
 
 	// The scene names in the scene folder
 	std::vector<std::string> availableScenesNames;
@@ -81,6 +90,10 @@ private:
 
 	// Split a string by the delimiter
 	std::vector<std::string> split(const std::string& input, char delim);
+
+	// Rendering size: only used for aspect ratio
+	unsigned int width{ 0 };
+	unsigned int height{ 0 };
 
 	// PATHS
 	const char* scenePath{ "scenes" };

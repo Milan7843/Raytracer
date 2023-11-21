@@ -11,8 +11,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Shader.h"
-#include "ComputeShader.h"
+#include "shaders/Shader.h"
+#include "shaders/ComputeShader.h"
+#include "shaders/MultiComputeShader.h"
 #include "Scene.h"
 #include "SceneManager.h"
 #include "Camera.h"
@@ -25,17 +26,25 @@
 #include "OutlineRenderer.h"
 #include "ObjectScreenSelector.h"
 #include "BVH/BVHHandler.h"
+#include "InputManager.h"
+#include "gui/GizmoRenderer.h"
+#include "TextureHandler.h"
+#include "Random.h"
+
+#include "WindowUtility.h"
 
 #include "CoordinateUtility.h"
 #include "Logger.h"
 #include "SceneFileSaver.h"
+#include "file_handling/Cache.h"
 
 #include "ApplicationRenderMode.h"
+#include "RasterizedDebugMode.h"
 
 class Application
 {
 public:
-	Application(unsigned int WIDTH, unsigned int HEIGHT);
+	Application(unsigned int WIDTH, unsigned int HEIGHT, bool useShaderCache);
 	~Application();
 
 	// Start up the application
@@ -52,8 +61,10 @@ private:
 	float lastFrame = 0.0f; // Time of last frame
 
 	ApplicationRenderMode currentRenderMode = ApplicationRenderMode::RASTERIZED;
+	RasterizedDebugMode currentRasterizedDebugMode = RasterizedDebugMode::REGULAR;
 
 	unsigned int WINDOW_SIZE_X = 1200, WINDOW_SIZE_Y = 700;
+	bool useShaderCache;
 
 	// Initialise GLFW
 	void initialiseGLFW();
@@ -77,4 +88,11 @@ private:
 	void processInput(GLFWwindow* window);
 
 	const char* saveFileName{ "saved_settings.save" };
+
+	void setupFramebuffer(glm::ivec2 renderedScreenSize);
+	void deleteFramebuffer();
+
+	unsigned int framebuffer{ 0 };
+	unsigned int screenTexture{ 0 };
+	unsigned int depthBuffer{ 0 };
 };

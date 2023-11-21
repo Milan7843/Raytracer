@@ -33,7 +33,7 @@
     <ClCompile Include="src\Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Shader.cpp">
+    <ClCompile Include="src\shaders\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Sphere.cpp">
@@ -63,10 +63,10 @@
     <ClCompile Include="src\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ComputeShader.cpp">
+    <ClCompile Include="src\shaders\ComputeShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\AbstractShader.cpp">
+    <ClCompile Include="src\shaders\AbstractShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="include\imgui\imgui.cpp">
@@ -150,6 +150,60 @@
     <ClCompile Include="src\BVH\BVHNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\shaders\MultiComputeShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Shaders\ComputeShaderInterface.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shaders\ShaderInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Shaders\ComputeShaderInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ContextMenuSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\GraphEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImCurveEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGradient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGuizmo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImSequencer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InputManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Maths.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\GizmoRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ImageLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file_handling\Cache.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextureHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WindowUtility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Random.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -164,7 +218,7 @@
     <ClInclude Include="src\Object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Shader.h">
+    <ClInclude Include="src\shaders\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Sphere.h">
@@ -1283,10 +1337,10 @@
     <ClInclude Include="src\Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ComputeShader.h">
+    <ClInclude Include="src\shaders\ComputeShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\AbstractShader.h">
+    <ClInclude Include="src\shaders\AbstractShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\imgui\imconfig.h">
@@ -1383,6 +1437,60 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\BVH\BVHNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\shaders\MultiComputeShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\shaders\ShaderInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\ContextMenuSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImZoomSlider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\GraphEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImCurveEdit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGradient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGuizmo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImSequencer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\InputManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Maths.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\GizmoRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ImageLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file_handling\Cache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TextureHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RasterizedDebugMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WindowUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Random.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1820,32 +1928,42 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="assimp-vc142-mtd.dll" />
-    <None Include="src\Shaders\uvColorVertexShader.shader" />
-    <None Include="src\Shaders\raymarchFragmentShader.shader" />
-    <None Include="src\Shaders\raymarchFragmentShaderBackup.shader" />
-    <None Include="src\Shaders\raymarchVertexShader.shader" />
-    <None Include="src\Shaders\raytracingFragmentShader.shader" />
-    <None Include="src\Shaders\solidColorFragmentShader.shader" />
-    <None Include="src\Shaders\solidColorVertexShader.shader" />
-    <None Include="src\Shaders\textureFragmentShader.shader" />
-    <None Include="src\Shaders\textureVertexShader.shader" />
-    <None Include="src\Shaders\uvColorFragmentShader.shader" />
-    <None Include="src\Shaders\backup.shader" />
-    <None Include="src\Shaders\ubobackup.shader" />
-    <None Include="src\Shaders\bufferedRaytracingFragmentShader.shader" />
-    <None Include="src\Shaders\bufferedIndirectLightingRaytracingFragmentShader.shader" />
-    <None Include="src\Shaders\raytraceComputeShaderSampled.shader" />
-    <None Include="src\Shaders\rasterizedView.shader" />
-    <None Include="src\Shaders\hdriVertex.shader" />
-    <None Include="src\Shaders\hdriFragment.shader" />
-    <None Include="src\Shaders\outlineRenderToTextureFragment.shader" />
-    <None Include="src\Shaders\screenTextureFragment.shader" />
-    <None Include="src\Shaders\blurComputeShader.shader" />
-    <None Include="src\Shaders\objectClickColoringShader.shader" />
-    <None Include="src\Shaders\raytraceComputeShaderSampledUpdated.shader" />
-    <None Include="src\Shaders\BVH visualisation\bvhVisualisationFragment.shader" />
-    <None Include="src\Shaders\BVH visualisation\bvhVisualisationGeometry.shader" />
-    <None Include="src\Shaders\BVH visualisation\bvhVisualisationVertex.shader" />
+    <None Include="src\shader_src\uvColorVertexShader.shader" />
+    <None Include="src\shader_src\raymarchFragmentShader.shader" />
+    <None Include="src\shader_src\raymarchFragmentShaderBackup.shader" />
+    <None Include="src\shader_src\raymarchVertexShader.shader" />
+    <None Include="src\shader_src\raytracingFragmentShader.shader" />
+    <None Include="src\shader_src\solidColorFragmentShader.shader" />
+    <None Include="src\shader_src\solidColorVertexShader.shader" />
+    <None Include="src\shader_src\textureFragmentShader.shader" />
+    <None Include="src\shader_src\textureVertexShader.shader" />
+    <None Include="src\shader_src\uvColorFragmentShader.shader" />
+    <None Include="src\shader_src\backup.shader" />
+    <None Include="src\shader_src\ubobackup.shader" />
+    <None Include="src\shader_src\bufferedRaytracingFragmentShader.shader" />
+    <None Include="src\shader_src\bufferedIndirectLightingRaytracingFragmentShader.shader" />
+    <None Include="src\shader_src\raytraceComputeShaderSampled.shader" />
+    <None Include="src\shader_src\rasterizedView.shader" />
+    <None Include="src\shader_src\hdriVertex.shader" />
+    <None Include="src\shader_src\hdriFragment.shader" />
+    <None Include="src\shader_src\outlineRenderToTextureFragment.shader" />
+    <None Include="src\shader_src\screenTextureFragment.shader" />
+    <None Include="src\shader_src\blurComputeShader.shader" />
+    <None Include="src\shader_src\objectClickColoringShader.shader" />
+    <None Include="src\shader_src\raytraceComputeShaderSampledUpdated.shader" />
+    <None Include="src\shader_src\BVH visualisation\bvhVisualisationFragment.shader" />
+    <None Include="src\shader_src\BVH visualisation\bvhVisualisationGeometry.shader" />
+    <None Include="src\shader_src\BVH visualisation\bvhVisualisationVertex.shader" />
+    <None Include="src\shader_src\indirectLightingCalculation.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoGeometry.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoFragment.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoVertex.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectVertex.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectGeometry.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectFragment.shader" />
+    <None Include="src\shader_src\raytraceComputeShaderSampledUpdatedBackup.shader" />
+    <None Include="src\shader_src\raytraceComputeShaderProbabilistic.shader" />
+    <None Include="src\shader_src\denoise.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />

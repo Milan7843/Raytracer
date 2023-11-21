@@ -2,13 +2,14 @@
 
 #include "Light.h"
 
-Light::Light(const std::string& name, glm::vec3 position, glm::vec3 color, float intensity)
-	: name(name),
-	position(position),
-	color(color),
+Light::Light(const std::string& name, glm::vec3 position, glm::vec3 color, float intensity, float shadowSoftness)
+	: color(color),
 	intensity(intensity),
+	shadowSoftness(shadowSoftness),
 	index(0)
 {
+	this->name = name;
+	this->position = position;
 }
 
 Light::~Light()
@@ -37,6 +38,11 @@ void Light::setIndex(unsigned int index)
 	this->index = index;
 }
 
+glm::vec3 Light::getColor()
+{
+	return color;
+}
+
 glm::vec3* Light::getPositionPointer()
 {
 	return &position;
@@ -52,7 +58,7 @@ float* Light::getIntensityPointer()
 	return &intensity;
 }
 
-std::string& Light::getName()
+float* Light::getShadowSoftnessPointer()
 {
-	return name;
+	return &shadowSoftness;
 }

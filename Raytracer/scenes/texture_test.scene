@@ -1,0 +1,60 @@
+1
+C:\Git\Raytracer\Raytracer\HDRIs\hdri_default.png
+# Materials
+New material
+0.8 0.8 0.8
+0
+0
+0
+0
+1 1 1
+0
+0
+1
+C:\Git\Raytracer\Raytracer\src\Textures\hampter.png
+1
+C:\Git\Raytracer\Raytracer\src\Textures\image0011.png
+0.57
+# Materials end
+
+# Spheres
+# Spheres end
+
+# Models
+texture_test_cube
+0 0 0
+0 0 0
+1 1 1
+src/models/texture_test_cube.obj
+1
+1
+1
+Cube
+0 0 0
+0 0 0
+1 1 1
+# Models end
+
+# Point lights
+Point light
+1 1 1
+2.32
+1.72266 1.71644 -1.5014
+0
+# Point lights end
+
+# Directional lights
+# Directional lights end
+
+# Ambient lights
+# Ambient lights end
+
+# Cameras
+3.22397 1.28344 -3.51933
+-14.6
+500.7
+1
+40
+1
+# Cameras end
+

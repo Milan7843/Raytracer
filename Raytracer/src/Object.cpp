@@ -1,10 +1,5 @@
 #include "Object.h"
 
-bool Object::writeToShader(AbstractShader* shader, unsigned int ssbo)
-{
-	return false;
-}
-
 void Object::writeDataToStream(std::ofstream& filestream)
 {
 	filestream << getName() << "\n";
@@ -48,7 +43,7 @@ void Object::resetRotation()
 	this->rotation = glm::vec3(0.0f);
 }
 
-glm::mat4 Object::getTransformationMatrix()
+glm::mat4 Object::getTransformationMatrix() const
 {
 	// Creating an identity matrix
 	glm::mat4 baseMatrix = glm::mat4(1.0f);
@@ -76,16 +71,53 @@ glm::vec3* Object::getScalePointer()
 	return &scaleVector;
 }
 
+glm::vec3 Object::getPosition() const
+{
+	return position;
+}
+
+glm::vec3 Object::getRotationPoint() const
+{
+	return getPosition();
+}
+
+glm::vec3 Object::getRotation() const
+{
+	return rotation;
+}
+
+glm::vec3 Object::getScale() const
+{
+	return scaleVector;
+}
+
 std::string& Object::getName()
 {
 	return name;
 }
 
-Object::Object()
+void Object::setTransformation(glm::mat4& transformMatrix)
 {
+	// Extract position
+	position = glm::vec3(transformMatrix[3]);
+
+	// Extract scale
+	scaleVector.x = glm::length(glm::vec3(transformMatrix[0]));
+	scaleVector.y = glm::length(glm::vec3(transformMatrix[1]));
+	scaleVector.z = glm::length(glm::vec3(transformMatrix[2]));
+
+	// Extract rotation
+	glm::mat3 rotationMatrix(transformMatrix);
+	glm::quat rotationQuat(rotationMatrix);
+	rotation = glm::eulerAngles(rotationQuat);
 }
 
-glm::mat4 Object::getRotationMatrix()
+float Object::getAppropriateCameraFocusDistance()
+{
+	return 0.5f;
+}
+
+glm::mat4 Object::getRotationMatrix() const
 {
 	// Creating an identity matrix
 	glm::mat4 rotationMatrix(1.0f);

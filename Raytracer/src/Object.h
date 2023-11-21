@@ -4,12 +4,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "AbstractShader.h"
-#include "ShaderWritable.h"
+#include "shaders/AbstractShader.h"
+#include "ImGuiEditorInterface.h"
 
 #include "Logger.h"
 
-class Object : public ShaderWritable
+class Object : public ImGuiEditorInterface
 {
 public:
 
@@ -28,27 +28,35 @@ public:
 	void resetRotation();
 
 	// Get a single matrix which includes all transformations
-	virtual glm::mat4 getTransformationMatrix();
+	virtual glm::mat4 getTransformationMatrix() const;
 
 	// Draw this object given the shader
 	virtual void draw(AbstractShader* shader);
-
-	// Write this object's data to the given shader
-	virtual bool writeToShader(AbstractShader* shader, unsigned int ssbo);
 
 	glm::vec3* getPositionPointer();
 	glm::vec3* getRotationPointer();
 	glm::vec3* getScalePointer();
 
+	glm::vec3 getPosition() const;
+	virtual glm::vec3 getRotationPoint() const;
+	glm::vec3 getRotation() const;
+	glm::vec3 getScale() const;
+
 	std::string& getName();
+
+	void setTransformation(glm::mat4& transformMatrix);
+
+	// Get an approximation of an appropriate distance the camera should be from the object
+	// after clicking the focus button.
+	virtual float getAppropriateCameraFocusDistance();
 
 protected:
 	// Abstract class, no need to instantiate this class
-	Object();
+	Object() : ImGuiEditorInterface() {}
 	virtual ~Object() {}
 
 	// Generate and get the rotation matrix
-	glm::mat4 getRotationMatrix();
+	glm::mat4 getRotationMatrix() const;
 
 	// Transformations
 	glm::vec3 position{ glm::vec3(0.0f) };

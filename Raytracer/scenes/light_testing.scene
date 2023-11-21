@@ -1,0 +1,94 @@
+1
+C:\Git\Raytracer\Raytracer\HDRIs\hdri_default.png
+# Materials
+Light
+1 1 1
+0
+0
+0
+0
+1 1 1
+1
+0
+0
+0
+0
+
+Glass
+0.266667 0.145098 1
+0.2
+0.71
+0.02
+0
+1 1 1
+0
+0
+0
+0
+0
+
+ground
+0.8 0.8 0.8
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+# Materials end
+
+# Spheres
+# Spheres end
+
+# Models
+full_light_testing
+0 0 0
+0 0 0
+1 1 1
+src/models/full_light_testing.obj
+3
+3
+1
+2
+3
+Plane
+0 0 0
+0 0 0
+1 1 1
+Icosphere
+0 0 0
+0 0 0
+1 1 1
+Plane.001
+0 0 0
+0 0 0
+1 1 1
+# Models end
+
+# Point lights
+# Point lights end
+
+# Directional lights
+Directional light
+1 1 1
+1
+-1 -1 1
+0
+# Directional lights end
+
+# Ambient lights
+# Ambient lights end
+
+# Cameras
+-0.877615 0.591961 0.921152
+-23.1
+320.6
+1
+40
+1
+# Cameras end
+

@@ -27,7 +27,14 @@ void ImGuiUserInterface::initialiseImGui(GLFWwindow* window)
     ImGui_ImplOpenGL3_Init("#version 130");
 }
 
-void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode)
+void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
+	SceneManager& sceneManager,
+	Camera& camera,
+	Renderer& renderer,
+	ApplicationRenderMode& applicationRenderMode,
+	RasterizedDebugMode& rasterizedDebugMode,
+	ContextMenuSource* contextMenuSource,
+	unsigned int screenTexture)
 {
 	if (!imGuiEnabled)
 	{
@@ -41,6 +48,9 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
+	ImGuiIO& io = ImGui::GetIO(); // Retrieve the ImGuiIO object
+
+
 	bool showDemoWindow{ false };
 	if (showDemoWindow)
 	{
@@ -50,377 +60,406 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window, SceneManager& sce
 		return;
 	}
 
-	ImGuiWindowFlags window_flags{ 0 };
-	window_flags |= ImGuiWindowFlags_MenuBar;
-	window_flags |= ImGuiWindowFlags_NoNavInputs;
-	window_flags |= ImGuiWindowFlags_NoNav;
-	//window_flags |= ImGuiWindowFlags_Popup;
-	bool windowOpen{ true };
+	if (false)
+		drawGUI(
+			window,
+			sceneManager,
+			camera,
+			renderer,
+			applicationRenderMode,
+			contextMenuSource
+		);
 
-	// Creating the GUI window
-	ImGui::Begin("Editor", &windowOpen, window_flags);
+	drawMenuBar(
+		window,
+		sceneManager,
+		camera,
+		renderer,
+		applicationRenderMode,
+		rasterizedDebugMode,
+		contextMenuSource
+	);
 
-	static bool updateSceneNames{ true };
+	float windowWidth{ io.DisplaySize.x };
+	float windowHeight{ io.DisplaySize.y };
+	float topAreaHeight{ 19.0f };
+	float rightAreaWidth{ windowWidth * 0.2f };
+	float bottomAreaHeight{ windowHeight * 0.2f };
+	float topRightAreaHeight{ windowHeight * 0.2f };
+	float bottomRightAreaHeight{ windowHeight - topRightAreaHeight - bottomAreaHeight };
+	float centralAreaWidth{ windowWidth - rightAreaWidth };
+	float centralAreaHeight{ windowHeight - bottomAreaHeight - topAreaHeight };
 
-	// Holds new scene name input
-	static std::string newSceneNameInput{};
-	static bool sceneNameInputError = false;
-	bool openSaveAsPopup{ false };
+	// Create the layout for the user interface
+	//ImGui::SetNextWindowPos(ImVec2(0, 0));
+	//ImGui::SetNextWindowSize(ImVec2(windowWidth, windowHeight));
+	//ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
-	// Unselecting all objects: they will be marked as selected as needed later in this function
-	//sceneManager.getCurrentScene().markAllUnselected();
-
-	bool openHelpMenuButtonPressed{ false };
-	// Menu Bar
-	if (ImGui::BeginMenuBar())
+	// Top area
+	if (false)
 	{
-		if (ImGui::BeginMenu("Scene"))
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::SetNextWindowSize(ImVec2(windowWidth, topAreaHeight));
+		ImGui::Begin("Top Area", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+		// Add your ImGui widgets for the top area here
+		ImGui::End();
+	}
+
+	// Central area for rendering
+	ImGui::SetNextWindowPos(ImVec2(0, topAreaHeight));
+	ImGui::SetNextWindowSize(ImVec2(windowWidth - rightAreaWidth, windowHeight - bottomAreaHeight - topAreaHeight));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::Begin("Central Area", nullptr, ImGuiWindowFlags_NoDecoration);
+
+	//ImVec2 windowMin = ImVec2(0.0f + 5.0f, std::floor(topAreaHeight + 23.0f));
+	//ImVec2 windowMax = ImVec2(std::floor(windowMin.x + centralAreaWidth - 10.0f), std::floor(windowMin.y + centralAreaHeight - 29.0f));
+	ImVec2 windowMin = ImVec2(1.0f, std::floor(topAreaHeight + 1.0f));
+	ImVec2 windowMax = ImVec2(std::floor(windowMin.x + centralAreaWidth - 2.0f), std::floor(windowMin.y + centralAreaHeight - 2.0f));
+
+	ImVec2 centralAreaSize{ (windowMax.x - windowMin.x), (windowMax.y - windowMin.y) };
+
+	ImVec2 uvMin = ImVec2(0.0f, 1.0f); // UV coordinates for the top-left corner of the texture
+	ImVec2 uvMax = ImVec2(1.0f, 0.0f); // UV coordinates for the bottom-right corner of the texture
+
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+	drawList->AddImage((void*)(intptr_t)screenTexture, windowMin, windowMax, uvMin, uvMax);
+
+	// No padding
+	ImGui::PopStyleVar(1);
+
+	ImGuizmo::BeginFrame();
+
+	// Set up the ImGuizmo parameters for the move gizmo
+	ImGuizmo::SetOrthographic(false);
+	ImGuizmo::SetDrawlist();
+	ImGuizmo::SetRect(windowMin.x, windowMin.y, centralAreaSize.x, centralAreaSize.y);
+
+	Object* object{ sceneManager.getCurrentScene().getObjectFromSelected() };
+	ObjectType type{ sceneManager.getCurrentScene().getSelectedObjectType() };
+
+	bool showingTransformation{ false };
+
+	if (object != nullptr)
+	{
+		if (currentTransformationObjectID != object->getID())
 		{
-			if (ImGui::BeginMenu("Open scene"))
+			// When we selected a new object, it must be the first frame it is being transformed
+			transformationFirstFrame = true;
+			currentTransformationObjectID = object->getID();
+		}
+
+		// Only show a gizmo if we are actually transforming
+		if (InputManager::getCurrentAction() == InputManager::Action::TRANSFORM)
+		{
+			ImGuizmo::OPERATION currentOperation{ InputManager::getCurrentActionAsImGuizmoOperation() };
+
+			if (type == ObjectType::MODEL)
 			{
-				// Showing all possible scene names
-				for (std::string& name : sceneManager.getAvailableScenesNames(updateSceneNames))
+				showingTransformation = true;
+
+				glm::mat4 objectMatrix{ object->getTransformationMatrix() };
+
+				// When the gizmo first appears (for the currently selected object)
+				if (transformationFirstFrame)
 				{
-					// Making a button which loads the scene on click
-					if (ImGui::MenuItem(name.c_str()))
+					transformationInitialObjectMatrix = objectMatrix;
+				}
+
+				// Toggle the "interacting after cancel" state
+				if (InputManager::keyPressed(InputManager::InputKey::CANCEL_TRANSLATION))
+				{
+					transformationCancelled = true;
+					Logger::logMatrix(transformationInitialObjectMatrix, "Initial object matrix");
+
+					object->setTransformation(transformationInitialObjectMatrix);
+					objectMatrix = object->getTransformationMatrix();
+				}
+
+				// Once we stop using, we reset the "cancelled" state
+				if (!ImGuizmo::IsUsing())
+				{
+					transformationCancelled = false;
+				}
+
+				// Define the delta matrix: this will hold all changes made to the object matrix
+				glm::mat4 deltaMatrix;
+
+				ImGuizmo::Manipulate(
+					glm::value_ptr(camera.getViewMatrix()),
+					glm::value_ptr(camera.getProjectionMatrix()),
+					currentOperation,
+					ImGuizmo::WORLD,
+					glm::value_ptr(objectMatrix),
+					glm::value_ptr(deltaMatrix)
+				);
+
+
+				// When the user stops dragging the gizmo
+				if (!ImGuizmo::IsUsing() && previousFrameTransformationDragging)
+				{
+					glm::mat4 totalTransformationMatrix{ transformationInitialObjectMatrix * glm::inverse(objectMatrix) };
+
+					Logger::logMatrix(totalTransformationMatrix, "Total transformation matrix");
+
+					transformationInitialObjectMatrix = objectMatrix;
+				}
+
+				// Do not apply the gizmo transformation after having cancelled the transformation
+				if (!transformationCancelled)
+				{
+					object->setTransformation(objectMatrix);
+
+					// If anything changed
+					// TODO this if statement is not accurate
+					if (deltaMatrix != glm::mat4(1.0f))
 					{
-						// Loading the scene
-						sceneManager.changeScene(name);
-						break;
+						Model* model{ dynamic_cast<Model*>(object) };
+						model->setVertexDataChanged(true);
 					}
 				}
 
-				updateSceneNames = false;
-
-				ImGui::EndMenu();
+				transformationFirstFrame = false;
+				previousFrameTransformationDragging = ImGuizmo::IsUsing();
 			}
-			else
+			else if (type == ObjectType::MESH)
 			{
-				updateSceneNames = true;
-			}
+				showingTransformation = true;
 
-			if (ImGui::MenuItem("New scene"))
-			{
-				sceneManager.newScene();
-			}
+				Mesh* mesh{ dynamic_cast<Mesh*>(object) };
+				Model* model{ mesh->getModel() };
 
-			if (ImGui::MenuItem("Save"))
-			{
-				// If this scene does not yet have a name, open the save as popup
-				if ((*sceneManager.getCurrentScene().getNamePointer()).empty())
-					openSaveAsPopup = true;
-				else
-					sceneManager.saveChanges();
-			}
+				// Create a copy of the original matrix
+				glm::mat4 objectMatrix{ mesh->getTransformationMatrix() * model->getTransformationMatrix() };
+				//objectMatrix = glm::translate(objectMatrix, mesh->getAverageVertexPosition());
 
-			if (ImGui::MenuItem("Save as"))
-			{
-				openSaveAsPopup = true;
-			}
-
-			if (ImGui::MenuItem("Revert changes"))
-			{
-				sceneManager.revertChanges();
-			}
-
-			ImGui::EndMenu();
-		}
-
-		// Help menu
-		static bool helpMenuWindowOpen{ false };
-
-		if (ImGui::BeginMenu("Help"))
-		{
-			if (ImGui::MenuItem("Open help"))
-			{
-				std::cout << "menu clicked?" << std::endl;
-				openHelpMenuButtonPressed = true;
-			}
-
-			ImGui::EndMenu();
-		}
-
-		ImGui::EndMenuBar();
-	}
-
-	if (openHelpMenuButtonPressed)
-		ImGui::OpenPopup("##help_popup");
-
-	if (ImGui::BeginPopup("##help_popup"))
-	{
-		drawHelpMenu();
-		ImGui::EndPopup();
-	}
-
-	if (openSaveAsPopup)
-		ImGui::OpenPopup("##save_changes_new_popup");
-
-	if (ImGui::BeginPopup("##save_changes_new_popup"))
-	{
-		// Name input field
-		ImGui::InputText("Scene name", &newSceneNameInput);
-
-		if (sceneNameInputError)
-			ImGui::Text("Invalid scene name. Make sure it does not contain periods ('.'), slashes ('/') or backslashes ('\\'),\n"
-				"and it is not empty.");
-
-		if (ImGui::Button("Save"))
-		{
-			if (FileUtility::isValidInput(newSceneNameInput))
-			{
-				if (sceneManager.willSaveOverwrite(newSceneNameInput))
+				// When the gizmo first appears (for the currently selected object)
+				if (transformationFirstFrame)
 				{
-					ImGui::OpenPopup("##save_changes_overwrite_popup");
+					transformationInitialObjectMatrix = objectMatrix;
+					transformationInitialMeshMatrix = mesh->getTransformationMatrix();
 				}
-				else
+
+				// Toggle the "interacting after cancel" state
+				if (InputManager::keyPressed(InputManager::InputKey::CANCEL_TRANSLATION))
 				{
-					sceneManager.saveChangesAs(newSceneNameInput);
-					// Empty input field
-					newSceneNameInput = {};
-					sceneNameInputError = false;
+					transformationCancelled = true;
+					Logger::logMatrix(transformationInitialMeshMatrix, "Initial mesh matrix");
 
-					// Then close the popup
-					ImGui::CloseCurrentPopup();
+					mesh->setTransformation(transformationInitialMeshMatrix);
+					objectMatrix = mesh->getTransformationMatrix() * model->getTransformationMatrix();
 				}
-			}
-			else
-			{
-				// Activating the error message
-				sceneNameInputError = true;
-			}
-		}
 
-		ImGui::SameLine();
-
-		if (ImGui::Button("Cancel"))
-		{
-			// Empty input field
-			newSceneNameInput = {};
-			sceneNameInputError = false;
-
-			// Then close the popup
-			ImGui::CloseCurrentPopup();
-		}
-
-		// Indicates whether the 'save as' popup should be closed by an action of the 
-		bool closeSaveSceneAsPopupAfterOverwritePopup{ false };
-
-		// Popup to ask whether you want to overwrite a scene
-		if (ImGui::BeginPopup("##save_changes_overwrite_popup"))
-		{
-			ImGui::Text(("Saving the scene with the name '" + newSceneNameInput
-				+ "' will overwrite the scene with the same name.").c_str());
-			ImGui::Text("Are you sure you want to overwrite this scene?");
-
-			if (ImGui::Button("Save anyway"))
-			{
-				sceneManager.saveChangesAs(newSceneNameInput);
-
-				// Empty input field
-				newSceneNameInput = {};
-
-				// Then close the popup
-				sceneNameInputError = false;
-				closeSaveSceneAsPopupAfterOverwritePopup = true;
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Cancel"))
-			{
-				// Then close the popup
-				sceneNameInputError = false;
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
-		}
-
-		if (closeSaveSceneAsPopupAfterOverwritePopup)
-			ImGui::CloseCurrentPopup();
-
-		ImGui::EndPopup();
-	}
-
-	ImGui::Text("Press TAB to open or close this interface.");
-
-	/*
-	if (ImGui::Button("Render frame"))
-	{
-		renderer.render();
-	}
-	*/
-	if (ImGui::Button("Render frame in blocks"))
-	{
-		renderer.startBlockRender();
-	}
-
-	// Render time left indicators
-	ImGui::ProgressBar(renderer.getRenderProgress());
-	ImGui::Text("Render time left: ");
-	ImGui::SameLine();
-	ImGui::Text(formatTime(renderer.getTimeLeft()).c_str());
-
-	static std::string renderSaveFileName{ "" };
-	static bool renderSaveFileNameError = false;
-
-	if (ImGui::Button("Save render"))
-		ImGui::OpenPopup("##save_render_popup");
-
-	if (ImGui::BeginPopup("##save_render_popup"))
-	{
-		// Name input field
-		ImGui::InputText("Render name", &renderSaveFileName);
-		if (renderSaveFileNameError)
-			ImGui::Text("Invalid image name. Make sure it does not contain periods ('.'), slashes ('/') or backslashes ('\\'),\n"
-				"and it is not empty.");
-
-		if (ImGui::Button("Save"))
-		{
-			if (FileUtility::isValidInput(renderSaveFileName))
-			{
-				// Saving the render
-				FileUtility::saveRender(renderSaveFileName + ".png", renderer.getWidth(), renderer.getHeight(), renderer.getPixelBuffer());
-
-				// Empty input field
-				renderSaveFileName = {};
-				// Close error
-				renderSaveFileNameError = false;
-				// Then close the popup
-				ImGui::CloseCurrentPopup();
-			}
-			else
-			{
-				// Activating the error
-				renderSaveFileNameError = true;
-			}
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Cancel"))
-		{
-			// Empty input field
-			renderSaveFileName = {};
-			// Close error
-			renderSaveFileNameError = false;
-			// Then close the popup
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::EndPopup();
-	}
-
-
-	// Creating the tab bar
-	ImGui::BeginTabBar("full_tab_bar");
-
-
-	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.22f, 0.4f, 0.48f, 0.2f));
-
-	// Tap for all settings related to rendering
-	if (ImGui::BeginTabItem("Render settings"))
-	{
-		ImGui::BeginGroup();
-		drawRenderSettings(sceneManager, camera, renderer, applicationRenderMode);
-		ImGui::EndGroup();
-		ImGui::EndTabItem();
-	}
-
-	// Tab for editing any scene objects
-	if (ImGui::BeginTabItem("Scene editing"))
-	{
-		if (ImGui::Button("Set HDRI"))
-			ImGui::OpenPopup("##open_hdri_popup");
-
-		static bool updateHDRINames = true;
-
-		if (ImGui::BeginPopup("##open_hdri_popup"))
-		{
-			// Stop updating while the popup is open
-			updateHDRINames = false;
-
-			// Showing all possible scene names
-			for (std::string& name : sceneManager.getAvailableHDRINames(updateHDRINames))
-			{
-				// Making a button which loads the scene on click
-				if (ImGui::Button(name.c_str()))
+				// Once we stop using, we reset the "cancelled" state
+				if (!ImGuizmo::IsUsing())
 				{
-					// Setting the HDRI
-					sceneManager.loadHDRI(name);
-
-					// Update next time
-					updateHDRINames = true;
-
-					// Closing the popup
-					ImGui::CloseCurrentPopup();
-					break;
+					transformationCancelled = false;
 				}
+
+				// Define the delta matrix: this will hold all changes made to the object matrix
+				glm::mat4 deltaMatrix;
+
+				ImGuizmo::Manipulate(
+					glm::value_ptr(camera.getViewMatrix()),
+					glm::value_ptr(camera.getProjectionMatrix()),
+					currentOperation,
+					ImGuizmo::MODE::WORLD,
+					glm::value_ptr(objectMatrix),
+					glm::value_ptr(deltaMatrix)
+				);
+
+				//std::cout << "using? " << (ImGuizmo::IsUsing() ? "ye" : "nah") << " okay and prev? " << (previousFrameTransformationDragging ? "ye" : "nah") << std::endl;
+
+				// When the user stops dragging the gizmo
+				if (!ImGuizmo::IsUsing() && previousFrameTransformationDragging)
+				{
+					glm::mat4 totalTransformationMatrix{ transformationInitialObjectMatrix * glm::inverse(objectMatrix) };
+
+					Logger::logMatrix(totalTransformationMatrix, "Total transformation matrix");
+
+					transformationInitialObjectMatrix = objectMatrix;
+					transformationInitialMeshMatrix = mesh->getTransformationMatrix();
+				}
+
+				// Do not apply the gizmo transformation after having cancelled the transformation
+				if (!transformationCancelled)
+				{
+					glm::mat4 newMeshMatrix{ deltaMatrix * mesh->getTransformationMatrix() };
+					mesh->setTransformation(newMeshMatrix);
+
+					// If anything changed
+					// TODO this if statement is not accurate
+					if (deltaMatrix != glm::mat4(1.0f))
+					{
+						mesh->setVertexDataChanged(true);
+					}
+				}
+
+				transformationFirstFrame = false;
+				previousFrameTransformationDragging = ImGuizmo::IsUsing();
 			}
-			ImGui::EndPopup();
-		}
-
-
-		ImGui::BeginTabBar("scene_edit_tab_bar");
-		ImGui::BeginGroup();
-
-		/*
-		ImGuiTabItemFlags_ objectsFlag{ ImGuiTabItemFlags_None };
-		ImGuiTabItemFlags_ materialsFlag{ ImGuiTabItemFlags_None };
-		ImGuiTabItemFlags_ lightsFlag{ ImGuiTabItemFlags_None };
-
-		// Automatically open correct tab on selection
-		if (newObjectSelected)
-		{
-			std::cout << selectedObjectType << std::endl;
-			switch (selectedObjectType)
+			else if (type == ObjectType::POINT_LIGHT)
 			{
-				// Model or sphere: open the objects tab
-				case 1: // model
-				case 2: // sphere
-					objectsFlag = ImGuiTabItemFlags_SetSelected;
-					break;
+				showingTransformation = true;
+
+				glm::mat4 objectMatrix{ object->getTransformationMatrix() };
+
+				// When the gizmo first appears (for the currently selected object)
+				if (transformationFirstFrame)
+				{
+					transformationInitialObjectMatrix = objectMatrix;
+				}
+
+				// Toggle the "interacting after cancel" state
+				if (InputManager::keyPressed(InputManager::InputKey::CANCEL_TRANSLATION))
+				{
+					transformationCancelled = true;
+					Logger::logMatrix(transformationInitialObjectMatrix, "Initial object matrix");
+
+					object->setTransformation(transformationInitialObjectMatrix);
+					objectMatrix = object->getTransformationMatrix();
+				}
+
+				// Once we stop using, we reset the "cancelled" state
+				if (!ImGuizmo::IsUsing())
+				{
+					transformationCancelled = false;
+				}
+
+				// Define the delta matrix: this will hold all changes made to the object matrix
+				glm::mat4 deltaMatrix;
+
+				ImGuizmo::Manipulate(
+					glm::value_ptr(camera.getViewMatrix()),
+					glm::value_ptr(camera.getProjectionMatrix()),
+					currentOperation,
+					ImGuizmo::WORLD,
+					glm::value_ptr(objectMatrix),
+					glm::value_ptr(deltaMatrix)
+				);
+
+
+				// When the user stops dragging the gizmo
+				if (!ImGuizmo::IsUsing() && previousFrameTransformationDragging)
+				{
+					glm::mat4 totalTransformationMatrix{ transformationInitialObjectMatrix * glm::inverse(objectMatrix) };
+
+					Logger::logMatrix(totalTransformationMatrix, "Total transformation matrix");
+
+					transformationInitialObjectMatrix = objectMatrix;
+				}
+
+				// Do not apply the gizmo transformation after having cancelled the transformation
+				if (!transformationCancelled)
+				{
+					object->setTransformation(objectMatrix);
+
+					// If anything changed
+					// TODO this if statement is not accurate
+					if (deltaMatrix != glm::mat4(1.0f))
+					{
+						dynamic_cast<Light*>(object)->clearShaderWrittenTo();
+					}
+				}
+
+				transformationFirstFrame = false;
+				previousFrameTransformationDragging = ImGuizmo::IsUsing();
 			}
 		}
-		*/
+	}
+	
+	if (!showingTransformation)
+	{
+		transformationFirstFrame = true;
+	}
 
-		//if (ImGui::BeginTabItem("Objects", (bool*)0, objectsFlag))
-		if (ImGui::BeginTabItem("Objects"))
-		{
-			drawObjects(sceneManager);
-			ImGui::EndTabItem();
-		}
+	// Finding the pixel coordinates of the mouse
+	ImVec2 mousePos = ImGui::GetIO().MousePos;
+	mousePos.x -= windowMin.x;
+	mousePos.y -= windowMin.y;
 
-		if (ImGui::BeginTabItem("Materials"))
-		{
-			drawMaterials(sceneManager.getCurrentScene());
-			ImGui::EndTabItem();
-		}
+	mouseCoordinates = glm::ivec2(
+		(unsigned int)std::floor(mousePos.x),
+		(unsigned int)std::floor(mousePos.y)
+	);
 
-		if (ImGui::BeginTabItem("Lights"))
-		{
-			drawLights(sceneManager.getCurrentScene());
-			ImGui::EndTabItem();
-		}
+	// Finding size of the rendered screen
+	renderedScreenSize = glm::ivec2(
+		(unsigned int)std::floor(windowMax.x - windowMin.x),
+		(unsigned int)std::floor(windowMax.y - windowMin.y)
+	);
+
+	// Finding the [0-1] coordinates of the mouse
+	mousePosition = glm::vec2(
+		(unsigned int)std::floor(mousePos.x / (windowMax.x - windowMin.x)),
+		(unsigned int)std::floor(mousePos.y / (windowMax.y - windowMin.y))
+	);
+
+	// Top right area
+	{
+		ImGui::SetNextWindowPos(ImVec2(windowWidth - rightAreaWidth, topAreaHeight));
+		ImGui::SetNextWindowSize(ImVec2(rightAreaWidth, topAreaHeight + topRightAreaHeight));
+		ImGui::Begin("Top Right Area", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
+
+		drawSceneSelector(
+			window,
+			sceneManager,
+			camera,
+			renderer,
+			applicationRenderMode,
+			contextMenuSource
+		);
 
 		ImGui::EndTabBar();
-		ImGui::EndGroup();
-		ImGui::EndTabItem();
+
+		ImGui::End();
 	}
 
-	// Camera settings (speed, fov etc.)
-	if (ImGui::BeginTabItem("Camera settings"))
+	// Bottom right area
 	{
-		ImGui::SliderFloat("Move speed", camera.getCameraSpeedPointer(), 0.1f, 10.0f);
-		ImGui::SliderFloat("Sensitivity", camera.getSensitivityPointer(), 0.1f, 5.0f);
-		ImGui::SliderFloat("Field of view", camera.getFovPointer(), 10.0f, 90.0f);
-		ImGui::EndTabItem();
+		ImGui::SetNextWindowPos(ImVec2(windowWidth - rightAreaWidth, topAreaHeight + topRightAreaHeight));
+		ImGui::SetNextWindowSize(ImVec2(rightAreaWidth, topAreaHeight + topRightAreaHeight + bottomRightAreaHeight));
+		ImGui::Begin("Bottom Right Area", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
+
+		drawSceneEditor(
+			window,
+			sceneManager,
+			camera,
+			renderer,
+			applicationRenderMode,
+			contextMenuSource
+		);
+
+		// Render time left indicators
+		ImGui::ProgressBar(renderer.getRenderProgress());
+		ImGui::Text("Render time left: ");
+		ImGui::SameLine();
+		ImGui::Text(formatTime(renderer.getTimeLeft()).c_str());
+
+
+		// Drawing the selected object
+		ImGui::Separator();
+		sceneManager.getCurrentScene().drawCurrentlySelectedObjectInterface();
+
+		ImGui::EndTabBar();
+
+		ImGui::End();
 	}
-	ImGui::PopStyleColor();
 
-	ImGui::EndTabBar();
+	// Bottom area
+	{
+		ImGui::SetNextWindowPos(ImVec2(0, windowHeight - bottomAreaHeight));
+		ImGui::SetNextWindowSize(ImVec2(windowWidth, bottomAreaHeight));
+		ImGui::Begin("Bottom Area", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
+		// Add your ImGui widgets for the bottom area here
+		ImGui::End();
+	}
 
+	//ImGui::End(); // End of "Main Window"
 
-	// Drawing the selected object
-	ImGui::Separator();
-	sceneManager.getCurrentScene().drawCurrentlySelectedObjectInterface();
+	// Window rounding
 
-	ImGui::End();
+	// If the context menu source exists
+	sceneManager.getCurrentScene().renderContextMenus();
 
 	// Rendering
 	ImGui::Render();
@@ -435,7 +474,7 @@ void ImGuiUserInterface::handleInput(GLFWwindow* window, Camera& camera)
 	// Enable/disable the ImGui GUI on key switch
 	if (glfwGetKey(window, interfaceToggleKey) == GLFW_PRESS && guiSwitchKeyPreviousState == GLFW_RELEASE)
 	{
-		imGuiEnabled = !imGuiEnabled;
+		//imGuiEnabled = !imGuiEnabled;
 
 		// If the GUI is enabled, 
 		if (imGuiEnabled)
@@ -463,7 +502,75 @@ bool ImGuiUserInterface::isEnabled()
 
 bool ImGuiUserInterface::isMouseOnGUI()
 {
-	return ImGui::GetIO().WantCaptureMouse;
+	return ImGuizmo::IsOver();
+}
+
+bool ImGuiUserInterface::isMouseOnRenderedScreen()
+{
+	return getMousePosition().x >= 0.0f
+		&& getMousePosition().x < 1.0f
+		&& getMousePosition().y >= 0.0f
+		&& getMousePosition().y < 1.0f;
+}
+
+glm::vec2 ImGuiUserInterface::getMousePosition()
+{
+	return mousePosition;
+}
+
+glm::ivec2 ImGuiUserInterface::getMouseCoordinates()
+{
+	return mouseCoordinates;
+}
+
+glm::ivec2 ImGuiUserInterface::getRenderedScreenSize()
+{
+	return renderedScreenSize;
+}
+
+bool ImGuiUserInterface::isExitOkay()
+{
+	return exitOkay;
+}
+
+void ImGuiUserInterface::requestExit()
+{
+	exitRequested = true;
+}
+
+void ImGuiUserInterface::drawGUI(GLFWwindow* window,
+	SceneManager& sceneManager,
+	Camera& camera,
+	Renderer& renderer,
+	ApplicationRenderMode& applicationRenderMode,
+	ContextMenuSource* contextMenuSource)
+{
+	ImGuiWindowFlags window_flags{ 0 };
+	window_flags |= ImGuiWindowFlags_MenuBar;
+	window_flags |= ImGuiWindowFlags_NoNavInputs;
+	window_flags |= ImGuiWindowFlags_NoNav;
+	//window_flags |= ImGuiWindowFlags_Popup;
+	bool windowOpen{ true };
+
+	// Creating the GUI window
+	ImGui::Begin("Editor", &windowOpen, window_flags);
+
+	// Holds new scene name input
+
+	ImGui::Text("Press TAB to open or close this interface.");
+
+	/*
+	if (ImGui::Button("Render frame"))
+	{
+		renderer.render();
+	}
+	*/
+	if (ImGui::Button("Render frame in blocks"))
+	{
+		renderer.startBlockRender();
+	}
+
+	ImGui::End();
 }
 
 std::string ImGuiUserInterface::formatTime(float time)
@@ -612,6 +719,496 @@ void ImGuiUserInterface::drawHelpMenu()
 	ImGui::EndTabBar();
 }
 
+void ImGuiUserInterface::drawSceneSelector(GLFWwindow* window,
+	SceneManager& sceneManager,
+	Camera& camera,
+	Renderer& renderer,
+	ApplicationRenderMode& applicationRenderMode,
+	ContextMenuSource* contextMenuSource)
+{
+	ImGui::BeginTabBar("scene_edit_tab_bar");
+	ImGui::BeginGroup();
+
+	/*
+	ImGuiTabItemFlags_ objectsFlag{ ImGuiTabItemFlags_None };
+	ImGuiTabItemFlags_ materialsFlag{ ImGuiTabItemFlags_None };
+	ImGuiTabItemFlags_ lightsFlag{ ImGuiTabItemFlags_None };
+
+	// Automatically open correct tab on selection
+	if (newObjectSelected)
+	{
+		std::cout << selectedObjectType << std::endl;
+		switch (selectedObjectType)
+		{
+			// Model or sphere: open the objects tab
+			case 1: // model
+			case 2: // sphere
+				objectsFlag = ImGuiTabItemFlags_SetSelected;
+				break;
+		}
+	}
+	*/
+
+	//if (ImGui::BeginTabItem("Objects", (bool*)0, objectsFlag))
+	if (ImGui::BeginTabItem("Objects"))
+	{
+		drawObjects(sceneManager);
+		ImGui::EndTabItem();
+	}
+
+	if (ImGui::BeginTabItem("Materials"))
+	{
+		drawMaterials(sceneManager.getCurrentScene());
+		ImGui::EndTabItem();
+	}
+
+	if (ImGui::BeginTabItem("Lights"))
+	{
+		drawLights(sceneManager.getCurrentScene());
+		ImGui::EndTabItem();
+	}
+
+	ImGui::EndTabBar();
+	ImGui::EndGroup();
+}
+
+void ImGuiUserInterface::drawSceneEditor(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode, ContextMenuSource* contextMenuSource)
+{
+	// Creating the tab bar
+	ImGui::BeginTabBar("full_tab_bar");
+
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.22f, 0.4f, 0.48f, 0.2f));
+
+	// Tab for editing any scene objects
+	if (ImGui::BeginTabItem("Scene editing"))
+	{
+		if (ImGui::Button("Set HDRI"))
+			ImGui::OpenPopup("##open_hdri_popup");
+
+		static bool updateHDRINames = true;
+
+		ImGui::Text("HDRI");
+		unsigned int previewTextureID{ 0 };
+		unsigned int previewTextureWidth{ 80 };
+		unsigned int previewTextureHeight{ 80 };
+
+		if (sceneManager.getCurrentScene().hasHDRI())
+		{
+			Texture* hdriTexture = sceneManager.getCurrentScene().getHDRI();
+
+			previewTextureID = hdriTexture->previewTextureID;
+			previewTextureWidth = hdriTexture->previewWidth;
+			previewTextureHeight = hdriTexture->previewHeight;
+		}
+
+		if (ImGui::ImageButton((void*)(intptr_t)previewTextureID, ImVec2(previewTextureWidth, previewTextureHeight)))
+		{
+			std::string imagePath = WindowUtility::openImageFileChooseDialog();
+
+			if (imagePath != std::string(""))
+			{
+				sceneManager.getCurrentScene().loadHDRI(imagePath);
+			}
+		}
+
+		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+		{
+			ImGui::OpenPopup("HDRITextureRightClick");
+		}
+
+		if (ImGui::BeginPopup("HDRITextureRightClick"))
+		{
+			if (ImGui::MenuItem("Remove"))
+			{
+				sceneManager.getCurrentScene().removeHDRI();
+			}
+
+			ImGui::EndPopup();
+		}
+
+		/*
+		if (ImGui::BeginPopup("##open_hdri_popup"))
+		{
+			// Stop updating while the popup is open
+			updateHDRINames = false;
+
+			// Showing all possible scene names
+			for (std::string& name : sceneManager.getAvailableHDRINames(updateHDRINames))
+			{
+				// Making a button which loads the scene on click
+				if (ImGui::Button(name.c_str()))
+				{
+					// Setting the HDRI
+					sceneManager.loadHDRI(name);
+
+					// Update next time
+					updateHDRINames = true;
+
+					// Closing the popup
+					ImGui::CloseCurrentPopup();
+					break;
+				}
+			}
+			ImGui::EndPopup();
+		}*/
+
+		ImGui::EndTabItem();
+	}
+
+	// Tap for all settings related to rendering
+	if (ImGui::BeginTabItem("Render settings"))
+	{
+		ImGui::BeginGroup();
+		drawRenderSettings(sceneManager, camera, renderer, applicationRenderMode);
+		ImGui::EndGroup();
+		ImGui::EndTabItem();
+	}
+
+	// Camera settings (speed, fov etc.)
+	if (ImGui::BeginTabItem("Camera settings"))
+	{
+		ImGui::SliderFloat("Move speed", camera.getCameraSpeedPointer(), 0.1f, 10.0f);
+		ImGui::SliderFloat("Sensitivity", camera.getSensitivityPointer(), 0.1f, 5.0f);
+		ImGui::SliderFloat("Field of view", camera.getFovPointer(), 10.0f, 90.0f);
+		ImGui::EndTabItem();
+	}
+	ImGui::PopStyleColor();
+
+	ImGui::EndTabBar();
+}
+
+void ImGuiUserInterface::drawMenuBar(GLFWwindow* window,
+	SceneManager& sceneManager,
+	Camera& camera,
+	Renderer& renderer,
+	ApplicationRenderMode& applicationRenderMode,
+	RasterizedDebugMode& rasterizedDebugMode,
+	ContextMenuSource* contextMenuSource)
+{
+	static bool updateSceneNames{ true };
+
+	static std::string newSceneNameInput{};
+	static bool sceneNameInputError = false;
+	bool openSaveAsPopup{ false };
+
+	// Unselecting all objects: they will be marked as selected as needed later in this function
+	//sceneManager.getCurrentScene().markAllUnselected();
+
+	bool openHelpMenuButtonPressed{ false };
+
+	static std::string renderSaveFileName{ "" };
+	static bool renderSaveFileNameError = false;
+
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("Scene"))
+		{
+			if (ImGui::BeginMenu("Open scene"))
+			{
+				// Showing all possible scene names
+				for (std::string& name : sceneManager.getAvailableScenesNames(updateSceneNames))
+				{
+					// Making a button which loads the scene on click
+					if (ImGui::MenuItem(name.c_str()))
+					{
+						// Loading the scene
+						sceneManager.changeScene(name);
+						break;
+					}
+				}
+
+				updateSceneNames = false;
+
+				ImGui::EndMenu();
+			}
+			else
+			{
+				updateSceneNames = true;
+			}
+
+			if (ImGui::MenuItem("New scene", "CTRL+N"))
+			{
+				sceneManager.newScene();
+			}
+
+			if (ImGui::MenuItem("Save", "CTRL+S"))
+			{
+				// If this scene does not yet have a name, open the save as popup
+				if ((*sceneManager.getCurrentScene().getNamePointer()).empty())
+					openSaveAsPopup = true;
+				else
+					sceneManager.saveChanges();
+			}
+
+			if (ImGui::MenuItem("Save as", "CTRL+SHIFT+S"))
+			{
+				openSaveAsPopup = true;
+			}
+
+			if (ImGui::MenuItem("Revert changes"))
+			{
+				sceneManager.revertChanges();
+			}
+
+			ImGui::EndMenu();
+		}
+
+		// Help menu
+		static bool helpMenuWindowOpen{ false };
+
+		if (ImGui::BeginMenu("Help"))
+		{
+			if (ImGui::MenuItem("Open help"))
+			{
+				std::cout << "menu clicked?" << std::endl;
+				openHelpMenuButtonPressed = true;
+			}
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Render"))
+		{
+			if (ImGui::MenuItem("Render frame"))
+			{
+				renderer.startBlockRender();
+			}
+
+			if (ImGui::MenuItem("Save render"))
+			{
+				ImGui::OpenPopup("##save_render_popup");
+			}
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("View"))
+		{
+			if (ImGui::BeginMenu("Debug view"))
+			{
+				if (ImGui::MenuItem("Disabled", NULL, rasterizedDebugMode == RasterizedDebugMode::REGULAR))
+				{
+					rasterizedDebugMode = RasterizedDebugMode::REGULAR;
+				}
+
+				if (ImGui::MenuItem("Albedo", NULL, rasterizedDebugMode == RasterizedDebugMode::ALBEDO))
+				{
+					rasterizedDebugMode = RasterizedDebugMode::ALBEDO;
+				}
+
+				if (ImGui::MenuItem("Normal", NULL, rasterizedDebugMode == RasterizedDebugMode::NORMALS))
+				{
+					rasterizedDebugMode = RasterizedDebugMode::NORMALS;
+				}
+
+				if (ImGui::MenuItem("UVs", NULL, rasterizedDebugMode == RasterizedDebugMode::UVS))
+				{
+					rasterizedDebugMode = RasterizedDebugMode::UVS;
+				}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("BVH display"))
+			{
+				if (ImGui::MenuItem("Disabled", NULL, renderer.getBVHRenderMode() == BVHRenderMode::DISABLED))
+				{
+					renderer.setBVHRenderMode(BVHRenderMode::DISABLED);
+				}
+
+				if (ImGui::MenuItem("Only leaves", NULL, renderer.getBVHRenderMode() == BVHRenderMode::LEAVES))
+				{
+					renderer.setBVHRenderMode(BVHRenderMode::LEAVES);
+				}
+
+				if (ImGui::MenuItem("All", NULL, renderer.getBVHRenderMode() == BVHRenderMode::ALL))
+				{
+					renderer.setBVHRenderMode(BVHRenderMode::ALL);
+				}
+				/*
+				if (ImGui::BeginMenu("Help"))
+				{
+					ImGui::Text((std::string("How the BVH (Bounding Volume Hierarchy) is drawn. ") +
+						"BVH is a way of structuring a model's triangle data in such a way that " +
+						"not all triangles have to be checked in order to know if a ray collision has occured." +
+						"\n'Disabled' will not draw anything." +
+						"\n'Only leaves' will draw onyl the nodes that contain vertices." +
+						"\n'All' will draw all nodes.").c_str());
+					ImGui::EndMenu();
+				}*/
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMenuBar();
+	}
+
+
+	if (ImGui::BeginPopup("##save_render_popup"))
+	{
+		// Name input field
+		ImGui::InputText("Render name", &renderSaveFileName);
+		if (renderSaveFileNameError)
+			ImGui::Text("Invalid image name. Make sure it does not contain periods ('.'), slashes ('/') or backslashes ('\\'),\n"
+				"and it is not empty.");
+
+		if (ImGui::Button("Save"))
+		{
+			if (FileUtility::isValidInput(renderSaveFileName))
+			{
+				// Saving the render
+				FileUtility::saveRender(renderSaveFileName + ".png", renderer.getWidth(), renderer.getHeight(), renderer.getPixelBuffer());
+
+				// Empty input field
+				renderSaveFileName = {};
+				// Close error
+				renderSaveFileNameError = false;
+				// Then close the popup
+				ImGui::CloseCurrentPopup();
+			}
+			else
+			{
+				// Activating the error
+				renderSaveFileNameError = true;
+			}
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel"))
+		{
+			// Empty input field
+			renderSaveFileName = {};
+			// Close error
+			renderSaveFileNameError = false;
+			// Then close the popup
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+
+	if (openHelpMenuButtonPressed)
+		ImGui::OpenPopup("##help_popup");
+
+	if (ImGui::BeginPopup("##help_popup"))
+	{
+		drawHelpMenu();
+		ImGui::EndPopup();
+	}
+
+	if (openSaveAsPopup)
+		ImGui::OpenPopup("##save_changes_new_popup");
+
+	if (ImGui::BeginPopup("##save_changes_new_popup"))
+	{
+		// Name input field
+		ImGui::InputText("Scene name", &newSceneNameInput);
+
+		if (sceneNameInputError)
+			ImGui::Text("Invalid scene name. Make sure it does not contain periods ('.'), slashes ('/') or backslashes ('\\'),\n"
+				"and it is not empty.");
+
+		if (ImGui::Button("Save"))
+		{
+			if (FileUtility::isValidInput(newSceneNameInput))
+			{
+				if (sceneManager.willSaveOverwrite(newSceneNameInput))
+				{
+					ImGui::OpenPopup("##save_changes_overwrite_popup");
+				}
+				else
+				{
+					sceneManager.saveChangesAs(newSceneNameInput);
+					// Empty input field
+					newSceneNameInput = {};
+					sceneNameInputError = false;
+
+					// Then close the popup
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			else
+			{
+				// Activating the error message
+				sceneNameInputError = true;
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Cancel"))
+		{
+			// Empty input field
+			newSceneNameInput = {};
+			sceneNameInputError = false;
+
+			// Then close the popup
+			ImGui::CloseCurrentPopup();
+		}
+
+		// Indicates whether the 'save as' popup should be closed by an action of the 
+		bool closeSaveSceneAsPopupAfterOverwritePopup{ false };
+
+		// Popup to ask whether you want to overwrite a scene
+		if (ImGui::BeginPopup("##save_changes_overwrite_popup"))
+		{
+			ImGui::Text(("Saving the scene with the name '" + newSceneNameInput
+				+ "' will overwrite the scene with the same name.").c_str());
+			ImGui::Text("Are you sure you want to overwrite this scene?");
+
+			if (ImGui::Button("Save anyway"))
+			{
+				sceneManager.saveChangesAs(newSceneNameInput);
+
+				// Empty input field
+				newSceneNameInput = {};
+
+				// Then close the popup
+				sceneNameInputError = false;
+				closeSaveSceneAsPopupAfterOverwritePopup = true;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel"))
+			{
+				// Then close the popup
+				sceneNameInputError = false;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		if (closeSaveSceneAsPopupAfterOverwritePopup)
+			ImGui::CloseCurrentPopup();
+
+		ImGui::EndPopup();
+	}
+
+	if (exitRequested)
+	{
+		if (sceneManager.hasUnsavedChanges())
+		{
+			ImGui::OpenPopup("##exit_with_unsaved_changes_popup");
+		}
+		else
+		{
+			// Tell the application to exit
+			exitOkay = true;
+		}
+	}
+
+	drawExitWithUnsavedChangesPrompt(
+		window,
+		sceneManager,
+		camera,
+		renderer,
+		applicationRenderMode,
+		rasterizedDebugMode,
+		contextMenuSource
+	);
+}
+
 void ImGuiUserInterface::drawMaterials(Scene& scene)
 {
 	ImGui::PushItemWidth(-1);
@@ -655,14 +1252,14 @@ void ImGuiUserInterface::drawMaterial(Material& material, Scene& scene, unsigned
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		scene.markSelected(ObjectType::MATERIAL, index);
+		scene.markSelected(material.getID());
 
 	// Drawing the 'delete' button
 	if (ImGui::BeginPopupContextItem())
 	{
 		if (ImGui::Button("Delete"))
 		{
-			scene.deleteMaterial(index);
+			scene.deleteMaterial(material.getID());
 		}
 		ImGui::EndPopup();
 	}
@@ -710,12 +1307,12 @@ void ImGuiUserInterface::drawLights(Scene& scene)
 		ImGui::Separator();
 		if (ImGui::Selectable("Point light"))
 		{
-			PointLight light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+			PointLight light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f);
 			scene.addLight(light);
 		}
 		if (ImGui::Selectable("Directional light"))
 		{
-			DirectionalLight light(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+			DirectionalLight light(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f);
 			scene.addLight(light);
 		}
 		if (ImGui::Selectable("Ambient light"))
@@ -740,13 +1337,13 @@ void ImGuiUserInterface::drawLight(PointLight& light, Scene& scene, unsigned int
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		scene.markSelected(ObjectType::POINT_LIGHT, index);
+		scene.markSelected(light.getID());
 
 	if (ImGui::BeginPopupContextItem())
 	{
 		if (ImGui::Button("Delete"))
 		{
-			scene.deletePointLight(index);
+			scene.deletePointLight(light.getID());
 		}
 		ImGui::EndPopup();
 	}
@@ -763,13 +1360,13 @@ void ImGuiUserInterface::drawLight(DirectionalLight& light, Scene& scene, unsign
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		scene.markSelected(ObjectType::DIRECTIONAL_LIGHT, index);
+		scene.markSelected(light.getID());
 
 	if (ImGui::BeginPopupContextItem())
 	{
 		if (ImGui::Button("Delete"))
 		{
-			scene.deleteDirectionalLight(index);
+			scene.deleteDirectionalLight(light.getID());
 		}
 		ImGui::EndPopup();
 	}
@@ -786,15 +1383,54 @@ void ImGuiUserInterface::drawLight(AmbientLight& light, Scene& scene, unsigned i
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		scene.markSelected(ObjectType::AMBIENT_LIGHT, index);
+		scene.markSelected(light.getID());
 
 	if (ImGui::BeginPopupContextItem())
 	{
 		if (ImGui::Button("Delete"))
 		{
-			scene.deleteAmbientLight(index);
+			scene.deleteAmbientLight(light.getID());
 		}
 		ImGui::EndPopup();
+	}
+}
+
+void ImGuiUserInterface::drawExitWithUnsavedChangesPrompt(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode, RasterizedDebugMode& rasterizedDebugMode, ContextMenuSource* contextMenuSource)
+{
+	ImGui::SetNextWindowPos(ImVec2((ImGui::GetIO().DisplaySize.x - 200) * 0.5f, (ImGui::GetIO().DisplaySize.y - 100) * 0.5f));
+
+	if (ImGui::BeginPopup("##exit_with_unsaved_changes_popup"))
+	{
+		ImGui::Text("Save changes before closing?");
+		ImGui::NewLine();
+
+		if (ImGui::Button("Save"))
+		{
+			// Save and then exit
+			sceneManager.saveChanges();
+			exitOkay = true;
+		}
+
+		ImGui::SameLine();
+		ImGui::Text(" ");
+		ImGui::SameLine();
+
+		if (ImGui::Button("Don't save"))
+		{
+			// Just exit
+			exitOkay = true;
+		}
+
+		ImGui::SameLine();
+		ImGui::Text(" ");
+		ImGui::SameLine();
+
+		if (ImGui::Button("Cancel"))
+		{
+			// No more exit is requested and close this popup
+			exitRequested = false;
+			ImGui::CloseCurrentPopup();
+		}
 	}
 }
 
@@ -896,13 +1532,13 @@ void ImGuiUserInterface::drawObject(Model& object, Scene& scene, unsigned int in
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		scene.markSelected(ObjectType::MODEL, index);
+		scene.markSelected(object.getID());
 
 	if (ImGui::BeginPopupContextItem())
 	{
 		if (ImGui::Button("Delete"))
 		{
-			scene.deleteModel(index);
+			scene.deleteModel(object.getID());
 		}
 		ImGui::EndPopup();
 	}
@@ -941,8 +1577,6 @@ void ImGuiUserInterface::drawMesh(Mesh& object, Scene& scene, const char* materi
 	}
 }
 
-
-
 void ImGuiUserInterface::drawObject(Sphere& object, Scene& scene, unsigned int index, const char* materialSlotsCharArray)
 {
 	// Get the object's name, then add a constant ID so that the 
@@ -954,13 +1588,13 @@ void ImGuiUserInterface::drawObject(Sphere& object, Scene& scene, unsigned int i
 	};
 
 	if (ImGui::Button(popupID.c_str()))
-		scene.markSelected(ObjectType::SPHERE, index);
+		scene.markSelected(object.getID());
 
 	if (ImGui::BeginPopupContextItem())
 	{
 		if (ImGui::Button("Delete"))
 		{
-			scene.deleteSphere(index);
+			scene.deleteSphere(object.getID());
 		}
 		ImGui::EndPopup();
 	}

@@ -2,20 +2,20 @@
 
 #include "Light.h"
 
-#include "../AbstractShader.h"
+#include "../shaders/AbstractShader.h"
 
 class DirectionalLight : public Light
 {
 public:
 	DirectionalLight();
-	DirectionalLight(std::string& name, glm::vec3 direction, glm::vec3 color, float intensity);
-	DirectionalLight(glm::vec3 direction, glm::vec3 color, float intensity);
+	DirectionalLight(std::string& name, glm::vec3 direction, glm::vec3 color, float intensity, float shadowSoftness);
+	DirectionalLight(glm::vec3 direction, glm::vec3 color, float intensity, float shadowSoftness);
 	~DirectionalLight();
 
-	virtual void drawInterface(Scene& scene);
+	virtual bool drawInterface(Scene& scene);
 
 	// Write this light to the given filestream
-	virtual void writeDataToStream(std::ofstream& filestream);
+	void writeDataToStream(std::ofstream& filestream) override;
 
 	// Write all the data of this directional light into the given shader
 	virtual bool writeToShader(AbstractShader* shader, bool useGlslCoordinates);

@@ -6,21 +6,33 @@ Model::Model(std::string& name, std::vector<unsigned int>& meshMaterialIndices,
 	const std::string& path, unsigned int* meshCount, unsigned int* triangleCount,
 	unsigned int MAX_MESH_COUNT)
 	: path(path)
+	, Object()
+	, ContextMenuSource()
 {
 	this->name = name;
 
+	// Checking how many triangles this model adds
+	unsigned int triangleCountBefore{ *triangleCount };
 	loadModel(path, meshMaterialIndices, meshCount, triangleCount, MAX_MESH_COUNT);
+	unsigned int triangleCountAfter{ *triangleCount };
+
+	this->triangleCount = triangleCountAfter - triangleCountBefore;
+
+	setType(MODEL);
 }
 
 Model::Model(unsigned int meshMaterialIndex,
 	const std::string& path, unsigned int* meshCount, unsigned int* triangleCount,
 	unsigned int MAX_MESH_COUNT)
 	: path(path)
+	, Object()
+	, ContextMenuSource()
 {
 	// Automatically setting name based on model name
 	this->name = path.substr(path.find_last_of('/') + 1, path.find_last_of('.') - (path.find_last_of('/') + 1));
 
 	loadModel(path, meshMaterialIndex, meshCount, triangleCount, MAX_MESH_COUNT);
+	setType(MODEL);
 }
 
 Model::~Model()
@@ -41,22 +53,36 @@ void Model::writeDataToStream(std::ofstream& filestream)
 	{
 		filestream << *mesh.getMaterialIndexPointer() << "\n";
 	}
+
+	filestream << meshes.size() << "\n";
+	for (Mesh& mesh : meshes)
+	{
+		mesh.writeDataToStream(filestream);
+	}
 }
 
-void Model::draw(AbstractShader* shader, Scene* scene)
+void Model::prepareForDraw(AbstractShader* shader)
 {
 	// Setting transformations
 	shader->setMat4("model", getTransformationMatrix());
 	shader->setMat4("rotation", getRotationMatrix());
+}
+
+void Model::draw(AbstractShader* shader, Scene* scene)
+{
+	prepareForDraw(shader);
 
 	// Drawing each mesh
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
-		meshes[i].draw(shader, scene);
+		shader->setInt("objectID", meshes[i].getID());
+
+		glm::mat4 transformation{ this->getTransformationMatrix() };
+		meshes[i].draw(shader, scene, transformation);
 	}
 }
 
-void Model::drawInterface(Scene& scene)
+bool Model::drawInterface(Scene& scene)
 {
 	bool anyPropertiesChanged{ false };
 
@@ -85,6 +111,13 @@ void Model::drawInterface(Scene& scene)
 	{
 		clearShaderWrittenTo();
 	}
+
+	if (anyPropertiesChanged)
+	{
+		markUnsavedChanges();
+	}
+
+	return anyPropertiesChanged;
 }
 
 bool Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
@@ -94,9 +127,11 @@ bool Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
 		return false;
 	}
 
+	std::cout << "m " << getPosition().x << ", " << getPosition().y << ", " << getPosition().z << std::endl;
+
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
-		meshes[i].writeToShader(shader, ssbo, getTransformationMatrix());
+		meshes[i].writeToShader(shader, ssbo, getTransformationMatrix() * meshes[i].getTransformationMatrix());
 	}
 
 	markShaderAsWrittenTo(shader);
@@ -110,6 +145,34 @@ void Model::onDeleteMaterial(unsigned int index)
 	for (Mesh& mesh : meshes)
 	{
 		mesh.onDeleteMaterial(index);
+	}
+}
+
+void Model::renderContextMenuItems(Scene& scene)
+{
+	// Draw some text
+	ImGui::Text((getName()).c_str());
+
+	// Add a separator line
+	ImGui::Separator();
+
+	if (ImGui::MenuItem("Delete"))
+	{
+		// TODO when delete is called, the click may still select one of its meshes, which causes an error
+		scene.deleteModel(this->getID());
+	}
+	if (ImGui::MenuItem("Option 2"))
+	{
+		// Handle option 2 selection
+	}
+}
+
+void Model::updateChildPointers()
+{
+	// Updating each submesh
+	for (Mesh& mesh : meshes)
+	{
+		mesh.setModel(this);
 	}
 }
 
@@ -137,9 +200,25 @@ bool Model::isVertexDataChanged()
 	return vertexDataChanged;
 }
 
-void Model::setVertexDataChanged(bool newValue)
+void Model::setVertexDataChanged(bool newValue, bool alsoSetMeshes)
 {
 	vertexDataChanged = newValue;
+
+	if (!vertexDataChanged)
+	{
+		return;
+	}
+
+	if (!alsoSetMeshes)
+	{
+		return;
+	}
+
+	// If this model changed, all submeshes must have also changed
+	for (Mesh& mesh : meshes)
+	{
+		mesh.setVertexDataChanged(true);
+	}
 }
 
 void Model::loadModel(std::string path, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT)
@@ -174,6 +253,19 @@ void Model::loadModel(std::string path, unsigned int meshMaterialIndex, unsigned
 	directory = path.substr(0, path.find_last_of('/'));
 
 	processNode(scene->mRootNode, scene, meshMaterialIndex, meshCount, triangleCount, MAX_MESH_COUNT);
+}
+
+float Model::getAppropriateCameraFocusDistance()
+{
+	// TODO make this implementation more precise
+	float maxDistance{ 0.0f };
+
+	for (Mesh& mesh : meshes)
+	{
+		maxDistance = glm::max(maxDistance, mesh.getAppropriateCameraFocusDistance());
+	}
+
+	return maxDistance;
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* meshIndex, unsigned int* triangleCount,
@@ -234,6 +326,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCou
 	int beginTriangleCount = *triangleCount;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
+	glm::vec4 meshPositionVec4{ glm::vec4(0.0f) };
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
@@ -250,7 +343,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCou
 
 		// Putting the new vertex into the vertices vector
 		vertices.push_back(vertex);
+
+		// Calculating the average vertex position
+		meshPositionVec4 += vertex.position;
 	}
+
+	glm::vec3 meshPosition{ glm::vec3(meshPositionVec4.x, meshPositionVec4.y, meshPositionVec4.z) / (float)mesh->mNumVertices };
 
 	// Getting indices
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -270,7 +368,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCou
 
 	std::string meshName{ mesh->mName.C_Str() };
 
-	return Mesh(meshName, vertices, indices, beginTriangleCount, meshCount, mesh->mMaterialIndex);
+	return Mesh(meshName, vertices, indices, meshPosition, beginTriangleCount, meshCount, mesh->mMaterialIndex, this->getID(), this);
 }
 
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materialIndex, unsigned int meshCount, unsigned int* triangleCount)
@@ -278,6 +376,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 	int beginTriangleCount = *triangleCount;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
+	glm::vec4 meshPositionVec4{ glm::vec4(0.0f) };
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
@@ -292,8 +391,34 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 			vertex.normal = aiVector3DToGLMVec4(mesh->mNormals[i]);
 		}
 
+		if (mesh->HasTextureCoords(0))
+		{
+			vertex.uv = aiVector3DToGLMVec4(mesh->mTextureCoords[0][i]);
+			//std::cout << "uv " << vertex.uv.x << ", " << vertex.uv.y << ", " << vertex.uv.z << std::endl;
+		}
+		else
+		{
+			vertex.uv = glm::vec4(0.0f);
+		}
+
 		// Putting the new vertex into the vertices vector
 		vertices.push_back(vertex);
+
+		// Calculating the average vertex position
+		meshPositionVec4 += vertex.position;
+	}
+
+	glm::vec3 meshPosition{ glm::vec3(meshPositionVec4.x, meshPositionVec4.y, meshPositionVec4.z) / (float)mesh->mNumVertices };
+
+	std::vector<glm::vec4> tangents;
+	std::vector<glm::vec4> bitangents;
+	std::vector<int> bi_ti_samplesPerVertex;
+
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+	{
+		tangents.push_back(glm::vec4(0.0f));
+		bitangents.push_back(glm::vec4(0.0f));
+		bi_ti_samplesPerVertex.push_back(0);
 	}
 
 	// Getting indices
@@ -312,6 +437,28 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 			}
 
 			// Another triangle has been added
+
+			// Calculating the tangent and bitangent vectors for each vertex
+			calculateTangentBitangent(
+				vertices,
+				face.mIndices[0], face.mIndices[1], face.mIndices[2], 
+				tangents, bitangents,
+				bi_ti_samplesPerVertex
+			);
+
+			calculateTangentBitangent(
+				vertices,
+				face.mIndices[1], face.mIndices[2], face.mIndices[0],
+				tangents, bitangents,
+				bi_ti_samplesPerVertex
+			);
+
+			calculateTangentBitangent(
+				vertices,
+				face.mIndices[2], face.mIndices[0], face.mIndices[1],
+				tangents, bitangents,
+				bi_ti_samplesPerVertex
+			);
 
 			// This variable is used to generate start indices for mesh's triangles
 			(*triangleCount)++;
@@ -341,15 +488,69 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 		}
 	}
 
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+	{
+		if (bi_ti_samplesPerVertex[i] == 0)
+		{
+			continue;
+		}
+
+		// There is at least one tangent/bitangent: take the average
+		vertices[i].tangent = tangents[i] / (float)bi_ti_samplesPerVertex[i];
+		vertices[i].bitangent = bitangents[i] / (float)bi_ti_samplesPerVertex[i];
+		//std::cout << "tangent vertex " << i << ": " << vertices[i].tangent.x << ", " << vertices[i].tangent.y << ", " << vertices[i].tangent.z << std::endl;
+		//std::cout << "bitangent vertex " << i << ": " << vertices[i].bitangent.x << ", " << vertices[i].bitangent.y << ", " << vertices[i].bitangent.z << std::endl;
+	}
+
 	std::string meshName{ mesh->mName.C_Str() };
 
-	return Mesh(meshName, vertices, indices, beginTriangleCount, meshCount, materialIndex);
+	return Mesh(meshName, vertices, indices, meshPosition, beginTriangleCount, meshCount, materialIndex, this->getID(), this);
 }
 
 
 glm::vec4 Model::aiVector3DToGLMVec4(aiVector3D v)
 {
 	return glm::vec4(v.x, v.y, v.z, 1.0f);
+}
+
+void Model::calculateTangentBitangent(std::vector<Vertex>& vertices,
+	unsigned int index1, unsigned int index2, unsigned int index3,
+	std::vector<glm::vec4>& tangents,
+	std::vector<glm::vec4>& bitangents,
+	std::vector<int>& bi_ti_samplesPerVertex)
+{
+	Vertex& v1 = vertices[index1];
+	Vertex& v2 = vertices[index2];
+	Vertex& v3 = vertices[index3];
+
+	// Calculate the edge vectors for the triangle
+	glm::vec3 edge1 = glm::vec3(v2.position) - glm::vec3(v1.position);
+	glm::vec3 edge2 = glm::vec3(v3.position) - glm::vec3(v1.position);
+
+	// Calculate the difference in UV coordinates
+	glm::vec2 deltaUV1 = glm::vec2(v2.uv) - glm::vec2(v1.uv);
+	glm::vec2 deltaUV2 = glm::vec2(v3.uv) - glm::vec2(v1.uv);
+
+	// Calculate the tangent and bitangent
+	glm::vec4 tangent, bitangent;
+
+	float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+	tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+	tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+	tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+	tangent.w = 0.0f;
+	tangent = glm::normalize(tangent);
+
+	bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+	bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+	bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+	bitangent.w = 0.0f;
+	bitangent = glm::normalize(bitangent);
+
+	tangents[index1] += tangent;
+	bitangents[index1] += bitangent;
+	bi_ti_samplesPerVertex[index1]++;
 }
 
 std::ostream& operator<<(std::ostream& stream, const Model& model)
@@ -382,4 +583,9 @@ BVHNode* Model::getRootNode()
 		setVertexDataChanged(false);
 	}
 	return bvhRootNode;
+}
+
+unsigned int Model::getTriangleCount()
+{
+	return triangleCount;
 }

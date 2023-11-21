@@ -1,0 +1,77 @@
+hdri_default.png
+# Materials
+White
+0.8 0.8 0.8
+0
+0
+0
+0
+1 1 1
+0
+0
+
+Red
+0.8 0.2 0.298039
+0
+0
+0
+0
+1 1 1
+0
+0
+
+reflective
+0.8 0.8 0.8
+1
+0
+0
+0
+1 1 1
+0
+0
+# Materials end
+
+# Spheres
+# Spheres end
+
+# Models
+plane
+0 0 0
+0 0 0
+1 1 1
+src/models/plane.obj
+1
+1
+
+crate
+0 0 0
+0 0 0
+1 1 1
+src/models/crate.obj
+1
+2
+# Models end
+
+# Point lights
+# Point lights end
+
+# Directional lights
+Directional light
+1 1 1
+1
+1 -1 -0.2
+0
+# Directional lights end
+
+# Ambient lights
+# Ambient lights end
+
+# Cameras
+0.583965 0.608671 0.656612
+-29.7001
+1314.86
+1
+39.333
+1.844
+# Cameras end
+

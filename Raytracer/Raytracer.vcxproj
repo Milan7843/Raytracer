@@ -19,9 +19,25 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\GraphEditor.cpp" />
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImCurveEdit.cpp" />
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGradient.cpp" />
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGuizmo.cpp" />
+    <ClCompile Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImSequencer.cpp" />
+    <ClCompile Include="src\Random.cpp" />
+    <ClCompile Include="src\file_handling\Cache.cpp" />
+    <ClCompile Include="src\gui\GizmoRenderer.cpp" />
+    <ClCompile Include="src\ImageLoader.cpp" />
+    <ClCompile Include="src\Maths.cpp" />
+    <ClCompile Include="src\InputManager.cpp" />
+    <ClCompile Include="src\gui\ContextMenuSource.cpp" />
+    <ClCompile Include="src\Shaders\ComputeShaderInterface.cpp" />
+    <ClCompile Include="src\Shaders\ComputeShaderInterface.h" />
+    <ClCompile Include="src\shaders\MultiComputeShader.cpp" />
     <ClCompile Include="src\BVH\BVHNode.cpp" />
     <ClCompile Include="src\BVH\BVH.cpp" />
     <ClCompile Include="src\BVH\BVHHandler.cpp" />
+    <ClCompile Include="src\shaders\ShaderInterface.cpp" />
     <ClCompile Include="src\ShaderWritable.cpp" />
     <ClCompile Include="src\Render processes\BlockRenderProcess.cpp" />
     <ClCompile Include="src\Render processes\RealtimeRenderProcess.cpp" />
@@ -46,8 +62,8 @@
     <ClCompile Include="include\imgui\imgui_stdlib.cpp" />
     <ClCompile Include="include\imgui\imgui_tables.cpp" />
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\AbstractShader.cpp" />
-    <ClCompile Include="src\ComputeShader.cpp" />
+    <ClCompile Include="src\shaders\AbstractShader.cpp" />
+    <ClCompile Include="src\shaders\ComputeShader.cpp" />
     <ClCompile Include="src\ImGuiUserInterface.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Application.cpp" />
@@ -62,10 +78,28 @@
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\Object.cpp" />
     <ClCompile Include="src\Scene.cpp" />
-    <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\shaders\Shader.cpp" />
     <ClCompile Include="src\Sphere.cpp" />
+    <ClCompile Include="src\TextureHandler.cpp" />
+    <ClCompile Include="src\WindowUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\GraphEditor.h" />
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImCurveEdit.h" />
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGradient.h" />
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImGuizmo.h" />
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImSequencer.h" />
+    <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\ImZoomSlider.h" />
+    <ClInclude Include="src\Random.h" />
+    <ClInclude Include="src\file_handling\Cache.h" />
+    <ClInclude Include="src\gui\GizmoRenderer.h" />
+    <ClInclude Include="src\ImageLoader.h" />
+    <ClInclude Include="src\Maths.h" />
+    <ClInclude Include="src\InputManager.h" />
+    <ClInclude Include="src\gui\ContextMenuSource.h" />
+    <ClInclude Include="src\RasterizedDebugMode.h" />
+    <ClInclude Include="src\shaders\ShaderInterface.h" />
+    <ClInclude Include="src\shaders\MultiComputeShader.h" />
     <ClInclude Include="src\BVH\BVHNode.h" />
     <ClInclude Include="src\BVH\BVH.h" />
     <ClInclude Include="src\BVH\BVHHandler.h" />
@@ -458,8 +492,8 @@
     <ClInclude Include="include\imgui\imstb_textedit.h" />
     <ClInclude Include="include\imgui\imstb_truetype.h" />
     <ClInclude Include="include\KHR\khrplatform.h" />
-    <ClInclude Include="src\AbstractShader.h" />
-    <ClInclude Include="src\ComputeShader.h" />
+    <ClInclude Include="src\shaders\AbstractShader.h" />
+    <ClInclude Include="src\shaders\ComputeShader.h" />
     <ClInclude Include="src\CoordinateUtility.h" />
     <ClInclude Include="src\ImGuiUserInterface.h" />
     <ClInclude Include="src\Renderer.h" />
@@ -473,10 +507,12 @@
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\Object.h" />
     <ClInclude Include="src\Scene.h" />
-    <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\shaders\Shader.h" />
     <ClInclude Include="src\Sphere.h" />
     <ClInclude Include="src\stb_image.h" />
     <ClInclude Include="src\stb_image_write.h" />
+    <ClInclude Include="src\TextureHandler.h" />
+    <ClInclude Include="src\WindowUtility.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc142-mtd.dll" />
@@ -624,32 +660,42 @@
     <None Include="include\glm\gtx\vector_angle.inl" />
     <None Include="include\glm\gtx\vector_query.inl" />
     <None Include="include\glm\gtx\wrap.inl" />
-    <None Include="src\Shaders\backup.shader" />
-    <None Include="src\Shaders\blurComputeShader.shader" />
-    <None Include="src\Shaders\bufferedIndirectLightingRaytracingFragmentShader.shader" />
-    <None Include="src\Shaders\bufferedRaytracingFragmentShader.shader" />
-    <None Include="src\Shaders\BVH visualisation\bvhVisualisationFragment.shader" />
-    <None Include="src\Shaders\BVH visualisation\bvhVisualisationGeometry.shader" />
-    <None Include="src\Shaders\BVH visualisation\bvhVisualisationVertex.shader" />
-    <None Include="src\Shaders\hdriFragment.shader" />
-    <None Include="src\Shaders\hdriVertex.shader" />
-    <None Include="src\Shaders\objectClickColoringShader.shader" />
-    <None Include="src\Shaders\outlineRenderToTextureFragment.shader" />
-    <None Include="src\Shaders\rasterizedView.shader" />
-    <None Include="src\Shaders\raymarchFragmentShader.shader" />
-    <None Include="src\Shaders\raymarchFragmentShaderBackup.shader" />
-    <None Include="src\Shaders\raymarchVertexShader.shader" />
-    <None Include="src\Shaders\raytraceComputeShaderSampled.shader" />
-    <None Include="src\Shaders\raytraceComputeShaderSampledUpdated.shader" />
-    <None Include="src\Shaders\raytracingFragmentShader.shader" />
-    <None Include="src\Shaders\screenTextureFragment.shader" />
-    <None Include="src\Shaders\solidColorFragmentShader.shader" />
-    <None Include="src\Shaders\solidColorVertexShader.shader" />
-    <None Include="src\Shaders\textureFragmentShader.shader" />
-    <None Include="src\Shaders\textureVertexShader.shader" />
-    <None Include="src\Shaders\ubobackup.shader" />
-    <None Include="src\Shaders\uvColorFragmentShader.shader" />
-    <None Include="src\Shaders\uvColorVertexShader.shader" />
+    <None Include="src\shader_src\backup.shader" />
+    <None Include="src\shader_src\blurComputeShader.shader" />
+    <None Include="src\shader_src\bufferedIndirectLightingRaytracingFragmentShader.shader" />
+    <None Include="src\shader_src\bufferedRaytracingFragmentShader.shader" />
+    <None Include="src\shader_src\BVH visualisation\bvhVisualisationFragment.shader" />
+    <None Include="src\shader_src\BVH visualisation\bvhVisualisationGeometry.shader" />
+    <None Include="src\shader_src\BVH visualisation\bvhVisualisationVertex.shader" />
+    <None Include="src\shader_src\denoise.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectFragment.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectGeometry.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectVertex.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoFragment.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoGeometry.shader" />
+    <None Include="src\shader_src\gizmo_shaders\gizmoVertex.shader" />
+    <None Include="src\shader_src\hdriFragment.shader" />
+    <None Include="src\shader_src\hdriVertex.shader" />
+    <None Include="src\shader_src\indirectLightingCalculation.shader" />
+    <None Include="src\shader_src\objectClickColoringShader.shader" />
+    <None Include="src\shader_src\outlineRenderToTextureFragment.shader" />
+    <None Include="src\shader_src\rasterizedView.shader" />
+    <None Include="src\shader_src\raymarchFragmentShader.shader" />
+    <None Include="src\shader_src\raymarchFragmentShaderBackup.shader" />
+    <None Include="src\shader_src\raymarchVertexShader.shader" />
+    <None Include="src\shader_src\raytraceComputeShaderProbabilistic.shader" />
+    <None Include="src\shader_src\raytraceComputeShaderSampled.shader" />
+    <None Include="src\shader_src\raytraceComputeShaderSampledUpdated.shader" />
+    <None Include="src\shader_src\raytraceComputeShaderSampledUpdatedBackup.shader" />
+    <None Include="src\shader_src\raytracingFragmentShader.shader" />
+    <None Include="src\shader_src\screenTextureFragment.shader" />
+    <None Include="src\shader_src\solidColorFragmentShader.shader" />
+    <None Include="src\shader_src\solidColorVertexShader.shader" />
+    <None Include="src\shader_src\textureFragmentShader.shader" />
+    <None Include="src\shader_src\textureVertexShader.shader" />
+    <None Include="src\shader_src\ubobackup.shader" />
+    <None Include="src\shader_src\uvColorFragmentShader.shader" />
+    <None Include="src\shader_src\uvColorVertexShader.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />
@@ -717,12 +763,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)/src;$(ProjectDir)/src/file_handling;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)/include</IncludePath>
+    <IncludePath>$(ProjectDir)/include/imgui;$(ProjectDir)/src;$(ProjectDir)/src/file_handling;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)/include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)/libs</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)/src;$(ProjectDir)/src/file_handling;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)/include</IncludePath>
+    <IncludePath>$(ProjectDir)/include/imgui;$(ProjectDir)/src;$(ProjectDir)/src/file_handling;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)/include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)/libs</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

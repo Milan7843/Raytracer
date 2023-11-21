@@ -43,8 +43,17 @@ Scene SceneFileSaver::readSceneFromFile(const std::string& fileName, bool* succe
 
 	// String buffer for file data
 	std::string buffer;
+	bool hasHDRI;
+	filestream >> hasHDRI;
+
+	// Moving to the next line 
 	std::getline(filestream, buffer);
-	scene.loadHDRI(buffer);
+
+	// Reading the HDRI path
+	std::getline(filestream, buffer);
+	if (hasHDRI)
+		scene.loadHDRI(buffer);
+
 	std::getline(filestream, buffer);
 
 	// Loading all important scene data
@@ -82,6 +91,7 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 {
 	// String buffer for any full-line reading
 	std::string buffer;
+	std::string name;
 
 	while (filestream)
 	{
@@ -94,7 +104,7 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		}
 
 		// Getting the material's name
-		std::getline(filestream, buffer);
+		std::getline(filestream, name);
 
 		// Defining all other data
 		glm::vec3 color;
@@ -104,6 +114,12 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		float reflectionDiffusion;
 		glm::vec3 emission;
 		float emissionStrength;
+		float fresnelReflectionStrength;
+		bool hasAlbedoTexture;
+		std::string albedoTexturePath;
+		bool hasNormalTexture;
+		std::string normalTexturePath;
+		float normalTextureStrength;
 
 		// Then getting said data
 		color = readVec3(filestream);
@@ -113,14 +129,48 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		filestream >> reflectionDiffusion;
 		emission = readVec3(filestream);
 		filestream >> emissionStrength;
+		filestream >> fresnelReflectionStrength;
+
+		filestream >> hasAlbedoTexture;
+		if (hasAlbedoTexture)
+		{
+			std::getline(filestream, buffer);
+			std::getline(filestream, albedoTexturePath);
+		}
+
+		filestream >> hasNormalTexture;
+		if (hasNormalTexture)
+		{
+			std::getline(filestream, buffer);
+			std::getline(filestream, normalTexturePath);
+		}
+		filestream >> normalTextureStrength;
+
+		/*
+		std::cout << "albedo map ? " << hasAlbedoTexture << ": " << albedoTexturePath << std::endl;
+		std::cout << "normal map ? " << hasNormalTexture << ": " << normalTexturePath << std::endl;
+		*/
 
 		// Creating the material with the read properties
-		Material material(buffer, color, reflectiveness, transparency, refractiveness, reflectionDiffusion, emission, emissionStrength);
+		Material material(name, color, reflectiveness, transparency, refractiveness, reflectionDiffusion, emission, emissionStrength, fresnelReflectionStrength);
+
+		if (hasAlbedoTexture)
+			material.setAlbedoTexture(albedoTexturePath, false);
+
+		if (hasNormalTexture)
+			material.setNormalTexture(normalTexturePath, false);
+
+		material.setNormalMapStrength(normalTextureStrength);
+		
+		//material.setNormalTexture("src/Textures/normal_map_test_2.png", false);
+		
 
 		// And adding the material to the scene
 		scene.addMaterial(material);
 
 		// Skipping two lines
+		// due to the fact that if the last data collection was already a getline, this one doubles
+		//if (!hasNormalTexture)
 		std::getline(filestream, buffer);
 		std::getline(filestream, buffer);
 	}
@@ -246,6 +296,35 @@ void readModels(std::ifstream& filestream, Scene& scene)
 		model->setRotation(rotation);
 		model->scale(scale);
 
+		// Reading all material indices for the submeshes
+		filestream >> numberOfSubmeshes;
+
+		// Reading each mesh properties
+		for (unsigned int i = 0; i < numberOfSubmeshes; i++)
+		{
+			// Retrieving the mesh data into 
+			std::string meshName;
+			glm::vec3 meshPosition;
+			glm::vec3 meshRotation;
+			glm::vec3 meshScale;
+
+			// Skip a line then get the name and other properties
+			std::getline(filestream, meshName);
+			std::getline(filestream, meshName);
+			meshPosition = readVec3(filestream);
+			meshRotation = readVec3(filestream);
+			meshScale = readVec3(filestream);
+
+			model->getMeshes()[i].move(meshPosition);
+			model->getMeshes()[i].rotate(meshRotation);
+			model->getMeshes()[i].scale(meshScale);
+
+			std::cout << "read nam " << (i+1) << " " << meshName << std::endl;
+			std::cout << "read pos " << (i+1) << " " << meshPosition.x << ", " << meshPosition.y << ", " << meshPosition.z << std::endl;
+			std::cout << "read rot " << (i+1) << " " << meshRotation.x << ", " << meshRotation.y << ", " << meshRotation.z << std::endl;
+			std::cout << "read scl " << (i+1) << " " << meshScale.x << ", " << meshScale.y << ", " << meshScale.z << std::endl;
+		}
+
 		// Skipping two lines
 		std::getline(filestream, buffer);
 	}
@@ -286,14 +365,16 @@ void readPointLights(std::ifstream& filestream, Scene& scene)
 		glm::vec3 color;
 		float intensity;
 		glm::vec3 position;
+		float shadowSoftness;
 
 		// Then getting said data
 		color = readVec3(filestream);
 		filestream >> intensity;
 		position = readVec3(filestream);
+		filestream >> shadowSoftness;
 
 		// Creating the light with the read properties
-		PointLight light(name, position, color, intensity);
+		PointLight light(name, position, color, intensity, shadowSoftness);
 		scene.addLight(light);
 
 		// Skipping a line
@@ -336,14 +417,16 @@ void readDirectionalLights(std::ifstream& filestream, Scene& scene)
 		glm::vec3 color;
 		float intensity;
 		glm::vec3 direction;
+		float shadowSoftness;
 
 		// Then getting said data
 		color = readVec3(filestream);
 		filestream >> intensity;
 		direction = readVec3(filestream);
+		filestream >> shadowSoftness;
 
 		// Creating the light with the read properties
-		DirectionalLight light(name, direction, color, intensity);
+		DirectionalLight light(name, direction, color, intensity, shadowSoftness);
 		scene.addLight(light);
 
 		// Skipping a line

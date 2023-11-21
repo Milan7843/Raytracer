@@ -1,22 +1,29 @@
 #include "OutlineRenderer.h"
 
 OutlineRenderer::OutlineRenderer(unsigned int width, unsigned int height, unsigned int screenQuadVAO)
-	: width(width)
-	, height(height)
-	, screenQuadVAO(screenQuadVAO)
-	, blurRenderShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/screenTextureFragment.shader")
-	, objectRenderShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/outlineRenderToTextureFragment.shader")
-	, textureBlurrerShader("src/Shaders/blurComputeShader.shader")
+	: screenQuadVAO(screenQuadVAO)
+	, blurRenderShader("src/shader_src/raymarchVertexShader.shader", "src/shader_src/screenTextureFragment.shader")
+	, objectRenderShader("src/shader_src/solidColorVertexShader.shader", "src/shader_src/outlineRenderToTextureFragment.shader")
+	, textureBlurrerShader("src/shader_src/blurComputeShader.shader")
 {
-	setup();
+	setResolution(width, height);
 }
 
 OutlineRenderer::~OutlineRenderer()
 {
 }
 
-void OutlineRenderer::setup()
+void OutlineRenderer::setResolution(unsigned int width, unsigned int height)
 {
+	deleteBuffers();
+
+	// Saving the new inputs
+	this->width = width;
+	this->textureWidth = width;
+	this->height = height;
+	this->textureHeight = height;
+
+	// And generating the required buffers
 	glGenFramebuffers(1, &framebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
@@ -61,8 +68,24 @@ void OutlineRenderer::setup()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void OutlineRenderer::deleteBuffers()
+{
+	glDeleteTextures(1, &sharpTexture);
+	glDeleteTextures(1, &blurTexture);
+	glDeleteFramebuffers(1, &framebuffer);
+}
+
 void OutlineRenderer::render(Scene& scene)
 {
+	if (!scene.hasObjectSelected())
+	{
+		return;
+	}
+
+	int framebufferBefore{ 0 };
+
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &framebufferBefore);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
 	GLenum drawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
@@ -79,9 +102,16 @@ void OutlineRenderer::render(Scene& scene)
 	/* DRAWING TO THE TEXTURES */
 
 	// Setting viewport size
-	glViewport(0, 0, textureWidth, textureHeight);
+	//glViewport(0, 0, textureWidth, textureHeight);
 
 	objectRenderShader.use();
+
+	// Setting none for the model and rotation 
+	glm::mat4 model = glm::mat4(1.0f);
+	objectRenderShader.setMat4("model", model);
+
+	glm::mat4 rotation = glm::mat4(1.0f);
+	objectRenderShader.setMat4("rotation", rotation);
 
 	// View matrix
 	glm::mat4 view = glm::mat4(1.0f);
@@ -96,8 +126,8 @@ void OutlineRenderer::render(Scene& scene)
 	// Drawing the objects
 	scene.drawSelected(&objectRenderShader);
 	
-	// Stop using our custom framebuffer to write to the screen again
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// Rebind the old buffer to render correctly to the screen again
+	glBindFramebuffer(GL_FRAMEBUFFER, framebufferBefore);
 
 
 
@@ -124,6 +154,9 @@ void OutlineRenderer::render(Scene& scene)
 
 	/* DRAWING BLUR */
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	glBindVertexArray(screenQuadVAO);
 
 	// Binding the shader which simply renders a texture over the entire screen
@@ -139,6 +172,5 @@ void OutlineRenderer::render(Scene& scene)
 
 	glBindBuffer(GL_VERTEX_ARRAY, 0);
 
-	// Setting viewport size back to normal
-	glViewport(0, 0, width, height);
+	glDisable(GL_BLEND);
 }

@@ -2,10 +2,9 @@
 
 #include <vector>
 
-#include "../AbstractShader.h"
-#include "ImGuiEditorInterface.h"
+#include "../shaders/AbstractShader.h"
 
-class ShaderWritable : public ImGuiEditorInterface
+class ShaderWritable
 {
 public:
 	bool hasWrittenToShader(AbstractShader* shader)

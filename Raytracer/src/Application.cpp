@@ -3,20 +3,27 @@
 #include "Application.h"
 
 
-Application::Application(unsigned int WIDTH, unsigned int HEIGHT)
+Application::Application(unsigned int WIDTH, unsigned int HEIGHT, bool useShaderCache)
     : WINDOW_SIZE_X(WIDTH), WINDOW_SIZE_Y(HEIGHT), camera(glm::vec3(6.7f, 2.7f, -3.7f))
+    , useShaderCache(useShaderCache)
 {
 
 }
 
 Application::~Application()
 {
+    deleteFramebuffer();
     Logger::log("Application instance destroyed");
 }
 
 int Application::Start()
 {
+    Logger::log("Initializing GLFW");
+
     initialiseGLFW();
+
+    Logger::log("Initializing cache");
+    Cache::initialise(useShaderCache);
 
     // Making a GLFW window
     GLFWwindow* window = glfwCreateWindow(WINDOW_SIZE_X, WINDOW_SIZE_Y, "OpenGL", NULL, NULL);
@@ -28,10 +35,17 @@ int Application::Start()
     }
     glfwMakeContextCurrent(window);
 
+    WindowUtility::setWindow(window);
+
     ImGuiUserInterface userInterface;
+
+    Logger::log("Initializing ImGui");
 
     userInterface.initialiseImGui(window);
 
+    InputManager::initialise(window);
+
+    Logger::log("Initializing GLAD");
     // GLAD manages function pointers for OpenGL, so we cannot run without it
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -44,6 +58,8 @@ int Application::Start()
 
     // Change the viewport size if the window is resized
     glfwSetFramebufferSizeCallback(window, &Callbacks::framebuffer_size_callback);
+
+    Random::initialise();
 
     /*
     // Making a scene
@@ -86,11 +102,17 @@ int Application::Start()
     SceneFileSaver::writeSceneToFile(scene, std::string("Scene 1 - testing"));
     */
 
+    glm::ivec2 renderedScreenSize{ glm::ivec2(0) };
+
+    Logger::log("Initializing scene");
     SceneManager sceneManager{};
+
+    sceneManager.setAspectRatio(renderedScreenSize.x, renderedScreenSize.y);
 
     std::string lastLoadedSceneName{};
     FileUtility::readSavedSettings(lastLoadedSceneName);
 
+    Logger::log("Loading scene");
     sceneManager.changeScene(lastLoadedSceneName);
     //sceneManager.getCurrentScene().addCamera(camera);
     //Scene scene{ SceneFileSaver::readSceneFromFile(std::string("Scene 1 - testing")) };
@@ -98,8 +120,11 @@ int Application::Start()
     // Setting the callback for window resizing and camera input
     Callbacks& callbacks = Callbacks::getInstance();
     callbacks.bindSceneManager(&sceneManager);
+    glfwSetScrollCallback(window, Callbacks::scrollCallback);
 
-    sceneManager.getCurrentScene().setAspectRatio(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+    TextureHandler::loadTexture("couch.png", false);
+    TextureHandler::loadTexture("normal_map_test.png", false);
+    TextureHandler::loadTexture("test.png", false);
 
     // Unused shaders... (should remove)
     //Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
@@ -111,21 +136,42 @@ int Application::Start()
         "src/Shaders/raymarchFragmentShader.shader", triangleCount, meshCount);
     */
 
+    Logger::log("Loading shaders");
+
+    Logger::log("Loading axes shader");
     // Shader for drawing axes
-    Shader solidColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/solidColorFragmentShader.shader");
+    Shader solidColorShader("src/shader_src/solidColorVertexShader.shader", "src/shader_src/solidColorFragmentShader.shader");
+    Logger::log("Loading rasterized view shader");
     // Shader for viewing rasterized view
-    Shader rasterizedShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/rasterizedView.shader");
+    Shader rasterizedShader("src/shader_src/solidColorVertexShader.shader", "src/shader_src/rasterizedView.shader");
+    Logger::log("Loading rendered image shader");
     // Shader for rendering the quad which shows the rendered image
-    Shader raytracedImageRendererShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/raytracedImageRendererShader.glsl");
+    Shader raytracedImageRendererShader("src/shader_src/raymarchVertexShader.shader", "src/shader_src/raytracedImageRendererShader.glsl");
 
     // Raytraced renderer
-    Renderer raytracingRenderer("src/shaders/raytraceComputeShaderSampledUpdated.shader", WINDOW_SIZE_X, WINDOW_SIZE_Y);
+    Logger::log("Loading raytracing shader"); 
+    //MultiComputeShader raytracingComputeShader(2, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
+    MultiComputeShader raytracingComputeShader(1, "src/shader_src/raytraceComputeShaderProbabilistic.shader");
+    //ComputeShader raytracingComputeShader("src/shader_src/raytraceComputeShaderSampledUpdated.shader");
+    Renderer raytracingRenderer(raytracingComputeShader, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
-    HDRIRenderer hdriRenderer("src/shaders/hdriVertex.shader", "src/shaders/hdriFragment.shader");
+    Logger::log("Loading HDRI renderer");
+    HDRIRenderer hdriRenderer("src/shader_src/hdriVertex.shader", "src/shader_src/hdriFragment.shader");
+
+    GizmoRenderer gizmoRenderer("src/shader_src/gizmo_shaders/gizmoVertex.shader",
+        "src/shader_src/gizmo_shaders/gizmoGeometry.shader",
+        "src/shader_src/gizmo_shaders/gizmoFragment.shader");
+
+    GizmoRenderer objectClickGizmoRenderer("src/shader_src/gizmo_shaders/gizmoClickSelectVertex.shader",
+        "src/shader_src/gizmo_shaders/gizmoClickSelectGeometry.shader",
+        "src/shader_src/gizmo_shaders/gizmoClickSelectFragment.shader");
 
     ObjectScreenSelector objectScreenSelector(WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
     raytracingRenderer.bindSceneManager(&sceneManager);
+
+
+    Logger::log("Generating triangle buffer");
 
     sceneManager.getCurrentScene().generateTriangleBuffer();
     
@@ -139,12 +185,14 @@ int Application::Start()
 
     unsigned int frame = 0;
 
+    Logger::log("Creating BVH handler");
     BVHHandler bvhHandler(
-        "src/shaders/BVH visualisation/bvhVisualisationVertex.shader",
-        "src/shaders/BVH visualisation/bvhVisualisationGeometry.shader",
-        "src/shaders/BVH visualisation/bvhVisualisationFragment.shader"
+        "src/shader_src/BVH visualisation/bvhVisualisationVertex.shader",
+        "src/shader_src/BVH visualisation/bvhVisualisationGeometry.shader",
+        "src/shader_src/BVH visualisation/bvhVisualisationFragment.shader"
     );
 
+    Logger::log("Generating initial BVH");
     // Generating the initial BVH
     sceneManager.getCurrentScene().updateBVH();
 
@@ -154,10 +202,21 @@ int Application::Start()
 
     // TODO change pointer passes to references
 
-    while (!glfwWindowShouldClose(window))
+    int leftMouseButtonState{ GLFW_RELEASE };
+    int rightMouseButtonState{ GLFW_RELEASE };
+
+    ContextMenuSource* contextMenuSource{ nullptr };
+
+    setupFramebuffer(glm::ivec2(0));
+
+    bool popupOpenOnStartClick{ false };
+
+    while (true)
     {
-        // Setting viewport size
-        glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+        // Setting viewport size to the rendered screen size
+        glViewport(0, 0, renderedScreenSize.x, renderedScreenSize.y);
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -172,19 +231,52 @@ int Application::Start()
         if (frame % 10 == 0 && false)
             std::cout << "FPS: " << 1.0f / deltaTime << std::endl;
 
+        if (userInterface.getRenderedScreenSize() != renderedScreenSize)
+        {
+            renderedScreenSize = userInterface.getRenderedScreenSize();
+            // The screen size was updated
+            sceneManager.setAspectRatio(renderedScreenSize.x, renderedScreenSize.y);
+            outlineRenderer.setResolution(renderedScreenSize.x, renderedScreenSize.y);
+            objectScreenSelector.setResolution(renderedScreenSize.x, renderedScreenSize.y);
+            raytracingRenderer.setResolution(renderedScreenSize.x, renderedScreenSize.y);
+            setupFramebuffer(renderedScreenSize);
+        }
+
+        int mouseX{ userInterface.getMouseCoordinates().x };
+        int mouseY{ userInterface.getMouseCoordinates().y };
+
+        if (sceneManager.hasUnsavedChanges())
+        {
+            WindowUtility::markUnsavedChanges();
+        }
+        else
+        {
+            WindowUtility::markSavedChanges();
+        }
+
+        // When the user requests to exit the application
+        if (glfwWindowShouldClose(window))
+        {
+            // First check if there are unsaved changes
+            // This will close the window if there aren't any
+            // And ask the user to save if there are
+            userInterface.requestExit();
+
+            // Set it back to false
+            glfwSetWindowShouldClose(window, GLFW_FALSE);
+        }
+
         // Input
         processInput(window);
 
-        // Check whether the UI is enabled
-        if (!userInterface.isEnabled() && currentRenderMode != ApplicationRenderMode::RAYTRACED)
-        {
-            // Calling the mouse callback
-            double xpos, ypos;
-            glfwGetCursorPos(window, &xpos, &ypos);
-            shouldReRender |= sceneManager.getCurrentScene().getActiveCamera().mouseCallback(window, xpos, ypos);
+        InputManager::takeInput(sceneManager.getCurrentScene());
 
+        // Check whether the UI is enabled
+        if (userInterface.isMouseOnRenderedScreen() && currentRenderMode != ApplicationRenderMode::RAYTRACED)
+        {
             // Process camera movement input
-            shouldReRender |= sceneManager.getCurrentScene().getActiveCamera().processInput(window, deltaTime);
+            shouldReRender |= sceneManager.getCurrentScene().getActiveCamera().processInput(window,
+                sceneManager.getCurrentScene(), (double)mouseX, (double)mouseY, deltaTime);
         }
 
         //std::cout << camera.getInformation() << std::endl;
@@ -192,6 +284,7 @@ int Application::Start()
 
         // Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         raytracingRenderer.update(deltaTime, currentRenderMode == ApplicationRenderMode::REALTIME_RAYTRACED, shouldReRender, sceneManager.getCurrentScene());
@@ -202,7 +295,7 @@ int Application::Start()
             Shader* usedShader = &raytracedImageRendererShader;
 
             usedShader->use();
-            usedShader->setVector2("screenSize", WINDOW_SIZE_X, WINDOW_SIZE_Y);
+            usedShader->setVector2("screenSize", (float)renderedScreenSize.x, (float)renderedScreenSize.y);
             //usedShader->setVector3("cameraRotation", CoordinateUtility::vec3ToGLSLVec3(camera.getRotation()));
 
             // Making sure the pixel buffer is assigned for the raytracedImageRendererShader
@@ -215,25 +308,48 @@ int Application::Start()
         }
         else
         {
-            // Checking for a click on an object on mouse click and mouse not on GUI
-            if (userInterface.isEnabled()
-                && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS
-                && !userInterface.isMouseOnGUI()
-                )
+            bool popupOpen{ ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopup) };
+            if (InputManager::keyPressed(InputManager::InputKey::CLICK))
             {
-                double xpos, ypos;
-                glfwGetCursorPos(window, &xpos, &ypos);
+                popupOpenOnStartClick = popupOpen;
+            }
+            if (InputManager::keyUp(InputManager::InputKey::CLICK))
+            {
+                popupOpenOnStartClick = false;
+            }
 
-                if (objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), xpos, ypos))
+            // Checking for a click on an object on mouse click and mouse not on GUI
+            if (!popupOpen && !popupOpenOnStartClick && !userInterface.isMouseOnGUI() && userInterface.isEnabled() && userInterface.isMouseOnRenderedScreen())
+            {
+                bool leftMouse = leftMouseButtonState == GLFW_PRESS &&
+                    glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE;
+
+                bool rightMouse = rightMouseButtonState == GLFW_PRESS && 
+                    glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE;
+
+                leftMouseButtonState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+                rightMouseButtonState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
+
+                if (leftMouse)
                 {
+                    unsigned int objectClickedID = objectScreenSelector.checkObjectClicked(sceneManager.getCurrentScene(), mouseX, mouseY, objectClickGizmoRenderer);
+
                     // An object was clicked
+                    // Using the data to select/deselect an object
+                    sceneManager.getCurrentScene().markSelected(objectClickedID);
+                }
+                // Attempting to open the context menu of the selected object
+                if (rightMouse) {
+                    ContextMenuSource* source{ sceneManager.getCurrentScene().getContextMenuSourceFromSelected() };
+                    if (source != nullptr)
+                        source->openContextMenu();
                 }
             }
 
             glDisable(GL_DEPTH_TEST);
             // Drawing the HDRI (skybox) if using it as a background is enabled
-            if (*sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer())
-                hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI(), sceneManager.getCurrentScene().getActiveCamera());
+            if (*sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer() && sceneManager.getCurrentScene().hasHDRI())
+                hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI()->textureID, sceneManager.getCurrentScene().getActiveCamera());
 
             glEnable(GL_DEPTH_TEST);
 
@@ -244,7 +360,9 @@ int Application::Start()
             drawAxes(axesVAO, &solidColorShader, &sceneManager.getCurrentScene().getActiveCamera());
 
             /* Rasterized scene rendering */
-            sceneManager.getCurrentScene().draw(&rasterizedShader);
+            sceneManager.getCurrentScene().draw(&rasterizedShader, currentRasterizedDebugMode);
+
+            sceneManager.getCurrentScene().drawGizmos(gizmoRenderer);
 
             // Rendering the outlines for selected objects
             outlineRenderer.render(sceneManager.getCurrentScene());
@@ -252,10 +370,27 @@ int Application::Start()
             bvhHandler.draw(sceneManager.getCurrentScene(), raytracingRenderer.getBVHRenderMode());
 
             // Rendering a preview of the colours used to select an object by clicking on it
-            //objectScreenSelector.renderTexturePreview(sceneManager.getCurrentScene(), screenQuadVAO);
+            //objectScreenSelector.renderTexturePreview(sceneManager.getCurrentScene(), screenQuadVAO, objectClickGizmoRenderer);
         }
 
-        userInterface.drawUserInterface(window, sceneManager, sceneManager.getCurrentScene().getActiveCamera(), raytracingRenderer, currentRenderMode);
+
+        // Render to the screen again
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // Setting viewport size to full screen
+        glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
+        userInterface.drawUserInterface(window,
+            sceneManager,
+            sceneManager.getCurrentScene().getActiveCamera(),
+            raytracingRenderer,
+            currentRenderMode,
+            currentRasterizedDebugMode,
+            contextMenuSource,
+            screenTexture
+        );
+
+        InputManager::updateKeyBindsPreviousValues();
 
         // Output
         glfwSwapBuffers(window);
@@ -263,14 +398,22 @@ int Application::Start()
         glfwPollEvents();
 
         frame++;
+
+        // If an exit is requested and everything is okay to exit
+        if (userInterface.isExitOkay())
+        {
+            break;
+        }
     }
 
     // Saving the last opened scene
-    FileUtility::saveSettings(*sceneManager.getCurrentScene().getNamePointer());
+    sceneManager.saveSceneLoaded();
 
     glDeleteVertexArrays(1, &screenQuadVAO);
     glDeleteBuffers(1, &screenQuadVBO);
     glDeleteBuffers(1, &screenQuadEBO);
+
+    Random::terminate();
 
     Logger::stop();
 
@@ -337,8 +480,60 @@ void Application::generateScreenQuad()
 
 void Application::processInput(GLFWwindow* window)
 {
+    /*
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    */
+}
+
+void Application::setupFramebuffer(glm::ivec2 renderedScreenSize)
+{
+    // Cleaning up previous buffers
+    deleteFramebuffer();
+
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    glGenTextures(1, &screenTexture);
+
+
+    // Setting up the texture
+    glBindTexture(GL_TEXTURE_2D, screenTexture);
+
+    // Making it an empty image
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, renderedScreenSize.x, renderedScreenSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+    // Setting texture filter settings
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    // Generate and bind the depth buffer
+    glGenRenderbuffers(1, &depthBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+
+    // Set the storage for the depth buffer
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
+    // Attach the depth buffer to the framebuffer
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+
+    // Binding the texture to be drawn to
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, screenTexture, 0);
+
+    // Set the list of draw buffers (only draw to the first slot
+    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, drawBuffers);
+
+
+    // Unbinding the frame buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Application::deleteFramebuffer()
+{
+    glDeleteTextures(1, &screenTexture);
+    glDeleteFramebuffers(1, &framebuffer);
+    glDeleteRenderbuffers(1, &depthBuffer);
 }
 
 void Application::generateAxesVAO()

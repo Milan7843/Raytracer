@@ -5,6 +5,13 @@ RealtimeRenderProcess::RealtimeRenderProcess(ComputeShader& computeShader,
 	unsigned int height)
 	: RenderProcess(computeShader, width, height)
 {
+	computeShader.setBool("renderUsingBlocks", false);
+	computeShader.setInt("stackSize", stackSize);
+	computeShader.setInt("renderPassCount", 1);
+	computeShader.setInt("currentBlockRenderPassIndex", 0);
+	computeShader.setInt("indirectLightingQuality", 0);
+	computeShader.setInt("blockSize", width);
+	generateStackBuffer();
 }
 
 RealtimeRenderProcess::~RealtimeRenderProcess()
@@ -18,15 +25,10 @@ void RealtimeRenderProcess::update(float deltaTime, ComputeShader& computeShader
 		return;
 	}
 
-	computeShader.setBool("renderUsingBlocks", false);
 	computeShader.setInt("pixelRenderSize", currentPixelSize);
-	computeShader.setInt("renderPassCount", 1);
 
 	// Running the compute shader once for each pixel
-	//glDispatchCompute(width / (16 * 4), height / (16 * 4), 1);
-	glDispatchCompute(std::ceil(width / (16.0f * currentPixelSize)), std::ceil(height / (16.0f * currentPixelSize)), 1);
-	//glDispatchCompute(std::ceil(float(size / 8.0f)), std::ceil(float(size / 8.0f)), 1);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	computeShader.run(std::ceil(width / (16.0f * currentPixelSize)), std::ceil(height / (16.0f * currentPixelSize)), 1);
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -37,6 +39,22 @@ void RealtimeRenderProcess::update(float deltaTime, ComputeShader& computeShader
 	}
 
 	currentPixelSize = currentPixelSize / 2;
+}
+
+void RealtimeRenderProcess::generateStackBuffer()
+{
+	// Deleting the previous stack buffer
+	glDeleteBuffers(1, &stackBuffer);
+
+	// Creating the stack array buffer
+	stackBuffer = 0;
+
+	glGenBuffers(1, &stackBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, stackBuffer);
+
+	glBufferData(GL_SHADER_STORAGE_BUFFER, this->width * this->height * sizeof(int) * stackSize, 0, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, stackBuffer);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
 float RealtimeRenderProcess::getRenderProgressPrecise()

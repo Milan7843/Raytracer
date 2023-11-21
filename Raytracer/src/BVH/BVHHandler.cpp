@@ -90,7 +90,7 @@ BVHNode* BVHHandler::generateFromModel(Model& model, BVHNode* oldBVHRoot)
 	for (Mesh& mesh : model.getMeshes())
 	{
 		// Generating a new tree from the mesh
-		meshRootNodes.push_back(generateFromMesh(model, mesh, nullptr));
+		meshRootNodes.push_back(mesh.getRootNode(model));
 	}
 
 	// Generating a new BVH using the root nodes
@@ -100,10 +100,12 @@ BVHNode* BVHHandler::generateFromModel(Model& model, BVHNode* oldBVHRoot)
 	return rootNode;
 }
 
-BVHNode* BVHHandler::generateFromMesh(Model& model, Mesh& mesh, BVHNode* oldBVHRoot)
+BVHNode* BVHHandler::generateFromMesh(Model& model, const Mesh& mesh, BVHNode* oldBVHRoot)
 {
 	// Deleting any old data we have already
 	deleteBVH(oldBVHRoot);
+
+	//std::cout << mesh.triangles.size() << std::endl;
 
 	std::vector<unsigned int> indices(mesh.triangles.size());
 
@@ -117,20 +119,21 @@ BVHNode* BVHHandler::generateFromMesh(Model& model, Mesh& mesh, BVHNode* oldBVHR
 	// Applying the translation onto each of the triangles
 	for (Triangle& triangle : translatedTriangles)
 	{
-		triangle.v1 = model.getTransformationMatrix() * triangle.v1;
-		triangle.v2 = model.getTransformationMatrix() * triangle.v2;
-		triangle.v3 = model.getTransformationMatrix() * triangle.v3;
+		triangle.v1 = model.getTransformationMatrix() * mesh.getTransformationMatrix() * triangle.v1;
+		triangle.v2 = model.getTransformationMatrix() * mesh.getTransformationMatrix() * triangle.v2;
+		triangle.v3 = model.getTransformationMatrix() * mesh.getTransformationMatrix() * triangle.v3;
 	}
 
 	// Generating a new BVH
 	BVHNode* meshRootNode = generateBVHRecursively(translatedTriangles, indices, 0, mesh.shaderArraybeginIndex);
+	meshRootNode->isModelRoot = true;
 	return meshRootNode;
 }
 
 void BVHHandler::writeIntoSSBOs(BVHNode* root, unsigned int dataSSBO, unsigned int triangleSSBO)
 {
 	std::vector<FlattenedBVHNode> structure;
-	std::vector<unsigned int> indices;
+	std::vector<int> indices;
 	
 
 	/*
@@ -250,7 +253,7 @@ void BVHHandler::writeIntoSSBOs(BVHNode* root, unsigned int dataSSBO, unsigned i
 	//std::cout << "Writing " << indices.size() << " indices into ssbo " << triangleSSBO << std::endl;
 
 	// Loading zero-data into the triangle buffer
-	glBufferData(GL_SHADER_STORAGE_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, indices.size() * sizeof(int), &indices[0], GL_STATIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, triangleSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -285,7 +288,7 @@ BVHNode* BVHHandler::generateBVHRecursively(std::vector<Triangle>& triangles, st
 	//	<< parent->data.size.x << ", " << parent->data.size.y << ", " << parent->data.size.z << ")" << std::endl;
 
 	// Base case: stop on too few triangles
-	if (indices.size() <= 20 || depth >= 40)
+	if (indices.size() <= 16 || depth >= 40)
 	{
 		//std::cout << "triangle count: " << triangles.size() << std::endl;
 		parent->triangleIndices = indices;
@@ -375,7 +378,7 @@ void BVHHandler::flattenBVHTreeData(BVHNode* rootNode, std::vector<BVHData>& dat
 	flattenBVHTreeData(rootNode->rightChild, data, onlyLeaves);
 }
 
-void BVHHandler::flattenBVHTreeIndices(BVHNode* rootNode, std::vector<FlattenedBVHNode>& treeStructureData, std::vector<unsigned int>& indices)
+void BVHHandler::flattenBVHTreeIndices(BVHNode* rootNode, std::vector<FlattenedBVHNode>& treeStructureData, std::vector<int>& indices)
 {
 	// There must be a root
 	if (rootNode == nullptr) return;

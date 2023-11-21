@@ -19,7 +19,7 @@ namespace FileUtility
 	bool isValidInput(std::string& input);
 
 	// Save the current application settings to a save file
-	void saveSettings(std::string& loadedSceneName);
+	void saveSettings(const std::string& loadedSceneName);
 	// Read the saved application settings from the save file
 	void readSavedSettings(std::string& savedSceneName);
 };

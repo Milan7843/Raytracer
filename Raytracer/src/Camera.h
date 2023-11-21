@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -16,6 +17,15 @@
 #include <sstream>
 
 #include "Logger.h"
+#include "Maths.h"
+
+enum class MovementMode
+{
+	FIRST_PERSON,
+	GLOBAL
+};
+
+class Scene;
 
 class Camera
 {
@@ -40,13 +50,12 @@ public:
 
 	// Process the input to the camera.
 	// Returns whether the camera moved.
-	bool processInput(GLFWwindow* window, float deltaTime);
-
-	// Callback for when the mouse is moved.
-	// Returns whether the camera moved.
-	bool mouseCallback(GLFWwindow* window, double xpos, double ypos);
+	bool processInput(GLFWwindow* window, Scene& scene, double xpos, double ypos, float deltaTime);
 
 	void setAspectRatio(int width, int height);
+
+	// Get the ratio width/height
+	float getAspectRatio();
 
 	// Write this light to the given filestream
 	virtual void writeDataToStream(std::ofstream& filestream);
@@ -58,8 +67,17 @@ public:
 	float* getFovPointer();
 	float* getSensitivityPointer();
 
+	void scrollCallback(double xoffset, double yoffset);
+
 	/* Private members */
 private:
+
+	// Different movement modes
+	bool processInputFirstPerson(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, double xscroll, double yscroll, float deltaTime);
+	bool processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, double xscroll, double yscroll, float deltaTime);
+
+	glm::vec3 calculateDirectionVector(float yaw, float pitch);
+
 	// Camera postion data
 	glm::vec3 position = glm::vec3(4.0f, 3.5f, 1.5f);
 	glm::vec3 up;
@@ -76,4 +94,17 @@ private:
 	float sensitivity = 1.0f;
 	float fov = 40.0f;
 	float cameraSpeed = 1.0f;
+
+	double scrollDeltaX{ 0.0 };
+	double scrollDeltaY{ 0.0 };
+
+	
+	bool movingToPosition{ false };
+	float movingToPositionProgress{ 0.0f };
+	glm::vec3 positionMovingFrom{ glm::vec3(0.0f) };
+	glm::vec3 positionMovingTo{ glm::vec3(0.0f) };
+	
+	float movingToPositionDuration{ 0.2f };
+	
+	MovementMode currentMode{ MovementMode::GLOBAL };
 };

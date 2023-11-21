@@ -1,75 +1,95 @@
-hdri_default.png
+1
+C:\Git\Raytracer\Raytracer\HDRIs\hdri_default.png
 # Materials
 Couch
-0.877451 0.467189 0.270978
+0.635294 0.384314 0.0901961
 0
 0
 0
 0
 1 1 1
 0
-
-idk
-1 1 1
 0
 0
 0
-0
-1 1 1
 0
 
 Rug
-1 1 1
+0.439216 0.407843 0.431373
 0
 0
 0
 0
 1 1 1
+0
+0
+0
+0
 0
 
 Pillows
-0.387255 0.229472 0.0892205
+0.439216 0.223529 0.121569
 0
 0
 0
 0
 1 1 1
+0
+0
+0
+0
 0
 
 Curtains
-1 1 1
+0.439216 0.223529 0.121569
 0
 0
 0
 0
 1 1 1
+0
+0
+0
+0
 0
 
 Curtain rod
+0.220588 0.220588 0.220588
+0.5
+0
+0
+0
 1 1 1
 0
 0
 0
 0
-1 1 1
 0
 
 Walls
-1 1 1
+0.270588 0.27451 0.164706
 0
 0
 0
 0
 1 1 1
+0
+0
+0
+0
 0
 
 Floor
-1 1 1
+0.203922 0.2 0.188235
 0
 0
 0
 0
 1 1 1
+0
+0
+0
+0
 0
 
 Window
@@ -80,6 +100,166 @@ Window
 0
 1 1 1
 0
+0
+0
+0
+0
+
+Coffee table
+0.495098 0.484819 0.465975
+0.2
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Coffee table plate
+0.941176 0.643137 0.368627
+0.2
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Coffee mug
+0.941176 0.333333 0.27451
+0.2
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Donut
+0.498039 0.333333 0.223529
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Donut glazing
+0.635294 0.309804 0.341176
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Sprinkles
+0.8 0 0
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Small table
+0.745098 0.623529 0.309804
+0.52
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Small table legs
+0 0 0
+0.5
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Plant pot
+0.431373 0.266667 0.211765
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Plant
+0.290196 0.8 0.0627451
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Coffee
+0.329412 0.101961 0.00784314
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Wall lamp
+1 1 1
+0
+0
+0
+0
+1 1 1
+10
+0
+0
+0
+0
 # Materials end
 
 # Spheres
@@ -88,55 +268,383 @@ Window
 # Models
 living room
 0 0 0
-0 0 0
+0 -0 0
 1 1 1
 src/models/living room.obj
-20
+71
+6
 7
-8
+2
+1
+1
+1
+1
+3
 3
 1
 1
-4
-4
-4
-4
 1
-1
+3
+7
+6
+8
+5
+5
+5
 4
-7
-7
-7
+4
+24
+24
+24
+24
+24
+24
+4
+24
+24
+24
+24
+24
+24
+24
+20
+22
+23
+23
+23
+23
+23
+23
+23
+23
+23
+23
+23
 9
-7
-7
-7
-7
+11
+10
+10
+12
+13
+13
+12
+15
+16
+17
+18
+2
+15
+19
+14
+14
+14
+14
+0
+0
+14
+14
+71
+window_Cube
+0 0 0
+0 0 0
+1 1 1
+floor_Cube.001
+0 0 0
+0 0 0
+1 1 1
+rug_Cube.002
+0 0 0
+0 0 0
+1 1 1
+couch_Plane
+0 0 0
+0 0 0
+1 1 1
+couch_legs_Plane.001
+0 0 0
+0 0 0
+1 1 1
+cushion_left_Cube.003
+0 0 0
+0 0 0
+1 1 1
+cushion_right_Cube.003
+0 0 0
+0 0 0
+1 1 1
+throw_cusion_left_Cube.004
+0 0 0
+0 0 0
+1 1 1
+throw_cusion_right_Cube.004
+0 0 0
+0 0 0
+1 1 1
+small_couch_Plane.002
+0 0 0
+0 0 0
+1 1 1
+small_couch_legs_Plane.003
+0 0 0
+0 0 0
+1 1 1
+cushion_left.001_Cube.005
+0 0 0
+0 0 0
+1 1 1
+throw_cusion_left.001_Cube.006
+0 0 0
+0 0 0
+1 1 1
+frame_Cube.007
+0 0 0
+0 0 0
+1 1 1
+window.001_Cube.008
+0 0 0
+0 0 0
+1 1 1
+Material.003
+0 0 0
+0 0 0
+1 1 1
+curtain_holder_left_Cube.009
+0 0 0
+0 0 0
+1 1 1
+curtain_holder_right_Cube.009
+0 0 0
+0 0 0
+1 1 1
+curtain_rod_Cylinder
+0 0 0
+0 0 0
+1 1 1
+curtain_left_Plane.004
+0 0 0
+0 0 0
+1 1 1
+Torus
+0 0 0
+0 0 0
+1 1 1
+Torus.001_Torus
+0 0 0
+0 0 0
+1 1 1
+Torus.002_Torus
+0 0 0
+0 0 0
+1 1 1
+Torus.003_Torus
+0 0 0
+0 0 0
+1 1 1
+Torus.004_Torus
+0 0 0
+0 0 0
+1 1 1
+Torus.005_Torus
+0 0 0
+0 0 0
+1 1 1
+Torus.006_Torus
+0 0 0
+0 0 0
+1 1 1
+curtain_right_Plane.004
+0 0 0
+0 0 0
+1 1 1
+Torus.007_Torus
+0 0 0
+0 0 0
+1 1 1
+Torus.008_Torus
+0 0 0
+0 0 0
+1 1 1
+Torus.009_Torus
+0 0 0
+0 0 0
+1 1 1
+Torus.010_Torus
+0 0 0
+0 0 0
+1 1 1
+Torus.011_Torus
+0 0 0
+0 0 0
+1 1 1
+Torus.012_Torus
+0 0 0
+0 0 0
+1 1 1
+Torus.013_Torus
+0 0 0
+0 0 0
+1 1 1
+lamp_Cylinder.001
+0 0 0
+0 0 0
+1 1 1
+clock_Cylinder.002
+0 0 0
+0 0 0
+1 1 1
+Cube_Cube.010
+0 0 0
+0 0 0
+1 1 1
+Cube.002_Cube.010
+0 0 0
+0 0 0
+1 1 1
+Cube.004_Cube.010
+0 0 0
+0 0 0
+1 1 1
+Cube.005_Cube.010
+0 0 0
+0 0 0
+1 1 1
+Cube.006_Cube.010
+0 0 0
+0 0 0
+1 1 1
+Cube.007_Cube.010
+0 0 0
+0 0 0
+1 1 1
+Cube.008_Cube.010
+0 0 0
+0 0 0
+1 1 1
+Cube.009_Cube.010
+0 0 0
+0 0 0
+1 1 1
+Cube.010_Cube.011
+0 0 0
+0 0 0
+1 1 1
+Cube.011
+0 0 0
+0 0 0
+1 1 1
+Cube.012_Cube.011
+0 0 0
+0 0 0
+1 1 1
+coffee_table_Circle
+0 0 0
+0 0 0
+1 1 1
+cup_Circle.001
+0 0 0
+0 0 -1.32958
+0.999997 0.999997 1
+donut_plate_Circle.003
+0 0 0
+0 0 0
+1 1 1
+mug_plate_Circle.003
+0 0 0
+0 0 0
+1 1 1
+donut_Torus.001
+0 0 0
+0 0 0
+1 1 1
+Torus.015_donut_glazing
+0 0 0
+0 0 0
+1 1 1
+donut_glazing_2_Torus.004
+0 0 0
+0 0 0
+1 1 1
+donut_2_Torus.005
+0 0 0
+0 0 0
+1 1 1
+table_Cylinder.003
+0 0 0
+0 0 0
+1 1 1
+Cube.014_Cube.012
+0 0 0
+0 0 0
+1 1 1
+pot_Cylinder.005
+0 0 0
+0 0 0
+1 1 1
+Cube.017_Cube.013
+0 0 0
+0 0 0
+1 1 1
+bg_Plane.005
+0 0 0
+0 0 0
+1 1 1
+lamp.001_Cylinder.006
+0 0 0
+0 0 0
+1 1 1
+coffee_Circle.004
+0 0 0
+0 0 0
+1 1 1
+Cube.019_sprinkles
+0 0 0
+0 0 0
+1 1 1
+Material.032
+0 0 0
+0 0 0
+1 1 1
+Material.033
+0 0 0
+0 0 0
+1 1 1
+Cube.015_sprinkles
+0 0 0
+0 0 0
+1 1 1
+Material.032
+0 0 0
+0 0 0
+1 1 1
+Material.033
+0 0 0
+0 0 0
+1 1 1
+Cube.016_Cube.015
+0 0 0
+0 0 0
+1 1 1
+Cube.018_Cube.016
+0 0 0
+0 0 0
+1 1 1
 # Models end
 
 # Point lights
-White point light
-1 1 1
-0
-0 2.05 0.52
 # Point lights end
 
 # Directional lights
-Directional light
-1 1 1
-1
--1 -1 0.2
 # Directional lights end
 
 # Ambient lights
 # Ambient lights end
 
 # Cameras
-1.82614 0.648975 -0.0749029
--10.4001
-2012.36
+-0.499011 2.47104 0.390187
+-34.4003
+3487.35
 1
-39.333
+16.333
 1.844
 # Cameras end
 

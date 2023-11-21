@@ -1,21 +1,23 @@
 #include "ObjectScreenSelector.h"
 
 ObjectScreenSelector::ObjectScreenSelector(unsigned int width, unsigned int height)
-	: width(width)
-	, height(height)
-	, objectColorShader("src/Shaders/solidColorVertexShader.shader", "src/Shaders/objectClickColoringShader.shader")
-	, textureRenderShader("src/Shaders/raymarchVertexShader.shader", "src/Shaders/screenTextureFragment.shader")
+	: objectColorShader("src/shader_src/solidColorVertexShader.shader", "src/shader_src/objectClickColoringShader.shader")
+	, textureRenderShader("src/shader_src/raymarchVertexShader.shader", "src/shader_src/screenTextureFragment.shader")
 {
-	setup();
+	setResolution(width, height);
 }
 
 ObjectScreenSelector::~ObjectScreenSelector()
 {
 }
 
-bool ObjectScreenSelector::checkObjectClicked(Scene& scene, double x, double y)
+unsigned int ObjectScreenSelector::checkObjectClicked(Scene& scene, unsigned int x, unsigned int y, GizmoRenderer& objectClickGizmoRenderer)
 {
-	renderSceneToTexture(scene);
+	int framebufferBefore{ 0 };
+
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &framebufferBefore);
+
+	renderSceneToTexture(scene, objectClickGizmoRenderer);
 
 	// Setting up for reading data
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -23,25 +25,23 @@ bool ObjectScreenSelector::checkObjectClicked(Scene& scene, double x, double y)
 
 	// Reading data
 	std::vector<unsigned char> colorData(4);
-	glReadPixels((unsigned int)x, height-(unsigned int)y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, colorData.data());
+	glReadPixels(x, height-y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, colorData.data());
 
 	// Getting data
-	unsigned int objectType{ (unsigned int)colorData[0] };
-	unsigned int objectIndex{ (unsigned int)colorData[1] };
+	unsigned int objectID{ (unsigned int)colorData[0] };
 
-	// Using the data to select/deselect an object
-	scene.markSelected((ObjectType)objectType, objectIndex);
+	std::cout << objectID << " at " << x << " " << y << std::endl;
 
-	// Unbinding the frame buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// Rebinding the previous framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, framebufferBefore);
 
-	// Only found an object if objectType is not 0
-	return objectType != ObjectType::NONE;
+	// Only found an object if objectID is not 0
+	return objectID;
 }
 
-void ObjectScreenSelector::renderTexturePreview(Scene& scene, unsigned int screenQuadVAO)
+void ObjectScreenSelector::renderTexturePreview(Scene& scene, unsigned int screenQuadVAO, GizmoRenderer& objectClickGizmoRenderer)
 {
-	renderSceneToTexture(scene);
+	//renderSceneToTexture(scene, objectClickGizmoRenderer);
 
 
 	/* DRAWING THE TEXTURE */
@@ -62,8 +62,14 @@ void ObjectScreenSelector::renderTexturePreview(Scene& scene, unsigned int scree
 	glBindBuffer(GL_VERTEX_ARRAY, 0);
 }
 
-void ObjectScreenSelector::setup()
+void ObjectScreenSelector::setResolution(unsigned int width, unsigned int height)
 {
+	deleteBuffers();
+
+	// Saving the new parameters
+	this->width = width;
+	this->height = height;
+
 	glGenFramebuffers(1, &framebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
@@ -80,6 +86,16 @@ void ObjectScreenSelector::setup()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
+	// Generate and bind the depth buffer
+	unsigned int depthBuffer;
+	glGenRenderbuffers(1, &depthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+
+	// Set the storage for the depth buffer
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+
+	// Attach the depth buffer to the framebuffer
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
 	// Binding the texture to be drawn to
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, objectClickTexture, 0);
@@ -93,7 +109,13 @@ void ObjectScreenSelector::setup()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void ObjectScreenSelector::renderSceneToTexture(Scene& scene)
+void ObjectScreenSelector::deleteBuffers()
+{
+	glDeleteTextures(1, &objectClickTexture);
+	glDeleteFramebuffers(1, &framebuffer);
+}
+
+void ObjectScreenSelector::renderSceneToTexture(Scene& scene, GizmoRenderer& objectClickGizmoRenderer)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 	
@@ -107,6 +129,12 @@ void ObjectScreenSelector::renderSceneToTexture(Scene& scene)
 
 	objectColorShader.use();
 
+	glm::mat4 model = glm::mat4(1.0f);
+	objectColorShader.setMat4("model", model);
+
+	glm::mat4 rotation = glm::mat4(1.0f);
+	objectColorShader.setMat4("rotation", rotation);
+
 	// View matrix
 	glm::mat4 view = glm::mat4(1.0f);
 	view = scene.getActiveCamera().getViewMatrix();
@@ -119,6 +147,9 @@ void ObjectScreenSelector::renderSceneToTexture(Scene& scene)
 
 	// Drawing the objects
 	scene.draw(&objectColorShader);
+
+	// Drawing the gizmos as clickables
+	scene.drawClickSelectGizmos(objectClickGizmoRenderer);
 
 	// Stop using our custom framebuffer to write to the screen again
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

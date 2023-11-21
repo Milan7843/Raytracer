@@ -22,6 +22,8 @@
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+#include "imguizmo/ImGuizmo.h"
+
 #include "ImGuiUtility.h"
 #include "Scene.h"
 #include "SceneManager.h"
@@ -29,6 +31,9 @@
 #include "Renderer.h"
 #include "FileUtility.h"
 #include "ApplicationRenderMode.h"
+#include "RasterizedDebugMode.h"
+#include "gui/ContextMenuSource.h"
+#include "InputManager.h"
 
 class ImGuiUserInterface
 {
@@ -41,7 +46,14 @@ public:
 	void initialiseImGui(GLFWwindow * window);
 
 	// Draw the user interface
-	void drawUserInterface(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode);
+	void drawUserInterface(GLFWwindow* window,
+		SceneManager& sceneManager,
+		Camera& camera,
+		Renderer& renderer,
+		ApplicationRenderMode& applicationRenderMode,
+		RasterizedDebugMode& rasterizedDebugMode,
+		ContextMenuSource* contextMenuSource,
+		unsigned int screenTexture);
 
 	void handleInput(GLFWwindow* window, Camera& camera);
 
@@ -50,11 +62,48 @@ public:
 	// Get whether the mouse is currently on the GUI
 	bool isMouseOnGUI();
 
+	// Get whether the mouse is currently on the rendered screen
+	bool isMouseOnRenderedScreen();
+
+	// Get the position of the mouse ([0,1], [0,1])
+	glm::vec2 getMousePosition();
+
+	// Get the coordinates of the mouse (pixel index x and y)
+	glm::ivec2 getMouseCoordinates();
+
+	// Get the size of the screen we are rendering to
+	glm::ivec2 getRenderedScreenSize();
+
+	bool isExitOkay();
+	void requestExit();
+
 private:
 	bool imGuiEnabled = true;
 	unsigned int guiSwitchKeyPreviousState = 0;
 
+	bool exitRequested{ false };
+	bool exitOkay{ false };
+
 	unsigned int interfaceToggleKey = GLFW_KEY_TAB;
+
+	glm::ivec2 mouseCoordinates{ glm::ivec2(0) };
+	glm::vec2 mousePosition{ glm::vec2(0) };
+	glm::ivec2 renderedScreenSize{ glm::ivec2(0) };
+
+	// Transformation saved variables
+	bool transformationFirstFrame{ true };
+	glm::mat4 transformationInitialObjectMatrix;
+	glm::mat4 transformationInitialMeshMatrix;
+	unsigned int currentTransformationObjectID;
+	bool previousFrameTransformationDragging{ false };
+	bool transformationCancelled{ false };
+
+	void drawGUI(GLFWwindow* window,
+		SceneManager& sceneManager,
+		Camera& camera,
+		Renderer& renderer,
+		ApplicationRenderMode& applicationRenderMode,
+		ContextMenuSource* contextMenuSource);
 
 	// Format a number of seconds
 	std::string formatTime(float time);
@@ -64,6 +113,37 @@ private:
 
 	// Draw the help menu window
 	void drawHelpMenu();
+
+	void drawSceneSelector(GLFWwindow* window,
+		SceneManager& sceneManager,
+		Camera& camera,
+		Renderer& renderer,
+		ApplicationRenderMode& applicationRenderMode,
+		ContextMenuSource* contextMenuSource);
+
+	void drawSceneEditor(GLFWwindow* window,
+		SceneManager& sceneManager,
+		Camera& camera,
+		Renderer& renderer,
+		ApplicationRenderMode& applicationRenderMode,
+		ContextMenuSource* contextMenuSource);
+
+	// Draw the main menu bar
+	void drawMenuBar(GLFWwindow* window,
+		SceneManager& sceneManager,
+		Camera& camera,
+		Renderer& renderer,
+		ApplicationRenderMode& applicationRenderMode,
+		RasterizedDebugMode& rasterizedDebugMode,
+		ContextMenuSource* contextMenuSource);
+
+	void drawExitWithUnsavedChangesPrompt(GLFWwindow* window,
+		SceneManager& sceneManager,
+		Camera& camera,
+		Renderer& renderer,
+		ApplicationRenderMode& applicationRenderMode,
+		RasterizedDebugMode& rasterizedDebugMode,
+		ContextMenuSource* contextMenuSource);
 
 	// Represent a material using ImGui
 	void drawMaterials(Scene& scene);

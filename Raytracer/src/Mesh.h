@@ -1,9 +1,11 @@
 #pragma once
 
-#include "AbstractShader.h"
+#include "shaders/AbstractShader.h"
+#include "gui/ContextMenuSource.h"
 
 #include "CoordinateUtility.h"
 #include "Logger.h"
+#include "Object.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -23,6 +25,9 @@ struct Vertex
 {
 	glm::vec4 position;
 	glm::vec4 normal;
+	glm::vec4 uv;
+	glm::vec4 tangent;
+	glm::vec4 bitangent;
 };
 
 struct Triangle
@@ -33,6 +38,15 @@ struct Triangle
 	glm::vec4 n1;
 	glm::vec4 n2;
 	glm::vec4 n3;
+	glm::vec4 uv1;
+	glm::vec4 uv2;
+	glm::vec4 uv3;
+	glm::vec4 t1;
+	glm::vec4 t2;
+	glm::vec4 t3;
+	glm::vec4 b1;
+	glm::vec4 b2;
+	glm::vec4 b3;
 	glm::vec3 normal;
 	float reflectiveness;
 	glm::vec3 color;
@@ -44,11 +58,11 @@ class BVH;
 
 class Model;
 
-class Mesh
+class Mesh : public Object, public ContextMenuSource
 {
 public:
-	Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices,
-		unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex);
+	Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices, glm::vec3 position,
+		unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex, unsigned int modelID, Model* model);
 	~Mesh();
 
 	void writeToShader(AbstractShader* shader, unsigned int ssbo, const glm::mat4& transformation);
@@ -70,25 +84,47 @@ public:
 	// Get the number of triangles in this single mesh
 	unsigned int getTriangleCount();
 
+	void writeDataToStream(std::ofstream& filestream) override;
+
 	// Set the index of the mesh this triangle belongs to
 	void setShaderMeshIndex(unsigned int shaderMeshIndex);
 
 	// Should be called when a material was deleted
 	void onDeleteMaterial(unsigned int index);
 
-	// Draws this mesh using the active shader
-	void draw(AbstractShader* shader, Scene* scene);
+	// Set the active material index
+	void setMaterialIndex(unsigned int index);
 
-	glm::vec3 position{ glm::vec3(0.0f) };
+	// Draws this mesh using the active shader
+	void draw(AbstractShader* shader, Scene* scene, glm::mat4& modelTransformation);
 
 	unsigned int VAO, VBO, EBO;
 
 	unsigned int* getMaterialIndexPointer();
 
-	std::string& getName();
-
 	// Get the index of the material this mesh uses
 	unsigned int getMaterialIndex() const;
+
+	unsigned int getModelID();
+
+	void renderContextMenuItems(Scene& scene) override;
+
+	void setModel(Model* model);
+	Model* getModel();
+
+	// Get the average vertex position from the origin of the model
+	glm::vec3 getAverageVertexPosition() const;
+
+	glm::vec3 getRotationPoint() const override;
+
+	bool isVertexDataChanged();
+	void setVertexDataChanged(bool newValue);
+
+	BVHNode* getRootNode(Model& model);
+
+	// Get an approximation of an appropriate distance the camera should be from the object
+	// after clicking the focus button.
+	virtual float getAppropriateCameraFocusDistance() override;
 
 private:
 	void setupMesh();
@@ -96,5 +132,14 @@ private:
 	// The index of the material this mesh uses
 	unsigned int materialIndex;
 
-	std::string name;
+	glm::vec3 averageVertexPosition;
+
+	glm::vec3 boundingBoxSize{ glm::vec3(0.0f) };
+
+	unsigned int modelID{ 0 };
+	Model* model;
+
+	bool vertexDataChanged{ true };
+
+	BVHNode* bvhRootNode{ nullptr };
 };

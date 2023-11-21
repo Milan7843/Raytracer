@@ -1,6 +1,6 @@
 #pragma once
 #include "../Object.h"
-#include "../Shader.h"
+#include "../shaders/Shader.h"
 #include "../Mesh.h"
 #include "BVHNode.h"
 
@@ -43,7 +43,7 @@ public:
 	static BVHNode* generateFromModel(Model& model, BVHNode* oldBVHRoot);
 
 	// Generate the BVH nodes from a given mesh
-	static BVHNode* generateFromMesh(Model& model, Mesh& mesh, BVHNode* oldBVHRoot);
+	static BVHNode* generateFromMesh(Model& model, const Mesh& mesh, BVHNode* oldBVHRoot);
 
 	// Write the given BVH into two SSBOs: one for position/size/structure data and one for index data
 	static void writeIntoSSBOs(BVHNode* root, unsigned int dataSSBO, unsigned int triangleSSBO);
@@ -60,7 +60,7 @@ private:
 
 	static BVHNode* generateBVHRecursively(std::vector<Triangle>& triangles, std::vector<unsigned int> indices, unsigned int depth, unsigned int shaderArrayBeginIndex);
 
-	static void flattenBVHTreeIndices(BVHNode* rootNode, std::vector<FlattenedBVHNode>& treeStructureData, std::vector<unsigned int>& indices);
+	static void flattenBVHTreeIndices(BVHNode* rootNode, std::vector<FlattenedBVHNode>& treeStructureData, std::vector<int>& indices);
 
 	static BVHNode* generateBVHRecursively(std::vector<BVHNode*> nodes);
 
