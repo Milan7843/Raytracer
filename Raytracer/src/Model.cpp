@@ -386,6 +386,16 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 			vertex.normal = aiVector3DToGLMVec4(mesh->mNormals[i]);
 		}
 
+		if (mesh->HasTextureCoords(0))
+		{
+			vertex.uv = aiVector3DToGLMVec4(mesh->mTextureCoords[0][i]);
+			std::cout << "uv " << vertex.uv.x << ", " << vertex.uv.y << ", " << vertex.uv.z << std::endl;
+		}
+		else
+		{
+			vertex.uv = glm::vec4(0.0f);
+		}
+
 		// Putting the new vertex into the vertices vector
 		vertices.push_back(vertex);
 
@@ -394,6 +404,17 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 	}
 
 	glm::vec3 meshPosition{ glm::vec3(meshPositionVec4.x, meshPositionVec4.y, meshPositionVec4.z) / (float)mesh->mNumVertices };
+
+	std::vector<glm::vec4> tangents;
+	std::vector<glm::vec4> bitangents;
+	std::vector<int> bi_ti_samplesPerVertex;
+
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+	{
+		tangents.push_back(glm::vec4(0.0f));
+		bitangents.push_back(glm::vec4(0.0f));
+		bi_ti_samplesPerVertex.push_back(0);
+	}
 
 	// Getting indices
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -411,6 +432,28 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 			}
 
 			// Another triangle has been added
+
+			// Calculating the tangent and bitangent vectors for each vertex
+			calculateTangentBitangent(
+				vertices,
+				face.mIndices[0], face.mIndices[1], face.mIndices[2], 
+				tangents, bitangents,
+				bi_ti_samplesPerVertex
+			);
+
+			calculateTangentBitangent(
+				vertices,
+				face.mIndices[1], face.mIndices[2], face.mIndices[0],
+				tangents, bitangents,
+				bi_ti_samplesPerVertex
+			);
+
+			calculateTangentBitangent(
+				vertices,
+				face.mIndices[2], face.mIndices[0], face.mIndices[1],
+				tangents, bitangents,
+				bi_ti_samplesPerVertex
+			);
 
 			// This variable is used to generate start indices for mesh's triangles
 			(*triangleCount)++;
@@ -440,6 +483,20 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 		}
 	}
 
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+	{
+		if (bi_ti_samplesPerVertex[i] == 0)
+		{
+			continue;
+		}
+
+		// There is at least one tangent/bitangent: take the average
+		vertices[i].tangent = tangents[i] / (float)bi_ti_samplesPerVertex[i];
+		vertices[i].bitangent = bitangents[i] / (float)bi_ti_samplesPerVertex[i];
+		std::cout << "tangent vertex " << i << ": " << vertices[i].tangent.x << ", " << vertices[i].tangent.y << ", " << vertices[i].tangent.z << std::endl;
+		std::cout << "bitangent vertex " << i << ": " << vertices[i].bitangent.x << ", " << vertices[i].bitangent.y << ", " << vertices[i].bitangent.z << std::endl;
+	}
+
 	std::string meshName{ mesh->mName.C_Str() };
 
 	return Mesh(meshName, vertices, indices, meshPosition, beginTriangleCount, meshCount, materialIndex, this->getID(), this);
@@ -449,6 +506,46 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 glm::vec4 Model::aiVector3DToGLMVec4(aiVector3D v)
 {
 	return glm::vec4(v.x, v.y, v.z, 1.0f);
+}
+
+void Model::calculateTangentBitangent(std::vector<Vertex>& vertices,
+	unsigned int index1, unsigned int index2, unsigned int index3,
+	std::vector<glm::vec4>& tangents,
+	std::vector<glm::vec4>& bitangents,
+	std::vector<int>& bi_ti_samplesPerVertex)
+{
+	Vertex& v1 = vertices[index1];
+	Vertex& v2 = vertices[index2];
+	Vertex& v3 = vertices[index3];
+
+	// Calculate the edge vectors for the triangle
+	glm::vec3 edge1 = glm::vec3(v2.position) - glm::vec3(v1.position);
+	glm::vec3 edge2 = glm::vec3(v3.position) - glm::vec3(v1.position);
+
+	// Calculate the difference in UV coordinates
+	glm::vec2 deltaUV1 = glm::vec2(v2.uv) - glm::vec2(v1.uv);
+	glm::vec2 deltaUV2 = glm::vec2(v3.uv) - glm::vec2(v1.uv);
+
+	// Calculate the tangent and bitangent
+	glm::vec4 tangent, bitangent;
+
+	float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+	tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+	tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+	tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+	tangent.w = 0.0f;
+	tangent = glm::normalize(tangent);
+
+	bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+	bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+	bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+	bitangent.w = 0.0f;
+	bitangent = glm::normalize(bitangent);
+
+	tangents[index1] += tangent;
+	bitangents[index1] += bitangent;
+	bi_ti_samplesPerVertex[index1]++;
 }
 
 std::ostream& operator<<(std::ostream& stream, const Model& model)

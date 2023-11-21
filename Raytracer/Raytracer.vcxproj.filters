@@ -195,6 +195,12 @@
     <ClCompile Include="src\file_handling\Cache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\TextureHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WindowUtility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -1472,6 +1478,15 @@
     <ClInclude Include="src\file_handling\Cache.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\TextureHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RasterizedDebugMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WindowUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\assimp\color4.inl">
@@ -1940,6 +1955,7 @@
     <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectVertex.shader" />
     <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectGeometry.shader" />
     <None Include="src\shader_src\gizmo_shaders\gizmoClickSelectFragment.shader" />
+    <None Include="src\shader_src\raytraceComputeShaderSampledUpdatedBackup.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />

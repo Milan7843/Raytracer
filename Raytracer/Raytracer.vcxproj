@@ -79,6 +79,8 @@
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\shaders\Shader.cpp" />
     <ClCompile Include="src\Sphere.cpp" />
+    <ClCompile Include="src\TextureHandler.cpp" />
+    <ClCompile Include="src\WindowUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Users\Milan\Downloads\ImGuizmo-1.83\ImGuizmo-1.83\GraphEditor.h" />
@@ -93,6 +95,7 @@
     <ClInclude Include="src\Maths.h" />
     <ClInclude Include="src\InputManager.h" />
     <ClInclude Include="src\gui\ContextMenuSource.h" />
+    <ClInclude Include="src\RasterizedDebugMode.h" />
     <ClInclude Include="src\shaders\ShaderInterface.h" />
     <ClInclude Include="src\shaders\MultiComputeShader.h" />
     <ClInclude Include="src\BVH\BVHNode.h" />
@@ -506,6 +509,8 @@
     <ClInclude Include="src\Sphere.h" />
     <ClInclude Include="src\stb_image.h" />
     <ClInclude Include="src\stb_image_write.h" />
+    <ClInclude Include="src\TextureHandler.h" />
+    <ClInclude Include="src\WindowUtility.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc142-mtd.dll" />
@@ -677,6 +682,7 @@
     <None Include="src\shader_src\raymarchVertexShader.shader" />
     <None Include="src\shader_src\raytraceComputeShaderSampled.shader" />
     <None Include="src\shader_src\raytraceComputeShaderSampledUpdated.shader" />
+    <None Include="src\shader_src\raytraceComputeShaderSampledUpdatedBackup.shader" />
     <None Include="src\shader_src\raytracingFragmentShader.shader" />
     <None Include="src\shader_src\screenTextureFragment.shader" />
     <None Include="src\shader_src\solidColorFragmentShader.shader" />

@@ -43,8 +43,17 @@ Scene SceneFileSaver::readSceneFromFile(const std::string& fileName, bool* succe
 
 	// String buffer for file data
 	std::string buffer;
+	bool hasHDRI;
+	filestream >> hasHDRI;
+
+	// Moving to the next line 
 	std::getline(filestream, buffer);
-	scene.loadHDRI(buffer);
+
+	// Reading the HDRI path
+	std::getline(filestream, buffer);
+	if (hasHDRI)
+		scene.loadHDRI(buffer);
+
 	std::getline(filestream, buffer);
 
 	// Loading all important scene data
@@ -82,6 +91,7 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 {
 	// String buffer for any full-line reading
 	std::string buffer;
+	std::string name;
 
 	while (filestream)
 	{
@@ -94,7 +104,7 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		}
 
 		// Getting the material's name
-		std::getline(filestream, buffer);
+		std::getline(filestream, name);
 
 		// Defining all other data
 		glm::vec3 color;
@@ -105,6 +115,11 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		glm::vec3 emission;
 		float emissionStrength;
 		float fresnelReflectionStrength;
+		bool hasAlbedoTexture;
+		std::string albedoTexturePath;
+		bool hasNormalTexture;
+		std::string normalTexturePath;
+		float normalTextureStrength;
 
 		// Then getting said data
 		color = readVec3(filestream);
@@ -116,13 +131,46 @@ void readMaterials(std::ifstream& filestream, Scene& scene)
 		filestream >> emissionStrength;
 		filestream >> fresnelReflectionStrength;
 
+		filestream >> hasAlbedoTexture;
+		if (hasAlbedoTexture)
+		{
+			std::getline(filestream, buffer);
+			std::getline(filestream, albedoTexturePath);
+		}
+
+		filestream >> hasNormalTexture;
+		if (hasNormalTexture)
+		{
+			std::getline(filestream, buffer);
+			std::getline(filestream, normalTexturePath);
+		}
+		filestream >> normalTextureStrength;
+
+		/*
+		std::cout << "albedo map ? " << hasAlbedoTexture << ": " << albedoTexturePath << std::endl;
+		std::cout << "normal map ? " << hasNormalTexture << ": " << normalTexturePath << std::endl;
+		*/
+
 		// Creating the material with the read properties
-		Material material(buffer, color, reflectiveness, transparency, refractiveness, reflectionDiffusion, emission, emissionStrength, fresnelReflectionStrength);
+		Material material(name, color, reflectiveness, transparency, refractiveness, reflectionDiffusion, emission, emissionStrength, fresnelReflectionStrength);
+
+		if (hasAlbedoTexture)
+			material.setAlbedoTexture(albedoTexturePath, false);
+
+		if (hasNormalTexture)
+			material.setNormalTexture(normalTexturePath, false);
+
+		material.setNormalMapStrength(normalTextureStrength);
+		
+		//material.setNormalTexture("src/Textures/normal_map_test_2.png", false);
+		
 
 		// And adding the material to the scene
 		scene.addMaterial(material);
 
 		// Skipping two lines
+		// due to the fact that if the last data collection was already a getline, this one doubles
+		//if (!hasNormalTexture)
 		std::getline(filestream, buffer);
 		std::getline(filestream, buffer);
 	}

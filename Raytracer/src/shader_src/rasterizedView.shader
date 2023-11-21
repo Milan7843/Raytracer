@@ -4,6 +4,8 @@ out vec4 FragColor;
 
 in vec3 FragPos;
 in vec3 Normal;
+in vec2 uv;
+in mat3 tbn;
 
 #define NUM_POINT_LIGHTS 10
 #define NUM_DIR_LIGHTS 10
@@ -50,15 +52,35 @@ struct Material
     float refractiveness;
     float reflectionDiffusion;
 };
+struct MaterialTextureData
+{
+    bool hasAlbedoTexture;
+    float albedoTexture_xMin;
+    float albedoTexture_xMax;
+    float albedoTexture_yMin;
+    float albedoTexture_yMax;
+    bool hasNormalTexture;
+    float normalTexture_xMin;
+    float normalTexture_xMax;
+    float normalTexture_yMin;
+    float normalTexture_yMax;
+    float normalMapStrength;
+};
 uniform Material materials[NUM_MATERIALS];
+uniform MaterialTextureData materialTextureData[NUM_MATERIALS];
+
 
 uniform int materialIndex;
 
-
-
+// 0: regular
+// 1: albedo
+// 2: normals
+// 3: uvs
+uniform int debugMode;
 
 // Skybox
 uniform sampler2D hdri;
+uniform sampler2D textureAtlas;
 
 #define PI 3.14159265359
 float atan2(float x, float z)
@@ -72,13 +94,50 @@ float rand(vec2 co)
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
+vec3 sampleAlbedo(vec2 uv)
+{
+    if (!materialTextureData[materialIndex].hasAlbedoTexture)
+    {
+        return materials[materialIndex].color;
+    }
+
+    uv.x = mod(uv.x + 1.0, 1.0);
+    uv.y = mod(uv.y + 1.0, 1.0);
+
+    float u = (uv.x * (materialTextureData[materialIndex].albedoTexture_xMax - materialTextureData[materialIndex].albedoTexture_xMin)) + materialTextureData[materialIndex].albedoTexture_xMin;
+    float v = (uv.y * (materialTextureData[materialIndex].albedoTexture_yMax - materialTextureData[materialIndex].albedoTexture_yMin)) + materialTextureData[materialIndex].albedoTexture_yMin;
+
+    return materials[materialIndex].color * texture(textureAtlas, vec2(u, v)).rgb;
+}
+
+vec3 sampleNormal(vec2 uv)
+{
+    if (!materialTextureData[materialIndex].hasNormalTexture)
+    {
+        return Normal;
+    }
+
+    uv.x = mod(uv.x + 1.0, 1.0);
+    uv.y = mod(uv.y + 1.0, 1.0);
+
+    float u = (uv.x * (materialTextureData[materialIndex].normalTexture_xMax - materialTextureData[materialIndex].normalTexture_xMin)) + materialTextureData[materialIndex].normalTexture_xMin;
+    float v = (uv.y * (materialTextureData[materialIndex].normalTexture_yMax - materialTextureData[materialIndex].normalTexture_yMin)) + materialTextureData[materialIndex].normalTexture_yMin;
+
+    vec3 normalFromMap = texture(textureAtlas, vec2(u, v)).xyz;
+
+    normalFromMap = normalFromMap * 2.0 - 1.0;
+    normalFromMap = normalize(tbn * normalFromMap);
+
+    return normalize(materialTextureData[materialIndex].normalMapStrength * normalFromMap + (1.0 - materialTextureData[materialIndex].normalMapStrength) * Normal);
+}
+
 vec3 sampleHDRI(vec3 direction)
 {
     vec3 dir = normalize(direction);
 
     // Calculating HDRI base position
     float yaw = atan2(dir.x, dir.z);
-    float pitch = (dir.y / 2 + 0.5);
+    float pitch = (-dir.y / 2.0 + 0.5);
 
     float randomness = materials[materialIndex].reflectionDiffusion * 0.01;
 
@@ -115,8 +174,26 @@ vec3 calculateAmbientLight(AmbientLight light);
 void main()
 {
     vec3 viewDir = normalize(cameraPos - FragPos);
+    vec3 albedo = sampleAlbedo(uv);
+    vec3 normal = sampleNormal(uv);
 
-    FragColor = vec4(materials[materialIndex].color * calculateLights(FragPos, Normal, viewDir), 1.);
+
+    if (debugMode == 0)
+    {
+        FragColor = vec4(albedo * calculateLights(FragPos, normal, viewDir), 1.);
+    }
+    if (debugMode == 1)
+    {
+        FragColor = vec4(albedo, 1.0);
+    }
+    if (debugMode == 2)
+    {
+        FragColor = vec4(normal, 1.0);
+    }
+    if (debugMode == 3)
+    {
+        FragColor = vec4(uv, 0., 1.0);
+    }
 }
 
 vec3 calculateLights(vec3 pos, vec3 normal, vec3 viewDir)
@@ -126,13 +203,13 @@ vec3 calculateLights(vec3 pos, vec3 normal, vec3 viewDir)
     /* POINT LIGHTS */
     for (int i = 0; i < pointLightCount; i++)
     {
-        finalLight += calculatePointLight(pointLights[i], Normal, pos, viewDir);
+        finalLight += calculatePointLight(pointLights[i], normal, pos, viewDir);
     }
 
     /* DIRECTIONAL LIGHTS */
     for (int i = 0; i < dirLightCount; i++)
     {
-        finalLight += calculateDirLight(dirLights[i], Normal, viewDir);
+        finalLight += calculateDirLight(dirLights[i], normal, viewDir);
     }
 
     /* AMBIENT LIGHTS */

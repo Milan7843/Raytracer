@@ -28,7 +28,7 @@ uniform int pixelRenderSize;
 #define NUM_DIR_LIGHTS 10
 #define NUM_AMBIENT_LIGHTS 10
 #define NUM_MESHES 100
-#define NUM_MATERIALS 40
+#define NUM_MATERIALS 10
 
 //#define NUM_TRIANGLES 1
 //#define NUM_SPHERES 1
@@ -51,6 +51,15 @@ struct Tri
     vec4 n1;
     vec4 n2;
     vec4 n3;
+    vec4 uv1;
+    vec4 uv2;
+    vec4 uv3;
+    vec4 t1;
+    vec4 t2;
+    vec4 t3;
+    vec4 b1;
+    vec4 b2;
+    vec4 b3;
     vec3 normal;
     float reflectiveness;
     vec3 color;
@@ -144,6 +153,7 @@ vec3 getSphereNormal(Sphere sph, vec3 pos);
 // LIGHTS
 // Skybox
 uniform sampler2D hdri;
+uniform sampler2D textureAtlas;
 
 struct PointLight
 {
@@ -191,6 +201,7 @@ layout(std430, binding = 8) buffer Meshes
 
 
 
+
 struct Material
 {
     vec3 color;
@@ -202,7 +213,22 @@ struct Material
     float emissionStrength;
     float fresnelReflectionStrength;
 };
+struct MaterialTextureData
+{
+    bool hasAlbedoTexture;
+    float albedoTexture_xMin;
+    float albedoTexture_xMax;
+    float albedoTexture_yMin;
+    float albedoTexture_yMax;
+    bool hasNormalTexture;
+    float normalTexture_xMin;
+    float normalTexture_xMax;
+    float normalTexture_yMin;
+    float normalTexture_yMax;
+    float normalMapStrength;
+};
 uniform Material materials[NUM_MATERIALS];
+uniform MaterialTextureData materialTextureData[NUM_MATERIALS];
 uniform int materialCount;
 
 
@@ -304,6 +330,70 @@ vec3 getNormal(Tri tri, vec3 p)
         return normalize(tri.n1 * area1 + tri.n2 * area2 + tri.n3 * area3).xyz;
     }
     */
+    if (materialTextureData[meshes[tri.mesh].material].hasNormalTexture)
+    {
+        vec3 v1 = (meshes[tri.mesh].transformation * vec4(tri.v1.xyz, 1.0)).zyx;
+        vec3 v2 = (meshes[tri.mesh].transformation * vec4(tri.v2.xyz, 1.0)).zyx;
+        vec3 v3 = (meshes[tri.mesh].transformation * vec4(tri.v3.xyz, 1.0)).zyx;
+
+        vec3 a = v2 - v1;
+        vec3 b = v3 - v1;
+        vec3 c = p - v1;
+        float daa = dot(a, a);
+        float dab = dot(a, b);
+        float dbb = dot(b, b);
+        float dca = dot(c, a);
+        float dcb = dot(c, b);
+        float denom = daa * dbb - dab * dab;
+        float y = (dbb * dca - dab * dcb) / denom;
+        float z = (daa * dcb - dab * dca) / denom;
+        float x = 1.0f - y - z;
+
+        vec3 normal = -normalize(tri.n1.xyz * x + tri.n2.xyz * y + tri.n3.xyz * z).xyz;
+
+        vec3 T = normalize(vec3(meshes[tri.mesh].transformation * tri.t1));
+        vec3 B = normalize(vec3(meshes[tri.mesh].transformation * tri.b1));
+        vec3 N = normalize(vec3(meshes[tri.mesh].transformation * -tri.n1));
+
+        mat3 tbn1 = mat3(T, B, N);
+
+        T = normalize(vec3(meshes[tri.mesh].transformation * tri.t2));
+        B = normalize(vec3(meshes[tri.mesh].transformation * tri.b2));
+        N = normalize(vec3(meshes[tri.mesh].transformation * -tri.n2));
+
+        mat3 tbn2 = mat3(T, B, N);
+
+        T = normalize(vec3(meshes[tri.mesh].transformation * tri.t3));
+        B = normalize(vec3(meshes[tri.mesh].transformation * tri.b3));
+        N = normalize(vec3(meshes[tri.mesh].transformation * -tri.n3));
+
+        mat3 tbn3 = mat3(T, B, N);
+
+        // If there is a normal texture we use it
+        if (materialTextureData[meshes[tri.mesh].material].hasNormalTexture)
+        {
+            vec2 uv = tri.uv1.xy * x + tri.uv2.xy * y + tri.uv3.xy * z;
+            mat3 tbn = tbn1 * x + tbn2 * y + tbn3 * z;
+
+            // Normalzing uvs to [0, 1]
+            uv.x = mod(uv.x + 1.0, 1.0);
+            uv.y = mod(uv.y + 1.0, 1.0);
+
+            float u = (uv.x * (materialTextureData[meshes[tri.mesh].material].normalTexture_xMax - materialTextureData[meshes[tri.mesh].material].normalTexture_xMin))
+                + materialTextureData[meshes[tri.mesh].material].normalTexture_xMin;
+            float v = (uv.y * (materialTextureData[meshes[tri.mesh].material].normalTexture_yMax - materialTextureData[meshes[tri.mesh].material].normalTexture_yMin))
+                + materialTextureData[meshes[tri.mesh].material].normalTexture_yMin;
+
+            vec3 normalFromMap = texture(textureAtlas, vec2(u, v)).xyz;
+
+            normalFromMap = normalFromMap * 2.0 - 1.0;
+            normalFromMap = normalize(tbn * normalFromMap);
+
+            return normalize(materialTextureData[meshes[tri.mesh].material].normalMapStrength * normalFromMap + (1.0 - materialTextureData[meshes[tri.mesh].material].normalMapStrength) * normal);
+        }
+
+        return normal;
+    }
     if (true)
     {
         vec3 v1 = (meshes[tri.mesh].transformation * vec4(tri.v1.xyz, 1.0)).zyx;
@@ -326,6 +416,52 @@ vec3 getNormal(Tri tri, vec3 p)
     }
     // Default harsh normals
     return tri.normal;
+}
+
+
+// Get the normal of a triangle at the given position
+vec3 sampleAlbedo(Tri tri, vec3 p)
+{
+    if (!materialTextureData[meshes[tri.mesh].material].hasAlbedoTexture)
+    {
+        return materials[meshes[tri.mesh].material].color;
+    }
+
+    // Finding the relative coordinates
+    vec3 v1 = (meshes[tri.mesh].transformation * vec4(tri.v1.xyz, 1.0)).zyx;
+    vec3 v2 = (meshes[tri.mesh].transformation * vec4(tri.v2.xyz, 1.0)).zyx;
+    vec3 v3 = (meshes[tri.mesh].transformation * vec4(tri.v3.xyz, 1.0)).zyx;
+
+    vec3 a = v2 - v1;
+    vec3 b = v3 - v1;
+    vec3 c = p - v1;
+    float daa = dot(a, a);
+    float dab = dot(a, b);
+    float dbb = dot(b, b);
+    float dca = dot(c, a);
+    float dcb = dot(c, b);
+    float denom = daa * dbb - dab * dab;
+    float y = (dbb * dca - dab * dcb) / denom;
+    float z = (daa * dcb - dab * dca) / denom;
+    float x = 1.0f - y - z;
+
+    // Getting the albedo value from the texture
+    vec2 uv = tri.uv1.xy * x + tri.uv2.xy * y + tri.uv3.xy * z;
+
+    // Normalzing uvs to [0, 1]
+    uv.x = mod(uv.x + 1.0, 1.0);
+    uv.y = mod(uv.y + 1.0, 1.0);
+
+    float u = (uv.x * (materialTextureData[meshes[tri.mesh].material].albedoTexture_xMax - materialTextureData[meshes[tri.mesh].material].albedoTexture_xMin))
+        + materialTextureData[meshes[tri.mesh].material].albedoTexture_xMin;
+    float v = (uv.y * (materialTextureData[meshes[tri.mesh].material].albedoTexture_yMax - materialTextureData[meshes[tri.mesh].material].albedoTexture_yMin))
+        + materialTextureData[meshes[tri.mesh].material].albedoTexture_yMin;
+
+
+    vec3 textureAlbedo = texture(textureAtlas, vec2(u, v)).xyz;
+
+    // Default harsh normals
+    return textureAlbedo * materials[meshes[tri.mesh].material].color;
 }
 
 #define PI 3.14159265359
@@ -553,7 +689,7 @@ vec3 fireRayAndGetFinalColor(int blockLocalX, int blockLocalY, vec3 pos, vec3 di
         {
             // Calculating HDRI position
             float yaw = atan2(ray.dir.z, ray.dir.x);
-            float pitch = (ray.dir.y / 2 + 0.5);
+            float pitch = (-ray.dir.y / 2 + 0.5);
 
             skyColor = texture(hdri, vec2(yaw / (2 * PI), -pitch)).rgb;
         }
@@ -1046,6 +1182,7 @@ Intersection getAllIntersections(Ray ray, int skipTri, int skipSphere)
                     closestIntersection.closestTriHit = int(j);
                     // TODO optimise this to to as few getNormal calls as possible (not on underlying faces)
                     closestIntersection.normal = getNormal(triangles[j], isec.pos);
+                    closestIntersection.color = sampleAlbedo(triangles[j], isec.pos);
                     //closestIntersection.normal = vec3(0.0, 0.0, 1.0);
                 }
             }
@@ -1192,6 +1329,7 @@ Intersection triangleIntersection(Tri tri, Ray ray)
         i.pos = ray.pos + ray.dir * t;
         i.depth = t;
         i.normal = tri.normal.xyz;
+        //i.color = sampleAlbedo(tri, i.pos);
         i.color = materials[meshes[tri.mesh].material].color.rgb;
         i.reflectiveness = materials[meshes[tri.mesh].material].reflectiveness;
         i.transparency = materials[meshes[tri.mesh].material].transparency;

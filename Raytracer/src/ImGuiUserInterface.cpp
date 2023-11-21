@@ -32,6 +32,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	Camera& camera,
 	Renderer& renderer,
 	ApplicationRenderMode& applicationRenderMode,
+	RasterizedDebugMode& rasterizedDebugMode,
 	ContextMenuSource* contextMenuSource,
 	unsigned int screenTexture)
 {
@@ -75,6 +76,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 		camera,
 		renderer,
 		applicationRenderMode,
+		rasterizedDebugMode,
 		contextMenuSource
 	);
 
@@ -775,6 +777,46 @@ void ImGuiUserInterface::drawSceneEditor(GLFWwindow* window, SceneManager& scene
 
 		static bool updateHDRINames = true;
 
+		ImGui::Text("HDRI");
+		unsigned int previewTextureID{ 0 };
+		unsigned int previewTextureWidth{ 80 };
+		unsigned int previewTextureHeight{ 80 };
+
+		if (sceneManager.getCurrentScene().hasHDRI())
+		{
+			Texture* hdriTexture = sceneManager.getCurrentScene().getHDRI();
+
+			previewTextureID = hdriTexture->previewTextureID;
+			previewTextureWidth = hdriTexture->previewWidth;
+			previewTextureHeight = hdriTexture->previewHeight;
+		}
+
+		if (ImGui::ImageButton((void*)(intptr_t)previewTextureID, ImVec2(previewTextureWidth, previewTextureHeight)))
+		{
+			std::string imagePath = WindowUtility::openImageFileChooseDialog();
+
+			if (imagePath != std::string(""))
+			{
+				sceneManager.getCurrentScene().loadHDRI(imagePath);
+			}
+		}
+
+		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+		{
+			ImGui::OpenPopup("HDRITextureRightClick");
+		}
+
+		if (ImGui::BeginPopup("HDRITextureRightClick"))
+		{
+			if (ImGui::MenuItem("Remove"))
+			{
+				sceneManager.getCurrentScene().removeHDRI();
+			}
+
+			ImGui::EndPopup();
+		}
+
+		/*
 		if (ImGui::BeginPopup("##open_hdri_popup"))
 		{
 			// Stop updating while the popup is open
@@ -798,7 +840,7 @@ void ImGuiUserInterface::drawSceneEditor(GLFWwindow* window, SceneManager& scene
 				}
 			}
 			ImGui::EndPopup();
-		}
+		}*/
 
 		ImGui::EndTabItem();
 	}
@@ -825,7 +867,13 @@ void ImGuiUserInterface::drawSceneEditor(GLFWwindow* window, SceneManager& scene
 	ImGui::EndTabBar();
 }
 
-void ImGuiUserInterface::drawMenuBar(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode, ContextMenuSource* contextMenuSource)
+void ImGuiUserInterface::drawMenuBar(GLFWwindow* window,
+	SceneManager& sceneManager,
+	Camera& camera,
+	Renderer& renderer,
+	ApplicationRenderMode& applicationRenderMode,
+	RasterizedDebugMode& rasterizedDebugMode,
+	ContextMenuSource* contextMenuSource)
 {
 	static bool updateSceneNames{ true };
 
@@ -868,12 +916,12 @@ void ImGuiUserInterface::drawMenuBar(GLFWwindow* window, SceneManager& sceneMana
 				updateSceneNames = true;
 			}
 
-			if (ImGui::MenuItem("New scene"))
+			if (ImGui::MenuItem("New scene", "CTRL+N"))
 			{
 				sceneManager.newScene();
 			}
 
-			if (ImGui::MenuItem("Save"))
+			if (ImGui::MenuItem("Save", "CTRL+S"))
 			{
 				// If this scene does not yet have a name, open the save as popup
 				if ((*sceneManager.getCurrentScene().getNamePointer()).empty())
@@ -882,7 +930,7 @@ void ImGuiUserInterface::drawMenuBar(GLFWwindow* window, SceneManager& sceneMana
 					sceneManager.saveChanges();
 			}
 
-			if (ImGui::MenuItem("Save as"))
+			if (ImGui::MenuItem("Save as", "CTRL+SHIFT+S"))
 			{
 				openSaveAsPopup = true;
 			}
@@ -919,6 +967,67 @@ void ImGuiUserInterface::drawMenuBar(GLFWwindow* window, SceneManager& sceneMana
 			if (ImGui::MenuItem("Save render"))
 			{
 				ImGui::OpenPopup("##save_render_popup");
+			}
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("View"))
+		{
+			if (ImGui::BeginMenu("Debug view"))
+			{
+				if (ImGui::MenuItem("Disabled", NULL, rasterizedDebugMode == RasterizedDebugMode::REGULAR))
+				{
+					rasterizedDebugMode = RasterizedDebugMode::REGULAR;
+				}
+
+				if (ImGui::MenuItem("Albedo", NULL, rasterizedDebugMode == RasterizedDebugMode::ALBEDO))
+				{
+					rasterizedDebugMode = RasterizedDebugMode::ALBEDO;
+				}
+
+				if (ImGui::MenuItem("Normal", NULL, rasterizedDebugMode == RasterizedDebugMode::NORMALS))
+				{
+					rasterizedDebugMode = RasterizedDebugMode::NORMALS;
+				}
+
+				if (ImGui::MenuItem("UVs", NULL, rasterizedDebugMode == RasterizedDebugMode::UVS))
+				{
+					rasterizedDebugMode = RasterizedDebugMode::UVS;
+				}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("BVH display"))
+			{
+				if (ImGui::MenuItem("Disabled", NULL, renderer.getBVHRenderMode() == BVHRenderMode::DISABLED))
+				{
+					renderer.setBVHRenderMode(BVHRenderMode::DISABLED);
+				}
+
+				if (ImGui::MenuItem("Only leaves", NULL, renderer.getBVHRenderMode() == BVHRenderMode::LEAVES))
+				{
+					renderer.setBVHRenderMode(BVHRenderMode::LEAVES);
+				}
+
+				if (ImGui::MenuItem("All", NULL, renderer.getBVHRenderMode() == BVHRenderMode::ALL))
+				{
+					renderer.setBVHRenderMode(BVHRenderMode::ALL);
+				}
+				/*
+				if (ImGui::BeginMenu("Help"))
+				{
+					ImGui::Text((std::string("How the BVH (Bounding Volume Hierarchy) is drawn. ") +
+						"BVH is a way of structuring a model's triangle data in such a way that " +
+						"not all triangles have to be checked in order to know if a ray collision has occured." +
+						"\n'Disabled' will not draw anything." +
+						"\n'Only leaves' will draw onyl the nodes that contain vertices." +
+						"\n'All' will draw all nodes.").c_str());
+					ImGui::EndMenu();
+				}*/
+
+				ImGui::EndMenu();
 			}
 
 			ImGui::EndMenu();

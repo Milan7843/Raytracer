@@ -3,12 +3,15 @@
 #include "ShaderWritable.h"
 #include "ImGuiUtility.h"
 #include "ImGuiEditorInterface.h"
+#include "TextureHandler.h"
 
 #include <glm/glm.hpp>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
+
+#include "WindowUtility.h"
 
 // Forward declaration of the Shader class
 class AbstractShader;
@@ -58,6 +61,21 @@ public:
 	float* getReflectionDiffusionPointer();
 	glm::vec3* getEmissionPointer();
 
+	void setTexture(std::string& path, bool pixelPerfect);
+
+	bool hasAlbedoTexture();
+	void setAlbedoTexture(std::string& path, bool pixelPerfect);
+	void setAlbedoTexture(const char* path, bool pixelPerfect);
+	void removeAlbedoTexture();
+	AtlasTexture* getAlbedoTexture();
+
+	bool hasNormalTexture();
+	void setNormalTexture(std::string& path, bool pixelPerfect);
+	void setNormalTexture(const char* path, bool pixelPerfect);
+	void removeNormalTexture();
+	void setNormalMapStrength(float strength);
+	AtlasTexture* getNormalTexture();
+
 	// Write this material to the stream (human readable format)
 	friend std::ostream& operator<< (std::ostream& stream, const Material& material);
 protected:
@@ -65,4 +83,9 @@ protected:
 
 private:
 	std::string name;
+	bool m_hasAlbedoTexture;
+	std::shared_ptr<AtlasTexture> albedoTexture;
+	bool m_hasNormalTexture;
+	std::shared_ptr<AtlasTexture> normalTexture;
+	float normalMapStrength;
 };

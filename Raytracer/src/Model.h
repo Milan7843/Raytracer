@@ -89,4 +89,10 @@ private:
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCount, unsigned int* triangleCount);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materialIndex, unsigned int meshCount, unsigned int* triangleCount);
 	glm::vec4 aiVector3DToGLMVec4(aiVector3D v);
+
+	void calculateTangentBitangent(std::vector<Vertex>& vertices,
+		unsigned int index1, unsigned int index2, unsigned int index3, 
+		std::vector<glm::vec4>& tangents,
+		std::vector<glm::vec4>& bitangents,
+		std::vector<int>& bi_ti_samplesPerVertex);
 };

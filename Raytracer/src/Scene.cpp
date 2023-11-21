@@ -14,7 +14,11 @@ Scene::~Scene()
 void Scene::writeDataToStream(std::ofstream& filestream)
 {
 	// Writing the scene's data to the filestream
-	filestream << loadedHDRIName << "\n";
+	filestream << hasHDRI() << "\n";
+	if (hasHDRI())
+		filestream << getHDRI()->path << "\n";
+	else
+		filestream << "\n";
 
 	// Writing all materials
 	filestream << "# Materials\n";
@@ -101,27 +105,18 @@ void Scene::setName(std::string name)
 	this->name = name;
 }
 
-void Scene::loadHDRI(const std::string& imageName)
+void Scene::loadHDRI(const std::string& imagePath)
 {
-	std::string fileName = "HDRIs/" + imageName;
-
-	try
-	{
-		unsigned int textureID = ImageLoader::loadImage(fileName);
-
-		// Saving the data to this scene
-		this->hdri = textureID;
-		this->loadedHDRIName = imageName;
-	}
-	catch (const std::exception& e)
-	{
-		Logger::logError("Failed to load HDRI: " + fileName + ".\nReason: " + e.what());
-	}
+	hdri = TextureHandler::loadTexture(imagePath, false, 2.0f);
 }
 
-unsigned int Scene::getHDRI()
+Texture* Scene::getHDRI()
 {
-	return hdri;
+	if (!hasHDRI())
+	{
+		return nullptr;
+	}
+	return hdri.get();
 }
 
 
@@ -138,6 +133,11 @@ void Scene::addLight(PointLight& pointLight)
 	this->pointLightCount++;
 }
 
+bool Scene::hasHDRI()
+{
+	return hdri != nullptr;
+}
+
 void Scene::addLight(DirectionalLight& directionalLight)
 {
 	// Full of directional lights
@@ -149,6 +149,11 @@ void Scene::addLight(DirectionalLight& directionalLight)
 	directionalLights.push_back(directionalLight);
 
 	this->directionalLightCount++;
+}
+
+void Scene::removeHDRI()
+{
+	hdri = nullptr;
 }
 
 void Scene::addLight(AmbientLight& ambientLight)
@@ -474,15 +479,35 @@ Camera& Scene::getActiveCamera()
 	return cameras[activeCamera];
 }
 
-void Scene::draw(AbstractShader* shader)
+void Scene::draw(AbstractShader* shader, RasterizedDebugMode debugMode)
 {
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	shader->use();
 
+	// Debug mode
+	shader->setInt("debugMode", (int)debugMode);
+
+	// Binding the hdri
+	shader->setInt("hdri", 0);
+
+	// Binding the texture atlas
+	shader->setInt("textureAtlas", 1);
+
+	if (hasHDRI())
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, getHDRI()->textureID);
+	}
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, TextureHandler::packTextures(materials));
+
 	// First writing all material data to the shader
 	writeMaterialsToShader(shader);
 	shader->setVector3("cameraPos", getActiveCamera().getPosition());
+
+	shader->setFloat("materials[0].normalTexture_xMax", 1.0f);
 
 	// View matrix
 	glm::mat4 view = glm::mat4(1.0f);
@@ -493,12 +518,6 @@ void Scene::draw(AbstractShader* shader)
 	glm::mat4 projection;
 	projection = getActiveCamera().getProjectionMatrix();
 	shader->setMat4("projection", projection);
-
-	// Binding the hdri
-	shader->setInt("hdri", 0);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, getHDRI());
 
 	for (Model& model : models)
 	{

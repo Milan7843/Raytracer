@@ -9,6 +9,8 @@ void removeFolderAndFiletype(std::vector<std::string>& fileNames, const char* fo
 
 std::vector<std::string> FileUtility::getFilesOfTypeInFolder(const char* folder, const char* filetype)
 {
+	//std::cout << std::filesystem::current_path() << std::endl;
+
 	std::vector<std::string> filesFound{};
 	try
 	{

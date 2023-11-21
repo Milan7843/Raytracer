@@ -257,7 +257,7 @@ Mirror
 # Models
 living room
 0 0 0
-0 0 0
+0 -0 0
 1 1 1
 src/models/living room.obj
 71
@@ -347,7 +347,7 @@ rug_Cube.002
 1 1 1
 couch_Plane
 0 0 0
-0 0 0
+0 -0 0
 1 1 1
 couch_legs_Plane.001
 0 0 0
@@ -617,72 +617,28 @@ Cube.018_Cube.016
 0 0 0
 0 0 0
 1 1 1
-
-plane
-0 3.38 0
-0 0 0
-0.4 1 0.4
-src/models/plane.obj
-1
-21
-1
-Plane
-0 0 0
-0 0 0
-1 1 1
-
-plane
-2.57 1.99 -0.6
--0.25 0 -1.25
-0.3 1 0.3
-src/models/plane.obj
-1
-21
-1
-Plane
-0 0 0
-0 0 0
-1 1 1
-
-plane
--1 1.79 2.93
-1.4 -0.22 -0.01
-0.3 1 0.3
-src/models/plane.obj
-1
-21
-1
-Plane
-0 0 0
-0 0 0
-1 1 1
 # Models end
 
 # Point lights
 Point light
 1 1 1
 1
-0 1.44 0
+0.237961 1.9892 0.30896
 0
 # Point lights end
 
 # Directional lights
-Directional light
-1 1 1
-1
--0.59 -1 -0.57
-0
 # Directional lights end
 
 # Ambient lights
 # Ambient lights end
 
 # Cameras
-0.92571 1.83043 0.452261
--24.2002
-3452.75
+6.54648 4.63383 7.37761
+-17.4003
+3468.65
 1
-37.333
+16.333
 1.844
 # Cameras end
 

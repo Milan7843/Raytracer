@@ -34,6 +34,8 @@ int Application::Start()
     }
     glfwMakeContextCurrent(window);
 
+    WindowUtility::setWindow(window);
+
     ImGuiUserInterface userInterface;
 
     Logger::log("Initializing ImGui");
@@ -116,6 +118,10 @@ int Application::Start()
     Callbacks& callbacks = Callbacks::getInstance();
     callbacks.bindSceneManager(&sceneManager);
     glfwSetScrollCallback(window, Callbacks::scrollCallback);
+
+    TextureHandler::loadTexture("couch.png", false);
+    TextureHandler::loadTexture("normal_map_test.png", false);
+    TextureHandler::loadTexture("test.png", false);
 
     // Unused shaders... (should remove)
     //Shader uvShader("src/Shaders/uvColorVertexShader.shader", "src/Shaders/uvColorFragmentShader.shader");
@@ -287,7 +293,6 @@ int Application::Start()
             {
                 popupOpenOnStartClick = false;
             }
-            std::cout << popupOpenOnStartClick << std::endl;
 
             // Checking for a click on an object on mouse click and mouse not on GUI
             if (!popupOpen && !popupOpenOnStartClick && !userInterface.isMouseOnGUI() && userInterface.isEnabled() && userInterface.isMouseOnRenderedScreen())
@@ -319,8 +324,8 @@ int Application::Start()
 
             glDisable(GL_DEPTH_TEST);
             // Drawing the HDRI (skybox) if using it as a background is enabled
-            if (*sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer())
-                hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI(), sceneManager.getCurrentScene().getActiveCamera());
+            if (*sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer() && sceneManager.getCurrentScene().hasHDRI())
+                hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI()->textureID, sceneManager.getCurrentScene().getActiveCamera());
 
             glEnable(GL_DEPTH_TEST);
 
@@ -331,7 +336,7 @@ int Application::Start()
             drawAxes(axesVAO, &solidColorShader, &sceneManager.getCurrentScene().getActiveCamera());
 
             /* Rasterized scene rendering */
-            sceneManager.getCurrentScene().draw(&rasterizedShader);
+            sceneManager.getCurrentScene().draw(&rasterizedShader, currentRasterizedDebugMode);
 
             sceneManager.getCurrentScene().drawGizmos(gizmoRenderer);
 
@@ -356,6 +361,7 @@ int Application::Start()
             sceneManager.getCurrentScene().getActiveCamera(),
             raytracingRenderer,
             currentRenderMode,
+            currentRasterizedDebugMode,
             contextMenuSource,
             screenTexture
         );
