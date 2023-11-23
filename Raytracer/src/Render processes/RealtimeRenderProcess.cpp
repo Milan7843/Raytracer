@@ -18,11 +18,11 @@ RealtimeRenderProcess::~RealtimeRenderProcess()
 {
 }
 
-void RealtimeRenderProcess::update(float deltaTime, ComputeShader& computeShader)
+unsigned int RealtimeRenderProcess::update(float deltaTime, ComputeShader& computeShader)
 {
 	if (finished)
 	{
-		return;
+		return 0;
 	}
 
 	computeShader.setInt("pixelRenderSize", currentPixelSize);
@@ -39,6 +39,8 @@ void RealtimeRenderProcess::update(float deltaTime, ComputeShader& computeShader
 	}
 
 	currentPixelSize = currentPixelSize / 2;
+
+	return (unsigned int)((float)width * height / (currentPixelSize * currentPixelSize));
 }
 
 void RealtimeRenderProcess::generateStackBuffer()

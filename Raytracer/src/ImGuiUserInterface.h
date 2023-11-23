@@ -145,6 +145,14 @@ private:
 		RasterizedDebugMode& rasterizedDebugMode,
 		ContextMenuSource* contextMenuSource);
 
+	void drawRenderInfo(GLFWwindow* window,
+		SceneManager& sceneManager,
+		Camera& camera,
+		Renderer& renderer,
+		ApplicationRenderMode& applicationRenderMode,
+		RasterizedDebugMode& rasterizedDebugMode,
+		ContextMenuSource* contextMenuSource);
+
 	// Represent a material using ImGui
 	void drawMaterials(Scene& scene);
 	void drawMaterial(Material& material, Scene& scene, unsigned int index);

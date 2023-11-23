@@ -7,7 +7,8 @@ public:
 	~RenderProcess() {}
 
 	// Update this render process; must be called every frame
-	virtual void update(float deltaTime, ComputeShader& computeShader) {}
+	// Returns the number of pixels that have been rendered
+	virtual unsigned int update(float deltaTime, ComputeShader& computeShader) = 0;
 
 	// The current progress of this render process [0.0f, 1.0f]
 	virtual float getRenderProgressPrecise() { return 0.0f; }
@@ -17,6 +18,12 @@ public:
 
 	// Get whether the process is finished
 	bool isFinished();
+
+	// Get the number of rays fired per second
+	unsigned int getRaysPerSecond()
+	{
+		return raysPerSecond;
+	}
 
 protected:
 	RenderProcess(
@@ -44,5 +51,6 @@ protected:
 
 	int stackSize{ 32 };
 	unsigned int stackBuffer{ 0 };
+	unsigned int raysPerSecond{ 0 };
 };
 

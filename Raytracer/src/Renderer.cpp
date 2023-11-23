@@ -45,6 +45,8 @@ void Renderer::startBlockRender()
 
 	// Starting a new render process
 	currentRenderProcess = new BlockRenderProcess(computeShader, width, height, blockSize, renderPassCount);
+
+	unpause();
 }
 
 void Renderer::startRealtimeFrameRender()
@@ -55,6 +57,8 @@ void Renderer::startRealtimeFrameRender()
 
 	// Starting a new render process
 	currentRenderProcess = new RealtimeRenderProcess(computeShader, width, height);
+
+	unpause();
 }
 
 void Renderer::setUpForRender(Scene& scene, Camera* camera)
@@ -114,8 +118,9 @@ void Renderer::update(float deltaTime, bool realtimeRaytracing, bool cameraMoved
 		startRealtimeFrameRender();
 	}
 
-	if (currentRenderProcess == nullptr)
+	if (currentRenderProcess == nullptr || paused)
 	{
+		raysPerSecond = 0;
 		return;
 	}
 
@@ -140,7 +145,19 @@ void Renderer::update(float deltaTime, bool realtimeRaytracing, bool cameraMoved
 	bindPixelBuffer();
 
 	// There is a process going on, so we update it
-	return currentRenderProcess->update(deltaTime, computeShader);
+	unsigned int pixelsRendered{ currentRenderProcess->update(deltaTime, computeShader) };
+	raysSinceLastRaysPerSecondUpdate += pixelsRendered * sampleCount;
+	timeSinceRaysPerSecondUpdate += deltaTime;
+
+	// If it is time for a new update
+	if (timeSinceRaysPerSecondUpdate > timeBetweenRaysPerSecondUpdate)
+	{
+		raysPerSecond = (float)raysSinceLastRaysPerSecondUpdate / timeSinceRaysPerSecondUpdate;
+
+		timeSinceRaysPerSecondUpdate = 0.0f;
+		raysSinceLastRaysPerSecondUpdate = 0;
+	}
+
 }
 
 void Renderer::updateMeshData(Scene* scene)
@@ -229,7 +246,7 @@ void Renderer::drawInterface()
 	ImGuiUtility::drawHelpMarker("The number of different sample points per pixel, works as anti-aliasing.");
 
 	// Samples per render pass
-	ImGui::SliderInt("Sample count", &sampleCount, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::SliderInt("Sample count", &sampleCount, 1, 1000, "%d", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_Logarithmic);
 	ImGuiUtility::drawHelpMarker("The number of samples per pixel per render pass.");
 
 	// Render passes per block
@@ -273,6 +290,31 @@ float Renderer::getTimeLeft()
 	float totalTime = currentRenderProcess->getCurrentProcessTime() / std::max(getRenderProgressPrecise(), 0.001f);
 
 	return totalTime - getRenderProgress() * totalTime;
+}
+
+unsigned int Renderer::getRaysPerSecond()
+{
+	return raysPerSecond;
+}
+
+bool Renderer::isPaused()
+{
+	return paused;
+}
+
+void Renderer::pause()
+{
+	this->setPaused(true);
+}
+
+void Renderer::unpause()
+{
+	this->setPaused(false);
+}
+
+void Renderer::setPaused(bool pause)
+{
+	this->paused = pause;
 }
 
 BVHRenderMode Renderer::getBVHRenderMode()

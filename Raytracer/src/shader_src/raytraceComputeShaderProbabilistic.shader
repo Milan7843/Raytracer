@@ -615,7 +615,8 @@ void main()
     }*/
 
     
-    float neighbourSumBrightness = 0.0;
+    //float neighbourSumBrightness = 0.0;
+    float neighbourMaxBrightness = 0.0;
     float samples = 0;
     int neighbourhoodSize = 3;
     for (int ny = -neighbourhoodSize; ny <= neighbourhoodSize; ny++)
@@ -630,14 +631,19 @@ void main()
 
             int neighbourPixelIndex = toPixelIndex(cx + nx, cy + ny);
             vec4 neighbourColour = colors[neighbourPixelIndex];
-            neighbourSumBrightness += (neighbourColour.x + neighbourColour.y + neighbourColour.z) / 3.0;
-            samples += 1.0;
+            float brightness = (neighbourColour.x + neighbourColour.y + neighbourColour.z) / 3.0;
+            //neighbourSumBrightness += brightness;
+            //samples += 1.0;
+            if (brightness > neighbourMaxBrightness)
+            {
+                neighbourMaxBrightness = brightness;
+            }
         }
     }
 
-    float neighbourAvgBrightness = neighbourSumBrightness / samples;
+    //float neighbourAvgBrightness = neighbourSumBrightness / samples;
     //neighbourAvgBrightness = 0.5;
-    int samplesPerPixel = max(min(int(max(neighbourAvgBrightness, 0.1) * sampleCount * 3), sampleCount), 1);
+    int samplesPerPixel = max(min(int(neighbourMaxBrightness * sampleCount), sampleCount), 1);
     //samplesPerPixel = sampleCount;
 
     // TODO make buffer empty on begin of render!
@@ -648,7 +654,8 @@ void main()
         pixelData[pixelIndex].dir = vec4(0.0);
         samplesPerPixel = sampleCount;
     }
-    /* for testing this feature
+    /*
+    // for testing this feature
     else if (currentBlockRenderPassIndex == 1)
     {
         // Empty the buffer here

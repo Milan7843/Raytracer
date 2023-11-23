@@ -25,11 +25,11 @@ BlockRenderProcess::~BlockRenderProcess()
 	glDeleteBuffers(1, &indirectLightingDataBuffer);
 }
 
-void BlockRenderProcess::update(float deltaTime, ComputeShader& computeShader)
+unsigned int BlockRenderProcess::update(float deltaTime, ComputeShader& computeShader)
 {
 	if (finished)
 	{
-		return;
+		return 0;
 	}
 
 	// Render a block
@@ -38,11 +38,13 @@ void BlockRenderProcess::update(float deltaTime, ComputeShader& computeShader)
 	// Add past time to current render time
 	currentProcessTime += deltaTime;
 
+	unsigned int pixelsRendered{ (unsigned int)blockSize * blockSize };
+
 	// Check if we need to render more passes on this specific block
 	if (currentBlockRenderPassIndex < renderPassCount)
 	{
 		// Stay on this block
-		return;
+		return pixelsRendered;
 	}
 
 	// Check if it is at the right side of the screen
@@ -66,6 +68,8 @@ void BlockRenderProcess::update(float deltaTime, ComputeShader& computeShader)
 	{
 		finished = true;
 	}
+
+	return pixelsRendered;
 }
 
 void BlockRenderProcess::generateIndirectLightingDataBuffer()

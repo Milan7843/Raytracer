@@ -64,11 +64,18 @@ public:
 
 	float getRenderProgress();
 	float getTimeLeft();
+	unsigned int getRaysPerSecond();
+	bool isPaused();
+	void pause();
+	void unpause();
+	void setPaused(bool pause);
 
 	BVHRenderMode getBVHRenderMode();
 	void setBVHRenderMode(BVHRenderMode newBVHRenderMode);
 
 private:
+
+	bool paused{ false };
 
 	// Format a number of seconds
 	std::string formatTime(float time);
@@ -119,6 +126,11 @@ private:
 
 	// How much the HDRI contributes to the lighting of the scene
 	float hdriLightStrength{ 0.2f };
+
+	unsigned int raysPerSecond{ 0 };
+	unsigned int raysSinceLastRaysPerSecondUpdate{ 0 };
+	float timeSinceRaysPerSecondUpdate{ 5.0f };
+	float timeBetweenRaysPerSecondUpdate{ 0.5f };
 
 	// How the BVH's are rendered
 	BVHRenderMode bvhRenderMode{ BVHRenderMode::DISABLED };

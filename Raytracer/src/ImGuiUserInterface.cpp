@@ -215,6 +215,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 					{
 						Model* model{ dynamic_cast<Model*>(object) };
 						model->setVertexDataChanged(true);
+						object->markUnsavedChanges();
 					}
 				}
 
@@ -291,6 +292,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 					if (deltaMatrix != glm::mat4(1.0f))
 					{
 						mesh->setVertexDataChanged(true);
+						object->markUnsavedChanges();
 					}
 				}
 
@@ -358,6 +360,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 					if (deltaMatrix != glm::mat4(1.0f))
 					{
 						dynamic_cast<Light*>(object)->clearShaderWrittenTo();
+						object->markUnsavedChanges();
 					}
 				}
 
@@ -428,12 +431,15 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 			applicationRenderMode,
 			contextMenuSource
 		);
-
-		// Render time left indicators
-		ImGui::ProgressBar(renderer.getRenderProgress());
-		ImGui::Text("Render time left: ");
-		ImGui::SameLine();
-		ImGui::Text(formatTime(renderer.getTimeLeft()).c_str());
+		drawRenderInfo(
+			window,
+			sceneManager,
+			camera,
+			renderer,
+			applicationRenderMode,
+			rasterizedDebugMode,
+			contextMenuSource
+		);
 
 
 		// Drawing the selected object
@@ -460,6 +466,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 
 	// If the context menu source exists
 	sceneManager.getCurrentScene().renderContextMenus();
+	
 
 	// Rendering
 	ImGui::Render();
@@ -1432,6 +1439,51 @@ void ImGuiUserInterface::drawExitWithUnsavedChangesPrompt(GLFWwindow* window, Sc
 			ImGui::CloseCurrentPopup();
 		}
 	}
+}
+
+void ImGuiUserInterface::drawRenderInfo(GLFWwindow* window, SceneManager& sceneManager, Camera& camera, Renderer& renderer, ApplicationRenderMode& applicationRenderMode, RasterizedDebugMode& rasterizedDebugMode, ContextMenuSource* contextMenuSource)
+{
+	// Create a simple button to show the popup
+	if (ImGui::Button(renderer.isPaused() ? "Continue" : "Pause"))
+	{
+		renderer.setPaused(!renderer.isPaused());
+	}
+
+	// Render time left indicators in the popup
+	ImGui::ProgressBar(renderer.getRenderProgress());
+	ImGui::Text("Render time left: ");
+	ImGui::SameLine();
+	ImGui::Text(std::to_string(renderer.getTimeLeft()).c_str());
+
+	const double billion = 1e9;
+	const double million = 1e6;
+	const double thousand = 1e3;
+
+	std::string raysPerSecondText;
+
+	unsigned int raysPerSecond{ renderer.getRaysPerSecond() };
+
+	if (raysPerSecond >= billion)
+	{
+		double value = round(raysPerSecond / billion * 10.0) / 10.0;
+		raysPerSecondText = std::format("{:.2f}", value) + " Giga-rays/s";
+	}
+	else if (raysPerSecond >= million)
+	{
+		double value = round(raysPerSecond / million * 10.0) / 10.0;
+		raysPerSecondText = std::format("{:.2f}", value) + " Mega-rays/s";
+	}
+	else if (raysPerSecond >= thousand)
+	{
+		double value = round(raysPerSecond / thousand * 10.0) / 10.0;
+		raysPerSecondText = std::format("{:.2f}", value) + " Kilo-rays/s";
+	}
+	else
+	{
+		raysPerSecondText = std::format("{:.2f}", (float)raysPerSecond) + " rays/s";
+	}
+
+	ImGui::Text(raysPerSecondText.c_str());
 }
 
 void ImGuiUserInterface::drawObjects(SceneManager& sceneManager)

@@ -12,7 +12,7 @@ public:
 	);
 	~RealtimeRenderProcess();
 
-	void update(float deltaTime, ComputeShader& computeShader) override;
+	unsigned int update(float deltaTime, ComputeShader& computeShader) override;
 
 	float getRenderProgressPrecise() override;
 
