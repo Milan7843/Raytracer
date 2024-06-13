@@ -2,7 +2,7 @@
 
 #include "Scene.h"
 
-Model::Model(std::string& name, std::vector<unsigned int>& meshMaterialIndices,
+Model::Model(std::string& name,
 	const std::string& path, unsigned int* meshCount, unsigned int* triangleCount,
 	unsigned int MAX_MESH_COUNT)
 	: path(path)
@@ -13,7 +13,7 @@ Model::Model(std::string& name, std::vector<unsigned int>& meshMaterialIndices,
 
 	// Checking how many triangles this model adds
 	unsigned int triangleCountBefore{ *triangleCount };
-	loadModel(path, meshMaterialIndices, meshCount, triangleCount, MAX_MESH_COUNT);
+	loadModel(path, meshCount, triangleCount, MAX_MESH_COUNT);
 	unsigned int triangleCountAfter{ *triangleCount };
 
 	this->triangleCount = triangleCountAfter - triangleCountBefore;
@@ -21,8 +21,7 @@ Model::Model(std::string& name, std::vector<unsigned int>& meshMaterialIndices,
 	setType(MODEL);
 }
 
-Model::Model(unsigned int meshMaterialIndex,
-	const std::string& path, unsigned int* meshCount, unsigned int* triangleCount,
+Model::Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount,
 	unsigned int MAX_MESH_COUNT)
 	: path(path)
 	, Object()
@@ -31,34 +30,12 @@ Model::Model(unsigned int meshMaterialIndex,
 	// Automatically setting name based on model name
 	this->name = path.substr(path.find_last_of('/') + 1, path.find_last_of('.') - (path.find_last_of('/') + 1));
 
-	loadModel(path, meshMaterialIndex, meshCount, triangleCount, MAX_MESH_COUNT);
+	loadModel(path, meshCount, triangleCount, MAX_MESH_COUNT);
 	setType(MODEL);
 }
 
 Model::~Model()
 {
-}
-
-void Model::writeDataToStream(std::ofstream& filestream)
-{
-	// Writing basic object data
-	Object::writeDataToStream(filestream);
-
-	// Writing specific model data
-	filestream << path << "\n";
-
-	// Writing the number of submeshes, then all mesh's material indices to filestream
-	filestream << meshes.size() << "\n";
-	for (Mesh& mesh : meshes)
-	{
-		filestream << *mesh.getMaterialIndexPointer() << "\n";
-	}
-
-	filestream << meshes.size() << "\n";
-	for (Mesh& mesh : meshes)
-	{
-		mesh.writeDataToStream(filestream);
-	}
 }
 
 void Model::prepareForDraw(AbstractShader* shader)
@@ -87,11 +64,11 @@ bool Model::drawInterface(Scene& scene)
 	bool anyPropertiesChanged{ false };
 
 	//anyPropertiesChanged |= ImGui::InputText("Name", &getName());
-	ImGui::InputText("Name", &getName());
+	ImGui::InputText("Name##", getNamePointer());
 	// Showing transformations
-	anyPropertiesChanged |= ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
-	anyPropertiesChanged |= ImGui::DragFloat3("Rotation", (float*)getRotationPointer(), 0.01f);
-	anyPropertiesChanged |= ImGui::DragFloat3("Scale", (float*)getScalePointer(), 0.01f);
+	anyPropertiesChanged |= ImGui::DragFloat3("Position##", (float*)getPositionPointer(), 0.01f);
+	anyPropertiesChanged |= ImGui::DragFloat3("Rotation##", (float*)getRotationPointer(), 0.01f);
+	anyPropertiesChanged |= ImGui::DragFloat3("Scale##", (float*)getScalePointer(), 0.01f);
 
 	if (anyPropertiesChanged)
 	{
@@ -221,7 +198,7 @@ void Model::setVertexDataChanged(bool newValue, bool alsoSetMeshes)
 	}
 }
 
-void Model::loadModel(std::string path, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT)
+void Model::loadModel(std::string path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);
@@ -236,23 +213,7 @@ void Model::loadModel(std::string path, std::vector<unsigned int>& meshMaterialI
 
 	unsigned int* meshIndex = new unsigned int(0);
 
-	processNode(scene->mRootNode, scene, meshMaterialIndices, meshCount, meshIndex, triangleCount, MAX_MESH_COUNT);
-}
-
-void Model::loadModel(std::string path, unsigned int meshMaterialIndex, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT)
-{
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);
-
-	// Checking for errors
-	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-	{
-		Logger::logError(std::string("Assimp error: model loading failed:") + importer.GetErrorString());
-		return;
-	}
-	directory = path.substr(0, path.find_last_of('/'));
-
-	processNode(scene->mRootNode, scene, meshMaterialIndex, meshCount, triangleCount, MAX_MESH_COUNT);
+	processNode(scene->mRootNode, scene, meshCount, meshIndex, triangleCount, MAX_MESH_COUNT);
 }
 
 float Model::getAppropriateCameraFocusDistance()
@@ -268,7 +229,7 @@ float Model::getAppropriateCameraFocusDistance()
 	return maxDistance;
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* meshIndex, unsigned int* triangleCount,
+void Model::processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* meshIndex, unsigned int* triangleCount,
 	unsigned int MAX_MESH_COUNT)
 {
 	// Reading mesh data for each mesh
@@ -282,7 +243,7 @@ void Model::processNode(aiNode* node, const aiScene* scene, std::vector<unsigned
 		}
 
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene, meshMaterialIndices[*meshIndex], *meshCount, triangleCount));
+		meshes.push_back(processMesh(mesh, scene, *meshCount, triangleCount));
 
 		(*meshCount)++;
 		(*meshIndex)++;
@@ -291,87 +252,11 @@ void Model::processNode(aiNode* node, const aiScene* scene, std::vector<unsigned
 	// Reading all the data from all children
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
-		processNode(node->mChildren[i], scene, meshMaterialIndices, meshCount, meshIndex, triangleCount, MAX_MESH_COUNT);
-	}
-}
-
-void Model::processNode(aiNode* node, const aiScene* scene, unsigned int meshMaterialIndex, unsigned int* meshCount, unsigned int* triangleCount,
-	unsigned int MAX_MESH_COUNT)
-{
-	// Reading mesh data for each mesh
-	for (unsigned int i = 0; i < node->mNumMeshes; i++)
-	{
-		// Reached maximum number of meshes
-		if (*meshCount >= MAX_MESH_COUNT)
-		{
-			// Stop loading more meshes
-			return;
-		}
-
-		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene, meshMaterialIndex, *meshCount, triangleCount));
-
-		(*meshCount)++;
-	}
-
-	// Reading all the data from all children
-	for (unsigned int i = 0; i < node->mNumChildren; i++)
-	{
-		processNode(node->mChildren[i], scene, meshMaterialIndex, meshCount, triangleCount, MAX_MESH_COUNT);
+		processNode(node->mChildren[i], scene, meshCount, meshIndex, triangleCount, MAX_MESH_COUNT);
 	}
 }
 
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCount, unsigned int* triangleCount)
-{
-	int beginTriangleCount = *triangleCount;
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	glm::vec4 meshPositionVec4{ glm::vec4(0.0f) };
-
-	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
-	{
-		// New vertex
-		Vertex vertex;
-
-		vertex.position = aiVector3DToGLMVec4(mesh->mVertices[i]);
-
-		// Adding normals if possible
-		if (mesh->HasNormals())
-		{
-			vertex.normal = aiVector3DToGLMVec4(mesh->mNormals[i]);
-		}
-
-		// Putting the new vertex into the vertices vector
-		vertices.push_back(vertex);
-
-		// Calculating the average vertex position
-		meshPositionVec4 += vertex.position;
-	}
-
-	glm::vec3 meshPosition{ glm::vec3(meshPositionVec4.x, meshPositionVec4.y, meshPositionVec4.z) / (float)mesh->mNumVertices };
-
-	// Getting indices
-	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-	{
-		aiFace face = mesh->mFaces[i];
-		// Pushing each index of the face
-		if (face.mNumIndices < 3) continue;
-		for (unsigned int j = 0; j < face.mNumIndices; j++)
-		{
-			indices.push_back(face.mIndices[j]);
-		}
-		// Another triangle has been added
-
-		// This variable is used to generate start indices for mesh's triangles
-		(*triangleCount)++;
-	}
-
-	std::string meshName{ mesh->mName.C_Str() };
-
-	return Mesh(meshName, vertices, indices, meshPosition, beginTriangleCount, meshCount, mesh->mMaterialIndex, this->getID(), this);
-}
-
-Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materialIndex, unsigned int meshCount, unsigned int* triangleCount)
 {
 	int beginTriangleCount = *triangleCount;
 	std::vector<Vertex> vertices;
@@ -504,7 +389,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materia
 
 	std::string meshName{ mesh->mName.C_Str() };
 
-	return Mesh(meshName, vertices, indices, meshPosition, beginTriangleCount, meshCount, materialIndex, this->getID(), this);
+	return Mesh(meshName, vertices, indices, meshPosition, beginTriangleCount, meshCount, this->getID(), this);
 }
 
 
@@ -585,7 +470,21 @@ BVHNode* Model::getRootNode()
 	return bvhRootNode;
 }
 
+const std::string& Model::getPath() const
+{
+	return path;
+}
+
 unsigned int Model::getTriangleCount()
 {
 	return triangleCount;
+}
+
+void Model::setMaterialIndex(unsigned int materialIndex)
+{
+	// Setting the material index of each submesh
+	for (Mesh& mesh : meshes)
+	{
+		mesh.setMaterialIndex(materialIndex);
+	}
 }

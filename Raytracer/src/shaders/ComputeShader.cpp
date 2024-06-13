@@ -7,6 +7,8 @@ ComputeShader::ComputeShader(const char* shaderPath)
 
 	ID = glCreateProgram();
 
+	bool succesfullyLoadedCachedShader{ true };
+
 	if (Cache::cachedFileExists(binaryPath))
 	{
 		Logger::log("Loading cached data for " + binaryPath);
@@ -38,10 +40,13 @@ ComputeShader::ComputeShader(const char* shaderPath)
 				// Printing the error log
 				Logger::logError("Error: shader program linking failed.");
 				Logger::logError(infoLog);
-				return;
+				//return;
 			}
-
-			std::cout << "Cached shader data loaded successfully for " << binaryPath << std::endl;
+			else
+			{
+				succesfullyLoadedCachedShader = true;
+				std::cout << "Cached shader data loaded successfully for " << binaryPath << std::endl;
+			}
 
 			//free(binaryData);
 		}
@@ -52,7 +57,8 @@ ComputeShader::ComputeShader(const char* shaderPath)
 
 		//linkProgram();
 	}
-	else
+	
+	if (!succesfullyLoadedCachedShader)
 	{
 		Logger::log("Compiling shader " + binaryPath);
 

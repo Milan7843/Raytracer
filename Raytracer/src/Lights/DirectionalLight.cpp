@@ -30,7 +30,7 @@ DirectionalLight::~DirectionalLight()
 bool DirectionalLight::drawInterface(Scene& scene)
 {
 	bool anyPropertiesChanged{ false };
-	anyPropertiesChanged |= ImGui::InputText("##", &getName());
+	anyPropertiesChanged |= ImGui::InputText("##", getNamePointer());
 	anyPropertiesChanged |= ImGui::ColorEdit3("Color", (float*)getColorPointer());
 	anyPropertiesChanged |= ImGui::DragFloat("Intensity", getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat3("Direction", (float*)getDirectionPointer(), 0.01f);
@@ -48,16 +48,6 @@ bool DirectionalLight::drawInterface(Scene& scene)
 	}
 
 	return anyPropertiesChanged;
-}
-
-void DirectionalLight::writeDataToStream(std::ofstream& filestream)
-{
-	// Writing basic data using the base class
-	Light::writeDataToStream(filestream);
-
-	// Then point light specific data
-	filestream << direction.x << " " << direction.y << " " << direction.z << "\n";
-	filestream << shadowSoftness << "\n";
 }
 
 bool DirectionalLight::writeToShader(AbstractShader* shader, bool useGlslCoordinates)
@@ -86,4 +76,14 @@ bool DirectionalLight::writeToShader(AbstractShader* shader, bool useGlslCoordin
 glm::vec3* DirectionalLight::getDirectionPointer()
 {
 	return &direction;
+}
+
+glm::vec3 DirectionalLight::getDirection() const
+{
+	return direction;
+}
+
+void DirectionalLight::setDirection(glm::vec3 newDirection)
+{
+	this->direction = newDirection;
 }

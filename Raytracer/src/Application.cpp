@@ -37,6 +37,8 @@ int Application::Start()
 
     WindowUtility::setWindow(window);
 
+    WindowUtility::setNewWindowSize(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+
     ImGuiUserInterface userInterface;
 
     Logger::log("Initializing ImGui");
@@ -106,8 +108,6 @@ int Application::Start()
 
     Logger::log("Initializing scene");
     SceneManager sceneManager{};
-
-    sceneManager.setAspectRatio(renderedScreenSize.x, renderedScreenSize.y);
 
     std::string lastLoadedSceneName{};
     FileUtility::readSavedSettings(lastLoadedSceneName);
@@ -235,11 +235,25 @@ int Application::Start()
         {
             renderedScreenSize = userInterface.getRenderedScreenSize();
             // The screen size was updated
-            sceneManager.setAspectRatio(renderedScreenSize.x, renderedScreenSize.y);
             outlineRenderer.setResolution(renderedScreenSize.x, renderedScreenSize.y);
             objectScreenSelector.setResolution(renderedScreenSize.x, renderedScreenSize.y);
             raytracingRenderer.setResolution(renderedScreenSize.x, renderedScreenSize.y);
             setupFramebuffer(renderedScreenSize);
+        }
+
+        if (InputManager::keyPressed(InputManager::InputAction::SAVE))
+        {
+            sceneManager.saveChanges();
+        }
+
+        if (InputManager::keyPressed(InputManager::InputAction::SAVE_AS))
+        {
+            //sceneManager.saveChangesAs();
+        }
+
+        if (InputManager::keyPressed(InputManager::InputAction::NEW_SCENE))
+        {
+            sceneManager.newScene();
         }
 
         int mouseX{ userInterface.getMouseCoordinates().x };
@@ -275,8 +289,7 @@ int Application::Start()
         if (userInterface.isMouseOnRenderedScreen() && currentRenderMode != ApplicationRenderMode::RAYTRACED)
         {
             // Process camera movement input
-            shouldReRender |= sceneManager.getCurrentScene().getActiveCamera().processInput(window,
-                sceneManager.getCurrentScene(), (double)mouseX, (double)mouseY, deltaTime);
+            shouldReRender |= sceneManager.getCurrentScene().getActiveCamera().processInput(sceneManager.getCurrentScene(), deltaTime);
         }
 
         //std::cout << camera.getInformation() << std::endl;
@@ -309,11 +322,11 @@ int Application::Start()
         else
         {
             bool popupOpen{ ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopup) };
-            if (InputManager::keyPressed(InputManager::InputKey::CLICK))
+            if (InputManager::keyPressed(InputManager::InputAction::CLICK))
             {
                 popupOpenOnStartClick = popupOpen;
             }
-            if (InputManager::keyUp(InputManager::InputKey::CLICK))
+            if (InputManager::keyUp(InputManager::InputAction::CLICK))
             {
                 popupOpenOnStartClick = false;
             }

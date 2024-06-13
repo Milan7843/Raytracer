@@ -63,28 +63,6 @@ Material::~Material()
 
 }
 
-void Material::writeDataToStream(std::ofstream& filestream)
-{
-	filestream << name << "\n";
-	filestream << color.r << " " << color.g << " " << color.b << "\n";
-	filestream << reflectiveness << "\n";
-	filestream << transparency << "\n";
-	filestream << refractiveness << "\n";
-	filestream << reflectionDiffusion << "\n";
-	filestream << emission.r << " " << emission.g << " " << emission.b << "\n";
-	filestream << emissionStrength << "\n";
-	filestream << fresnelReflectionStrength << "\n";
-
-	filestream << m_hasAlbedoTexture << "\n";
-	if (m_hasAlbedoTexture)
-		filestream << albedoTexture->path << "\n";
-
-	filestream << m_hasNormalTexture << "\n";
-	if (m_hasNormalTexture)
-		filestream << normalTexture->path << "\n";
-	filestream << normalMapStrength << "\n";
-}
-
 bool Material::drawInterface(Scene& scene)
 {
 	bool anyPropertiesChanged{ false };
@@ -272,6 +250,11 @@ glm::vec3 Material::getColor() const
 	return color;
 }
 
+const std::string& Material::getName() const
+{
+	return name;
+}
+
 float Material::getReflectiveness() const
 {
 	return reflectiveness;
@@ -305,6 +288,11 @@ float Material::getEmissionStrength() const
 float Material::getFresnelReflectionStrength() const
 {
 	return fresnelReflectionStrength;
+}
+
+void Material::setName(std::string name)
+{
+	this->name = name;
 }
 
 // Setters

@@ -1,36 +1,40 @@
 #include "Sphere.h"
 
+Sphere::Sphere(unsigned int materialIndex)
+	: Model("src/models/defaultSphere.obj", &meshCount, &triangleCount, 1),
+	shaderSphereIndex(0) // will be set later
+{
+	this->scale(1.0f);
+	this->name = "Sphere";
+	this->setMaterialIndex(materialIndex);
+	setType(SPHERE);
+}
+
 Sphere::Sphere(std::string& name, glm::vec3 position, float radius, unsigned int materialIndex)
-	: Model(materialIndex, "src/models/defaultSphere.obj", &meshCount, &triangleCount, 1),
+	: Model("src/models/defaultSphere.obj", &meshCount, &triangleCount, 1),
 	shaderSphereIndex(0) // will be set later
 {
 	this->move(position);
 	this->scale(radius);
 	this->name = name;
+	this->setMaterialIndex(materialIndex);
 	setType(SPHERE);
 }
 
 Sphere::Sphere(glm::vec3 position, float radius, unsigned int materialIndex, unsigned int shaderSphereIndex)
-	: Model(materialIndex, "src/models/defaultSphere.obj", &meshCount, &triangleCount, 1)
+	: Model("src/models/defaultSphere.obj", &meshCount, &triangleCount, 1)
 	, shaderSphereIndex(shaderSphereIndex)
 {
 	this->move(position);
 	this->scale(radius);
 	this->name = "New sphere";
+	this->setMaterialIndex(materialIndex);
 	setType(SPHERE);
 }
 
 Sphere::~Sphere()
 {
 
-}
-
-void Sphere::writeDataToStream(std::ofstream& filestream)
-{
-	Object::writeDataToStream(filestream);
-
-	filestream << radius << "\n";
-	filestream << meshes[0].getMaterialIndex() << "\n";
 }
 
 bool Sphere::writeToShader(AbstractShader* shader, unsigned int ssbo)
@@ -68,13 +72,13 @@ void Sphere::drawInterface()
 {
 	bool anyPropertiesChanged{ false };
 
-	anyPropertiesChanged |= ImGui::InputText("Name", &getName());
+	anyPropertiesChanged |= ImGui::InputText("Name##", getNamePointer());
 
 	// Showing transformations
-	anyPropertiesChanged |= ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
+	anyPropertiesChanged |= ImGui::DragFloat3("Position##", (float*)getPositionPointer(), 0.01f);
 
 	// Drawing a dragfloat for the radius
-	anyPropertiesChanged |= ImGui::DragFloat("Radius", getRadiusPointer(), 0.01f, 0.01f, 100.0f, "%.02f");
+	anyPropertiesChanged |= ImGui::DragFloat("Radius##", getRadiusPointer(), 0.01f, 0.01f, 100.0f, "%.02f");
 
 	// Draw the first and only mesh
 	//drawMesh(getMeshes()[0], scene, materialSlotsCharArray, index);
@@ -108,6 +112,21 @@ glm::mat4 Sphere::getTransformationMatrix()
 float* Sphere::getRadiusPointer()
 {
 	return &radius;
+}
+
+float Sphere::getRadius() const
+{
+	return radius;
+}
+
+unsigned int Sphere::getMaterialIndex() const
+{
+	return meshes[0].getMaterialIndex();
+}
+
+void Sphere::setRadius(float radius)
+{
+	this->radius = radius;
 }
 
 std::ostream& operator<<(std::ostream& stream, const Sphere& sphere)

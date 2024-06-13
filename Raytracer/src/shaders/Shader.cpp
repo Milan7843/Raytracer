@@ -9,6 +9,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 
 	ID = glCreateProgram();
 
+	bool succesfullyLoadedCachedShader{ false };
+
 	if (Cache::cachedFileExists(binaryPath))
 	{
 		Logger::log("Loading cached data for " + binaryPath);
@@ -38,12 +40,16 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 				glGetProgramInfoLog(ID, 512, NULL, infoLog);
 
 				// Printing the error log
-				Logger::logError("Error: shader program linking failed.");
+				Logger::logError("Error: shader program linking failed. Falling back to compilation.");
 				Logger::logError(infoLog);
-				return;
+				//return;
+			}
+			else
+			{
+				succesfullyLoadedCachedShader = true;
+				std::cout << "Cached shader data loaded successfully for " << binaryPath << std::endl;
 			}
 
-			std::cout << "Cached shader data loaded successfully for " << binaryPath << std::endl;
 
 			//free(binaryData);
 		}
@@ -54,7 +60,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 
 		//linkProgram();
 	}
-	else
+
+	if (!succesfullyLoadedCachedShader)
 	{
 		Logger::log("Compiling shader " + binaryPath);
 
@@ -127,6 +134,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 
 	ID = glCreateProgram();
 
+	bool succesfullyLoadedCachedShader{ false };
+
 	if (Cache::cachedFileExists(binaryPath))
 	{
 		Logger::log("Loading cached data for " + binaryPath);
@@ -156,12 +165,15 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 				glGetProgramInfoLog(ID, 512, NULL, infoLog);
 
 				// Printing the error log
-				Logger::logError("Error: shader program linking failed.");
+				Logger::logError("Error: shader program linking failed. Falling back to compilation.");
 				Logger::logError(infoLog);
-				return;
+				//return;
 			}
-
-			std::cout << "Cached shader data loaded successfully for " << binaryPath << std::endl;
+			else
+			{
+				succesfullyLoadedCachedShader = true;
+				std::cout << "Cached shader data loaded successfully for " << binaryPath << std::endl;
+			}
 
 			//free(binaryData);
 		}
@@ -172,7 +184,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 
 		//linkProgram();
 	}
-	else
+	
+	if (!succesfullyLoadedCachedShader)
 	{
 		Logger::log("Compiling shader " + binaryPath);
 

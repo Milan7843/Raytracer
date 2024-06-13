@@ -1,13 +1,5 @@
 #include "Object.h"
 
-void Object::writeDataToStream(std::ofstream& filestream)
-{
-	filestream << getName() << "\n";
-	filestream << position.x << " " << position.y << " " << position.z << "\n";
-	filestream << rotation.x << " " << rotation.y << " " << rotation.z << "\n";
-	filestream << scaleVector.x << " " << scaleVector.y << " " << scaleVector.z << "\n";
-}
-
 void Object::rotate(glm::vec3 rotation)
 {
 	this->rotation += rotation;
@@ -91,9 +83,19 @@ glm::vec3 Object::getScale() const
 	return scaleVector;
 }
 
-std::string& Object::getName()
+const std::string& Object::getName() const
 {
 	return name;
+}
+
+std::string* Object::getNamePointer()
+{
+	return &name;
+}
+
+void Object::setName(std::string newName)
+{
+	this->name = newName;
 }
 
 void Object::setTransformation(glm::mat4& transformMatrix)

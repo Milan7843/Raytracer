@@ -84,6 +84,13 @@ public:
 	// Add an ambient light to the scene
 	void addLight(AmbientLight& ambientLight);
 
+	// Add an empty point light to the scene
+	PointLight* addPointLight();
+	// Add an empty directional light to the scene
+	DirectionalLight* addDirectionalLight();
+	// Add an empty ambient light to the scene
+	AmbientLight* addAmbientLight();
+
 	void deleteObject(unsigned int id);
 
 	// Remove a point light from the scene
@@ -99,12 +106,15 @@ public:
 	void recalculateAmbientLightIndices();
 
 
-	Model* addModel(std::string& name, std::vector<unsigned int>& meshMaterialIndices, const std::string& path);
-	Model* addModel(const std::string& path, unsigned int materialIndex);
+	Model* addModel(std::string& name, const std::string& path);
+	Model* addModel(const std::string& path);
 	bool deleteModel(unsigned int id);
 	Model* getModelByID(unsigned int id);
 	// Add a sphere to the scene, returns whether the addition was succesfull
 	bool addSphere(Sphere& sphere);
+
+	// Add an empty sphere to the scene
+	Sphere* addSphere(unsigned int materialIndex);
 	Sphere* addSphere(glm::vec3 position, float radius, unsigned int materialIndex);
 	bool deleteSphere(unsigned int id);
 	void addMaterial(Material& material);
@@ -115,8 +125,6 @@ public:
 	void recalculateModelIndices();
 	void recalculateSphereIndices();
 
-	void setAspectRatio(int width, int height);
-
 
 	// Add a camera to the scene
 	void addCamera(Camera& camera);
@@ -124,6 +132,9 @@ public:
 	void activateCamera(unsigned int index);
 	// Get the active camera
 	Camera& getActiveCamera();
+
+	void updateCamera(float deltaTime);
+	void onScroll(float delta);
 
 	// Draw this scene with the given shader
 	void draw(AbstractShader* shader, RasterizedDebugMode debugMode = RasterizedDebugMode::REGULAR);
@@ -177,6 +188,9 @@ public:
 
 	// Get a pointer to the name of this scene
 	std::string* getNamePointer();
+
+	// Get the name of this scene
+	std::string getName() const;
 
 	bool* getUseHDRIAsBackgroundPointer();
 

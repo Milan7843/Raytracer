@@ -30,9 +30,6 @@ public:
 	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness);
 	~Material();
 
-	// Write this light to the given filestream
-	void writeDataToStream(std::ofstream& filestream);
-
 	// Draw an interface for this model using ImGui
 	virtual bool drawInterface(Scene& scene);
 
@@ -49,6 +46,7 @@ public:
 	float fresnelReflectionStrength;
 
 	// Getters
+	const std::string& getName() const;
 	glm::vec3 getColor() const;
 	float getReflectiveness() const;
 	float getTransparency() const;
@@ -59,6 +57,7 @@ public:
 	float getFresnelReflectionStrength() const;
 
 	// Setters
+	void setName(std::string name);
 	void setColor(const glm::vec3& newColor);
 	void setReflectiveness(float newReflectiveness);
 	void setTransparency(float newTransparency);

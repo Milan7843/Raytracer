@@ -166,7 +166,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 				}
 
 				// Toggle the "interacting after cancel" state
-				if (InputManager::keyPressed(InputManager::InputKey::CANCEL_TRANSLATION))
+				if (InputManager::keyPressed(InputManager::InputAction::CANCEL_TRANSLATION))
 				{
 					transformationCancelled = true;
 					Logger::logMatrix(transformationInitialObjectMatrix, "Initial object matrix");
@@ -241,7 +241,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 				}
 
 				// Toggle the "interacting after cancel" state
-				if (InputManager::keyPressed(InputManager::InputKey::CANCEL_TRANSLATION))
+				if (InputManager::keyPressed(InputManager::InputAction::CANCEL_TRANSLATION))
 				{
 					transformationCancelled = true;
 					Logger::logMatrix(transformationInitialMeshMatrix, "Initial mesh matrix");
@@ -312,7 +312,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 				}
 
 				// Toggle the "interacting after cancel" state
-				if (InputManager::keyPressed(InputManager::InputKey::CANCEL_TRANSLATION))
+				if (InputManager::keyPressed(InputManager::InputAction::CANCEL_TRANSLATION))
 				{
 					transformationCancelled = true;
 					Logger::logMatrix(transformationInitialObjectMatrix, "Initial object matrix");
@@ -1525,7 +1525,7 @@ void ImGuiUserInterface::drawObjects(SceneManager& sceneManager)
 					if (ImGui::MenuItem(name.c_str()))
 					{
 						// Loading the scene
-						sceneManager.getCurrentScene().addModel("src/models/" + name + ".obj", 0);
+						sceneManager.getCurrentScene().addModel("src/models/" + name + ".obj");
 						sceneManager.getCurrentScene().generateTriangleBuffer();
 						break;
 					}

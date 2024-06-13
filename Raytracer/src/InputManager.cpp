@@ -6,30 +6,123 @@ namespace InputManager
 {
 	namespace
 	{
-		const unsigned int numKeyBinds{ 9 };
+		const unsigned int numKeyBinds{ 19 };
 
-		int keyBinds[] = {
-			GLFW_KEY_Q,
-			GLFW_MOUSE_BUTTON_RIGHT,
-			GLFW_KEY_G,
-			GLFW_KEY_R,
-			GLFW_KEY_S,
-			GLFW_KEY_X,
-			GLFW_KEY_Y,
-			GLFW_KEY_Z,
-			GLFW_MOUSE_BUTTON_LEFT
-		};
-
-		KeyType keyTypes[]{
-			KeyType::KEYBOARD,
-			KeyType::MOUSE,
-			KeyType::KEYBOARD,
-			KeyType::KEYBOARD,
-			KeyType::KEYBOARD,
-			KeyType::KEYBOARD,
-			KeyType::KEYBOARD,
-			KeyType::KEYBOARD,
-			KeyType::MOUSE
+		Input inputs[numKeyBinds] = {
+			{
+				InputAction::MOVE_VIEW_TO_SELECTED,
+				Modifier::ANY,
+				GLFW_KEY_Q,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::CANCEL_TRANSLATION,
+				Modifier::ANY,
+				GLFW_MOUSE_BUTTON_RIGHT,
+				KeyType::MOUSE
+			},
+			{
+				InputAction::TRANSLATE,
+				Modifier::ANY,
+				GLFW_KEY_G,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::ROTATE,
+				Modifier::ANY,
+				GLFW_KEY_R,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::SCALE,
+				Modifier::ANY,
+				GLFW_KEY_S,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::AXIS_X,
+				Modifier::ANY,
+				GLFW_KEY_X,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::AXIS_Y,
+				Modifier::ANY,
+				GLFW_KEY_Y,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::AXIS_Z,
+				Modifier::ANY,
+				GLFW_KEY_Z,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::CLICK,
+				Modifier::ANY,
+				GLFW_MOUSE_BUTTON_LEFT,
+				KeyType::MOUSE
+			},
+			{
+				InputAction::MOVE_VIEW,
+				Modifier::ANY,
+				GLFW_MOUSE_BUTTON_MIDDLE,
+				KeyType::MOUSE
+			},
+			{
+				InputAction::MOVE_FORWARD,
+				Modifier::ANY,
+				GLFW_KEY_W,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::MOVE_BACKWARD,
+				Modifier::ANY,
+				GLFW_KEY_S,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::MOVE_LEFT,
+				Modifier::ANY,
+				GLFW_KEY_A,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::MOVE_RIGHT,
+				Modifier::ANY,
+				GLFW_KEY_D,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::MOVE_UP,
+				Modifier::ANY,
+				GLFW_KEY_E,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::MOVE_DOWN,
+				Modifier::ANY,
+				GLFW_KEY_Q,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::SAVE,
+				Modifier::CTRL,
+				GLFW_KEY_S,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::SAVE_AS,
+				Modifier::CTRL_SHIFT,
+				GLFW_KEY_S,
+				KeyType::KEYBOARD
+			},
+			{
+				InputAction::NEW_SCENE,
+				Modifier::CTRL,
+				GLFW_KEY_N,
+				KeyType::KEYBOARD
+			}
 		};
 
 		int keyBindsPreviousState[numKeyBinds];
@@ -48,8 +141,8 @@ namespace InputManager
 
 		int getKeyStateFromIndex(unsigned int keyIndex)
 		{
-			KeyType keyType = keyTypes[keyIndex];
-			unsigned int key = keyBinds[keyIndex];
+			KeyType keyType = inputs[keyIndex].type;
+			unsigned int key = inputs[keyIndex].key;
 
 			switch (keyType)
 			{
@@ -60,10 +153,10 @@ namespace InputManager
 			}
 		}
 
-		int getKeyState(InputKey key)
+		int getKeyState(InputAction action)
 		{
-			unsigned int keyIndex{ (unsigned int)key };
-			return getKeyStateFromIndex(keyIndex);
+			unsigned int actionIndex{ (unsigned int)action };
+			return getKeyStateFromIndex(actionIndex);
 		}
 	}
 
@@ -83,17 +176,17 @@ namespace InputManager
 		switch (currentAction)
 		{
 			case Action::NONE:
-				if (keyPressed(InputKey::TRANSLATE) && scene.hasObjectSelected())
+				if (keyPressed(InputAction::TRANSLATE) && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::TRANSLATE;
 				}
-				else if (keyPressed(InputKey::ROTATE) && scene.hasObjectSelected())
+				else if (keyPressed(InputAction::ROTATE) && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::ROTATE;
 				}
-				else if (keyPressed(InputKey::SCALE) && scene.hasObjectSelected())
+				else if (keyPressed(InputAction::SCALE) && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::SCALE;
@@ -108,24 +201,24 @@ namespace InputManager
 					break;
 				}
 				// Setting the transformation action based on the key press
-				if (keyPressed(InputKey::TRANSLATE) && scene.hasObjectSelected())
+				if (keyPressed(InputAction::TRANSLATE) && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::TRANSLATE;
 				}
-				else if (keyPressed(InputKey::ROTATE) && scene.hasObjectSelected())
+				else if (keyPressed(InputAction::ROTATE) && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::ROTATE;
 				}
-				else if (keyPressed(InputKey::SCALE) && scene.hasObjectSelected())
+				else if (keyPressed(InputAction::SCALE) && scene.hasObjectSelected())
 				{
 					currentAction = Action::TRANSFORM;
 					currentTransformAction = TransformAction::SCALE;
 				}
 
 				// Setting the axis based on the key press 
-				if (keyPressed(InputKey::AXIS_X))
+				if (keyPressed(InputAction::AXIS_X))
 				{
 					// If we were already on this axis, now go to no specific axis
 					if (currentAxis == Axis::X)
@@ -138,7 +231,7 @@ namespace InputManager
 						currentAxis = Axis::X;
 					}
 				}
-				if (keyPressed(InputKey::AXIS_Y))
+				if (keyPressed(InputAction::AXIS_Y))
 				{
 					// If we were already on this axis, now go to no specific axis
 					if (currentAxis == Axis::Y)
@@ -151,7 +244,7 @@ namespace InputManager
 						currentAxis = Axis::Y;
 					}
 				}
-				if (keyPressed(InputKey::AXIS_Z))
+				if (keyPressed(InputAction::AXIS_Z))
 				{
 					// If we were already on this axis, now go to no specific axis
 					if (currentAxis == Axis::Z)
@@ -236,36 +329,46 @@ namespace InputManager
 		}
 	}
 
-	bool keyPressed(InputKey key)
+	bool keyPressed(InputAction action)
 	{
-		unsigned int keyIndex{ (unsigned int)key };
-		int currentState{ getKeyState(key) };
+		unsigned int keyIndex{ (unsigned int)action };
+		int currentState{ getKeyState(action) };
 		int previousState{ keyBindsPreviousState[keyIndex] };
+
+		bool rightModifier = inputs[keyIndex].modifier == Modifier::ANY || getModifierState() == inputs[keyIndex].modifier;
 
 		// Must be pressed now and released on the previous frame
-		return currentState == GLFW_PRESS && previousState == GLFW_RELEASE;
+		return currentState == GLFW_PRESS && previousState == GLFW_RELEASE && rightModifier;
 	}
 
-	bool keyHeld(InputKey key)
+	bool keyHeld(InputAction action)
 	{
+		unsigned int keyIndex{ (unsigned int)action };
+		bool rightModifier = inputs[keyIndex].modifier == Modifier::ANY || getModifierState() == inputs[keyIndex].modifier;
+
 		// Checking whether the key is currently pressed
-		return getKeyState(key) == GLFW_PRESS;
+		return getKeyState(action) == GLFW_PRESS && rightModifier;
 	}
 
-	bool keyReleased(InputKey key)
+	bool keyReleased(InputAction action)
 	{
-		unsigned int keyIndex{ (unsigned int)key };
-		int currentState{ getKeyState(key) };
+		unsigned int keyIndex{ (unsigned int)action };
+		int currentState{ getKeyState(action) };
 		int previousState{ keyBindsPreviousState[keyIndex] };
+
+		bool rightModifier = inputs[keyIndex].modifier == Modifier::ANY || getModifierState() == inputs[keyIndex].modifier;
 
 		// Must be released now and pressed on the previous frame
 		return currentState == GLFW_RELEASE && previousState == GLFW_PRESS;
 	}
 
-	bool keyUp(InputKey key)
+	bool keyUp(InputAction action)
 	{
+		unsigned int keyIndex{ (unsigned int)action };
+		bool rightModifier = getModifierState() == inputs[keyIndex].modifier;
+
 		// Checking whether the key is currently not pressed
-		return getKeyState(key) == GLFW_RELEASE;
+		return getKeyState(action) == GLFW_RELEASE || !rightModifier;
 	}
 
 	void updateKeyBindsPreviousValues()
@@ -275,5 +378,41 @@ namespace InputManager
 		{
 			keyBindsPreviousState[i] = getKeyStateFromIndex(i);
 		}
+	}
+
+	glm::vec2 getMousePosition()
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+
+		return glm::vec2(xpos, ypos);
+	}
+
+	Modifier getModifierState()
+	{
+		bool ctrl = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
+			glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
+		bool alt = glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS ||
+			glfwGetKey(window, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS;
+		bool shift = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ||
+			glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS;
+
+		if (ctrl && !alt && !shift)
+			return Modifier::CTRL;
+		if (!ctrl && !alt && shift)
+			return Modifier::SHIFT;
+		if (!ctrl && alt && !shift)
+			return Modifier::ALT;
+
+		if (ctrl && !alt && shift)
+			return Modifier::CTRL_SHIFT;
+		if (ctrl && alt && !shift)
+			return Modifier::CTRL_ALT;
+		if (!ctrl && alt && shift)
+			return Modifier::ALT_SHIFT;
+		if (ctrl && alt && shift)
+			return Modifier::CTRL_ALT_SHIFT;
+
+		return Modifier::NONE;
 	}
 };

@@ -14,6 +14,13 @@ AmbientLight::AmbientLight(glm::vec3 color, float intensity)
 	setType(AMBIENT_LIGHT);
 }
 
+AmbientLight::AmbientLight()
+// Initialising the base class
+	: Light(std::string("Ambient light"), glm::vec3(0.0f), glm::vec3(1.0f), 1.0f, 0.0f)
+{
+	setType(AMBIENT_LIGHT);
+}
+
 AmbientLight::~AmbientLight()
 {
 	setType(AMBIENT_LIGHT);
@@ -22,7 +29,7 @@ AmbientLight::~AmbientLight()
 bool AmbientLight::drawInterface(Scene& scene)
 {
 	bool anyPropertiesChanged{ false };
-	anyPropertiesChanged |= ImGui::InputText("##", &getName());
+	anyPropertiesChanged |= ImGui::InputText("##", getNamePointer());
 	anyPropertiesChanged |= ImGui::ColorEdit3("Color", (float*)getColorPointer());
 	anyPropertiesChanged |= ImGui::DragFloat("Intensity", getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
 

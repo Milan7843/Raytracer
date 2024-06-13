@@ -6,7 +6,7 @@
 
 
 Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices, glm::vec3 position
-    , unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex, unsigned int modelID, Model* model)
+    , unsigned int startIndex, unsigned int meshIndex, unsigned int modelID, Model* model)
     : shaderArraybeginIndex(startIndex)
     , shaderMeshIndex(meshIndex)
     , materialIndex(materialIndex)
@@ -71,7 +71,7 @@ bool Mesh::drawInterface(Scene& scene)
     bool anyPropertiesChanged{ false };
 
     //anyPropertiesChanged |= ImGui::InputText("Name", &getName());
-    ImGui::InputText("Name", &getName());
+    ImGui::InputText("Name", getNamePointer());
     // Showing transformations
     anyPropertiesChanged |= ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
     anyPropertiesChanged |= ImGui::DragFloat3("Rotation", (float*)getRotationPointer(), 0.01f);
@@ -223,16 +223,6 @@ void Mesh::setupMesh()
 unsigned int Mesh::getTriangleCount()
 {
     return triangles.size();
-}
-
-void Mesh::writeDataToStream(std::ofstream& filestream)
-{
-    filestream << getName() << "\n";
-    // Position moved
-    glm::vec3 offsetPosition{ getPosition() - getAverageVertexPosition() };
-    filestream << offsetPosition.x << " " << offsetPosition.y << " " << offsetPosition.z << "\n";
-    filestream << rotation.x << " " << rotation.y << " " << rotation.z << "\n";
-    filestream << scaleVector.x << " " << scaleVector.y << " " << scaleVector.z << "\n";
 }
 
 void Mesh::setShaderMeshIndex(unsigned int shaderMeshIndex)

@@ -11,95 +11,6 @@ Scene::~Scene()
 {
 }
 
-void Scene::writeDataToStream(std::ofstream& filestream)
-{
-	// Writing the scene's data to the filestream
-	filestream << hasHDRI() << "\n";
-	if (hasHDRI())
-		filestream << getHDRI()->path << "\n";
-	else
-		filestream << "\n";
-
-	// Writing all materials
-	filestream << "# Materials\n";
-	for (Material& material : materials)
-	{
-		// Skip the first material: it is the None material
-		if (&material == &materials.front())
-			continue;
-
-		material.writeDataToStream(filestream);
-		// Write newline if it is not the last item
-		if (&material != &materials.back())
-			filestream << "\n";
-	}
-	filestream << "# Materials end\n\n";
-
-	// Writing all spheres
-	filestream << "# Spheres\n";
-	for (Sphere& sphere : getSpheres())
-	{
-		sphere.writeDataToStream(filestream);
-		// Write newline if it is not the last item
-		if (&sphere != &getSpheres().back())
-			filestream << "\n";
-	}
-	filestream << "# Spheres end\n\n";
-
-	// Writing all models
-	filestream << "# Models\n";
-	for (Model& model : getModels())
-	{
-		model.writeDataToStream(filestream);
-		// Write newline if it is not the last item
-		if (&model != &getModels().back())
-			filestream << "\n";
-	}
-	filestream << "# Models end\n\n";
-
-	// Writing all lights
-	filestream << "# Point lights\n";
-	for (PointLight& light : getPointLights())
-	{
-		light.writeDataToStream(filestream);
-		// Write newline if it is not the last item
-		if (&light != &getPointLights().back())
-			filestream << "\n";
-	}
-	filestream << "# Point lights end\n\n";
-
-	filestream << "# Directional lights\n";
-	for (DirectionalLight& light : getDirectionalLights())
-	{
-		light.writeDataToStream(filestream);
-		// Write newline if it is not the last item
-		if (&light != &getDirectionalLights().back())
-			filestream << "\n";
-	}
-	filestream << "# Directional lights end\n\n";
-
-	filestream << "# Ambient lights\n";
-	for (AmbientLight& light : getAmbientLights())
-	{
-		light.writeDataToStream(filestream);
-		// Write newline if it is not the last item
-		if (&light != &getAmbientLights().back())
-			filestream << "\n";
-	}
-	filestream << "# Ambient lights end\n\n";
-
-	// Writing all cameras
-	filestream << "# Cameras\n";
-	for (Camera& camera : cameras)
-	{
-		camera.writeDataToStream(filestream);
-		// Write newline if it is not the last item
-		if (&camera != &cameras.back())
-			filestream << "\n";
-	}
-	filestream << "# Cameras end\n\n";
-}
-
 void Scene::setName(std::string name)
 {
 	this->name = name;
@@ -167,6 +78,51 @@ void Scene::addLight(AmbientLight& ambientLight)
 	ambientLights.push_back(ambientLight);
 
 	this->ambientLightCount++;
+}
+
+PointLight* Scene::addPointLight()
+{
+	// Full of point lights
+	if (this->pointLightCount >= MAX_POINT_LIGHT_COUNT)
+		return nullptr;
+
+	// Adding a new point light and incrementing the counter for this
+	PointLight light;
+	light.setIndex(this->pointLightCount);
+	pointLightCount++;
+	pointLights.push_back(light);
+
+	return &(pointLights.back());
+}
+
+DirectionalLight* Scene::addDirectionalLight()
+{
+	// Full of directional lights
+	if (this->directionalLightCount >= MAX_DIR_LIGHT_COUNT)
+		return nullptr;
+
+	// Adding a new directional light and incrementing the counter for this
+	DirectionalLight light;
+	light.setIndex(this->directionalLightCount);
+	directionalLightCount++;
+	directionalLights.push_back(light);
+
+	return &(directionalLights.back());
+}
+
+AmbientLight* Scene::addAmbientLight()
+{
+	// Full of ambient lights
+	if (this->ambientLightCount >= MAX_AMBIENT_LIGHT_COUNT)
+		return nullptr;
+
+	// Adding a new ambient light and incrementing the counter for this
+	AmbientLight light;
+	light.setIndex(this->ambientLightCount);
+	ambientLightCount++;
+	ambientLights.push_back(light);
+
+	return &(ambientLights.back());
 }
 
 void Scene::deleteObject(unsigned int id)
@@ -275,9 +231,9 @@ void Scene::recalculateAmbientLightIndices()
 	}
 }
 
-Model* Scene::addModel(std::string& name, std::vector<unsigned int>& meshMaterialIndices, const std::string& path)
+Model* Scene::addModel(std::string& name, const std::string& path)
 {
-	Model model(name, meshMaterialIndices, path, &meshCount, &triangleCount, MAX_MESH_COUNT);
+	Model model(name, path, &meshCount, &triangleCount, MAX_MESH_COUNT);
 	
 	models.push_back(model);
 
@@ -287,9 +243,9 @@ Model* Scene::addModel(std::string& name, std::vector<unsigned int>& meshMateria
 	return &(models[models.size() - 1]);
 }
 
-Model* Scene::addModel(const std::string& path, unsigned int materialIndex)
+Model* Scene::addModel(const std::string& path)
 {
-	Model model(materialIndex, path, &meshCount, &triangleCount, MAX_MESH_COUNT);
+	Model model(path, &meshCount, &triangleCount, MAX_MESH_COUNT);
 	models.push_back(model);
 
 	// Making sure the meshes' parent model pointers are still valid after resizing
@@ -347,6 +303,20 @@ bool Scene::addSphere(Sphere& sphere)
 	sphereCount++;
 	spheres.push_back(sphere);
 	return true;
+}
+
+Sphere* Scene::addSphere(unsigned int materialIndex)
+{
+	// Full of spheres
+	if (this->sphereCount >= MAX_SPHERE_COUNT)
+		return nullptr;
+
+	spheres.emplace_back(Sphere{ materialIndex });
+
+	sphereCount++;
+	spheres.back().setShaderSphereIndex(sphereCount);
+
+	return &spheres.back();
 }
 
 Sphere* Scene::addSphere(glm::vec3 position, float radius, unsigned int materialIndex)
@@ -454,21 +424,9 @@ void Scene::recalculateSphereIndices()
 	}
 }
 
-void Scene::setAspectRatio(int width, int height)
-{
-	// Updating the aspect ratio of all cameras to the new one
-	for (Camera& camera : cameras)
-	{
-		camera.setAspectRatio(width, height);
-	}
-}
-
 void Scene::addCamera(Camera& camera)
 {
 	this->cameras.push_back(camera);
-
-	// Setting the aspect ratio of the camera to the one currently being used
-	camera.setAspectRatio(width, height);
 }
 
 void Scene::activateCamera(unsigned int index)
@@ -479,6 +437,16 @@ void Scene::activateCamera(unsigned int index)
 Camera& Scene::getActiveCamera()
 {
 	return cameras[activeCamera];
+}
+
+void Scene::updateCamera(float deltaTime)
+{
+	getActiveCamera().processInput(*this, deltaTime);
+}
+
+void Scene::onScroll(float delta)
+{
+	getActiveCamera().onScroll(delta);
 }
 
 void Scene::draw(AbstractShader* shader, RasterizedDebugMode debugMode)
@@ -805,6 +773,11 @@ void Scene::bindMaterialsBuffer()
 std::string* Scene::getNamePointer()
 {
 	return &name;
+}
+
+std::string Scene::getName() const
+{
+	return name;
 }
 
 bool* Scene::getUseHDRIAsBackgroundPointer()

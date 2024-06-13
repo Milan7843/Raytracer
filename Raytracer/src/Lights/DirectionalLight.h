@@ -14,14 +14,17 @@ public:
 
 	virtual bool drawInterface(Scene& scene);
 
-	// Write this light to the given filestream
-	void writeDataToStream(std::ofstream& filestream) override;
-
 	// Write all the data of this directional light into the given shader
 	virtual bool writeToShader(AbstractShader* shader, bool useGlslCoordinates);
 
-	// Get a pointer the the direction vector of this light
+	// Get a pointer to the direction vector of this light
 	glm::vec3* getDirectionPointer();
+
+	// Get the direction vector of this light
+	glm::vec3 getDirection() const;
+
+	// Set the direction vector of this light
+	void setDirection(glm::vec3 newDirection);
 
 private:
 	// The direction this light points in

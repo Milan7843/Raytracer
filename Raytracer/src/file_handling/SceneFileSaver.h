@@ -5,6 +5,13 @@
 #include <fstream>
 #include <sstream>
 
+#include "JSONUtility.h"
+
+struct SavedSettings
+{
+	std::string previouslyLoadedScene;
+};
+
 namespace SceneFileSaver
 {
 	// Write the given scene into a file with the given name
@@ -12,4 +19,8 @@ namespace SceneFileSaver
 
 	// Read the scene with the given name from the file
 	Scene readSceneFromFile(const std::string& fileName, bool* success);
+
+	void writeSettingsToFile(std::string& loadedScene);
+
+	SavedSettings readSavedSettings();
 }

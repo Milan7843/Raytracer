@@ -19,16 +19,12 @@ class Scene;
 class Model : public Object, public ContextMenuSource, public ShaderWritable
 {
 public:
-	Model(std::string& name, std::vector<unsigned int>& meshMaterialIndices,
+	Model(std::string& name,
 		const std::string& path, unsigned int* meshCount, unsigned int* triangleCount,
 		unsigned int MAX_MESH_COUNT);
-	Model(unsigned int meshMaterialIndex,
-		const std::string& path, unsigned int* meshCount, unsigned int* triangleCount,
+	Model(const std::string& path, unsigned int* meshCount, unsigned int* triangleCount,
 		unsigned int MAX_MESH_COUNT);
 	~Model();
-
-	// Write this model to the given filestream
-	virtual void writeDataToStream(std::ofstream& filestream);
 
 	// Write this material to the stream (human readable format)
 	friend std::ostream& operator<< (std::ostream& stream, const Model& model);
@@ -66,7 +62,11 @@ public:
 
 	BVHNode* getRootNode();
 
+	const std::string& getPath() const;
+
 	unsigned int getTriangleCount();
+
+	void setMaterialIndex(unsigned int materialIndex);
 
 	// Get an approximation of an appropriate distance the camera should be from the object
 	// after clicking the focus button.
@@ -82,12 +82,9 @@ private:
 
 	unsigned int triangleCount{ 0 };
 
-	void loadModel(std::string path, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
-	void loadModel(std::string path, unsigned int meshMaterialIndex, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
-	void processNode(aiNode* node, const aiScene* scene, unsigned int meshMaterialIndex, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
-	void processNode(aiNode* node, const aiScene* scene, std::vector<unsigned int>& meshMaterialIndices, unsigned int* meshCount, unsigned int* meshIndex, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
+	void loadModel(std::string path, unsigned int* meshCount, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
+	void processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* meshIndex, unsigned int* triangleCount, unsigned int MAX_MESH_COUNT);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene, unsigned int meshCount, unsigned int* triangleCount);
-	Mesh processMesh(aiMesh* mesh, const aiScene* scene, unsigned int materialIndex, unsigned int meshCount, unsigned int* triangleCount);
 	glm::vec4 aiVector3DToGLMVec4(aiVector3D v);
 
 	void calculateTangentBitangent(std::vector<Vertex>& vertices,

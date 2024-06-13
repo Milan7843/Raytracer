@@ -5,12 +5,10 @@
 class Sphere : public Model
 {
 public:
+	Sphere(unsigned int materialIndex);
 	Sphere(std::string& name, glm::vec3 position, float radius, unsigned int materialIndex);
 	Sphere(glm::vec3 position, float radius, unsigned int materialIndex, unsigned int shaderSphereIndex);
 	~Sphere();
-
-	// Write this sphere to the given filestream
-	virtual void writeDataToStream(std::ofstream& filestream);
 
 	// Write this material to the stream (human readable format)
 	friend std::ostream& operator<< (std::ostream& stream, const Sphere& sphere);
@@ -33,6 +31,12 @@ public:
 
 	// Get a pointer to the radius of this sphere
 	float* getRadiusPointer();
+
+	float getRadius() const;
+
+	void setRadius(float radius);
+
+	unsigned int getMaterialIndex() const;
 
 private:
 	float radius{ 1.0f };

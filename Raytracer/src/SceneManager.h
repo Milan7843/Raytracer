@@ -66,8 +66,6 @@ public:
 	// Set the HDRI in the currently active scene
 	void loadHDRI(const std::string& imageName);
 
-	void setAspectRatio(unsigned int width, unsigned int height);
-
 	bool hasUnsavedChanges();
 
 private:

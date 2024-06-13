@@ -1,0 +1,89 @@
+1
+C:\Git\Raytracer\Raytracer\HDRIs\hdri_default.png
+# Materials
+New material
+1 1 1
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+
+Crate
+0.838235 0.189014 0.189014
+0
+0
+0
+0
+1 1 1
+0
+0
+0
+0
+0
+# Materials end
+
+# Spheres
+# Spheres end
+
+# Models
+plane
+0 0 0
+0 -0 0
+1 1 1
+src/models/plane.obj
+1
+1
+1
+plane
+0 0 0
+0 0 0
+1 1 1
+
+crate
+0 0 0
+0 -0 0
+1 1 1
+src/models/crate.obj
+1
+2
+1
+SmartCombine_1_Mesh
+0 0 0
+0 0 0
+1 1 1
+# Models end
+
+# Point lights
+Point light
+1 1 1
+1
+-0.701771 0.5878 -0.353075
+0
+# Point lights end
+
+# Directional lights
+Directional light
+1 1 1
+1
+1 -1 1
+0
+# Directional lights end
+
+# Ambient lights
+# Ambient lights end
+
+# Cameras
+-0.436268 0.914925 -1.17059
+-32
+432.1
+1
+27
+1
+# Cameras end
+

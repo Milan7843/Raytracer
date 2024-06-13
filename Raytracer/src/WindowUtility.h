@@ -6,6 +6,7 @@
 #include <GLFW/glfw3native.h>
 #include <Windows.h>
 #include <filesystem>
+#include <glm/glm.hpp>
 
 #include <string>
 
@@ -25,6 +26,10 @@ namespace WindowUtility
 
 	// Unmark the window title with the unsaved changes symbol
 	void markSavedChanges();
+
+	void setNewWindowSize(unsigned int width, unsigned int height);
+
+	glm::ivec2 getWindowSize();
 
 	// Open a Windows dialogue that lets the user choose an image file
 	// Returns the path of the chosen image

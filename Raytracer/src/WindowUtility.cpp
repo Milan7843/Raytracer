@@ -7,6 +7,8 @@ namespace WindowUtility
         GLFWwindow* savedWindow;
         std::string currentWindowName{ "" };
         bool unsavedChanges{ false };
+        unsigned int windowWidth{ 0 };
+        unsigned int windowHeight{ 0 };
 
         const std::string newSceneWindowName{ "New Scene" };
     }
@@ -49,6 +51,17 @@ namespace WindowUtility
 
         unsavedChanges = false;
         glfwSetWindowTitle(savedWindow, currentWindowName.c_str());
+    }
+
+    void setNewWindowSize(unsigned int width, unsigned int height)
+    {
+        windowWidth = width;
+        windowHeight = height;
+    }
+
+    glm::ivec2 getWindowSize()
+    {
+        return glm::ivec2(windowWidth, windowHeight);
     }
 
     std::string openImageFileChooseDialog()

@@ -14,6 +14,13 @@ PointLight::PointLight(glm::vec3 position, glm::vec3 color, float intensity, flo
 	setType(POINT_LIGHT);
 }
 
+PointLight::PointLight()
+	: Light("Point light", glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f), 1.0f, 0.0f)
+{
+	setType(POINT_LIGHT);
+}
+
+
 PointLight::~PointLight()
 {
 }
@@ -21,7 +28,7 @@ PointLight::~PointLight()
 bool PointLight::drawInterface(Scene& scene)
 {
 	bool anyPropertiesChanged{ false };
-	anyPropertiesChanged |= ImGui::InputText("##", &getName());
+	anyPropertiesChanged |= ImGui::InputText("##", getNamePointer());
 	anyPropertiesChanged |= ImGui::ColorEdit3("Color", (float*)getColorPointer());
 	anyPropertiesChanged |= ImGui::DragFloat("Intensity", getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
@@ -39,16 +46,6 @@ bool PointLight::drawInterface(Scene& scene)
 	}
 
 	return anyPropertiesChanged;
-}
-
-void PointLight::writeDataToStream(std::ofstream& filestream)
-{
-	// Writing basic data using the base class
-	Light::writeDataToStream(filestream);
-
-	// Then point light specific data
-	filestream << position.x << " " << position.y << " " << position.z << "\n";
-	filestream << shadowSoftness << "\n";
 }
 
 bool PointLight::writeToShader(AbstractShader* shader, bool useGlslCoordinates)

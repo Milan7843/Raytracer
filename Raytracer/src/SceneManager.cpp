@@ -70,7 +70,6 @@ void SceneManager::changeScene(const std::string& sceneName)
 	currentScene = loadedScene;
 	hasSceneLoaded = true;
 	inUnnamedScene = false;
-	getCurrentScene().setAspectRatio(width, height);
 	currentScene.verifyMeshModelPointers();
 	FileUtility::saveSettings(sceneName);
 	WindowUtility::setWindowTitle(sceneName);
@@ -100,8 +99,6 @@ void SceneManager::newScene()
 
 	hasSceneLoaded = true;
 	inUnnamedScene = true;
-
-	getCurrentScene().setAspectRatio(width, height);
 
 	WindowUtility::setWindowTitleNewScene();
 }
@@ -192,13 +189,6 @@ std::string SceneManager::scenePathToSceneName(std::string scenePath)
 void SceneManager::loadHDRI(const std::string& imageName)
 {
 	getCurrentScene().loadHDRI(imageName);
-}
-
-void SceneManager::setAspectRatio(unsigned int width, unsigned int height)
-{
-	this->width = width;
-	this->height = height;
-	getCurrentScene().setAspectRatio(width, height);
 }
 
 bool SceneManager::hasUnsavedChanges()

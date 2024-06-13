@@ -22,17 +22,17 @@ public:
 	virtual bool writeToShader(AbstractShader* shader);
 	bool writePositionToShader(AbstractShader* shader);
 
-	// Write this light to the given filestream
-	void writeDataToStream(std::ofstream& filestream) override;
-
 	void setIndex(unsigned int index);
 
-	glm::vec3 getColor();
+	glm::vec3 getColor() const;
+	float getIntensity() const;
 
 	glm::vec3* getPositionPointer();
 	glm::vec3* getColorPointer();
 	float* getIntensityPointer();
 	float* getShadowSoftnessPointer();
+
+	void setColor(glm::vec3 color);
 
 	~Light();
 protected:

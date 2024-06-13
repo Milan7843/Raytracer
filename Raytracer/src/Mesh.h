@@ -62,7 +62,7 @@ class Mesh : public Object, public ContextMenuSource
 {
 public:
 	Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned int> indices, glm::vec3 position,
-		unsigned int startIndex, unsigned int meshIndex, unsigned int materialIndex, unsigned int modelID, Model* model);
+		unsigned int startIndex, unsigned int meshIndex, unsigned int modelID, Model* model);
 	~Mesh();
 
 	void writeToShader(AbstractShader* shader, unsigned int ssbo, const glm::mat4& transformation);
@@ -83,8 +83,6 @@ public:
 
 	// Get the number of triangles in this single mesh
 	unsigned int getTriangleCount();
-
-	void writeDataToStream(std::ofstream& filestream) override;
 
 	// Set the index of the mesh this triangle belongs to
 	void setShaderMeshIndex(unsigned int shaderMeshIndex);
@@ -130,7 +128,7 @@ private:
 	void setupMesh();
 
 	// The index of the material this mesh uses
-	unsigned int materialIndex;
+	unsigned int materialIndex{ 0 };
 
 	glm::vec3 averageVertexPosition;
 

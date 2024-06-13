@@ -12,10 +12,6 @@
 class Object : public ImGuiEditorInterface
 {
 public:
-
-	// Write this model to the given filestream
-	virtual void writeDataToStream(std::ofstream& filestream);
-
 	// Applying transformations on this object
 	void rotate(glm::vec3 rotation);
 	void setRotation(glm::vec3 rotation);
@@ -42,7 +38,9 @@ public:
 	glm::vec3 getRotation() const;
 	glm::vec3 getScale() const;
 
-	std::string& getName();
+	const std::string& getName() const;
+	std::string* getNamePointer();
+	void setName(std::string newName);
 
 	void setTransformation(glm::mat4& transformMatrix);
 

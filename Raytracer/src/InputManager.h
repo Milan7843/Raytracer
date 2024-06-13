@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 // ImGui
 #include "imgui/imgui.h"
@@ -26,6 +27,19 @@ class Scene;
 
 namespace InputManager
 {
+	enum class Modifier
+	{
+		ANY,
+		NONE,
+		CTRL,
+		SHIFT,
+		ALT,
+		CTRL_SHIFT,
+		CTRL_ALT,
+		ALT_SHIFT,
+		CTRL_ALT_SHIFT
+	};
+
 	enum class Action
 	{
 		NONE,
@@ -45,7 +59,7 @@ namespace InputManager
 		X, Y, Z
 	};
 
-	enum class InputKey
+	enum class InputAction
 	{
 		MOVE_VIEW_TO_SELECTED,
 		CANCEL_TRANSLATION,
@@ -55,13 +69,31 @@ namespace InputManager
 		AXIS_X,
 		AXIS_Y,
 		AXIS_Z,
-		CLICK
+		CLICK,
+		MOVE_VIEW,
+		MOVE_FORWARD,
+		MOVE_BACKWARD,
+		MOVE_LEFT,
+		MOVE_RIGHT,
+		MOVE_UP,
+		MOVE_DOWN,
+		SAVE,
+		SAVE_AS,
+		NEW_SCENE
 	};
 
 	enum class KeyType
 	{
 		MOUSE,
 		KEYBOARD
+	};
+
+	struct Input
+	{
+		InputAction action;
+		Modifier modifier;
+		int key;
+		KeyType type;
 	};
 
 	// Initialise the input manager with the window to take input on
@@ -83,19 +115,23 @@ namespace InputManager
 
 	// Check whether the key for a specific action is pressed.
 	// Only returns true on the first frame the key is pressed.
-	bool keyPressed(InputKey key);
+	bool keyPressed(InputAction action);
 
 	// Check whether the key for a specific action is currently pressed
-	bool keyHeld(InputKey key);
+	bool keyHeld(InputAction action);
 
 	// Check whether the key for a specific action is not pressed.
 	// Only returns true on the first frame the key is released.
-	bool keyReleased(InputKey key);
+	bool keyReleased(InputAction action);
 
 	// Check whether the key for a specific action is currently not pressed
-	bool keyUp(InputKey key);
+	bool keyUp(InputAction action);
 
 	// Update all keybinds' previous values to have the new old values
 	void updateKeyBindsPreviousValues();
+
+	glm::vec2 getMousePosition();
+
+	Modifier getModifierState();
 };
 

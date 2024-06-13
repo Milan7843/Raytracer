@@ -37,6 +37,8 @@ public:
 	Camera(glm::vec3 pos, float yaw, float pitch, float sensitivity, float fov, float cameraSpeed);
 	~Camera();
 
+	void updateVectors();
+
 	glm::mat4 getViewMatrix();
 	glm::mat4 getProjectionMatrix();
 	glm::mat4 getProjectionMatrix(unsigned int width, unsigned int height);
@@ -50,31 +52,34 @@ public:
 
 	// Process the input to the camera.
 	// Returns whether the camera moved.
-	bool processInput(GLFWwindow* window, Scene& scene, double xpos, double ypos, float deltaTime);
+	bool processInput(Scene& scene, float deltaTime);
 
-	void setAspectRatio(int width, int height);
+	float getYaw() const;
+	float getPitch() const;
+
+	void setPosition(glm::vec3 position);
+	void setPitch(float newPitch);
+	void setYaw(float newYaw);
+	void setFov(float newFov);
 
 	// Get the ratio width/height
 	float getAspectRatio();
 
-	// Write this light to the given filestream
-	virtual void writeDataToStream(std::ofstream& filestream);
-
 	// Get important information of this camera (position, rotation)
 	std::string getInformation();
+
+	void onScroll(float delta);
 
 	float* getCameraSpeedPointer();
 	float* getFovPointer();
 	float* getSensitivityPointer();
 
-	void scrollCallback(double xoffset, double yoffset);
-
 	/* Private members */
 private:
 
 	// Different movement modes
-	bool processInputFirstPerson(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, double xscroll, double yscroll, float deltaTime);
-	bool processInputGlobal(GLFWwindow* window, Scene& scene, double xpos, double ypos, double xoffset, double yoffset, double xscroll, double yscroll, float deltaTime);
+	bool processInputFirstPerson(Scene& scene, double xoffset, double yoffset, float scroll, float deltaTime);
+	bool processInputGlobal(Scene& scene, double xoffset, double yoffset, float scroll, float deltaTime);
 
 	glm::vec3 calculateDirectionVector(float yaw, float pitch);
 
@@ -87,16 +92,14 @@ private:
 	bool firstMouse = true;
 	unsigned int ssbo;
 
-	// Rendering size: only used for aspect ratio
-	unsigned int width{ 0 };
-	unsigned int height{ 0 };
+	float nearPlane{ 0.1f };
+	float farPlane{ 1000.0f };
 
 	float sensitivity = 1.0f;
 	float fov = 40.0f;
 	float cameraSpeed = 1.0f;
 
-	double scrollDeltaX{ 0.0 };
-	double scrollDeltaY{ 0.0 };
+	float scroll{ 0.0f };
 
 	
 	bool movingToPosition{ false };

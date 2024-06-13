@@ -26,21 +26,19 @@ bool Light::writePositionToShader(AbstractShader* shader)
 	return false;
 }
 
-void Light::writeDataToStream(std::ofstream& filestream)
-{
-	filestream << name << "\n";
-	filestream << color.r << " " << color.g << " " << color.b << "\n";
-	filestream << intensity << "\n";
-}
-
 void Light::setIndex(unsigned int index)
 {
 	this->index = index;
 }
 
-glm::vec3 Light::getColor()
+glm::vec3 Light::getColor() const
 {
 	return color;
+}
+
+float Light::getIntensity() const
+{
+	return intensity;
 }
 
 glm::vec3* Light::getPositionPointer()
@@ -61,4 +59,9 @@ float* Light::getIntensityPointer()
 float* Light::getShadowSoftnessPointer()
 {
 	return &shadowSoftness;
+}
+
+void Light::setColor(glm::vec3 color)
+{
+	this->color = color;
 }
