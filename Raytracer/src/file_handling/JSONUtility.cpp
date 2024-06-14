@@ -172,6 +172,12 @@ namespace JSONUtility
 				);
 				pointLight->setPosition(position);
 			}
+
+			if (lightData.contains("intensity"))
+			{
+				float intensity = lightData["intensity"];
+				pointLight->setIntensity(intensity);
+			}
 		}
 	}
 
@@ -208,6 +214,12 @@ namespace JSONUtility
 				);
 				directionalLight->setDirection(direction);
 			}
+
+			if (lightData.contains("intensity"))
+			{
+				float intensity = lightData["intensity"];
+				directionalLight->setIntensity(intensity);
+			}
 		}
 	}
 
@@ -243,6 +255,12 @@ namespace JSONUtility
 					colorData[2]
 				);
 				ambientLight->setColor(color);
+			}
+
+			if (lightData.contains("intensity"))
+			{
+				float intensity = lightData["intensity"];
+				ambientLight->setIntensity(intensity);
 			}
 		}
 	}
@@ -427,6 +445,7 @@ namespace JSONUtility
 		j["name"] = light.getName();
 		j["color"] = vec3ToJSON(light.getColor());
 		j["position"] = vec3ToJSON(light.getPosition());
+		j["intensity"] = light.getIntensity();
 		return j;
 	}
 
@@ -436,6 +455,7 @@ namespace JSONUtility
 		j["name"] = light.getName();
 		j["color"] = vec3ToJSON(light.getColor());
 		j["direction"] = vec3ToJSON(light.getDirection());
+		j["intensity"] = light.getIntensity();
 		return j;
 	}
 

@@ -9,6 +9,8 @@ namespace WindowUtility
         bool unsavedChanges{ false };
         unsigned int windowWidth{ 0 };
         unsigned int windowHeight{ 0 };
+        unsigned int renderWindowWidth{ 0 };
+        unsigned int renderWindowHeight{ 0 };
 
         const std::string newSceneWindowName{ "New Scene" };
     }
@@ -62,6 +64,17 @@ namespace WindowUtility
     glm::ivec2 getWindowSize()
     {
         return glm::ivec2(windowWidth, windowHeight);
+    }
+
+    void setNewRenderWindowSize(unsigned int width, unsigned int height)
+    {
+        renderWindowWidth = width;
+        renderWindowHeight = height;
+    }
+
+    glm::ivec2 getRenderWindowSize()
+    {
+        return glm::ivec2(renderWindowWidth, renderWindowHeight);
     }
 
     std::string openImageFileChooseDialog()

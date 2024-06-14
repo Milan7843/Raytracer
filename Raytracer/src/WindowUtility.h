@@ -31,6 +31,10 @@ namespace WindowUtility
 
 	glm::ivec2 getWindowSize();
 
+	void setNewRenderWindowSize(unsigned int width, unsigned int height);
+
+	glm::ivec2 getRenderWindowSize();
+
 	// Open a Windows dialogue that lets the user choose an image file
 	// Returns the path of the chosen image
 	std::string openImageFileChooseDialog();

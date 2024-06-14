@@ -36,6 +36,7 @@ void main()
         //imageStore(blurredTexture, ivec2(gl_GlobalInvocationID.xy), vec4(1.0, 0.0, 0.0, 1.0));
         return;
     }
+    //return;
 
     float outlinesFound = 0;
     float foundOutline = 0.0;

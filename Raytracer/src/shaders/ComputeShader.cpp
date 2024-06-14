@@ -7,7 +7,7 @@ ComputeShader::ComputeShader(const char* shaderPath)
 
 	ID = glCreateProgram();
 
-	bool succesfullyLoadedCachedShader{ true };
+	bool succesfullyLoadedCachedShader{ false };
 
 	if (Cache::cachedFileExists(binaryPath))
 	{

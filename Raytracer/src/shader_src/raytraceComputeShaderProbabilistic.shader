@@ -822,21 +822,25 @@ vec4 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
 
                 skyColor = texture(hdri, vec2(yaw / (2 * PI), -pitch)).rgb * hdriLightStrength;
             }
-            /*
+            
             // Rendering each directional light as a sort of sun, by doing the final color dot the -direction, 
             // to calculate how much the ray is going into the sun
+            vec3 dirLightInfluence = vec3(0.);
             for (int lightIndex = 0; lightIndex < dirLightCount; lightIndex++)
             {
-                t = dot(ray.dir, -normalize(dirLights[lightIndex].dir));
+                float t = dot(ray.dir, -normalize(dirLights[lightIndex].dir));
                 float threshold = 0.98f;
                 if (t > threshold)
                 {
                     // Normalize (threshold, 1.0] to (0.0, 1.0]
                     t = (t - threshold) / (1. - threshold);
 
-                    finalColor = dirLights[lightIndex].color * (t)+skyColor * (1. - t);
+                    dirLightInfluence += dirLights[lightIndex].color * dirLights[lightIndex].intensity * 20.;
                 }
-            }*/
+                //skyColor = dirLights[lightIndex].color;
+            }
+
+            skyColor += dirLightInfluence;
 
             color *= skyColor;
             break;
@@ -849,12 +853,14 @@ vec4 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
         }
         else
         {
-            float rayDirNormalDotProduct = dot(closestIntersection.normal, ray.dir);
+            float rayDirNormalDotProduct = dot(closestIntersection.normal, -ray.dir);
+
+            float reflectiveness = closestIntersection.reflectiveness;
 
             // Fresnel effect approximation reflection value
             // TODO turn fresnel back on at some point but i dont like it right now, it works too much on non-reflective objects like a couch
             float fresnelReflectionStrength = 0.;
-            float fresnelReflectiveness = closestIntersection.reflectiveness + fresnelReflectionStrength * (1.0 - closestIntersection.reflectiveness) * pow(1.0 - max(0.0, rayDirNormalDotProduct), 5.0);
+            float fresnelReflectiveness = reflectiveness + fresnelReflectionStrength * (1.0 - reflectiveness) * pow(1.0 - max(0.0, rayDirNormalDotProduct), 5.0);
 
             if (rayDirNormalDotProduct < 0)
             {
@@ -868,6 +874,7 @@ vec4 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
 
                 ray.dir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
                 ray.pos = closestIntersection.pos + EPSILON * ray.dir;
+
 
                 //continue; // reflecting
             }

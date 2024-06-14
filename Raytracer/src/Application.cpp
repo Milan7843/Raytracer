@@ -178,7 +178,7 @@ int Application::Start()
     // Generating the screen quad on which the raytraced image is rendered
     generateScreenQuad();
 
-    OutlineRenderer outlineRenderer(WINDOW_SIZE_X, WINDOW_SIZE_Y, screenQuadVAO);
+    OutlineRenderer outlineRenderer(renderedScreenSize.x, renderedScreenSize.y, screenQuadVAO);
 
     // Generating a VAO for the axes so that they can be rendered easily
     generateAxesVAO();
@@ -239,6 +239,7 @@ int Application::Start()
             objectScreenSelector.setResolution(renderedScreenSize.x, renderedScreenSize.y);
             raytracingRenderer.setResolution(renderedScreenSize.x, renderedScreenSize.y);
             setupFramebuffer(renderedScreenSize);
+            WindowUtility::setNewRenderWindowSize(renderedScreenSize.x, renderedScreenSize.y);
         }
 
         if (InputManager::keyPressed(InputManager::InputAction::SAVE))

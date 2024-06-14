@@ -49,7 +49,7 @@ glm::mat4 Camera::getViewMatrix()
 }
 glm::mat4 Camera::getProjectionMatrix()
 {   //                           cam pos,  target,            up vector
-	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)WindowUtility::getWindowSize().x / (float)WindowUtility::getWindowSize().y, nearPlane, farPlane);
+	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)WindowUtility::getRenderWindowSize().x / (float)WindowUtility::getRenderWindowSize().y, nearPlane, farPlane);
 	return projection;
 }
 glm::mat4 Camera::getProjectionMatrix(unsigned int width, unsigned int height)
@@ -108,7 +108,7 @@ void Camera::setFov(float newFov)
 
 float Camera::getAspectRatio()
 {
-	return (float)WindowUtility::getWindowSize().x / (float)WindowUtility::getWindowSize().y;
+	return (float)WindowUtility::getRenderWindowSize().x / (float)WindowUtility::getRenderWindowSize().y;
 }
 
 std::string Camera::getInformation()

@@ -15,6 +15,12 @@ OutlineRenderer::~OutlineRenderer()
 
 void OutlineRenderer::setResolution(unsigned int width, unsigned int height)
 {
+	if (this->width == width && this->textureWidth == width && this->height == height && this->textureHeight == height)
+	{
+		// No change in texture size required
+		return;
+	}
+
 	deleteBuffers();
 
 	// Saving the new inputs
@@ -82,8 +88,8 @@ void OutlineRenderer::render(Scene& scene)
 		return;
 	}
 
+	// Saving the currently bound framebuffer so it can be restored after
 	int framebufferBefore{ 0 };
-
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &framebufferBefore);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);

@@ -41,6 +41,11 @@ float Light::getIntensity() const
 	return intensity;
 }
 
+void Light::setIntensity(float intensity)
+{
+	this->intensity = intensity;
+}
+
 glm::vec3* Light::getPositionPointer()
 {
 	return &position;
