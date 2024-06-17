@@ -72,7 +72,7 @@ public:
 
 	// Set the HDRI used in this scene
 	void loadHDRI(const std::string& imagePath);
-	Texture* getHDRI();
+	HDRITexture* getHDRI();
 	bool hasHDRI();
 	void removeHDRI();
 
@@ -236,7 +236,7 @@ private:
 	ImGuiEditorInterface* getSelectedObject();
 
 	// The hdri currently loaded
-	std::shared_ptr<Texture> hdri;
+	std::shared_ptr<HDRITexture> hdri;
 
 	// Keeping track of the lights in this scene
 	std::vector<PointLight> pointLights;

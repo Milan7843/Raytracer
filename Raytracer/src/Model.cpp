@@ -104,6 +104,8 @@ bool Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
 		return false;
 	}
 
+	std::cout << "Writing Model to shader" << std::endl;
+
 	std::cout << "m " << getPosition().x << ", " << getPosition().y << ", " << getPosition().z << std::endl;
 
 	for (unsigned int i = 0; i < meshes.size(); i++)

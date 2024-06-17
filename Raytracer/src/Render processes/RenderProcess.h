@@ -4,7 +4,9 @@
 class RenderProcess
 {
 public:
-	~RenderProcess() {}
+	~RenderProcess() {
+		glDeleteBuffers(1, &stackBuffer);
+	}
 
 	// Update this render process; must be called every frame
 	// Returns the number of pixels that have been rendered

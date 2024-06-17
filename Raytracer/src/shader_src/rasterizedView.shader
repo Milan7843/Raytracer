@@ -80,6 +80,7 @@ uniform int debugMode;
 
 // Skybox
 uniform sampler2D hdri;
+uniform sampler2D blurredhdri;
 uniform sampler2D textureAtlas;
 
 #define PI 3.14159265359
@@ -92,6 +93,11 @@ float atan2(float x, float z)
 float rand(vec2 co)
 {
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+float rand(float co)
+{
+    return fract(sin(co * 12.9898 + co * 78.233) * 43758.5453);
 }
 
 vec3 sampleAlbedo(vec2 uv)
@@ -129,6 +135,17 @@ vec3 sampleNormal(vec2 uv)
     normalFromMap = normalize(tbn * normalFromMap);
 
     return normalize(materialTextureData[materialIndex].normalMapStrength * normalFromMap + (1.0 - materialTextureData[materialIndex].normalMapStrength) * Normal);
+}\
+
+vec3 sampleGlobalHDRI(vec3 direction)
+{
+    vec3 dir = normalize(direction);
+
+    // Sample the low res HDRI
+    float yaw = atan2(dir.x, dir.z);
+    float pitch = (-dir.y / 2.0 + 0.5);
+
+    return texture(blurredhdri, vec2(yaw / (2 * PI), -pitch)).rgb;
 }
 
 vec3 sampleHDRI(vec3 direction)
@@ -173,6 +190,7 @@ vec3 calculateAmbientLight(AmbientLight light);
 
 void main()
 {
+
     vec3 viewDir = normalize(cameraPos - FragPos);
     vec3 albedo = sampleAlbedo(uv);
     vec3 normal = sampleNormal(uv);
@@ -220,7 +238,7 @@ vec3 calculateLights(vec3 pos, vec3 normal, vec3 viewDir)
 
     /* HDRI */
     vec3 reflectDir = reflect(-viewDir, normal);
-    finalLight = finalLight + sampleHDRI(reflectDir) * materials[materialIndex].reflectiveness;
+    finalLight = finalLight + sampleHDRI(reflectDir) * materials[materialIndex].reflectiveness + sampleGlobalHDRI(normal) * 1.0;
 
     return finalLight;
 }

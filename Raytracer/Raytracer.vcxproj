@@ -708,7 +708,7 @@
     <None Include="include\glm\gtx\vector_query.inl" />
     <None Include="include\glm\gtx\wrap.inl" />
     <None Include="src\shader_src\backup.shader" />
-    <None Include="src\shader_src\blurComputeShader.shader" />
+    <None Include="src\shader_src\blurCompute.shader" />
     <None Include="src\shader_src\bufferedIndirectLightingRaytracingFragmentShader.shader" />
     <None Include="src\shader_src\bufferedRaytracingFragmentShader.shader" />
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationFragment.shader" />
@@ -725,6 +725,7 @@
     <None Include="src\shader_src\hdriVertex.shader" />
     <None Include="src\shader_src\indirectLightingCalculation.shader" />
     <None Include="src\shader_src\objectClickColoringShader.shader" />
+    <None Include="src\shader_src\outlineCompute.shader" />
     <None Include="src\shader_src\outlineRenderToTextureFragment.shader" />
     <None Include="src\shader_src\rasterizedView.shader" />
     <None Include="src\shader_src\raymarchFragmentShader.shader" />

@@ -2,6 +2,7 @@
 
 #include "Camera.h"
 #include "shaders/Shader.h"
+#include "ImageLoader.h"
 
 class HDRIRenderer
 {
@@ -9,7 +10,7 @@ public:
 	HDRIRenderer(const char* vertexShaderPath, const char* fragmentShaderPath);
 	~HDRIRenderer();
 
-	void drawHDRI(unsigned int hdri, Camera& camera);
+	void drawHDRI(HDRITexture* hdri, Camera& camera);
 
 private:
 

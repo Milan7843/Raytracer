@@ -38,5 +38,6 @@ namespace WindowUtility
 	// Open a Windows dialogue that lets the user choose an image file
 	// Returns the path of the chosen image
 	std::string openImageFileChooseDialog();
+	std::string openHDRIImageFileChooseDialog();
 };
 

@@ -98,10 +98,10 @@ private:
 	ComputeShader denoiseShader;
 
 	// The buffer to store rendered pixel data
-	unsigned int pixelBuffer;
+	unsigned int pixelBuffer{ 0 };
 
 	// The buffer to store other pixel data (e.g. ray direction)
-	unsigned int pixelDataBuffer;
+	unsigned int pixelDataBuffer{ 0 };
 
 	// The resolution used to render
 	unsigned int width, height;

@@ -63,6 +63,9 @@ int Application::Start()
 
     Random::initialise();
 
+    // Must be called after GLAD init
+    ImageLoader::initialise();
+
     /*
     // Making a scene
     Scene scene = Scene();
@@ -363,7 +366,7 @@ int Application::Start()
             glDisable(GL_DEPTH_TEST);
             // Drawing the HDRI (skybox) if using it as a background is enabled
             if (*sceneManager.getCurrentScene().getUseHDRIAsBackgroundPointer() && sceneManager.getCurrentScene().hasHDRI())
-                hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI()->textureID, sceneManager.getCurrentScene().getActiveCamera());
+                hdriRenderer.drawHDRI(sceneManager.getCurrentScene().getHDRI(), sceneManager.getCurrentScene().getActiveCamera());
 
             glEnable(GL_DEPTH_TEST);
 

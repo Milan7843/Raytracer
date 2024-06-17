@@ -820,7 +820,7 @@ vec4 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
                 float yaw = atan2(ray.dir.z, ray.dir.x);
                 float pitch = (-ray.dir.y / 2 + 0.5);
 
-                skyColor = texture(hdri, vec2(yaw / (2 * PI), -pitch)).rgb * hdriLightStrength;
+                skyColor = min(vec3(1000.), texture(hdri, vec2(yaw / (2 * PI), -pitch)).rgb) * hdriLightStrength;
             }
             
             // Rendering each directional light as a sort of sun, by doing the final color dot the -direction, 

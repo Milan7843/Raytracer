@@ -4,7 +4,7 @@ OutlineRenderer::OutlineRenderer(unsigned int width, unsigned int height, unsign
 	: screenQuadVAO(screenQuadVAO)
 	, blurRenderShader("src/shader_src/raymarchVertexShader.shader", "src/shader_src/screenTextureFragment.shader")
 	, objectRenderShader("src/shader_src/solidColorVertexShader.shader", "src/shader_src/outlineRenderToTextureFragment.shader")
-	, textureBlurrerShader("src/shader_src/blurComputeShader.shader")
+	, textureBlurrerShader("src/shader_src/outlineCompute.shader")
 {
 	setResolution(width, height);
 }

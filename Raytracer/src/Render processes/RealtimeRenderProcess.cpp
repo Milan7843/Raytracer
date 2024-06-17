@@ -45,13 +45,11 @@ unsigned int RealtimeRenderProcess::update(float deltaTime, ComputeShader& compu
 
 void RealtimeRenderProcess::generateStackBuffer()
 {
-	// Deleting the previous stack buffer
-	glDeleteBuffers(1, &stackBuffer);
-
-	// Creating the stack array buffer
-	stackBuffer = 0;
-
-	glGenBuffers(1, &stackBuffer);
+	// Generate the buffer if it didn't exist yet
+	if (stackBuffer == 0)
+	{
+		glGenBuffers(1, &stackBuffer);
+	}
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, stackBuffer);
 
 	glBufferData(GL_SHADER_STORAGE_BUFFER, this->width * this->height * sizeof(int) * stackSize, 0, GL_DYNAMIC_COPY);

@@ -18,10 +18,10 @@ void Scene::setName(std::string name)
 
 void Scene::loadHDRI(const std::string& imagePath)
 {
-	hdri = TextureHandler::loadTexture(imagePath, false, 2.0f);
+	hdri = TextureHandler::loadHDRITexture(imagePath, false, 2.0f);
 }
 
-Texture* Scene::getHDRI()
+HDRITexture* Scene::getHDRI()
 {
 	if (!hasHDRI())
 	{
@@ -460,6 +460,7 @@ void Scene::draw(AbstractShader* shader, RasterizedDebugMode debugMode)
 
 	// Binding the hdri
 	shader->setInt("hdri", 0);
+	shader->setInt("blurredhdri", 2);
 
 	// Binding the texture atlas
 	shader->setInt("textureAtlas", 1);
@@ -468,6 +469,9 @@ void Scene::draw(AbstractShader* shader, RasterizedDebugMode debugMode)
 	{
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, getHDRI()->textureID);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, getHDRI()->blurredTextureID);
 	}
 
 	glActiveTexture(GL_TEXTURE1);
@@ -648,9 +652,12 @@ void Scene::writeObjectsToShader(AbstractShader* shader)
 
 void Scene::generateTriangleBuffer()
 {
-	// Generating a buffer for the triangles to go into
-	triangleBufferSSBO = 0;
-	glGenBuffers(1, &triangleBufferSSBO);
+	// Generate the buffer if it didn't exist yet
+	if (triangleBufferSSBO == 0)
+	{
+		glGenBuffers(1, &triangleBufferSSBO);
+	}
+
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
 
 	Logger::log("Making room for " + std::to_string(triangleCount) + " triangles in SSBO " + std::to_string(triangleBufferSSBO));

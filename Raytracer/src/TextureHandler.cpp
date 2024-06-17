@@ -32,6 +32,16 @@ namespace TextureHandler
 		return loadTexture(std::string(spritePath), pixelPerfect, previewAspectRatio);
 	}
 
+	std::shared_ptr<HDRITexture> loadHDRITexture(const std::string& spritePath, bool pixelPerfect, float previewAspectRatio)
+	{
+		return ImageLoader::loadHDRITexture(spritePath, pixelPerfect, previewAspectRatio);
+	}
+
+	std::shared_ptr<HDRITexture> loadHDRITexture(const char* spritePath, bool pixelPerfect, float previewAspectRatio)
+	{
+		return loadHDRITexture(std::string(spritePath), pixelPerfect, previewAspectRatio);
+	}
+
 	unsigned int packTextures(std::vector<Material>& materials)
 	{
 		if (!newTextureLoaded)
@@ -51,8 +61,6 @@ namespace TextureHandler
 		{
 			if (material.hasAlbedoTexture())
 			{
-				std::cout << "material has albedo texture" << std::endl;
-
 				textures.push_back(material.getAlbedoTexture());
 			}
 			if (material.hasNormalTexture())

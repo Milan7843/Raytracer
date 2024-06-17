@@ -2089,7 +2089,7 @@
     <None Include="src\shader_src\hdriFragment.shader" />
     <None Include="src\shader_src\outlineRenderToTextureFragment.shader" />
     <None Include="src\shader_src\screenTextureFragment.shader" />
-    <None Include="src\shader_src\blurComputeShader.shader" />
+    <None Include="src\shader_src\blurCompute.shader" />
     <None Include="src\shader_src\objectClickColoringShader.shader" />
     <None Include="src\shader_src\raytraceComputeShaderSampledUpdated.shader" />
     <None Include="src\shader_src\BVH visualisation\bvhVisualisationFragment.shader" />
@@ -2105,6 +2105,7 @@
     <None Include="src\shader_src\raytraceComputeShaderSampledUpdatedBackup.shader" />
     <None Include="src\shader_src\raytraceComputeShaderProbabilistic.shader" />
     <None Include="src\shader_src\denoise.shader" />
+    <None Include="src\shader_src\outlineCompute.shader" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\assimp-vc142-mtd.lib" />

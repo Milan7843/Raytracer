@@ -70,7 +70,7 @@ void Renderer::setUpForRender(Scene& scene, Camera* camera)
 	scene.bindTriangleBuffer();
 	scene.bindMaterialsBuffer();
 	scene.writeLightsToShader(&computeShader, true);
-	//scene.writeMaterialsToShader(&computeShader);
+	scene.writeMaterialsToShader(&computeShader);
 	Random::bindRandomTexture();
 	computeShader.setInt("randomTexture", 5);
 
@@ -167,17 +167,15 @@ void Renderer::updateMeshData(Scene* scene)
 
 void Renderer::setResolution(unsigned int width, unsigned int height)
 {
-	// Deleting the previous pixel buffer
-	glDeleteBuffers(1, &pixelBuffer);
+	// Generate the buffer if it didn't exist yet
+	if (pixelBuffer == 0)
+	{
+		glGenBuffers(1, &pixelBuffer);
+	}
 
 	this->width = width;
 	this->height = height;
 
-	// Creating the pixel array buffer
-	pixelBuffer = 0;
-
-	// Problematic statement: very slow (?)
-	glGenBuffers(1, &pixelBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelBuffer);
 
 	// Setting buffer size to be width x height x 16, for 16 bytes per pixel
@@ -186,15 +184,11 @@ void Renderer::setResolution(unsigned int width, unsigned int height)
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 
-
-	// Deleting the previous pixel data buffer
-	glDeleteBuffers(1, &pixelDataBuffer);
-
-	// Creating the pixel data array buffer
-	pixelDataBuffer = 0;
-
-	// Problematic statement: very slow (?)
-	glGenBuffers(1, &pixelDataBuffer);
+	// Generate the buffer if it didn't exist yet
+	if (pixelDataBuffer == 0)
+	{
+		glGenBuffers(1, &pixelDataBuffer);
+	}
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pixelDataBuffer);
 
 	// Setting buffer size to be width x height x 16, for 16 bytes per pixel

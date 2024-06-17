@@ -33,12 +33,20 @@ void BVH::setRoot(BVHNode* newRoot)
 
 void BVH::generateBuffers()
 {
-	glDeleteBuffers(1, &dataSSBO);
-	glDeleteBuffers(1, &triangleSSBO);
+	// Generate the buffer if it didn't exist yet
+	if (dataSSBO == 0)
+	{
+		glGenBuffers(1, &dataSSBO);
+	}
+
+	// Generate the buffer if it didn't exist yet
+	if (triangleSSBO == 0)
+	{
+		glGenBuffers(1, &triangleSSBO);
+	}
 
 
 	// Generating a buffer for data
-	glGenBuffers(1, &dataSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, dataSSBO);
 
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, dataSSBO);
@@ -46,7 +54,6 @@ void BVH::generateBuffers()
 
 
 	// Generating a buffer for the triangle indices
-	glGenBuffers(1, &triangleSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleSSBO);
 
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, triangleSSBO);

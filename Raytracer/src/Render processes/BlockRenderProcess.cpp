@@ -74,6 +74,9 @@ unsigned int BlockRenderProcess::update(float deltaTime, ComputeShader& computeS
 
 void BlockRenderProcess::generateIndirectLightingDataBuffer()
 {
+	// Not necessary in current implementation
+	return;
+
 	// Deleting the previous pixel buffer
 	glDeleteBuffers(1, &indirectLightingDataBuffer);
 
@@ -96,13 +99,11 @@ void BlockRenderProcess::generateIndirectLightingDataBuffer()
 
 void BlockRenderProcess::generateStackBuffer()
 {
-	// Deleting the previous stack buffer
-	glDeleteBuffers(1, &stackBuffer);
-
-	// Creating the stack array buffer
-	stackBuffer = 0;
-
-	glGenBuffers(1, &stackBuffer);
+	// Generate the buffer if it didn't exist yet
+	if (stackBuffer == 0)
+	{
+		glGenBuffers(1, &stackBuffer);
+	}
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, stackBuffer);
 
 	glBufferData(GL_SHADER_STORAGE_BUFFER, this->blockSize * this->blockSize * sizeof(int) * stackSize, 0, GL_DYNAMIC_COPY);

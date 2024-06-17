@@ -10,7 +10,7 @@ HDRIRenderer::~HDRIRenderer()
 {
 }
 
-void HDRIRenderer::drawHDRI(unsigned int hdri, Camera& camera)
+void HDRIRenderer::drawHDRI(HDRITexture* hdri, Camera& camera)
 {
     glBindVertexArray(skyboxVAO);
 
@@ -26,9 +26,13 @@ void HDRIRenderer::drawHDRI(unsigned int hdri, Camera& camera)
 
     // Binding the hdri
     hdriShader.setInt("hdri", 0);
+    //hdriShader.setInt("blurredhdri", 1);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, hdri);
+    glBindTexture(GL_TEXTURE_2D, hdri->textureID);
+
+    //glActiveTexture(GL_TEXTURE1);
+    //glBindTexture(GL_TEXTURE_2D, hdri->blurredTextureID);
 
     // Drawing
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);

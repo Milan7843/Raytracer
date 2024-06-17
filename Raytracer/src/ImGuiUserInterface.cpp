@@ -801,7 +801,7 @@ void ImGuiUserInterface::drawSceneEditor(GLFWwindow* window, SceneManager& scene
 
 		if (sceneManager.getCurrentScene().hasHDRI())
 		{
-			Texture* hdriTexture = sceneManager.getCurrentScene().getHDRI();
+			HDRITexture* hdriTexture = sceneManager.getCurrentScene().getHDRI();
 
 			previewTextureID = hdriTexture->previewTextureID;
 			previewTextureWidth = hdriTexture->previewWidth;
@@ -810,7 +810,7 @@ void ImGuiUserInterface::drawSceneEditor(GLFWwindow* window, SceneManager& scene
 
 		if (ImGui::ImageButton((void*)(intptr_t)previewTextureID, ImVec2(previewTextureWidth, previewTextureHeight)))
 		{
-			std::string imagePath = WindowUtility::openImageFileChooseDialog();
+			std::string imagePath = WindowUtility::openHDRIImageFileChooseDialog();
 
 			if (imagePath != std::string(""))
 			{
