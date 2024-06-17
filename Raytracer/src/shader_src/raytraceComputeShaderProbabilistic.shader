@@ -125,6 +125,7 @@ struct Material
     vec4 color;
     vec4 emission;
     float reflectiveness;
+    float roughness;
     float transparency;
     float refractiveness;
     float reflectionDiffusion;
@@ -541,6 +542,14 @@ vec3 getRandomDirectionFollowingNormal(vec3 normal, int seed)
 
 
 
+vec3 multipleColoursWithImpact(vec3 base, vec3 mult, float impact)
+{
+    impact = max(min(impact, 1.0), 0.0);
+    return base * (vec3(1.) - (vec3(1.) - mult) * impact);
+}
+
+
+
 
 
 
@@ -801,6 +810,8 @@ vec4 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
     vec3 color = vec3(1.0);
     bool hitLightSourceDirectly = false;
 
+    float impact = 1.0;
+
     // Reflections loop
     for (int i = 0; i < MAX_REFLECTIONS; i++)
     {
@@ -842,7 +853,8 @@ vec4 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
 
             skyColor += dirLightInfluence;
 
-            color *= skyColor;
+            //color *= skyColor;
+            color = multipleColoursWithImpact(color, skyColor, impact);
             break;
         }
         else if (closestIntersection.emission != vec3(0.0))
@@ -853,9 +865,52 @@ vec4 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
         }
         else
         {
+            Material material = materials[closestIntersection.materialIndex];
+
             float rayDirNormalDotProduct = dot(closestIntersection.normal, -ray.dir);
 
             float reflectiveness = closestIntersection.reflectiveness;
+
+            float fresnelReflectiveness = material.fresnelReflectionStrength * pow(1.0 - max(0.0, rayDirNormalDotProduct), 5.0);
+
+            if (rayDirNormalDotProduct < 0)
+            {
+                fresnelReflectiveness = 0;
+            }
+
+            vec3 randomDir = getRandomDirectionFollowingNormal(closestIntersection.normal, seed * 7 + i * 19 + 371);
+            vec3 reflectDir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
+
+            //ray.dir = newDir;
+
+            float random_num = rand(seed * 3 + i * 17);
+            float smoothness = (1. - material.roughness);
+
+            vec3 newDir = vec3(0.0);
+
+            if (random_num < reflectiveness + fresnelReflectiveness)
+            {
+                newDir = normalize(randomDir * material.roughness + reflectDir * (1. - material.roughness));
+            }
+            else if (random_num < reflectiveness + fresnelReflectiveness)
+            {
+                newDir = reflectDir;
+            }
+            else
+            {
+                newDir = randomDir;
+            }
+
+            ray.dir = newDir;
+
+            ray.pos = closestIntersection.pos + EPSILON * ray.dir;
+            //color *= vec3(1.0) - ((vec3(1.0) - closestIntersection.color) * (1. - reflectiveness));
+            impact *= min(1.0, material.reflectiveness + fresnelReflectiveness);
+            color = multipleColoursWithImpact(color, closestIntersection.color, 1. - impact);
+            //color *= dot(closestIntersection.normal, ray.dir);
+        }
+        /* {
+            //continue;
 
             // Fresnel effect approximation reflection value
             // TODO turn fresnel back on at some point but i dont like it right now, it works too much on non-reflective objects like a couch
@@ -872,13 +927,19 @@ vec4 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
                 // Calculating the new ray direction for a reflection
                 //ray.finalColor += closestIntersection.color;
 
-                ray.dir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
+                vec3 randomDir = getRandomDirectionFollowingNormal(closestIntersection.normal, seed * 7 + i * 19 + 361);
+                vec3 reflectDir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
+
+                vec3 newDir = normalize(randomDir * (1. - closestIntersection.transparency) + reflectDir * closestIntersection.transparency);
+
+                ray.dir = randomDir;
+                //ray.dir = normalize(ray.dir + closestIntersection.normal * -2. * dot(ray.dir, closestIntersection.normal));
                 ray.pos = closestIntersection.pos + EPSILON * ray.dir;
 
 
                 //continue; // reflecting
             }
-            else if (closestIntersection.transparency > EPSILON && i != MAX_REFLECTIONS - 1 && rand(seed * 13 + i * 47 + 5779) < closestIntersection.transparency)
+            else if (false && closestIntersection.transparency > EPSILON && i != MAX_REFLECTIONS - 1 && rand(seed * 13 + i * 47 + 5779) < closestIntersection.transparency)
             {
                 // If the dot product is negative, the ray direction is opposing the normal,
                 // so we are entering glass, otherwise we are exiting
@@ -938,7 +999,7 @@ vec4 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
                 ray.dir = getRandomDirectionFollowingNormal(closestIntersection.normal, seed * 7 + i * 19 + 371);
                 ray.pos = closestIntersection.pos + EPSILON * ray.dir;
                 color *= closestIntersection.color;
-                color *= dot(closestIntersection.normal, ray.dir);
+                //color *= dot(closestIntersection.normal, ray.dir);
 
                 //return vec3(float(seed * 7 + i * 19 + 371) / 2147483647.0 * 7);
 
@@ -949,7 +1010,7 @@ vec4 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
 
                 //continue;
             }
-        }
+        }*/
 
         // Updating the closest intersection after the first iteration
         closestIntersection = getAllIntersections(ray, skipTriThisIteration, skipSphereThisIteration);

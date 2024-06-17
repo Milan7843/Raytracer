@@ -25,9 +25,9 @@ public:
 	Material();
 
 	// Actual constructors
-	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness, float reflectionDiffusion, glm::vec3 emission, float emissionStrength, float fresnelReflectionStrength);
-	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, glm::vec3 emission, float emissionStrength);
-	Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness);
+	Material(std::string name, glm::vec3 color, float reflectiveness, float roughness, float transparency, float refractiveness, float reflectionDiffusion, glm::vec3 emission, float emissionStrength, float fresnelReflectionStrength);
+	Material(std::string name, glm::vec3 color, float reflectiveness, float roughness, float transparency, glm::vec3 emission, float emissionStrength);
+	Material(std::string name, glm::vec3 color, float reflectiveness, float roughness, float transparency, float refractiveness);
 	~Material();
 
 	// Draw an interface for this model using ImGui
@@ -38,6 +38,7 @@ public:
 
 	glm::vec3 color;
 	float reflectiveness;
+	float roughness;
 	float transparency;
 	float refractiveness;
 	float reflectionDiffusion;
@@ -49,6 +50,7 @@ public:
 	const std::string& getName() const;
 	glm::vec3 getColor() const;
 	float getReflectiveness() const;
+	float getRoughness() const;
 	float getTransparency() const;
 	float getRefractiveness() const;
 	float getReflectionDiffusion() const;
@@ -60,6 +62,7 @@ public:
 	void setName(std::string name);
 	void setColor(const glm::vec3& newColor);
 	void setReflectiveness(float newReflectiveness);
+	void setRoughness(float newRoughness);
 	void setTransparency(float newTransparency);
 	void setRefractiveness(float newRefractiveness);
 	void setReflectionDiffusion(float newReflectionDiffusion);
@@ -75,6 +78,7 @@ public:
 	std::string* getNamePointer();
 	glm::vec3* getColorPointer();
 	float* getReflectivenessPointer();
+	float* getRoughnessPointer();
 	float* getTransparencyPointer();
 	float* getRefractivenessPointer();
 	float* getReflectionDiffusionPointer();

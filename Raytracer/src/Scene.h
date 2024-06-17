@@ -35,27 +35,28 @@ struct ShaderMaterial
 	glm::vec4 color; // 1
 	glm::vec4 emission; // 2
 	float reflectiveness;
+	float roughness;
 	float transparency;
-	float refractiveness;
-	float reflectionDiffusion; // 3
+	float refractiveness; // 3
+	float reflectionDiffusion;
 	float emissionStrength;
 	float fresnelReflectionStrength;
 
-	int hasAlbedoTexture;
-	float albedoTexture_xMin; // 4
+	int hasAlbedoTexture; // 4
+	float albedoTexture_xMin;
 	float albedoTexture_xMax;
 	float albedoTexture_yMin;
-	float albedoTexture_yMax;
+	float albedoTexture_yMax; // 5
 
-	int hasNormalTexture; // 5
+	int hasNormalTexture;
 	float normalTexture_xMin;
 	float normalTexture_xMax;
-	float normalTexture_yMin;
-	float normalTexture_yMax; // 6
+	float normalTexture_yMin; // 6
+	float normalTexture_yMax;
 	float normalMapStrength;
 	float pad1;
-	float pad2;
-	float pad3; // 7
+	float pad2; // 7
+	//float pad3;
 };
 
 class Scene
@@ -63,9 +64,6 @@ class Scene
 public:
 	Scene();
 	~Scene();
-
-	// Write this scene to the given filestream
-	void writeDataToStream(std::ofstream& filestream);
 
 	// Set the name of this scene
 	void setName(std::string name);

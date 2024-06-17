@@ -745,6 +745,7 @@ void Scene::bindMaterialsBuffer()
 				glm::vec4(material.getColor(), 1.0f),
 				glm::vec4(material.getEmission(), 1.0f),
 				material.getReflectiveness(),
+				material.getRoughness(),
 				material.getTransparency(),
 				material.getRefractiveness(),
 				material.getReflectionDiffusion(),

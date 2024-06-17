@@ -9,7 +9,6 @@ Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned
     , unsigned int startIndex, unsigned int meshIndex, unsigned int modelID, Model* model)
     : shaderArraybeginIndex(startIndex)
     , shaderMeshIndex(meshIndex)
-    , materialIndex(materialIndex)
     , modelID(modelID)
     , averageVertexPosition(position)
     , model(model)
@@ -77,14 +76,16 @@ bool Mesh::drawInterface(Scene& scene)
     anyPropertiesChanged |= ImGui::DragFloat3("Rotation", (float*)getRotationPointer(), 0.01f);
     anyPropertiesChanged |= ImGui::DragFloat3("Scale", (float*)getScalePointer(), 0.01f);
 
+    //std::cout << getMaterialIndex() << std::endl;
+
     // Preview the currently selected name
-    if (ImGui::BeginCombo((getName() + "##combo").c_str(), (*(scene.getMaterials()[*getMaterialIndexPointer()].getNamePointer())).c_str()))
+    if (ImGui::BeginCombo((getName() + "##combo").c_str(), scene.getMaterials()[getMaterialIndex()].getName().c_str()))
     {
         // Looping over each material to check whether it was clicked;
         // If it was: select the index of the material as the material index for this mesh
         for (Material& material : scene.getMaterials())
         {
-            bool thisMaterialSelected = (i == *getMaterialIndexPointer());
+            bool thisMaterialSelected = (i == getMaterialIndex());
 
             // Button for selecting material
             if (ImGui::Selectable((*(scene.getMaterials()[i].getNamePointer())).c_str()))

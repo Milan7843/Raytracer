@@ -7,6 +7,7 @@ Material::Material()
 	: name("New material"),
 	color(glm::vec3(0.8f)),
 	reflectiveness(0.0f),
+	roughness(0.0f),
 	transparency(0.0f),
 	refractiveness(0.0f),
 	reflectionDiffusion(0.0f),
@@ -17,10 +18,11 @@ Material::Material()
 	setType(MATERIAL);
 }
 
-Material::Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness, float reflectionDiffusion, glm::vec3 emission, float emissionStrength, float fresnelReflectionStrength)
+Material::Material(std::string name, glm::vec3 color, float reflectiveness, float roughness, float transparency, float refractiveness, float reflectionDiffusion, glm::vec3 emission, float emissionStrength, float fresnelReflectionStrength)
 	: name(name),
 	color(color),
 	reflectiveness(reflectiveness),
+	roughness(roughness),
 	transparency(transparency),
 	refractiveness(refractiveness),
 	reflectionDiffusion(reflectionDiffusion),
@@ -30,10 +32,11 @@ Material::Material(std::string name, glm::vec3 color, float reflectiveness, floa
 {
 	setType(MATERIAL);
 }
-Material::Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, float refractiveness)
+Material::Material(std::string name, glm::vec3 color, float reflectiveness, float roughness, float transparency, float refractiveness)
 	: name(name),
 	color(color),
 	reflectiveness(reflectiveness),
+	roughness(roughness),
 	transparency(transparency),
 	refractiveness(refractiveness),
 	reflectionDiffusion(0.0f),
@@ -44,10 +47,11 @@ Material::Material(std::string name, glm::vec3 color, float reflectiveness, floa
 	setType(MATERIAL);
 }
 
-Material::Material(std::string name, glm::vec3 color, float reflectiveness, float transparency, glm::vec3 emission, float emissionStrength)
+Material::Material(std::string name, glm::vec3 color, float reflectiveness, float roughness, float transparency, glm::vec3 emission, float emissionStrength)
 	: name(name),
 	color(color),
 	reflectiveness(reflectiveness),
+	roughness(roughness),
 	transparency(transparency),
 	refractiveness(0.0f),
 	reflectionDiffusion(0.0f),
@@ -72,6 +76,7 @@ bool Material::drawInterface(Scene& scene)
 	anyPropertiesChanged |= ImGui::ColorEdit3("Emission", (float*)getEmissionPointer());
 	anyPropertiesChanged |= ImGui::DragFloat("Emission strength", &emissionStrength, 0.01f, 0.0f, 10.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat("Reflectiveness", getReflectivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
+	anyPropertiesChanged |= ImGui::DragFloat("Roughness", getRoughnessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat("Transparency", getTransparencyPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat("Refractiveness", getRefractivenessPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
 	anyPropertiesChanged |= ImGui::DragFloat("Reflective diffusion", getReflectionDiffusionPointer(), 0.01f, 0.0f, 1.0f, "%.2f");
@@ -191,6 +196,7 @@ Material Material::generateErrorMaterial()
 		0.0f,
 		0.0f,
 		0.0f,
+		0.0f,
 		glm::vec3(0.0f),
 		0.0f,
 		0.0f);
@@ -208,6 +214,7 @@ bool Material::writeToShader(AbstractShader* shader, unsigned int index)
 
 	shader->setVector3(("materials[" + std::to_string(index) + "].color").c_str(), color);
 	shader->setFloat(("materials[" + std::to_string(index) + "].reflectiveness").c_str(), reflectiveness);
+	shader->setFloat(("materials[" + std::to_string(index) + "].roughness").c_str(), roughness);
 	shader->setFloat(("materials[" + std::to_string(index) + "].transparency").c_str(), transparency);
 	shader->setFloat(("materials[" + std::to_string(index) + "].refractiveness").c_str(), refractiveness);
 	shader->setFloat(("materials[" + std::to_string(index) + "].reflectionDiffusion").c_str(), reflectionDiffusion);
@@ -260,6 +267,11 @@ float Material::getReflectiveness() const
 	return reflectiveness;
 }
 
+float Material::getRoughness() const
+{
+	return roughness;
+}
+
 float Material::getTransparency() const
 {
 	return transparency;
@@ -306,6 +318,11 @@ void Material::setReflectiveness(float newReflectiveness)
 	reflectiveness = newReflectiveness;
 }
 
+void Material::setRoughness(float newRoughness)
+{
+	roughness = newRoughness;
+}
+
 void Material::setTransparency(float newTransparency)
 {
 	transparency = newTransparency;
@@ -349,6 +366,11 @@ glm::vec3* Material::getColorPointer()
 float* Material::getReflectivenessPointer()
 {
 	return &reflectiveness;
+}
+
+float* Material::getRoughnessPointer()
+{
+	return &roughness;
 }
 
 float* Material::getTransparencyPointer()

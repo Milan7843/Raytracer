@@ -294,6 +294,12 @@ namespace JSONUtility
 				material.setReflectiveness(data);
 			}
 
+			if (materialData.contains("roughness"))
+			{
+				json data = materialData["roughness"];
+				material.setRoughness(data);
+			}
+
 			if (materialData.contains("transparency"))
 			{
 				json data = materialData["transparency"];
@@ -490,6 +496,7 @@ namespace JSONUtility
 		j["name"] = material.getName();
 		j["color"] = vec3ToJSON(material.getColor());
 		j["reflectiveness"] = material.getReflectiveness();
+		j["roughness"] = material.getRoughness();
 		j["transparency"] = material.getTransparency();
 		j["refractiveness"] = material.getRefractiveness();
 		j["reflectionDiffusion"] = material.getReflectionDiffusion();
