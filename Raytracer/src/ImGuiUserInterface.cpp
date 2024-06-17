@@ -86,7 +86,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	float rightAreaWidth{ windowWidth * 0.2f };
 	float bottomAreaHeight{ windowHeight * 0.2f };
 	float topRightAreaHeight{ windowHeight * 0.2f };
-	float bottomRightAreaHeight{ windowHeight - topRightAreaHeight - bottomAreaHeight };
+	float bottomRightAreaHeight{ windowHeight - topRightAreaHeight - bottomAreaHeight - topAreaHeight };
 	float centralAreaWidth{ windowWidth - rightAreaWidth };
 	float centralAreaHeight{ windowHeight - bottomAreaHeight - topAreaHeight };
 
@@ -400,7 +400,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	// Top right area
 	{
 		ImGui::SetNextWindowPos(ImVec2(windowWidth - rightAreaWidth, topAreaHeight));
-		ImGui::SetNextWindowSize(ImVec2(rightAreaWidth, topAreaHeight + topRightAreaHeight));
+		ImGui::SetNextWindowSize(ImVec2(rightAreaWidth, topRightAreaHeight));
 		ImGui::Begin("Top Right Area", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
 
 		drawSceneSelector(
@@ -420,7 +420,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	// Bottom right area
 	{
 		ImGui::SetNextWindowPos(ImVec2(windowWidth - rightAreaWidth, topAreaHeight + topRightAreaHeight));
-		ImGui::SetNextWindowSize(ImVec2(rightAreaWidth, topAreaHeight + topRightAreaHeight + bottomRightAreaHeight));
+		ImGui::SetNextWindowSize(ImVec2(rightAreaWidth, bottomRightAreaHeight));
 		ImGui::Begin("Bottom Right Area", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
 
 		drawSceneEditor(

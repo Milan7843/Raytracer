@@ -892,10 +892,11 @@ vec4 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
             {
                 newDir = normalize(randomDir * material.roughness + reflectDir * (1. - material.roughness));
             }
+            /*
             else if (random_num < reflectiveness + fresnelReflectiveness)
             {
                 newDir = reflectDir;
-            }
+            }*/
             else
             {
                 newDir = randomDir;
