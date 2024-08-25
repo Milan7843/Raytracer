@@ -33,7 +33,7 @@ float gaussian2D(float x, float y, float sigma)
 
 void main()
 {
-    int blurSize = 100;
+    int blurSize = 60;
     float cutoff = blurSize * blurSize * 2;
     float kernelSize = 0.2;
     float dist = kernelSize / (2 * blurSize);
@@ -49,13 +49,18 @@ void main()
     {
         for (int x = -blurSize; x <= blurSize; x++)
         {
-            if (x * x + y * y < cutoff)
+            if (x * x/4. + y * y < cutoff)
             {
-                vec2 sampleUV = uv + vec2(x, y) * dist;
+                vec2 sampleUV = uv + vec2(x/2., y) * dist;
+
+                //if (sampleUV.x < 0.0 || sampleUV.x >= 1.0 || sampleUV.y < 0.0 || sampleUV.y >= 1.0)
+                //{
+                    //continue;
+                //}
 
                 float t = gaussian2D(x * dist, y * dist, 0.05);
 
-                sum += min(vec3(10.), texture(originalTexture, sampleUV).rgb) * t;
+                sum += max(vec3(0.), min(vec3(10.), texture(originalTexture, sampleUV).rgb)) * t;
 
                 samples += t;
             }
@@ -63,5 +68,12 @@ void main()
     }
 
     // Writing outline color
-    imageStore(blurredTexture, ivec2(gl_GlobalInvocationID.xy)-ivec2(1,1), vec4(sum / samples, 1.0));
+    if (samples > 0.0)
+    {
+        imageStore(blurredTexture, ivec2(gl_GlobalInvocationID.xy), vec4(sum / samples, 1.0));
+    }
+    else
+    {
+        //imageStore(blurredTexture, ivec2(gl_GlobalInvocationID.xy) - ivec2(1, 1), vec4(0., 0., 0., 1.0));
+    }
 }

@@ -51,6 +51,7 @@ struct Material
     float transparency;
     float refractiveness;
     float reflectionDiffusion;
+    float fresnelReflectionStrength;
 };
 struct MaterialTextureData
 {
@@ -236,9 +237,19 @@ vec3 calculateLights(vec3 pos, vec3 normal, vec3 viewDir)
         finalLight += calculateAmbientLight(ambientLights[i]);
     }
 
+
+    float rayDirNormalDotProduct = dot(normal, viewDir);
+
+    float fresnelReflectiveness = materials[materialIndex].fresnelReflectionStrength * pow(1.0 - max(0.0, rayDirNormalDotProduct), 5.0);
+
+    if (rayDirNormalDotProduct < 0)
+    {
+        fresnelReflectiveness = 0;
+    }
+
     /* HDRI */
     vec3 reflectDir = reflect(-viewDir, normal);
-    finalLight = finalLight + sampleHDRI(reflectDir) * materials[materialIndex].reflectiveness + sampleGlobalHDRI(normal) * 1.0;
+    finalLight = finalLight + sampleHDRI(reflectDir) * min(1., (materials[materialIndex].reflectiveness + fresnelReflectiveness)) + sampleGlobalHDRI(normal) * 1.0;
 
     return finalLight;
 }
