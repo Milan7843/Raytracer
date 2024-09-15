@@ -79,6 +79,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 		rasterizedDebugMode,
 		contextMenuSource
 	);
+	
 
 	float windowWidth{ io.DisplaySize.x };
 	float windowHeight{ io.DisplaySize.y };
@@ -110,6 +111,7 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	ImGui::SetNextWindowSize(ImVec2(windowWidth - rightAreaWidth, windowHeight - bottomAreaHeight - topAreaHeight));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::Begin("Central Area", nullptr, ImGuiWindowFlags_NoDecoration);
+
 
 	//ImVec2 windowMin = ImVec2(0.0f + 5.0f, std::floor(topAreaHeight + 23.0f));
 	//ImVec2 windowMax = ImVec2(std::floor(windowMin.x + centralAreaWidth - 10.0f), std::floor(windowMin.y + centralAreaHeight - 29.0f));
@@ -397,6 +399,8 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 		(unsigned int)std::floor(mousePos.y / (windowMax.y - windowMin.y))
 	);
 
+	ImGui::End();
+
 	// Top right area
 	{
 		ImGui::SetNextWindowPos(ImVec2(windowWidth - rightAreaWidth, topAreaHeight));
@@ -411,8 +415,6 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 			applicationRenderMode,
 			contextMenuSource
 		);
-
-		ImGui::EndTabBar();
 
 		ImGui::End();
 	}
@@ -446,8 +448,6 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 		ImGui::Separator();
 		sceneManager.getCurrentScene().drawCurrentlySelectedObjectInterface();
 
-		ImGui::EndTabBar();
-
 		ImGui::End();
 	}
 
@@ -467,7 +467,6 @@ void ImGuiUserInterface::drawUserInterface(GLFWwindow* window,
 	// If the context menu source exists
 	sceneManager.getCurrentScene().renderContextMenus();
 	
-
 	// Rendering
 	ImGui::Render();
 	//int display_w, display_h;
@@ -1050,7 +1049,7 @@ void ImGuiUserInterface::drawMenuBar(GLFWwindow* window,
 			ImGui::EndMenu();
 		}
 
-		ImGui::EndMenuBar();
+		ImGui::EndMainMenuBar();
 	}
 
 

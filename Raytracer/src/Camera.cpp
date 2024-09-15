@@ -48,7 +48,9 @@ glm::mat4 Camera::getViewMatrix()
 	return view;
 }
 glm::mat4 Camera::getProjectionMatrix()
-{   //                           cam pos,  target,            up vector
+{
+	if (WindowUtility::getRenderWindowSize().x == 0 || WindowUtility::getRenderWindowSize().y == 0)
+		return glm::mat4(1.0f);
 	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)WindowUtility::getRenderWindowSize().x / (float)WindowUtility::getRenderWindowSize().y, nearPlane, farPlane);
 	return projection;
 }
