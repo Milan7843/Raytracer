@@ -15,8 +15,15 @@ Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned
     , Object()
     , ContextMenuSource()
 {
+    std::vector<Vertex> subDivVertices;
+    std::vector<unsigned int> subDivIndices;
+
+    SubdivisionSurface::subdivide(vertices, indices, subDivVertices, subDivIndices);
+
     this->name = name;
-    this->vertices = vertices;
+    this->vertices = subDivVertices;
+    this->indices = subDivIndices;
+
 
     glm::vec4 positionVec4{ glm::vec4(position, 0.0f) };
 
@@ -52,7 +59,6 @@ Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned
         maxPosition.z - minPosition.z
     );
 
-    this->indices = indices;
     this->position = position;
     setupMesh();
     setType(MESH);
@@ -129,7 +135,7 @@ int Mesh::getTriangleSize()
 
 void Mesh::writeToShader(AbstractShader* shader, unsigned int ssbo, const glm::mat4& transformation)
 {
-    std::cout << "Writing mesh data to buffer" << std::endl;
+    //std::cout << "Writing mesh data to buffer" << std::endl;
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     // Copying this mesh's data into the buffer at the right position
     glBufferSubData(GL_SHADER_STORAGE_BUFFER, shaderArraybeginIndex * sizeof(Triangle), triangles.size() * sizeof(Triangle), &triangles[0]);

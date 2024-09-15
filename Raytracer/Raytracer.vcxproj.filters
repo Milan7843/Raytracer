@@ -207,6 +207,9 @@
     <ClCompile Include="src\file_handling\JSONUtility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\SubdivisionSurface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -1632,6 +1635,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\nlohmann\ordered_map.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SubdivisionSurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

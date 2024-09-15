@@ -453,6 +453,7 @@ void Scene::draw(AbstractShader* shader, RasterizedDebugMode debugMode)
 {
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	shader->use();
 
 	// Debug mode
@@ -505,6 +506,8 @@ void Scene::draw(AbstractShader* shader, RasterizedDebugMode debugMode)
 		shader->setInt("objectID", sphere.getID());
 		sphere.draw(shader, (Scene*)this);
 	}
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void Scene::drawSelected(AbstractShader* shader)

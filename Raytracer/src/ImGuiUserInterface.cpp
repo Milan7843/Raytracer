@@ -501,7 +501,7 @@ void ImGuiUserInterface::handleInput(GLFWwindow* window, Camera& camera)
 	guiSwitchKeyPreviousState = glfwGetKey(window, interfaceToggleKey);
 }
 
-bool ImGuiUserInterface::isEnabled()
+bool ImGuiUserInterface::isEnabled() const
 {
 	return imGuiEnabled;
 }
@@ -511,7 +511,7 @@ bool ImGuiUserInterface::isMouseOnGUI()
 	return ImGuizmo::IsOver();
 }
 
-bool ImGuiUserInterface::isMouseOnRenderedScreen()
+bool ImGuiUserInterface::isMouseOnRenderedScreen() const
 {
 	return getMousePosition().x >= 0.0f
 		&& getMousePosition().x < 1.0f
@@ -519,22 +519,22 @@ bool ImGuiUserInterface::isMouseOnRenderedScreen()
 		&& getMousePosition().y < 1.0f;
 }
 
-glm::vec2 ImGuiUserInterface::getMousePosition()
+glm::vec2 ImGuiUserInterface::getMousePosition() const
 {
 	return mousePosition;
 }
 
-glm::ivec2 ImGuiUserInterface::getMouseCoordinates()
+glm::ivec2 ImGuiUserInterface::getMouseCoordinates() const
 {
 	return mouseCoordinates;
 }
 
-glm::ivec2 ImGuiUserInterface::getRenderedScreenSize()
+glm::ivec2 ImGuiUserInterface::getRenderedScreenSize() const
 {
 	return renderedScreenSize;
 }
 
-bool ImGuiUserInterface::isExitOkay()
+bool ImGuiUserInterface::isExitOkay() const
 {
 	return exitOkay;
 }

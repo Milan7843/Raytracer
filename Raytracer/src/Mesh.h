@@ -2,6 +2,7 @@
 
 #include "shaders/AbstractShader.h"
 #include "gui/ContextMenuSource.h"
+#include "SubdivisionSurface.h"
 
 #include "CoordinateUtility.h"
 #include "Logger.h"
