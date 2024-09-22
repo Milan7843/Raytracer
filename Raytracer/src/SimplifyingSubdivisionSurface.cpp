@@ -6,127 +6,96 @@ namespace SubdivisionSurface
 {
 	namespace
 	{
-		Vertex mix(const Vertex& v1, const Vertex& v2, float t = 0.5f)
+		struct VertexAndIndex
 		{
-			return Vertex(
-				v1.position * (1.0f - t) + v2.position * t,
-				v1.normal * (1.0f - t) + v2.normal * t,
-				v1.uv * (1.0f - t) + v2.uv * t,
-				v1.tangent * (1.0f - t) + v2.tangent * t,
-				v1.bitangent * (1.0f - t) + v2.bitangent * t
-			);
-		}
+			Vertex v;
+			unsigned int i;
+		};
+		struct PositionAndVertices
+		{
+			glm::vec4 position;
+			std::vector<VertexAndIndex> vertices;
 
-		// Try to find this vertex in the list of vertices.
-		// Returns -1 if it is not found, otherwise the index
-		int contains(const std::vector<Vertex>& vertices, Vertex& v, int from = 0)
-		{
-			for (int i = from; i < vertices.size(); i++)
+			Vertex average()
 			{
-				// Compare the vertices
-				if (vertices[i].position == v.position && vertices[i].normal == v.normal)
+				if (vertices.size() == 0)
 				{
-					return i;
+					return Vertex{};
 				}
+				float t = 1.0f / (float)vertices.size();
+
+				Vertex avg = Vertex{};
+
+				for (unsigned int i = 0; i < vertices.size(); i++)
+				{
+					avg = avg + (vertices[i].v * t);
+				}
+				return avg;
 			}
+		};
 
-			return -1;
-		}
-
-		void addNonDuplicate(const std::vector<Vertex>& inVertices, std::vector<unsigned int>& indices, unsigned int index)
+		class VertexSet
 		{
-			for (unsigned int i = 0; i < indices.size(); i++)
-			{
-				// Problem: doesn't check for position duplicates, only by index
-				if (inVertices[indices[i]].position == inVertices[index].position)
-				{
-					// Already found it
-					return;
-				}
-			}
-
-			indices.push_back(index);
-		}
-
-		void getNeighbours(const std::vector<unsigned int>& inIndices, const std::vector<Vertex>& inVertices, std::vector<unsigned int>& outIndices, unsigned int index)
-		{
-			for (unsigned int i = 0; i < inIndices.size(); i += 3)
-			{
-				if (inIndices[i + 0] == index)
-				{
-					addNonDuplicate(inVertices, outIndices, inIndices[i + 1]);
-					addNonDuplicate(inVertices, outIndices, inIndices[i + 2]);
-				}
-				else if (inIndices[i + 1] == index)
-				{
-					addNonDuplicate(inVertices, outIndices, inIndices[i + 0]);
-					addNonDuplicate(inVertices, outIndices, inIndices[i + 2]);
-				}
-				else if (inIndices[i + 2] == index)
-				{
-					addNonDuplicate(inVertices, outIndices, inIndices[i + 0]);
-					addNonDuplicate(inVertices, outIndices, inIndices[i + 1]);
-				}
-			}
-		}
-
-		void getPositionsDuplicates(unsigned int index, const std::vector<Vertex>& vertices, std::vector<unsigned int>& outIndices)
-		{
-			Vertex vertex = vertices[index];
-
-			for (unsigned int i = 0; i < vertices.size(); i++)
-			{
-				if (i == index) continue;
-
-				if (vertices[i].position == vertex.position)
-				{
-					outIndices.push_back(i);
-				}
-			}
-		}
-
-		// Get the neighbours of a vertex + all neighbours of all position duplicates
-		void getNeighboursWithDuplicates(unsigned int index,
-			const std::vector<Vertex>& inVertices,
-			const std::vector<unsigned int>& inIndices,
-			std::vector<unsigned int>& outIndices)
-		{
-			std::vector<unsigned int> duplicateIndices;
-			getPositionsDuplicates(index, inVertices, duplicateIndices);
-
-			for (unsigned int i = 0; i < duplicateIndices.size(); i++)
-			{
-				unsigned int index = duplicateIndices[i];
-
-				getNeighbours(inIndices, inVertices, outIndices, index);
-			}
-		}
-
-		class Vec4HashSet
-		{
-		public: 
-			Vec4HashSet() {}
-			~Vec4HashSet() {}
+		public:
+			VertexSet() {}
+			~VertexSet() {}
 
 			// Adds this vec4 to the set, returning if it was already contained
-			bool add(glm::vec4 v)
+			void add(const Vertex& vertex, unsigned int index)
 			{
 				for (unsigned int i = 0; i < set.size(); i++)
 				{
 					// Already contained
-					if (v == set[i]) { return true; }
+					if (vertex.position == set[i].position)
+					{
+						set[i].vertices.push_back(VertexAndIndex{ vertex, index });
+						return;
+					}
 				}
-				// Not yet contained, add it
-				set.push_back(v);
-				return false;
+				set.push_back(PositionAndVertices{ vertex.position });
+				set[set.size()-1].vertices.push_back(VertexAndIndex{ vertex, index });
+			}
+
+			void print()
+			{
+				std::cout << "VertexSet" << std::endl;
+				for (unsigned int i = 0; i < set.size(); i++)
+				{
+					std::cout << "Collection " << i << " at " << set[i].position.x << ", " << set[i].position.y << ", " << set[i].position.z << std::endl;
+					for (unsigned int j = 0; j < set[i].vertices.size(); j++)
+					{
+						std::cout << "  " 
+							<< set[i].vertices[j].i << ": "
+							<< set[i].vertices[j].v.position.x << ", " << set[i].vertices[j].v.position.y << ", " << set[i].vertices[j].v.position.z << std::endl;
+					}
+				}
+			}
+
+			std::vector<unsigned int> generateLookupTableAndNewVertices(unsigned int size, std::vector<Vertex>& vertices)
+			{
+				std::vector<unsigned int> lookupTable = std::vector<unsigned int>(size);
+
+				for (unsigned int i = 0; i < set.size(); i++)
+				{
+					for (unsigned int j = 0; j < set[i].vertices.size(); j++)
+					{
+						lookupTable[set[i].vertices[j].i] = i;
+					}
+
+					Vertex avg = set[i].average();
+
+					vertices.push_back(avg);
+				}
+
+				return lookupTable;
 			}
 
 		private:
-			std::vector<glm::vec4> set;
+			std::vector<PositionAndVertices> set;
 		};
 	}
 
-	void replaceAll(std::vector<unsigned int>& indices, unsigned int replace, unsigned int with)
+	void replaceAll(const std::vector<Vertex>& inVertices, std::vector<unsigned int>& indices, unsigned int replace, unsigned int with)
 	{
 		for (unsigned int i = 0; i < indices.size(); i++)
 		{
@@ -138,7 +107,10 @@ namespace SubdivisionSurface
 	}
 
 	// Not finished
-	void removeDuplicateVertices(const std::vector<Vertex>& inVertices, std::vector<unsigned int>& inIndices, std::vector<Vertex>& outVertices)
+	void removeDuplicateVertices(const std::vector<Vertex>& inVertices,
+		const std::vector<unsigned int>& inIndices,
+		std::vector<Vertex>& outVertices,
+		std::vector<unsigned int>& outIndices)
 	{
 		std::cout << inVertices.size() << " vertices." << std::endl;
 		for (unsigned int i = 0; i < inVertices.size(); i++)
@@ -150,28 +122,27 @@ namespace SubdivisionSurface
 		}
 
 		// Merge vertices with equal positions
-		Vec4HashSet set;
+		VertexSet set;
 
 		for (unsigned int i = 0; i < inVertices.size(); i++)
 		{
-			if (set.add(inVertices[i].position))
-			{
-				// Already contained
-				//replaceAll(inIndices, )
-			}
-			else
-			{
-				// New vertex
-				outVertices.push_back(inVertices[i]);
-			}
+			set.add(inVertices[i], i);
 		}
 
-		std::cout << inVertices.size() << " vertices." << std::endl;
-		for (unsigned int i = 0; i < inVertices.size(); i++)
+		set.print();
+		
+		std::vector<unsigned int> lookupTable = set.generateLookupTableAndNewVertices(inIndices.size(), outVertices);
+		for (unsigned int i = 0; i < inIndices.size(); i++)
+		{
+			outIndices.push_back(lookupTable[inIndices[i]]);
+		}
+
+		std::cout << outVertices.size() << " vertices." << std::endl;
+		for (unsigned int i = 0; i < outVertices.size(); i++)
 		{
 			std::cout
 				<< "Vertex " << i << ": "
-				<< inVertices[i].position.x << ", " << inVertices[i].position.y << ", " << inVertices[i].position.z
+				<< outVertices[i].position.x << ", " << outVertices[i].position.y << ", " << outVertices[i].position.z
 				<< std::endl;
 		}
 	}
@@ -209,7 +180,7 @@ namespace SubdivisionSurface
 		if (across1 == -1 || across2 == -1)
 		{
 			std::cout << "Doesn't have vertices across" << std::endl;
-			return mix(inVertices[a], inVertices[b]);
+			//return mix(inVertices[a], inVertices[b]);
 		}
 
 		// Has vertices across
@@ -221,7 +192,9 @@ namespace SubdivisionSurface
 	{
 		//::vector<Vertex> inVertices;
 
-		//removeDuplicateVertices(inVerticesWithDupl, inIndices, inVertices);
+		removeDuplicateVertices(inVertices, inIndices, outVertices, outIndices);
+
+		return;
 
 		// Adding the original indices
 		for (unsigned int i = 0; i < inVertices.size(); i++)
@@ -245,39 +218,6 @@ namespace SubdivisionSurface
 			Vertex v5 = createVertexBetween(inVertices, i2, i3, i1, getLast(inVertices, inIndices, i2, i3, i1));
 			Vertex v6 = createVertexBetween(inVertices, i1, i3, i2, getLast(inVertices, inIndices, i1, i3, i2));
 
-
-			int index;
-			// This parts removes duplicate new vertices
-			if ((index = contains(outVertices, v4, inVertices.size())) != -1)
-			{
-				i4 = index;
-			}
-			else
-			{
-				i4 = outVertices.size();
-				outVertices.push_back(v4);
-			}
-
-			if ((index = contains(outVertices, v5, inVertices.size())) != -1)
-			{
-				i5 = index;
-			}
-			else
-			{
-				i5 = outVertices.size();
-				outVertices.push_back(v5);
-			}
-
-			if ((index = contains(outVertices, v6, inVertices.size())) != -1)
-			{
-				i6 = index;
-			}
-			else
-			{
-				i6 = outVertices.size();
-				outVertices.push_back(v6);
-			}
-
 			// 1, 4, 6
 			outIndices.push_back(i1);
 			outIndices.push_back(i4);
@@ -295,7 +235,7 @@ namespace SubdivisionSurface
 			outIndices.push_back(i5);
 			outIndices.push_back(i6);
 		}
-
+		/*
 		// Updating original vertex positions
 		std::vector<unsigned int> neighbours;
 		for (unsigned int i = 0; i < inVertices.size(); i++)
@@ -351,7 +291,7 @@ namespace SubdivisionSurface
 				tangent,
 				bitangent
 			};
-		}
+		}*/
 	}
 
 	void subdivide(const std::vector<Vertex>& inVertices,

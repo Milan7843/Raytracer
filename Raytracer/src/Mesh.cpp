@@ -18,7 +18,7 @@ Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned
     std::vector<Vertex> subDivVertices;
     std::vector<unsigned int> subDivIndices;
 
-    SubdivisionSurface::subdivide(vertices, indices, subDivVertices, subDivIndices);
+    SubdivisionSurface::subdivide(vertices, indices, subDivVertices, subDivIndices, 2);
 
     this->name = name;
     this->vertices = subDivVertices;

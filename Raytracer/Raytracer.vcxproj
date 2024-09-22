@@ -80,10 +80,10 @@
     <ClCompile Include="src\Object.cpp" />
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\shaders\Shader.cpp" />
+    <ClCompile Include="src\SimplifyingSubdivisionSurface.cpp" />
     <ClCompile Include="src\Sphere.cpp" />
     <ClCompile Include="src\TextureHandler.cpp" />
     <ClCompile Include="src\WindowUtility.cpp" />
-    <ClCompile Include="src\SubdivisionSurface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\imguizmo\GraphEditor.h" />

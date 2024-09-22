@@ -207,7 +207,7 @@
     <ClCompile Include="src\file_handling\JSONUtility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\SubdivisionSurface.cpp">
+    <ClCompile Include="src\SimplifyingSubdivisionSurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
