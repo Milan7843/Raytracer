@@ -453,7 +453,14 @@ void Scene::draw(AbstractShader* shader, RasterizedDebugMode debugMode)
 {
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	if (isWireframeView())
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+	else
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 	shader->use();
 
 	// Debug mode
@@ -1261,4 +1268,16 @@ bool Scene::replace(std::string& str, const std::string& from, const std::string
 		return false;
 	str.replace(start_pos, from.length(), to);
 	return true;
+}
+
+
+
+void Scene::setWireframeView(bool enabled)
+{
+	this->wireframe = enabled;
+}
+
+bool Scene::isWireframeView() const
+{
+	return this->wireframe;
 }

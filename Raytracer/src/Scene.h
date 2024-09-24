@@ -217,6 +217,9 @@ public:
 	void markAllChangesSaved();
 	bool hasUnsavedChanges();
 
+	void setWireframeView(bool enabled);
+	bool isWireframeView() const;
+
 private:
 
 	void generateMeshBuffer(std::vector<ShaderMesh>& shaderMeshes);
@@ -263,6 +266,8 @@ private:
 
 	// Whether to render the HDRI as a background or just plain colours
 	bool useHDRIAsBackground{ true };
+
+	bool wireframe{ false };
 
 	// The buffer for storing mesh triangles
 	unsigned int triangleBufferSSBO = 0;

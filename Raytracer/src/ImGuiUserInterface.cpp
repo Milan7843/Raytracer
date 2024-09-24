@@ -1015,6 +1015,21 @@ void ImGuiUserInterface::drawMenuBar(GLFWwindow* window,
 				ImGui::EndMenu();
 			}
 
+			if (ImGui::BeginMenu("Wireframe"))
+			{
+				if (ImGui::MenuItem("Disabled", NULL, !sceneManager.getCurrentScene().isWireframeView()))
+				{
+					sceneManager.getCurrentScene().setWireframeView(false);
+				}
+
+				if (ImGui::MenuItem("Enabled", NULL, sceneManager.getCurrentScene().isWireframeView()))
+				{
+					sceneManager.getCurrentScene().setWireframeView(true);
+				}
+
+				ImGui::EndMenu();
+			}
+
 			if (ImGui::BeginMenu("BVH display"))
 			{
 				if (ImGui::MenuItem("Disabled", NULL, renderer.getBVHRenderMode() == BVHRenderMode::DISABLED))

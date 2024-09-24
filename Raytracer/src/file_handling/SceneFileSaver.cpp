@@ -34,6 +34,9 @@ Scene SceneFileSaver::readSceneFromFile(const std::string& fileName, bool* succe
 
 	scene.setName(fileName);
 
+	// Setting wireframe mode
+
+
 	JSONUtility::loadModels(data, scene);
 	JSONUtility::loadMaterials(data, scene);
 	JSONUtility::loadSpheres(data, scene);
@@ -42,6 +45,7 @@ Scene SceneFileSaver::readSceneFromFile(const std::string& fileName, bool* succe
 	JSONUtility::loadAmbientLights(data, scene);
 	JSONUtility::loadCamera(data, scene);
 	JSONUtility::loadHDRI(data, scene);
+	JSONUtility::loadSettings(data, scene);
 
 	// Finally closing the file
 	filestream.close();
