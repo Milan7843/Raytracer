@@ -253,6 +253,20 @@ float Model::getAppropriateCameraFocusDistance()
 	return maxDistance;
 }
 
+unsigned int Model::getSubdivisionLevel() const
+{
+	return this->subdivisionLevel;
+}
+
+void Model::setSubdivisionLevel(unsigned int level)
+{
+	this->subdivisionLevel = level;
+	for (Mesh& mesh : meshes)
+	{
+		mesh.updateSubdivision(subdivisionLevel);
+	}
+}
+
 void Model::updateSubdivision(Scene& scene)
 {
 	for (Mesh& mesh : meshes)

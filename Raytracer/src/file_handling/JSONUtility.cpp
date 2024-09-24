@@ -33,6 +33,13 @@ namespace JSONUtility
 			Model* model = scene.addModel(name, path);
 
 			// If position data is available
+			if (modelData.contains("subsurflevel"))
+			{
+				unsigned int subsurflevel = modelData["subsurflevel"];
+				model->setSubdivisionLevel(subsurflevel);
+			}
+
+			// If position data is available
 			if (modelData.contains("position"))
 			{
 				json positionData = modelData["position"];
@@ -86,6 +93,8 @@ namespace JSONUtility
 				}
 			}
 		}
+
+		scene.recalculateModelIndices();
 	}
 
 	void loadSpheres(json data, Scene& scene)
@@ -404,6 +413,7 @@ namespace JSONUtility
 		j["position"] = vec3ToJSON(model.getPosition());
 		j["rotation"] = vec3ToJSON(model.getRotation());
 		j["scale"] = vec3ToJSON(model.getScale());
+		j["subsurflevel"] = model.getSubdivisionLevel();
 
 		j["submeshdata"] = toJSON(model.getMeshes());
 		

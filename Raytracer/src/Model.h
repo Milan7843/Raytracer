@@ -72,6 +72,11 @@ public:
 	// after clicking the focus button.
 	virtual float getAppropriateCameraFocusDistance() override;
 
+	unsigned int getSubdivisionLevel() const;
+	// Set the subdivision level without updating the scene with new indices.
+	// Should always be followed by recalculating the model indices in the scene.
+	void setSubdivisionLevel(unsigned int level);
+
 private:
 	std::string directory;
 	std::string path;
