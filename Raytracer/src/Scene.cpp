@@ -410,6 +410,14 @@ void Scene::recalculateModelIndices()
 
 	// Must create a new triangle buffer for the new number of triangles
 	generateTriangleBuffer();
+
+	// Since all model locations could have changed, they must now be rewritten to every shader.
+	// This also counts for the BVH indices, so it is regenerated
+	for (Model& model : models)
+	{
+		model.clearShaderWrittenTo();
+		model.setVertexDataChanged(true);
+	}
 }
 
 void Scene::recalculateSphereIndices()

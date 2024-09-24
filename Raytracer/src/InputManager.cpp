@@ -66,7 +66,7 @@ namespace InputManager
 			{
 				InputAction::MOVE_VIEW,
 				Modifier::ANY,
-				GLFW_MOUSE_BUTTON_RIGHT,
+				GLFW_MOUSE_BUTTON_MIDDLE,
 				KeyType::MOUSE
 			},
 			{

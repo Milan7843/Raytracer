@@ -544,7 +544,7 @@ vec3 getRandomDirectionFollowingNormal(vec3 normal, int seed)
 
 vec3 multipleColoursWithImpact(vec3 base, vec3 mult, float impact)
 {
-    impact = max(min(impact, 1.0), 0.0);
+    impact = max(min(impact, 1.0), 0.0); // impact in [0, 1]
     return base * (vec3(1.) - (vec3(1.) - mult) * impact);
 }
 
@@ -853,8 +853,8 @@ vec4 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
 
             skyColor += dirLightInfluence;
 
-            //color *= skyColor;
-            color = multipleColoursWithImpact(color, skyColor, impact);
+            color *= skyColor;
+            //color = multipleColoursWithImpact(color, skyColor, impact);
             break;
         }
         else if (closestIntersection.emission != vec3(0.0))
@@ -891,23 +891,61 @@ vec4 fireRay(bool reflect, int seed, Ray ray, Intersection closestIntersection)
             if (random_num < reflectiveness + fresnelReflectiveness)
             {
                 newDir = normalize(randomDir * material.roughness + reflectDir * (1. - material.roughness));
+                impact = min(1.0, material.reflectiveness + fresnelReflectiveness);
+                color = multipleColoursWithImpact(color, closestIntersection.color, 1. - impact);
             }
-            /*
-            else if (random_num < reflectiveness + fresnelReflectiveness)
+            else if (rand(seed * 3 + i * 17 + 7) < closestIntersection.transparency)
             {
-                newDir = reflectDir;
-            }*/
+                // If the dot product is negative, the ray direction is opposing the normal,
+                // so we are entering glass, otherwise we are exiting
+                bool isEnteringTransparentMaterial = rayDirNormalDotProduct <= 0.0;
+                vec3 rayPositionBeforeUpdate = ray.pos;
+
+                // Refracting
+                vec3 normal = sign(rayDirNormalDotProduct) * closestIntersection.normal;
+                vec3 refractedRayDir = normalize(normal * closestIntersection.refractiveness +
+                    (1.0 - closestIntersection.refractiveness) * ray.dir);
+                newDir = refractedRayDir;
+
+                // Tell the next iterations that we are in glass right now
+
+                if (isEnteringTransparentMaterial)
+                    inTransparentMaterial = true;
+                else
+                {
+                    float distanceFromTransparentMaterialEntry = distance(ray.pos, rayPositionBeforeUpdate);
+                    transparencyColorMultiplier = transparencyColorMultiplier *
+                        (vec3(1.0) - min(distanceFromTransparentMaterialEntry + 0.1, 1.0) * (vec3(1.0) - closestIntersection.color));
+                    inTransparentMaterial = false;
+
+                    color *= closestIntersection.color;
+
+                    //ray.finalColor = vec3(distanceFromTransparentMaterialEntry);
+                    //ray.hit = true;
+                    //break;
+                }
+
+                //ray.pos = vec3(5.0);
+
+
+
+
+                totalClosestIntersection = closestIntersection;
+            }
             else
             {
                 newDir = randomDir;
+                impact = min(1.0, material.reflectiveness + fresnelReflectiveness);
+                color = multipleColoursWithImpact(color, closestIntersection.color, 1. - impact);
             }
 
             ray.dir = newDir;
 
             ray.pos = closestIntersection.pos + EPSILON * ray.dir;
             //color *= vec3(1.0) - ((vec3(1.0) - closestIntersection.color) * (1. - reflectiveness));
-            impact *= min(1.0, material.reflectiveness + fresnelReflectiveness);
-            color = multipleColoursWithImpact(color, closestIntersection.color, 1. - impact);
+            //impact = min(1.0, material.reflectiveness + fresnelReflectiveness);
+            //color = multipleColoursWithImpact(color, closestIntersection.color, 1. - impact);
+            //color *= closestIntersection.color;
             //color *= dot(closestIntersection.normal, ray.dir);
         }
         /* {

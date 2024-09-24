@@ -137,7 +137,6 @@ int Mesh::getTriangleSize()
 
 void Mesh::writeToShader(AbstractShader* shader, unsigned int ssbo, const glm::mat4& transformation)
 {
-    //std::cout << "Writing mesh data to buffer" << std::endl;
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     // Copying this mesh's data into the buffer at the right position
     glBufferSubData(GL_SHADER_STORAGE_BUFFER, shaderArraybeginIndex * sizeof(Triangle), triangles.size() * sizeof(Triangle), &triangles[0]);
@@ -223,6 +222,12 @@ void Mesh::setupMesh()
         tri.mesh = shaderMeshIndex;
         tri.reflectiveness = 1.0f;
         triangles.push_back(tri);
+        /*
+        std::cout << "Triangle: "
+            << "\n  v1: (" << tri.v1.x << ", " << tri.v1.y << ", " << tri.v1.z << ")"
+            << "\n  v2: (" << tri.v2.x << ", " << tri.v2.y << ", " << tri.v2.z << ")"
+            << "\n  v3: (" << tri.v3.x << ", " << tri.v3.y << ", " << tri.v3.z << ")"
+            << std::endl;*/
     }
 }
 

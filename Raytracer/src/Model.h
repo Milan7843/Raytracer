@@ -77,7 +77,7 @@ private:
 	std::string path;
 
 	unsigned int subdivisionLevel{ 0 };
-	void updateSubdivision();
+	void updateSubdivision(Scene& scene);
 
 	bool vertexDataChanged{ true };
 

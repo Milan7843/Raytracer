@@ -75,13 +75,13 @@ bool Model::drawInterface(Scene& scene)
 	ImGui::SameLine();
 
 	float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
-	ImGui::PushButtonRepeat(true);
+	ImGui::PushButtonRepeat(false);
 	if (ImGui::ArrowButton("##left", ImGuiDir_Left))
 	{
 		if (subdivisionLevel > 0)
 		{
 			this->subdivisionLevel--;
-			this->updateSubdivision();
+			this->updateSubdivision(scene);
 			anyPropertiesChanged = true;
 		}
 	}
@@ -89,7 +89,7 @@ bool Model::drawInterface(Scene& scene)
 	if (ImGui::ArrowButton("##right", ImGuiDir_Right))
 	{
 		this->subdivisionLevel++;
-		this->updateSubdivision();
+		this->updateSubdivision(scene);
 		anyPropertiesChanged = true;
 	}
 	ImGui::PopButtonRepeat();
@@ -129,10 +129,6 @@ bool Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
 	{
 		return false;
 	}
-
-	std::cout << "Writing Model to shader" << std::endl;
-
-	std::cout << "m " << getPosition().x << ", " << getPosition().y << ", " << getPosition().z << std::endl;
 
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
@@ -257,12 +253,13 @@ float Model::getAppropriateCameraFocusDistance()
 	return maxDistance;
 }
 
-void Model::updateSubdivision()
+void Model::updateSubdivision(Scene& scene)
 {
 	for (Mesh& mesh : meshes)
 	{
 		mesh.updateSubdivision(subdivisionLevel);
 	}
+	scene.recalculateModelIndices();
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* meshIndex, unsigned int* triangleCount,
@@ -500,6 +497,7 @@ BVHNode* Model::getRootNode()
 	if (isVertexDataChanged())// || true)
 	{
 		// Creating a BVH from the model
+		std::cout << "regenerating bvh" << std::endl;
 		this->bvhRootNode = BVHHandler::generateFromModel(*this, this->bvhRootNode);
 		setVertexDataChanged(false);
 	}
