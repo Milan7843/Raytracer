@@ -410,6 +410,14 @@ void Scene::recalculateModelIndices()
 
 	// Must create a new triangle buffer for the new number of triangles
 	generateTriangleBuffer();
+
+	// Since all model locations could have changed, they must now be rewritten to every shader.
+	// This also counts for the BVH indices, so it is regenerated
+	for (Model& model : models)
+	{
+		model.clearShaderWrittenTo();
+		model.setVertexDataChanged(true);
+	}
 }
 
 void Scene::recalculateSphereIndices()
@@ -453,6 +461,14 @@ void Scene::draw(AbstractShader* shader, RasterizedDebugMode debugMode)
 {
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT);
+	if (isWireframeView())
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+	else
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 	shader->use();
 
 	// Debug mode
@@ -505,6 +521,8 @@ void Scene::draw(AbstractShader* shader, RasterizedDebugMode debugMode)
 		shader->setInt("objectID", sphere.getID());
 		sphere.draw(shader, (Scene*)this);
 	}
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void Scene::drawSelected(AbstractShader* shader)
@@ -1258,4 +1276,16 @@ bool Scene::replace(std::string& str, const std::string& from, const std::string
 		return false;
 	str.replace(start_pos, from.length(), to);
 	return true;
+}
+
+
+
+void Scene::setWireframeView(bool enabled)
+{
+	this->wireframe = enabled;
+}
+
+bool Scene::isWireframeView() const
+{
+	return this->wireframe;
 }

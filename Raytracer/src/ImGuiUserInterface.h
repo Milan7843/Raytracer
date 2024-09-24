@@ -57,24 +57,24 @@ public:
 
 	void handleInput(GLFWwindow* window, Camera& camera);
 
-	bool isEnabled();
+	bool isEnabled() const;
 
 	// Get whether the mouse is currently on the GUI
 	bool isMouseOnGUI();
 
 	// Get whether the mouse is currently on the rendered screen
-	bool isMouseOnRenderedScreen();
+	bool isMouseOnRenderedScreen() const;
 
 	// Get the position of the mouse ([0,1], [0,1])
-	glm::vec2 getMousePosition();
+	glm::vec2 getMousePosition() const;
 
 	// Get the coordinates of the mouse (pixel index x and y)
-	glm::ivec2 getMouseCoordinates();
+	glm::ivec2 getMouseCoordinates() const;
 
 	// Get the size of the screen we are rendering to
-	glm::ivec2 getRenderedScreenSize();
+	glm::ivec2 getRenderedScreenSize() const;
 
-	bool isExitOkay();
+	bool isExitOkay() const;
 	void requestExit();
 
 private:

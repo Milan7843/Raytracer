@@ -2,6 +2,7 @@
 
 #include "shaders/AbstractShader.h"
 #include "gui/ContextMenuSource.h"
+#include "SubdivisionSurface.h"
 
 #include "CoordinateUtility.h"
 #include "Logger.h"
@@ -23,11 +24,33 @@ class Scene;
 
 struct Vertex
 {
-	glm::vec4 position;
-	glm::vec4 normal;
-	glm::vec4 uv;
-	glm::vec4 tangent;
-	glm::vec4 bitangent;
+	glm::vec4 position = glm::vec4(0.0f);
+	glm::vec4 normal = glm::vec4(0.0f);
+	glm::vec4 uv = glm::vec4(0.0f);
+	glm::vec4 tangent = glm::vec4(0.0f);
+	glm::vec4 bitangent = glm::vec4(0.0f);
+
+	inline Vertex operator+ (const Vertex& b) const
+	{
+		Vertex result;
+		result.position = this->position + b.position;
+		result.normal = this->normal + b.normal;
+		result.uv = this->uv + b.uv;
+		result.tangent = this->tangent + b.tangent;
+		result.bitangent = this->bitangent + b.bitangent;
+		return result;
+	}
+
+	inline Vertex operator* (const float t) const
+	{
+		Vertex result;
+		result.position = this->position * t;
+		result.normal = this->normal * t;
+		result.uv = this->uv * t;
+		result.tangent = this->tangent * t;
+		result.bitangent = this->bitangent * t;
+		return result;
+	}
 };
 
 struct Triangle
@@ -75,6 +98,8 @@ public:
 
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
+	std::vector<Vertex> subdividedVertices;
+	std::vector<unsigned int> subdividedIndices;
 	std::vector<Triangle> triangles;
 
 	// First index for writing this mesh's data to a shader
@@ -124,8 +149,11 @@ public:
 	// after clicking the focus button.
 	virtual float getAppropriateCameraFocusDistance() override;
 
+	void updateSubdivision(unsigned int subdivisionLevel);
+
 private:
 	void setupMesh();
+	void setupBuffers();
 
 	// The index of the material this mesh uses
 	unsigned int materialIndex{ 0 };

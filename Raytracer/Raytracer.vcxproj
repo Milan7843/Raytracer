@@ -80,6 +80,7 @@
     <ClCompile Include="src\Object.cpp" />
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\shaders\Shader.cpp" />
+    <ClCompile Include="src\SimplifyingSubdivisionSurface.cpp" />
     <ClCompile Include="src\Sphere.cpp" />
     <ClCompile Include="src\TextureHandler.cpp" />
     <ClCompile Include="src\WindowUtility.cpp" />
@@ -560,6 +561,7 @@
     <ClInclude Include="src\stb_image_write.h" />
     <ClInclude Include="src\TextureHandler.h" />
     <ClInclude Include="src\WindowUtility.h" />
+    <ClInclude Include="src\SubdivisionSurface.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc142-mtd.dll" />

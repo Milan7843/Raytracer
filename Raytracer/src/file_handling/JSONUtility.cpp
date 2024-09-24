@@ -33,6 +33,13 @@ namespace JSONUtility
 			Model* model = scene.addModel(name, path);
 
 			// If position data is available
+			if (modelData.contains("subsurflevel"))
+			{
+				unsigned int subsurflevel = modelData["subsurflevel"];
+				model->setSubdivisionLevel(subsurflevel);
+			}
+
+			// If position data is available
 			if (modelData.contains("position"))
 			{
 				json positionData = modelData["position"];
@@ -86,6 +93,8 @@ namespace JSONUtility
 				}
 			}
 		}
+
+		scene.recalculateModelIndices();
 	}
 
 	void loadSpheres(json data, Scene& scene)
@@ -383,6 +392,18 @@ namespace JSONUtility
 		scene.loadHDRI(data["hdri"]);
 	}
 
+	void loadSettings(json data, Scene& scene)
+	{
+		if (!data.contains("settings"))
+		{
+			Logger::logError("Scene file is missing settings");
+			return;
+		}
+		json settings = data["settings"];
+
+		scene.setWireframeView(settings["wireframe"]);
+	}
+
 
 	json toJSON(Model& model)
 	{
@@ -392,6 +413,7 @@ namespace JSONUtility
 		j["position"] = vec3ToJSON(model.getPosition());
 		j["rotation"] = vec3ToJSON(model.getRotation());
 		j["scale"] = vec3ToJSON(model.getScale());
+		j["subsurflevel"] = model.getSubdivisionLevel();
 
 		j["submeshdata"] = toJSON(model.getMeshes());
 		
@@ -595,6 +617,15 @@ namespace JSONUtility
 		return j;
 	}
 
+	json getSceneSettingsJSON(const Scene& scene)
+	{
+		json j;
+
+		j["wireframe"] = scene.isWireframeView();
+
+		return j;
+	}
+
 	json toJSON(Scene& scene)
 	{
 		json j;
@@ -610,6 +641,7 @@ namespace JSONUtility
 		j["ambientlights"] = toJSON(scene.getAmbientLights());
 
 		j["camera"] = toJSON(scene.getActiveCamera());
+		j["settings"] = getSceneSettingsJSON(scene);
 
 		if (scene.hasHDRI())
 		{

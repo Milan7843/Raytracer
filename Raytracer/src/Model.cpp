@@ -70,6 +70,32 @@ bool Model::drawInterface(Scene& scene)
 	anyPropertiesChanged |= ImGui::DragFloat3("Rotation##", (float*)getRotationPointer(), 0.01f);
 	anyPropertiesChanged |= ImGui::DragFloat3("Scale##", (float*)getScalePointer(), 0.01f);
 
+	// Subdivision level buttons
+	ImGui::Text("Subdivision level:");
+	ImGui::SameLine();
+
+	float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+	ImGui::PushButtonRepeat(false);
+	if (ImGui::ArrowButton("##left", ImGuiDir_Left))
+	{
+		if (subdivisionLevel > 0)
+		{
+			this->subdivisionLevel--;
+			this->updateSubdivision(scene);
+			anyPropertiesChanged = true;
+		}
+	}
+	ImGui::SameLine(0.0f, spacing);
+	if (ImGui::ArrowButton("##right", ImGuiDir_Right))
+	{
+		this->subdivisionLevel++;
+		this->updateSubdivision(scene);
+		anyPropertiesChanged = true;
+	}
+	ImGui::PopButtonRepeat();
+	ImGui::SameLine();
+	ImGui::Text("%d", this->subdivisionLevel);
+
 	if (anyPropertiesChanged)
 	{
 		setVertexDataChanged(true);
@@ -103,10 +129,6 @@ bool Model::writeToShader(AbstractShader* shader, unsigned int ssbo)
 	{
 		return false;
 	}
-
-	std::cout << "Writing Model to shader" << std::endl;
-
-	std::cout << "m " << getPosition().x << ", " << getPosition().y << ", " << getPosition().z << std::endl;
 
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
@@ -229,6 +251,29 @@ float Model::getAppropriateCameraFocusDistance()
 	}
 
 	return maxDistance;
+}
+
+unsigned int Model::getSubdivisionLevel() const
+{
+	return this->subdivisionLevel;
+}
+
+void Model::setSubdivisionLevel(unsigned int level)
+{
+	this->subdivisionLevel = level;
+	for (Mesh& mesh : meshes)
+	{
+		mesh.updateSubdivision(subdivisionLevel);
+	}
+}
+
+void Model::updateSubdivision(Scene& scene)
+{
+	for (Mesh& mesh : meshes)
+	{
+		mesh.updateSubdivision(subdivisionLevel);
+	}
+	scene.recalculateModelIndices();
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* meshIndex, unsigned int* triangleCount,
@@ -466,6 +511,7 @@ BVHNode* Model::getRootNode()
 	if (isVertexDataChanged())// || true)
 	{
 		// Creating a BVH from the model
+		std::cout << "regenerating bvh" << std::endl;
 		this->bvhRootNode = BVHHandler::generateFromModel(*this, this->bvhRootNode);
 		setVertexDataChanged(false);
 	}

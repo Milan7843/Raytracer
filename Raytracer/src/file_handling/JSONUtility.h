@@ -16,6 +16,7 @@ namespace JSONUtility
 	void loadMaterials(json data, Scene& scene);
 	void loadCamera(json data, Scene& scene);
 	void loadHDRI(json data, Scene& scene);
+	void loadSettings(json data, Scene& scene);
 
 	json toJSON(Model& model);
 	json toJSON(Mesh& mesh);
