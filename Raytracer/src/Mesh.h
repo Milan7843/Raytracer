@@ -98,6 +98,8 @@ public:
 
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
+	std::vector<Vertex> subdividedVertices;
+	std::vector<unsigned int> subdividedIndices;
 	std::vector<Triangle> triangles;
 
 	// First index for writing this mesh's data to a shader
@@ -147,8 +149,11 @@ public:
 	// after clicking the focus button.
 	virtual float getAppropriateCameraFocusDistance() override;
 
+	void updateSubdivision(unsigned int subdivisionLevel);
+
 private:
 	void setupMesh();
+	void setupBuffers();
 
 	// The index of the material this mesh uses
 	unsigned int materialIndex{ 0 };

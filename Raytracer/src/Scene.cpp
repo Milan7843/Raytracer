@@ -453,7 +453,7 @@ void Scene::draw(AbstractShader* shader, RasterizedDebugMode debugMode)
 {
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	shader->use();
 
 	// Debug mode

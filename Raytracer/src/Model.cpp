@@ -70,6 +70,32 @@ bool Model::drawInterface(Scene& scene)
 	anyPropertiesChanged |= ImGui::DragFloat3("Rotation##", (float*)getRotationPointer(), 0.01f);
 	anyPropertiesChanged |= ImGui::DragFloat3("Scale##", (float*)getScalePointer(), 0.01f);
 
+	// Subdivision level buttons
+	ImGui::Text("Subdivision level:");
+	ImGui::SameLine();
+
+	float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+	ImGui::PushButtonRepeat(true);
+	if (ImGui::ArrowButton("##left", ImGuiDir_Left))
+	{
+		if (subdivisionLevel > 0)
+		{
+			this->subdivisionLevel--;
+			this->updateSubdivision();
+			anyPropertiesChanged = true;
+		}
+	}
+	ImGui::SameLine(0.0f, spacing);
+	if (ImGui::ArrowButton("##right", ImGuiDir_Right))
+	{
+		this->subdivisionLevel++;
+		this->updateSubdivision();
+		anyPropertiesChanged = true;
+	}
+	ImGui::PopButtonRepeat();
+	ImGui::SameLine();
+	ImGui::Text("%d", this->subdivisionLevel);
+
 	if (anyPropertiesChanged)
 	{
 		setVertexDataChanged(true);
@@ -229,6 +255,14 @@ float Model::getAppropriateCameraFocusDistance()
 	}
 
 	return maxDistance;
+}
+
+void Model::updateSubdivision()
+{
+	for (Mesh& mesh : meshes)
+	{
+		mesh.updateSubdivision(subdivisionLevel);
+	}
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene, unsigned int* meshCount, unsigned int* meshIndex, unsigned int* triangleCount,

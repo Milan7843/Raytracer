@@ -76,6 +76,9 @@ private:
 	std::string directory;
 	std::string path;
 
+	unsigned int subdivisionLevel{ 0 };
+	void updateSubdivision();
+
 	bool vertexDataChanged{ true };
 
 	BVHNode* bvhRootNode{ nullptr };

@@ -15,14 +15,11 @@ Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned
     , Object()
     , ContextMenuSource()
 {
-    std::vector<Vertex> subDivVertices;
-    std::vector<unsigned int> subDivIndices;
-
-    SubdivisionSurface::subdivide(vertices, indices, subDivVertices, subDivIndices, 2);
-
     this->name = name;
-    this->vertices = subDivVertices;
-    this->indices = subDivIndices;
+    this->vertices = vertices;
+    this->indices = indices;
+    this->subdividedVertices = vertices;
+    this->subdividedIndices = indices;
 
 
     glm::vec4 positionVec4{ glm::vec4(position, 0.0f) };
@@ -60,13 +57,18 @@ Mesh::Mesh(std::string& name, std::vector<Vertex> vertices, std::vector<unsigned
     );
 
     this->position = position;
+    setupBuffers();
     setupMesh();
     setType(MESH);
 }
 
 Mesh::~Mesh()
 {
-
+    /* TODO: where to delete these? maybe in model?
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    */
 }
 
 bool Mesh::drawInterface(Scene& scene)
@@ -163,39 +165,35 @@ float Mesh::getAppropriateCameraFocusDistance()
     ) * 2.0f;
 }
 
+void Mesh::updateSubdivision(unsigned int subdivisionLevel)
+{
+    this->subdividedVertices.clear();
+    this->subdividedIndices.clear();
+    SubdivisionSurface::subdivide(this->vertices, this->indices, this->subdividedVertices, this->subdividedIndices, subdivisionLevel);
+
+    setupMesh();
+}
+
 void Mesh::setupMesh()
 {
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), &indices[0], GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
-    glEnableVertexAttribArray(4);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * this->subdividedVertices.size(), &this->subdividedVertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * this->subdividedIndices.size(), &this->subdividedIndices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    triangles.clear();
+
     // Setting up the triangles in the UBO
-    for (unsigned int i = 0; i < indices.size(); i += 3)
+    for (unsigned int i = 0; i < this->subdividedIndices.size(); i += 3)
     {
-        Vertex& v1 = vertices[indices[i]];
-        Vertex& v2 = vertices[indices[i + 1]];
-        Vertex& v3 = vertices[indices[i + 2]];
+        Vertex& v1 = this->subdividedVertices[this->subdividedIndices[i]];
+        Vertex& v2 = this->subdividedVertices[this->subdividedIndices[i + 1]];
+        Vertex& v3 = this->subdividedVertices[this->subdividedIndices[i + 2]];
         // static_cast<unsigned __int64>(i)
         Triangle tri{};
         tri.v1 = v1.position;
@@ -226,6 +224,31 @@ void Mesh::setupMesh()
         tri.reflectiveness = 1.0f;
         triangles.push_back(tri);
     }
+}
+
+void Mesh::setupBuffers()
+{
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
+    glEnableVertexAttribArray(4);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 unsigned int Mesh::getTriangleCount()
@@ -274,7 +297,7 @@ void Mesh::draw(AbstractShader* shader, Scene* scene, glm::mat4& modelTransforma
 
     glBindVertexArray(VAO);
 
-    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(this->subdividedIndices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 

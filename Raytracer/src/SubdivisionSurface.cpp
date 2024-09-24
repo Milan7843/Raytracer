@@ -37,7 +37,6 @@ namespace SubdivisionSurface
 		{
 			for (unsigned int i = 0; i < indices.size(); i++)
 			{
-				// Problem: doesn't check for position duplicates, only by index
 				if (inVertices[indices[i]].position == inVertices[index].position)
 				{
 					// Already found it
