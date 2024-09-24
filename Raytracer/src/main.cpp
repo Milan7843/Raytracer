@@ -31,5 +31,6 @@ int main(int argc, char* argv[])
     }
 
 	Application application(WIDTH, HEIGHT, useShaderCache);
+    Logger::setDebug(false);
 	return application.Start();
 }

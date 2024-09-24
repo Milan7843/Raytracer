@@ -16,12 +16,12 @@ void BVH::updateByScene(Scene& scene)
 	BVHHandler::writeIntoSSBOs(bvhRoot, dataSSBO, triangleSSBO);
 }
 
-void BVH::flatten(std::vector<BVHData>& data, bool onlyLeaves)
+void BVH::flatten(std::vector<BVHData>& data, bool onlyLeaves) const
 {
 	BVHHandler::flattenBVHTreeData(this->bvhRoot, data, onlyLeaves);
 }
 
-BVHNode* BVH::getRoot()
+BVHNode* BVH::getRoot() const
 {
 	return bvhRoot;
 }

@@ -397,7 +397,7 @@ void Material::setTexture(std::string& path, bool pixelPerfect)
 {
 }
 
-bool Material::hasAlbedoTexture()
+bool Material::hasAlbedoTexture() const
 {
 	return m_hasAlbedoTexture;
 }
@@ -429,7 +429,7 @@ AtlasTexture* Material::getAlbedoTexture()
 	return albedoTexture.get();
 }
 
-bool Material::hasNormalTexture()
+bool Material::hasNormalTexture() const
 {
 	return m_hasNormalTexture;
 }

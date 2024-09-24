@@ -7,7 +7,7 @@
 class ShaderWritable
 {
 public:
-	bool hasWrittenToShader(AbstractShader* shader)
+	bool hasWrittenToShader(AbstractShader* shader) const
 	{
 		for (AbstractShader* pointer : shadersWrittenTo)
 		{

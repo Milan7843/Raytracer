@@ -34,7 +34,6 @@ Sphere::Sphere(glm::vec3 position, float radius, unsigned int materialIndex, uns
 
 Sphere::~Sphere()
 {
-
 }
 
 bool Sphere::writeToShader(AbstractShader* shader, unsigned int ssbo)
@@ -75,10 +74,10 @@ void Sphere::drawInterface()
 	anyPropertiesChanged |= ImGui::InputText("Name##", getNamePointer());
 
 	// Showing transformations
-	anyPropertiesChanged |= ImGui::DragFloat3("Position##", (float*)getPositionPointer(), 0.01f);
+	anyPropertiesChanged |= ImGui::DragFloat3("Position##", (float*)&position, 0.01f);
 
 	// Drawing a dragfloat for the radius
-	anyPropertiesChanged |= ImGui::DragFloat("Radius##", getRadiusPointer(), 0.01f, 0.01f, 100.0f, "%.02f");
+	anyPropertiesChanged |= ImGui::DragFloat("Radius##", &radius, 0.01f, 0.01f, 100.0f, "%.02f");
 
 	// Draw the first and only mesh
 	//drawMesh(getMeshes()[0], scene, materialSlotsCharArray, index);
@@ -107,11 +106,6 @@ glm::mat4 Sphere::getTransformationMatrix()
 
 	// Then use the radius to scale it
 	return glm::scale(base, glm::vec3(radius));
-}
-
-float* Sphere::getRadiusPointer()
-{
-	return &radius;
 }
 
 float Sphere::getRadius() const

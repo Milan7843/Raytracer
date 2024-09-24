@@ -18,7 +18,7 @@ public:
 	virtual bool writeToShader(AbstractShader* shader, bool useGlslCoordinates);
 
 	// Get a pointer to the direction vector of this light
-	glm::vec3* getDirectionPointer();
+	glm::vec3* getDirectionPointer() const;
 
 	// Get the direction vector of this light
 	glm::vec3 getDirection() const;

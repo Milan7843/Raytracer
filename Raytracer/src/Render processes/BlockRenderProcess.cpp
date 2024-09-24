@@ -94,7 +94,7 @@ void BlockRenderProcess::generateIndirectLightingDataBuffer()
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, indirectLightingDataBuffer);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-	std::cout << "Indirect lighting buffer " << indirectLightingDataBuffer << " with " << this->blockSize * this->blockSize * sizeof(IndirectLightingPixelData) << "bytes" << std::endl;
+	//std::cout << "Indirect lighting buffer " << indirectLightingDataBuffer << " with " << this->blockSize * this->blockSize * sizeof(IndirectLightingPixelData) << "bytes" << std::endl;
 }
 
 void BlockRenderProcess::generateStackBuffer()
@@ -124,7 +124,7 @@ void BlockRenderProcess::blockRenderStep(ComputeShader& computeShader)
 	currentBlockRenderPassIndex++;
 }
 
-float BlockRenderProcess::getRenderProgressPrecise()
+float BlockRenderProcess::getRenderProgressPrecise() const
 {
 	float blocksInHeight = (float)height / (float)blockSize;
 	float blocksInWidth = (float)width / (float)blockSize;

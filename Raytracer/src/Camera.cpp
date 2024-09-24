@@ -29,7 +29,6 @@ Camera::Camera(glm::vec3 pos, float yaw, float pitch, float sensitivity, float f
 }
 Camera::~Camera()
 {
-	Logger::log("Camera destroyed");
 }
 
 void Camera::updateVectors()
@@ -42,12 +41,12 @@ void Camera::updateVectors()
 	forward = glm::normalize(direction);
 }
 
-glm::mat4 Camera::getViewMatrix()
+glm::mat4 Camera::getViewMatrix() const
 {   //                           cam pos,  target,            up vector
 	glm::mat4 view = glm::lookAt(position, position + forward, up);
 	return view;
 }
-glm::mat4 Camera::getProjectionMatrix()
+glm::mat4 Camera::getProjectionMatrix() const
 {
 	if (WindowUtility::getRenderWindowSize().x == 0 || WindowUtility::getRenderWindowSize().y == 0)
 		return glm::mat4(1.0f);
@@ -60,16 +59,16 @@ glm::mat4 Camera::getProjectionMatrix(unsigned int width, unsigned int height)
 	return projection;
 }
 
-glm::vec3 Camera::getPosition()
+glm::vec3 Camera::getPosition() const
 {
 	return glm::vec3(position.x, position.y, position.z);
 }
-glm::vec3 Camera::getRotation()
+glm::vec3 Camera::getRotation() const
 {
 	return glm::vec3(0.0f, glm::radians(yaw), -glm::radians(pitch));
 }
 
-float Camera::getFov()
+float Camera::getFov() const
 {
 	return fov;
 }
@@ -108,7 +107,7 @@ void Camera::setFov(float newFov)
 	updateVectors();
 }
 
-float Camera::getAspectRatio()
+float Camera::getAspectRatio() const
 {
 	return (float)WindowUtility::getRenderWindowSize().x / (float)WindowUtility::getRenderWindowSize().y;
 }

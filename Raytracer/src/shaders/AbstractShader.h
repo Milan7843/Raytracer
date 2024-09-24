@@ -7,7 +7,7 @@ class AbstractShader : public ShaderInterface
 {
 public:
 	// Program ID
-	unsigned int ID = 0;
+	unsigned int ID{ 0 };
 
 	// Activates the shader
 	virtual void use();
@@ -37,5 +37,5 @@ protected:
 	AbstractShader() {}
 	~AbstractShader();
 
-	const char* cacheLocation;
+	const char* cacheLocation{ nullptr };
 };

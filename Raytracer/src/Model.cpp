@@ -66,9 +66,9 @@ bool Model::drawInterface(Scene& scene)
 	//anyPropertiesChanged |= ImGui::InputText("Name", &getName());
 	ImGui::InputText("Name##", getNamePointer());
 	// Showing transformations
-	anyPropertiesChanged |= ImGui::DragFloat3("Position##", (float*)getPositionPointer(), 0.01f);
-	anyPropertiesChanged |= ImGui::DragFloat3("Rotation##", (float*)getRotationPointer(), 0.01f);
-	anyPropertiesChanged |= ImGui::DragFloat3("Scale##", (float*)getScalePointer(), 0.01f);
+	anyPropertiesChanged |= ImGui::DragFloat3("Position##", (float*)&position, 0.01f);
+	anyPropertiesChanged |= ImGui::DragFloat3("Rotation##", (float*)&rotation, 0.01f);
+	anyPropertiesChanged |= ImGui::DragFloat3("Scale##", (float*)&scaleVector, 0.01f);
 
 	// Subdivision level buttons
 	ImGui::Text("Subdivision level:");
@@ -511,7 +511,6 @@ BVHNode* Model::getRootNode()
 	if (isVertexDataChanged())// || true)
 	{
 		// Creating a BVH from the model
-		std::cout << "regenerating bvh" << std::endl;
 		this->bvhRootNode = BVHHandler::generateFromModel(*this, this->bvhRootNode);
 		setVertexDataChanged(false);
 	}

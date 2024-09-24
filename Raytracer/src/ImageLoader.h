@@ -33,7 +33,7 @@ struct AtlasTexture
 	{
 		// Deleting the preview data on delete
 		glDeleteTextures(1, &previewTextureID);
-		std::cout << "Destroying atlas texture" << std::endl;
+		Logger::logDebug("Destroying atlas texture");
 	}
 };
 
@@ -59,7 +59,7 @@ struct Texture
 		// Deleting the preview data on delete
 		glDeleteTextures(1, &previewTextureID);
 		glDeleteTextures(1, &textureID);
-		std::cout << "Destroying texture" << std::endl;
+		Logger::logDebug("Destroying texture");
 	}
 };
 
@@ -87,7 +87,7 @@ struct HDRITexture
 		glDeleteTextures(1, &previewTextureID);
 		glDeleteTextures(1, &textureID);
 		glDeleteTextures(1, &blurredTextureID);
-		std::cout << "Destroying HDRI texture" << std::endl;
+		Logger::logDebug("Destroying HDRI texture.");
 	}
 };
 

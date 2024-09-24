@@ -30,8 +30,6 @@ unsigned int ObjectScreenSelector::checkObjectClicked(Scene& scene, unsigned int
 	// Getting data
 	unsigned int objectID{ (unsigned int)colorData[0] };
 
-	std::cout << objectID << " at " << x << " " << y << std::endl;
-
 	// Rebinding the previous framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, framebufferBefore);
 

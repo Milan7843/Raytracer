@@ -26,13 +26,8 @@ public:
 
 	glm::vec3 getColor() const;
 	float getIntensity() const;
+
 	void setIntensity(float intensity);
-
-	glm::vec3* getPositionPointer();
-	glm::vec3* getColorPointer();
-	float* getIntensityPointer();
-	float* getShadowSoftnessPointer();
-
 	void setColor(glm::vec3 color);
 
 	~Light();

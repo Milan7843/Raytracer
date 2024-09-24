@@ -29,9 +29,9 @@ AmbientLight::~AmbientLight()
 bool AmbientLight::drawInterface(Scene& scene)
 {
 	bool anyPropertiesChanged{ false };
-	anyPropertiesChanged |= ImGui::InputText("##", getNamePointer());
-	anyPropertiesChanged |= ImGui::ColorEdit3("Color", (float*)getColorPointer());
-	anyPropertiesChanged |= ImGui::DragFloat("Intensity", getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
+	anyPropertiesChanged |= ImGui::InputText("##", &name);
+	anyPropertiesChanged |= ImGui::ColorEdit3("Color", (float*)&color);
+	anyPropertiesChanged |= ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 10.0f, "%.2f");
 
 	// If anything changed, no shader will have the updated data
 	if (anyPropertiesChanged)

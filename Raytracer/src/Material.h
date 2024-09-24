@@ -36,16 +36,6 @@ public:
 	// Generate a material with easily distinguishable error properties
 	static Material generateErrorMaterial();
 
-	glm::vec3 color;
-	float reflectiveness;
-	float roughness;
-	float transparency;
-	float refractiveness;
-	float reflectionDiffusion;
-	glm::vec3 emission;
-	float emissionStrength;
-	float fresnelReflectionStrength;
-
 	// Getters
 	const std::string& getName() const;
 	glm::vec3 getColor() const;
@@ -86,13 +76,13 @@ public:
 
 	void setTexture(std::string& path, bool pixelPerfect);
 
-	bool hasAlbedoTexture();
+	bool hasAlbedoTexture() const;
 	void setAlbedoTexture(std::string& path, bool pixelPerfect);
 	void setAlbedoTexture(const char* path, bool pixelPerfect);
 	void removeAlbedoTexture();
 	AtlasTexture* getAlbedoTexture();
 
-	bool hasNormalTexture();
+	bool hasNormalTexture() const;
 	void setNormalTexture(std::string& path, bool pixelPerfect);
 	void setNormalTexture(const char* path, bool pixelPerfect);
 	void removeNormalTexture();
@@ -112,4 +102,14 @@ private:
 	bool m_hasNormalTexture;
 	std::shared_ptr<AtlasTexture> normalTexture;
 	float normalMapStrength;
+
+	glm::vec3 color;
+	float reflectiveness;
+	float roughness;
+	float transparency;
+	float refractiveness;
+	float reflectionDiffusion;
+	glm::vec3 emission;
+	float emissionStrength;
+	float fresnelReflectionStrength;
 };

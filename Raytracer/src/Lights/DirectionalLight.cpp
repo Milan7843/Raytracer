@@ -30,11 +30,11 @@ DirectionalLight::~DirectionalLight()
 bool DirectionalLight::drawInterface(Scene& scene)
 {
 	bool anyPropertiesChanged{ false };
-	anyPropertiesChanged |= ImGui::InputText("##", getNamePointer());
-	anyPropertiesChanged |= ImGui::ColorEdit3("Color", (float*)getColorPointer());
-	anyPropertiesChanged |= ImGui::DragFloat("Intensity", getIntensityPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
-	anyPropertiesChanged |= ImGui::DragFloat3("Direction", (float*)getDirectionPointer(), 0.01f);
-	anyPropertiesChanged |= ImGui::DragFloat("Shadow softness", getShadowSoftnessPointer(), 0.01f, 0.0f, 10.0f, "%.2f");
+	anyPropertiesChanged |= ImGui::InputText("##", &name);
+	anyPropertiesChanged |= ImGui::ColorEdit3("Color", (float*)&color);
+	anyPropertiesChanged |= ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 10.0f, "%.2f");
+	anyPropertiesChanged |= ImGui::DragFloat3("Direction", (float*)&direction, 0.01f);
+	anyPropertiesChanged |= ImGui::DragFloat("Shadow softness", &shadowSoftness, 0.01f, 0.0f, 10.0f, "%.2f");
 
 	// If anything changed, no shader will have the updated data
 	if (anyPropertiesChanged)
@@ -71,11 +71,6 @@ bool DirectionalLight::writeToShader(AbstractShader* shader, bool useGlslCoordin
 
 	// New data was written
 	return true;
-}
-
-glm::vec3* DirectionalLight::getDirectionPointer()
-{
-	return &direction;
 }
 
 glm::vec3 DirectionalLight::getDirection() const

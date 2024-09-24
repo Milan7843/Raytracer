@@ -1,11 +1,11 @@
 #include "RenderProcess.h"
 
-float RenderProcess::getCurrentProcessTime()
+float RenderProcess::getCurrentProcessTime() const
 {
     return currentProcessTime;
 }
 
-bool RenderProcess::isFinished()
+bool RenderProcess::isFinished() const
 {
     return finished;
 }

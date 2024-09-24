@@ -57,7 +57,7 @@ void RealtimeRenderProcess::generateStackBuffer()
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
-float RealtimeRenderProcess::getRenderProgressPrecise()
+float RealtimeRenderProcess::getRenderProgressPrecise() const
 {
 	return 0.0f;
 }

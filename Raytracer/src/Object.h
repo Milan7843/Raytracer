@@ -29,10 +29,6 @@ public:
 	// Draw this object given the shader
 	virtual void draw(AbstractShader* shader);
 
-	glm::vec3* getPositionPointer();
-	glm::vec3* getRotationPointer();
-	glm::vec3* getScalePointer();
-
 	glm::vec3 getPosition() const;
 	virtual glm::vec3 getRotationPoint() const;
 	glm::vec3 getRotation() const;

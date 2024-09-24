@@ -29,9 +29,6 @@ public:
 	// Get a single matrix which includes all transformations
 	glm::mat4 getTransformationMatrix();
 
-	// Get a pointer to the radius of this sphere
-	float* getRadiusPointer();
-
 	float getRadius() const;
 
 	void setRadius(float radius);

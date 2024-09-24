@@ -91,7 +91,7 @@ namespace TextureHandler
 
 		unsigned int currentX{ 0 };
 
-		std::cout << "Creating texture atlas of size " << atlasTextureWidth << "x" << atlasTextureHeight << " (" << (atlasTextureHeight * atlasTextureWidth * sizeof(unsigned char) * 4) << " bytes)" << std::endl;
+		//std::cout << "Creating texture atlas of size " << atlasTextureWidth << "x" << atlasTextureHeight << " (" << (atlasTextureHeight * atlasTextureWidth * sizeof(unsigned char) * 4) << " bytes)" << std::endl;
 
 		for (AtlasTexture* texture : textures)
 		{
@@ -149,7 +149,7 @@ namespace TextureHandler
 			currentX += texture->width;
 		}
 
-		Logger::log(std::string("Making atlas texture of size ") + std::to_string(atlasTextureWidth) + " by " + std::to_string(atlasTextureHeight));
+		Logger::logDebug(std::string("Making atlas texture of size ") + std::to_string(atlasTextureWidth) + " by " + std::to_string(atlasTextureHeight));
 
 		// Putting the packed data into a texture
 

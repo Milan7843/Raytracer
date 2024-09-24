@@ -128,7 +128,7 @@ public:
 	// Get the index of the material this mesh uses
 	unsigned int getMaterialIndex() const;
 
-	unsigned int getModelID();
+	unsigned int getModelID() const;
 
 	void renderContextMenuItems(Scene& scene) override;
 

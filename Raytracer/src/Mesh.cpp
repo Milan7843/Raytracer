@@ -80,9 +80,9 @@ bool Mesh::drawInterface(Scene& scene)
     //anyPropertiesChanged |= ImGui::InputText("Name", &getName());
     ImGui::InputText("Name", getNamePointer());
     // Showing transformations
-    anyPropertiesChanged |= ImGui::DragFloat3("Position", (float*)getPositionPointer(), 0.01f);
-    anyPropertiesChanged |= ImGui::DragFloat3("Rotation", (float*)getRotationPointer(), 0.01f);
-    anyPropertiesChanged |= ImGui::DragFloat3("Scale", (float*)getScalePointer(), 0.01f);
+    anyPropertiesChanged |= ImGui::DragFloat3("Position", (float*)&position, 0.01f);
+    anyPropertiesChanged |= ImGui::DragFloat3("Rotation", (float*)&rotation, 0.01f);
+    anyPropertiesChanged |= ImGui::DragFloat3("Scale", (float*)&scaleVector, 0.01f);
 
     //std::cout << getMaterialIndex() << std::endl;
 
@@ -296,7 +296,7 @@ void Mesh::setMaterialIndex(unsigned int index)
 void Mesh::draw(AbstractShader* shader, Scene* scene, glm::mat4& modelTransformation)
 {
     // Setting up the shader for the material used by this mesh
-    shader->setVector3("inputColor", scene->getMaterials()[materialIndex].color);
+    shader->setVector3("inputColor", scene->getMaterials()[materialIndex].getColor());
     shader->setInt("materialIndex", materialIndex);
     shader->setMat4("model", this->getTransformationMatrix() * modelTransformation);
 
@@ -316,7 +316,7 @@ unsigned int Mesh::getMaterialIndex() const
     return materialIndex;
 }
 
-unsigned int Mesh::getModelID()
+unsigned int Mesh::getModelID() const
 {
     return modelID;
 }

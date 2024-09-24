@@ -48,21 +48,6 @@ glm::mat4 Object::getTransformationMatrix() const
 	return baseMatrix;
 }
 
-glm::vec3* Object::getPositionPointer()
-{
-	return &position;
-}
-
-glm::vec3* Object::getRotationPointer()
-{
-	return &rotation;
-}
-
-glm::vec3* Object::getScalePointer()
-{
-	return &scaleVector;
-}
-
 glm::vec3 Object::getPosition() const
 {
 	return position;

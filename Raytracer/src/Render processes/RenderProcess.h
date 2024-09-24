@@ -13,16 +13,16 @@ public:
 	virtual unsigned int update(float deltaTime, ComputeShader& computeShader) = 0;
 
 	// The current progress of this render process [0.0f, 1.0f]
-	virtual float getRenderProgressPrecise() { return 0.0f; }
+	virtual float getRenderProgressPrecise() const { return 0.0f; }
 
 	// The time this process has been going for
-	float getCurrentProcessTime();
+	float getCurrentProcessTime() const;
 
 	// Get whether the process is finished
-	bool isFinished();
+	bool isFinished() const;
 
 	// Get the number of rays fired per second
-	unsigned int getRaysPerSecond()
+	unsigned int getRaysPerSecond() const
 	{
 		return raysPerSecond;
 	}

@@ -358,8 +358,6 @@ void Scene::addMaterial(Material& material)
 	if (this->materialCount >= MAX_MATERIAL_COUNT)
 		return;
 
-	std::cout << "adding material " << this->materialCount << std::endl;
-
 	// Adding a new material and incrementing the counter for this
 	materials.push_back(material);
 	this->materialCount++;
@@ -617,7 +615,7 @@ bool Scene::checkObjectUpdates(AbstractShader* shader)
 	{
 		if (!sphere.hasWrittenToShader(shader))
 		{
-			Logger::log("sphere updated");
+			Logger::logDebug("sphere updated");
 			return true;
 		}
 	}
@@ -678,7 +676,7 @@ void Scene::generateTriangleBuffer()
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, triangleBufferSSBO);
 
-	Logger::log("Making room for " + std::to_string(triangleCount) + " triangles in SSBO " + std::to_string(triangleBufferSSBO));
+	Logger::logDebug("Making room for " + std::to_string(triangleCount) + " triangles in SSBO " + std::to_string(triangleBufferSSBO));
 
 	// Loading zero-data into the new buffer
 	glBufferData(GL_SHADER_STORAGE_BUFFER, triangleCount * Mesh::getTriangleSize(), 0, GL_DYNAMIC_COPY);
@@ -718,7 +716,7 @@ void Scene::generateMeshBuffer(std::vector<ShaderMesh>& shaderMeshes)
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, meshBufferSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-	Logger::log("Making " + std::to_string(shaderMeshes.size() * sizeof(ShaderMesh)) + " bytes in SSBO " + std::to_string(meshBufferSSBO));
+	Logger::logDebug("Making " + std::to_string(shaderMeshes.size() * sizeof(ShaderMesh)) + " bytes in SSBO " + std::to_string(meshBufferSSBO));
 }
 
 void Scene::bindMaterialsBuffer()
@@ -782,18 +780,16 @@ void Scene::bindMaterialsBuffer()
 				material.getNormalMapStrength()
 			}
 		);
-
-		std::cout << "has albedo texture? " << material.hasAlbedoTexture() << std::endl;
 	}
 
 	// Loading zero-data into the new buffer
-	std::cout << "A single shader material is " << sizeof(ShaderMaterial) << "bytes" << std::endl;
-	std::cout << "There are " << shaderMaterials.size() << "shader materials" << std::endl;
+	//std::cout << "A single shader material is " << sizeof(ShaderMaterial) << "bytes" << std::endl;
+	//std::cout << "There are " << shaderMaterials.size() << "shader materials" << std::endl;
 	glBufferData(GL_SHADER_STORAGE_BUFFER, shaderMaterials.size() * sizeof(ShaderMaterial), &shaderMaterials[0], GL_DYNAMIC_READ);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 9, materialsBufferSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-	Logger::log("Making " + std::to_string(shaderMaterials.size() * sizeof(ShaderMaterial)) + " bytes in SSBO " + std::to_string(materialsBufferSSBO) + " for materials");
+	Logger::logDebug("Making " + std::to_string(shaderMaterials.size() * sizeof(ShaderMaterial)) + " bytes in SSBO " + std::to_string(materialsBufferSSBO) + " for materials");
 }
 
 std::string* Scene::getNamePointer()
@@ -839,11 +835,6 @@ void Scene::markSelected(unsigned int objectID)
 		currentlySelectedObject = objectID;
 		//InputManager::resetCurrentAction();
 		return;
-	}
-
-	for (unsigned int i{ 0 }; i < models.size(); i++)
-	{
-		std::cout << "model " << &models[i] << std::endl;
 	}
 
 	// Getting a pointer to the selected object
@@ -1136,7 +1127,6 @@ void Scene::drawClickSelectGizmos(GizmoRenderer& renderer)
 	glm::vec3 selectedGizmoColor{ glm::vec3(0.9f, 0.3f, 0.8f) };
 	for (PointLight& light : getPointLights())
 	{
-		std::cout << "light id " << light.getID() << std::endl;
 		gizmoDrawData.push_back(
 			GizmoClickSelectDrawData{
 				light.getPosition(),

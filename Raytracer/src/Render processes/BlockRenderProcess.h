@@ -25,7 +25,7 @@ public:
 
 	unsigned int update(float deltaTime, ComputeShader& computeShader) override;
 
-	float getRenderProgressPrecise() override;
+	float getRenderProgressPrecise() const override;
 
 private:
 

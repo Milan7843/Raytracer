@@ -39,13 +39,13 @@ public:
 
 	void updateVectors();
 
-	glm::mat4 getViewMatrix();
-	glm::mat4 getProjectionMatrix();
+	glm::mat4 getViewMatrix() const;
+	glm::mat4 getProjectionMatrix() const;
 	glm::mat4 getProjectionMatrix(unsigned int width, unsigned int height);
 
-	glm::vec3 getPosition();
-	glm::vec3 getRotation();
-	float getFov();
+	glm::vec3 getPosition() const;
+	glm::vec3 getRotation() const;
+	float getFov() const;
 
 	// Don't use the current mouse offset, but start from where the cursor is
 	void resetMouseOffset();
@@ -63,7 +63,7 @@ public:
 	void setFov(float newFov);
 
 	// Get the ratio width/height
-	float getAspectRatio();
+	float getAspectRatio() const;
 
 	// Get important information of this camera (position, rotation)
 	std::string getInformation();

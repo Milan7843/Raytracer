@@ -12,10 +12,10 @@ public:
 	void updateByScene(Scene& scene);
 
 	// Flatten this BVH into the given data array
-	void flatten(std::vector<BVHData>& data, bool onlyLeaves);
+	void flatten(std::vector<BVHData>& data, bool onlyLeaves) const;
 
 	// Get the root of this BVH
-	BVHNode* getRoot();
+	BVHNode* getRoot() const;
 
 	// Set the root of this BVH
 	void setRoot(BVHNode* newRoot);

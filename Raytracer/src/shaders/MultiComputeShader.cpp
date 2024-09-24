@@ -26,7 +26,7 @@ MultiComputeShader::~MultiComputeShader()
 		delete shaders[i];
 	}
 
-	Logger::log("Multi compute shader destroyed.");
+	Logger::logDebug("Multi compute shader destroyed.");
 }
 
 void MultiComputeShader::use()
@@ -34,7 +34,7 @@ void MultiComputeShader::use()
 	// The multi compute shader cannot be used
 }
 
-void MultiComputeShader::run(unsigned int numGroupsX, unsigned int numGroupsY, unsigned int numGroupsZ)
+void MultiComputeShader::run(unsigned int numGroupsX, unsigned int numGroupsY, unsigned int numGroupsZ) const
 {
 	for (ComputeShader* shader : shaders)
 	{

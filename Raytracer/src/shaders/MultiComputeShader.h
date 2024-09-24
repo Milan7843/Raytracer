@@ -14,7 +14,7 @@ public:
 	// Activates the shader
 	void use() override;
 
-	void run(unsigned int numGroupsX, unsigned int numGroupsY, unsigned int numGroupsZ) override;
+	void run(unsigned int numGroupsX, unsigned int numGroupsY, unsigned int numGroupsZ) const override;
 
 	// Uniform setting functions
 	void setBool(const std::string& name, bool value) const override;

@@ -13,16 +13,16 @@ Application::Application(unsigned int WIDTH, unsigned int HEIGHT, bool useShader
 Application::~Application()
 {
     deleteFramebuffer();
-    Logger::log("Application instance destroyed");
+    Logger::logDebug("Application instance destroyed");
 }
 
 int Application::Start()
 {
-    Logger::log("Initializing GLFW");
+    Logger::logDebug("Initializing GLFW");
 
     initialiseGLFW();
 
-    Logger::log("Initializing cache");
+    Logger::logDebug("Initializing cache");
     Cache::initialise(useShaderCache);
 
     // Making a GLFW window
@@ -41,13 +41,13 @@ int Application::Start()
 
     ImGuiUserInterface userInterface;
 
-    Logger::log("Initializing ImGui");
+    Logger::logDebug("Initializing ImGui");
 
     userInterface.initialiseImGui(window);
 
     InputManager::initialise(window);
 
-    Logger::log("Initializing GLAD");
+    Logger::logDebug("Initializing GLAD");
     // GLAD manages function pointers for OpenGL, so we cannot run without it
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -109,13 +109,13 @@ int Application::Start()
 
     glm::ivec2 renderedScreenSize{ glm::ivec2(0) };
 
-    Logger::log("Initializing scene");
+    Logger::logDebug("Initializing scene manager");
     SceneManager sceneManager{};
 
     std::string lastLoadedSceneName{};
     FileUtility::readSavedSettings(lastLoadedSceneName);
 
-    Logger::log("Loading scene");
+    Logger::logDebug("Loading scene");
     sceneManager.changeScene(lastLoadedSceneName);
     //sceneManager.getCurrentScene().addCamera(camera);
     //Scene scene{ SceneFileSaver::readSceneFromFile(std::string("Scene 1 - testing")) };
@@ -139,26 +139,26 @@ int Application::Start()
         "src/Shaders/raymarchFragmentShader.shader", triangleCount, meshCount);
     */
 
-    Logger::log("Loading shaders");
+    Logger::logDebug("Loading shaders");
 
-    Logger::log("Loading axes shader");
+    Logger::logDebug("Loading axes shader");
     // Shader for drawing axes
     Shader solidColorShader("src/shader_src/solidColorVertexShader.shader", "src/shader_src/solidColorFragmentShader.shader");
-    Logger::log("Loading rasterized view shader");
+    Logger::logDebug("Loading rasterized view shader");
     // Shader for viewing rasterized view
     Shader rasterizedShader("src/shader_src/solidColorVertexShader.shader", "src/shader_src/rasterizedView.shader");
-    Logger::log("Loading rendered image shader");
+    Logger::logDebug("Loading rendered image shader");
     // Shader for rendering the quad which shows the rendered image
     Shader raytracedImageRendererShader("src/shader_src/raymarchVertexShader.shader", "src/shader_src/raytracedImageRendererShader.glsl");
 
     // Raytraced renderer
-    Logger::log("Loading raytracing shader"); 
+    Logger::logDebug("Loading raytracing shader");
     //MultiComputeShader raytracingComputeShader(2, "src/shader_src/raytraceComputeShaderSampledUpdated.shader", "src/shader_src/indirectLightingCalculation.shader");
     MultiComputeShader raytracingComputeShader(1, "src/shader_src/raytraceComputeShaderProbabilistic.shader");
     //ComputeShader raytracingComputeShader("src/shader_src/raytraceComputeShaderSampledUpdated.shader");
     Renderer raytracingRenderer(raytracingComputeShader, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 
-    Logger::log("Loading HDRI renderer");
+    Logger::logDebug("Loading HDRI renderer");
     HDRIRenderer hdriRenderer("src/shader_src/hdriVertex.shader", "src/shader_src/hdriFragment.shader");
 
     GizmoRenderer gizmoRenderer("src/shader_src/gizmo_shaders/gizmoVertex.shader",
@@ -173,9 +173,6 @@ int Application::Start()
 
     raytracingRenderer.bindSceneManager(&sceneManager);
 
-
-    Logger::log("Generating triangle buffer");
-
     sceneManager.getCurrentScene().generateTriangleBuffer();
     
     // Generating the screen quad on which the raytraced image is rendered
@@ -188,14 +185,14 @@ int Application::Start()
 
     unsigned int frame = 0;
 
-    Logger::log("Creating BVH handler");
+    Logger::logDebug("Creating BVH handler");
     BVHHandler bvhHandler(
         "src/shader_src/BVH visualisation/bvhVisualisationVertex.shader",
         "src/shader_src/BVH visualisation/bvhVisualisationGeometry.shader",
         "src/shader_src/BVH visualisation/bvhVisualisationFragment.shader"
     );
 
-    Logger::log("Generating initial BVH");
+    Logger::logDebug("Generating initial BVH");
     // Generating the initial BVH
     sceneManager.getCurrentScene().updateBVH();
 

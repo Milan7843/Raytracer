@@ -966,7 +966,6 @@ void ImGuiUserInterface::drawMenuBar(GLFWwindow* window,
 		{
 			if (ImGui::MenuItem("Open help"))
 			{
-				std::cout << "menu clicked?" << std::endl;
 				openHelpMenuButtonPressed = true;
 			}
 

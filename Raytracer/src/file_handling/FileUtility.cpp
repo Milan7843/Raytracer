@@ -72,7 +72,7 @@ void FileUtility::saveSettings(const std::string& loadedSceneName)
 	std::ofstream filestream{ "saved_settings.save" };
 
 	// Writing all settings data
-	std::cout << "saving current scene as " << loadedSceneName << std::endl;
+	Logger::logDebug("saving current scene as " + loadedSceneName);
 	filestream << loadedSceneName << "\n";
 
 	// Done writing so flush data and close filestream

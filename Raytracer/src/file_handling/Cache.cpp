@@ -35,13 +35,13 @@ namespace Cache
 	{
 		std::ofstream binaryFile(binaryPath.c_str(), std::ios::binary | std::ios::out);
 
-		Logger::log("Saving shader data to " + binaryPath);
+		Logger::logDebug("Saving shader data to " + binaryPath);
 
 		if (binaryFile.is_open())
 		{
 			// Write the binary format and data to the file
 			binaryFile.write(reinterpret_cast<const char*>(binaryData), binaryLength);
-			Logger::log("Binary shader data saved successfully.");
+			Logger::logDebug("Binary shader data saved successfully.");
 		}
 		else
 		{

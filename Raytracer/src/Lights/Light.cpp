@@ -46,26 +46,6 @@ void Light::setIntensity(float intensity)
 	this->intensity = intensity;
 }
 
-glm::vec3* Light::getPositionPointer()
-{
-	return &position;
-}
-
-glm::vec3* Light::getColorPointer()
-{
-	return &color;
-}
-
-float* Light::getIntensityPointer()
-{
-	return &intensity;
-}
-
-float* Light::getShadowSoftnessPointer()
-{
-	return &shadowSoftness;
-}
-
 void Light::setColor(glm::vec3 color)
 {
 	this->color = color;

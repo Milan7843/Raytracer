@@ -11,7 +11,7 @@ ComputeShader::ComputeShader(const char* shaderPath)
 
 	if (Cache::cachedFileExists(binaryPath))
 	{
-		Logger::log("Loading cached data for " + binaryPath);
+		Logger::logDebug("Loading cached data for " + binaryPath);
 
 		// There is a cached file, just load that
 		std::ifstream binaryFile(binaryPath, std::ios::binary | std::ios::in);
@@ -45,14 +45,14 @@ ComputeShader::ComputeShader(const char* shaderPath)
 			else
 			{
 				succesfullyLoadedCachedShader = true;
-				std::cout << "Cached shader data loaded successfully for " << binaryPath << std::endl;
+				Logger::logDebug("Cached shader data loaded successfully for " + binaryPath);
 			}
 
 			//free(binaryData);
 		}
 		else
 		{
-			std::cerr << "Error: Unable to open binary shader data file." << std::endl;
+			Logger::logError("Error: Unable to open binary shader data file.");
 		}
 
 		//linkProgram();
@@ -60,7 +60,7 @@ ComputeShader::ComputeShader(const char* shaderPath)
 	
 	if (!succesfullyLoadedCachedShader)
 	{
-		Logger::log("Compiling shader " + binaryPath);
+		Logger::logDebug("Compiling shader " + binaryPath);
 
 		std::string shaderCode = readFile(shaderPath);
 		const char* shaderCodeChars = shaderCode.c_str();
@@ -79,7 +79,7 @@ ComputeShader::ComputeShader(const char* shaderPath)
 		linkProgram();
 
 		// Saving the shader binary
-		Logger::log("Caching shader " + binaryPath);
+		Logger::logDebug("Caching shader " + binaryPath);
 
 		GLint binaryLength;
 		glGetProgramiv(ID, GL_PROGRAM_BINARY_LENGTH, &binaryLength);
@@ -91,15 +91,13 @@ ComputeShader::ComputeShader(const char* shaderPath)
 
 			glGetProgramBinary(ID, binaryLength, NULL, &binaryFormat, binaryData);
 
-			std::cout << "binary format new " << binaryFormat << std::endl;
-
 			if (binaryData)
 			{
 				Cache::cacheShader(binaryPath, binaryFormat, binaryData, binaryLength);
 			}
 			else
 			{
-				std::cerr << "Error: Unable to allocate memory for binary shader data." << std::endl;
+				Logger::logError("Error: Unable to allocate memory for binary shader data.");
 			}
 
 			free(binaryData);
@@ -109,11 +107,11 @@ ComputeShader::ComputeShader(const char* shaderPath)
 			char errorBuf[100]; // Provide a buffer for strerror_s to write the error message
 			if (strerror_s(errorBuf, sizeof(errorBuf), errno) == 0)
 			{
-				std::cerr << "Error: Unable to retrieve binary shader data. " << errorBuf << std::endl;
+				Logger::logError("Error: Unable to retrieve binary shader data. " + std::string(errorBuf));
 			}
 			else
 			{
-				std::cerr << "Error: Unable to retrieve binary shader data. Error message not available." << std::endl;
+				Logger::logError("Error: Unable to retrieve binary shader data. Error message not available.");
 			}
 		}
 
@@ -124,7 +122,7 @@ ComputeShader::ComputeShader(const char* shaderPath)
 
 ComputeShader::~ComputeShader()
 {
-	Logger::log("Compute shader destroyed.");
+	Logger::logDebug("Compute shader destroyed.");
 }
 
 ComputeShader::ComputeShader()

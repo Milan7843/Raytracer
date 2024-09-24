@@ -13,7 +13,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 
 	if (Cache::cachedFileExists(binaryPath))
 	{
-		Logger::log("Loading cached data for " + binaryPath);
+		Logger::logDebug("Loading cached data for " + binaryPath);
 
 		// There is a cached file, just load that
 		std::ifstream binaryFile(binaryPath, std::ios::binary | std::ios::in);
@@ -47,15 +47,14 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 			else
 			{
 				succesfullyLoadedCachedShader = true;
-				std::cout << "Cached shader data loaded successfully for " << binaryPath << std::endl;
+				Logger::logDebug("Cached shader data loaded successfully for " + binaryPath);
 			}
-
 
 			//free(binaryData);
 		}
 		else
 		{
-			std::cerr << "Error: Unable to open binary shader data file." << std::endl;
+			Logger::logError("Error: Unable to open binary shader data file.");
 		}
 
 		//linkProgram();
@@ -63,7 +62,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 
 	if (!succesfullyLoadedCachedShader)
 	{
-		Logger::log("Compiling shader " + binaryPath);
+		Logger::logDebug("Compiling shader " + binaryPath);
 
 		std::string vertexCode = readFile(vertexPath);
 		std::string fragmentCode = readFile(fragmentPath);
@@ -84,7 +83,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 		linkProgram();
 
 		// Saving the shader binary
-		Logger::log("Caching shader " + binaryPath);
+		Logger::logDebug("Caching shader " + binaryPath);
 
 		GLint binaryLength;
 		glGetProgramiv(ID, GL_PROGRAM_BINARY_LENGTH, &binaryLength);
@@ -96,15 +95,13 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 
 			glGetProgramBinary(ID, binaryLength, NULL, &binaryFormat, binaryData);
 
-			std::cout << "binary format new " << binaryFormat << std::endl;
-
 			if (binaryData)
 			{
 				Cache::cacheShader(binaryPath, binaryFormat, binaryData, binaryLength);
 			}
 			else
 			{
-				std::cerr << "Error: Unable to allocate memory for binary shader data." << std::endl;
+				Logger::logError("Error: Unable to allocate memory for binary shader data.");
 			}
 
 			free(binaryData);
@@ -114,11 +111,11 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 			char errorBuf[100]; // Provide a buffer for strerror_s to write the error message
 			if (strerror_s(errorBuf, sizeof(errorBuf), errno) == 0)
 			{
-				std::cerr << "Error: Unable to retrieve binary shader data. " << errorBuf << std::endl;
+				Logger::logError("Error: Unable to retrieve binary shader data. " + std::string(errorBuf));
 			}
 			else
 			{
-				std::cerr << "Error: Unable to retrieve binary shader data. Error message not available." << std::endl;
+				Logger::logError("Error: Unable to retrieve binary shader data. Error message not available.");
 			}
 		}
 
@@ -138,7 +135,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 
 	if (Cache::cachedFileExists(binaryPath))
 	{
-		Logger::log("Loading cached data for " + binaryPath);
+		Logger::logDebug("Loading cached data for " + binaryPath);
 
 		// There is a cached file, just load that
 		std::ifstream binaryFile(binaryPath, std::ios::binary | std::ios::in);
@@ -172,14 +169,14 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 			else
 			{
 				succesfullyLoadedCachedShader = true;
-				std::cout << "Cached shader data loaded successfully for " << binaryPath << std::endl;
+				Logger::logDebug("Cached shader data loaded successfully for " + binaryPath);
 			}
 
 			//free(binaryData);
 		}
 		else
 		{
-			std::cerr << "Error: Unable to open binary shader data file." << std::endl;
+			Logger::logError("Error: Unable to open binary shader data file.");
 		}
 
 		//linkProgram();
@@ -187,7 +184,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 	
 	if (!succesfullyLoadedCachedShader)
 	{
-		Logger::log("Compiling shader " + binaryPath);
+		Logger::logDebug("Compiling shader " + binaryPath);
 
 		std::string vertexCode = readFile(vertexPath);
 		std::string fragmentCode = readFile(fragmentPath);
@@ -215,7 +212,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 		linkProgram();
 
 		// Saving the shader binary
-		Logger::log("Caching shader " + binaryPath);
+		Logger::logDebug("Caching shader " + binaryPath);
 
 		GLint binaryLength;
 		glGetProgramiv(ID, GL_PROGRAM_BINARY_LENGTH, &binaryLength);
@@ -227,15 +224,13 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 
 			glGetProgramBinary(ID, binaryLength, NULL, &binaryFormat, binaryData);
 
-			std::cout << "binary format new " << binaryFormat << std::endl;
-
 			if (binaryData)
 			{
 				Cache::cacheShader(binaryPath, binaryFormat, binaryData, binaryLength);
 			}
 			else
 			{
-				std::cerr << "Error: Unable to allocate memory for binary shader data." << std::endl;
+				Logger::logError("Error: Unable to allocate memory for binary shader data.");
 			}
 
 			free(binaryData);
@@ -245,11 +240,11 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 			char errorBuf[100]; // Provide a buffer for strerror_s to write the error message
 			if (strerror_s(errorBuf, sizeof(errorBuf), errno) == 0)
 			{
-				std::cerr << "Error: Unable to retrieve binary shader data. " << errorBuf << std::endl;
+				Logger::logError("Error: Unable to retrieve binary shader data. " + std::string(errorBuf));
 			}
 			else
 			{
-				std::cerr << "Error: Unable to retrieve binary shader data. Error message not available." << std::endl;
+				Logger::logError("Error: Unable to retrieve binary shader data. Error message not available.");
 			}
 		}
 
@@ -262,5 +257,5 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 
 Shader::~Shader()
 {
-	Logger::log("Shader destroyed.");
+	Logger::logDebug("Shader destroyed.");
 }
